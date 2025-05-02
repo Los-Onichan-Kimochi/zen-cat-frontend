@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import HeaderDescriptor from '@/components/common/header-descriptor';
 
 export const Route = createFileRoute('/locales')({
   component: LocalesComponent,
@@ -6,9 +7,8 @@ export const Route = createFileRoute('/locales')({
 
 function LocalesComponent() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Locales</h1>
-      <p>Aquí se gestionarán los locales.</p>
+    <div className="p-15">
+      <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
     </div>
   );
 } 

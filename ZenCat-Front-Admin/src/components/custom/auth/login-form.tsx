@@ -4,7 +4,7 @@ import { authApi } from '@/api/auth/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ErrorModal } from '@/components/custom/common/ErrorModal';
+import { ErrorModal } from '@/components/custom/common/error-modal';
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
@@ -48,7 +48,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   return (
     <>
-      <Card className="w-full max-w-md shadow-xl bg-white"> {/* Added bg-white for clarity against potential blurry bg */}
+      <Card className="w-full max-w-md shadow-xl bg-white">
         <CardHeader className="flex flex-col items-center gap-2 pt-8">
           <div className="bg-blue-100 rounded-full p-3 mb-2">
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />

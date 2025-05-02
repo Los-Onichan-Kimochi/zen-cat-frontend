@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import HeaderDescriptor from '@/components/common/header-descriptor';
 
 export const Route = createFileRoute('/profesionales')({
   component: ProfesionalesComponent,
@@ -6,9 +7,8 @@ export const Route = createFileRoute('/profesionales')({
 
 function ProfesionalesComponent() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Profesionales</h1>
-      <p>Aquí se gestionarán los profesionales.</p>
+    <div className="p-15">
+      <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
     </div>
   );
 } 

@@ -1,14 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
-
+import HeaderDescriptor from '@/components/common/header-descriptor';
 export const Route = createFileRoute('/membresias')({
   component: MembresiasComponent,
 });
 
 function MembresiasComponent() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Membresías</h1>
-      <p>Aquí se gestionarán las membresías de usuarios.</p>
+    <div className="p-15">
+      <HeaderDescriptor title="MEMBRESÍAS" subtitle="LISTADO DE USUARIOS Y MEMBRESÍAS" />
     </div>
   );
 } 

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import HeaderDescriptor from '@/components/common/header-descriptor';
 
 export const Route = createFileRoute('/sesiones')({
   component: SesionesComponent,
@@ -6,9 +7,8 @@ export const Route = createFileRoute('/sesiones')({
 
 function SesionesComponent() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Sesiones</h1>
-      <p>Aquí se gestionarán las sesiones.</p>
+    <div className="p-15">
+      <HeaderDescriptor title="SESIONES" subtitle="LISTADO DE SESIONES" />
     </div>
   );
 } 
