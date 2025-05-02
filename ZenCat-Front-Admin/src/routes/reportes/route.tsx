@@ -7,7 +7,7 @@ export const Route = createFileRoute('/reportes')({
 
 function ReportesComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="DASHBOARD" subtitle="GENERA TUS REPORTES" />
     </div>
   );

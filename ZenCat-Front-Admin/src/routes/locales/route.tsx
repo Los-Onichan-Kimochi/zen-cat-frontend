@@ -7,7 +7,7 @@ export const Route = createFileRoute('/locales')({
 
 function LocalesComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
     </div>
   );

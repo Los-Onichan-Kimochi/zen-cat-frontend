@@ -7,7 +7,7 @@ export const Route = createFileRoute('/log-errores')({
 
 function LogErroresComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="LOG DE ERRORES" subtitle="LISTADO DE ERRORES" />
     </div>
   );

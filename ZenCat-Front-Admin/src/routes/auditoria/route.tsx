@@ -7,7 +7,7 @@ export const Route = createFileRoute('/auditoria')({
 
 function AuditoriaComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="AUDITORÍA" subtitle="LISTADO DE AUDITORÍA" />
     </div>
   );

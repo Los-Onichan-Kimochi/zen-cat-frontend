@@ -9,9 +9,9 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children, user }: MainLayoutProps) {
   return (
-    <SidebarProvider className=" h-100">
+    <SidebarProvider className="flex h-screen w-full">
       <AppSidebar user={user} />
-      <main>
+      <main className="flex-grow p-6 overflow-auto">
         {children}
       </main>
     </SidebarProvider>

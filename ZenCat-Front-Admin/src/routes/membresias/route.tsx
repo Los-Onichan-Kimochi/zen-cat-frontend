@@ -6,7 +6,7 @@ export const Route = createFileRoute('/membresias')({
 
 function MembresiasComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="MEMBRESÍAS" subtitle="LISTADO DE USUARIOS Y MEMBRESÍAS" />
     </div>
   );

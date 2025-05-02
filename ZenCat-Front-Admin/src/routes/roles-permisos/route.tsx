@@ -7,7 +7,7 @@ export const Route = createFileRoute('/roles-permisos')({
 
 function RolesPermisosComponent() {
   return (
-    <div className="p-15">
+    <div className="p-6 h-full">
       <HeaderDescriptor title="ROLES Y PERMISOS" subtitle="LISTADO DE ROLES Y PERMISOS" />
     </div>
   );
