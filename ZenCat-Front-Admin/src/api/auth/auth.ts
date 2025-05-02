@@ -11,12 +11,12 @@ export const authApi = {
     
     const user = dummyUsers.find(u => u.email === email);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Usuario no encontrado");
     }
     
     // In a real app, we would verify the password here
-    if (password !== "password") {
-      throw new Error("Invalid password");
+    if (password !== user.password) {
+      throw new Error("Contraseña incorrecta");
     }
     user.isAuthenticated = true;
     return user;
