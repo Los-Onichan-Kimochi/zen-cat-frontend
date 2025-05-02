@@ -14,7 +14,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
-  const [activeItem, setActiveItem] = React.useState("Comunidades")
+  const [activeItem, setActiveItem] = React.useState("")
 
   return (
     <Sidebar
