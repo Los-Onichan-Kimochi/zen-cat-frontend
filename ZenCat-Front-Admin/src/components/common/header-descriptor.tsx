@@ -13,7 +13,7 @@ const HeaderDescriptor: React.FC<HeaderDescriptorProps> = ({ title, subtitle }) 
         {title}
       </h1>
       
-      <div className="my-2 w-[125%] h-[5px] bg-black"></div>
+      <div className="my-2 w-[40%] h-[5px] bg-black"></div>
 
       {subtitle && (
         <p className="font-montserrat text-xl font-extrabold text-black mt-3 tracking-wider">

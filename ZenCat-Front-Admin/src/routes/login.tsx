@@ -26,12 +26,11 @@ function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left: BG Image */}
       <div 
-        className="hidden md:flex w-1/2 login-background bg-black items-center justify-center bg-cover bg-center" 
+        className="hidden md:flex w-1/2 login-background bg-black items-center justify-center bg-cover bg-center animate-scroll-right"
       >
       </div>
-      {/* Right: Login Form (blurry) */}
+      {/* Right: Login Form */}
       <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-200 bg-opacity-50 backdrop-blur-sm">
         <LoginForm onLoginSuccess={handleLoginSuccess} />
       </div>
