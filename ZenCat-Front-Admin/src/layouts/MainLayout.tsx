@@ -1,10 +1,16 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/custom/sidebar/app-sidebar"
+import { User } from "@/types/user"
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface MainLayoutProps {
+  children: React.ReactNode;
+  user: User;
+}
+
+export default function MainLayout({ children, user }: MainLayoutProps) {
   return (
     <SidebarProvider className=" h-100">
-      <AppSidebar/>
+      <AppSidebar user={user} />
       <main>
         {children}
       </main>

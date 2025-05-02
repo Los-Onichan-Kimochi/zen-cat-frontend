@@ -7,8 +7,13 @@ import {
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar"
 import { menuItems } from "@/types/navbar-items"
+import { User as UserType } from "@/types/user"
 
-export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: UserType;
+}
+
+export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
   const [activeItem, setActiveItem] = React.useState("Comunidades")
 
   return (
@@ -42,7 +47,7 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
               <item.icon
                 className={cn(
                   "h-5 w-5 min-w-5 transition-transform duration-300",
-                  activeItem === item.title ? "text-black scale-120" : "text-gray-300",
+                  activeItem === item.title ? "text-black scale-150" : "text-gray-300",
                 )}
               />
               <span className="text-xl transition-opacity duration-300 ">
@@ -50,16 +55,20 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
               </span>
             </button>
           ))}
-        </nav>
+        </nav>  
       </SidebarContent>
       <SidebarFooter className="border-t border-zinc-800 bg-black p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 min-w-10 items-center justify-center rounded-full border-2 border-white">
-              <User className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 min-w-10 items-center justify-center rounded-lg border-2 border-white">
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.name} className="h-full w-full rounded-lg" />
+              ) : (
+                <User className="h-5 w-5 text-white" />
+              )}
             </div>
             <span className="text-xl font-bold transition-opacity duration-300 ">
-              Litus
+              {user.name}
             </span>
           </div>
           <div className="flex items-center gap-2 transition-opacity duration-300 ">
