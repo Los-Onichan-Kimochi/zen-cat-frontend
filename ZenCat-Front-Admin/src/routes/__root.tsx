@@ -4,6 +4,7 @@ import { User } from '@/types/user';
 import { authApi } from '@/api/auth/auth';
 import { useEffect, useState } from 'react';
 
+// TODO: Implement auth JWT system
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
     try {

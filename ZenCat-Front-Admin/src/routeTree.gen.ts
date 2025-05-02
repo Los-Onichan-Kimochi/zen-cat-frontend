@@ -13,6 +13,17 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as NotFoundPageImport } from './routes/NotFoundPage'
+import { Route as SesionesRouteImport } from './routes/sesiones/route'
+import { Route as ServiciosRouteImport } from './routes/servicios/route'
+import { Route as RolesPermisosRouteImport } from './routes/roles-permisos/route'
+import { Route as ReportesRouteImport } from './routes/reportes/route'
+import { Route as ProfesionalesRouteImport } from './routes/profesionales/route'
+import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/route'
+import { Route as MembresiasRouteImport } from './routes/membresias/route'
+import { Route as LogErroresRouteImport } from './routes/log-errores/route'
+import { Route as LocalesRouteImport } from './routes/locales/route'
+import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
+import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -26,6 +37,72 @@ const LoginRoute = LoginImport.update({
 const NotFoundPageRoute = NotFoundPageImport.update({
   id: '/NotFoundPage',
   path: '/NotFoundPage',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SesionesRouteRoute = SesionesRouteImport.update({
+  id: '/sesiones',
+  path: '/sesiones',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosRouteRoute = ServiciosRouteImport.update({
+  id: '/servicios',
+  path: '/servicios',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RolesPermisosRouteRoute = RolesPermisosRouteImport.update({
+  id: '/roles-permisos',
+  path: '/roles-permisos',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ReportesRouteRoute = ReportesRouteImport.update({
+  id: '/reportes',
+  path: '/reportes',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfesionalesRouteRoute = ProfesionalesRouteImport.update({
+  id: '/profesionales',
+  path: '/profesionales',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PlanesMembresiaRouteRoute = PlanesMembresiaRouteImport.update({
+  id: '/planes-membresia',
+  path: '/planes-membresia',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MembresiasRouteRoute = MembresiasRouteImport.update({
+  id: '/membresias',
+  path: '/membresias',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LogErroresRouteRoute = LogErroresRouteImport.update({
+  id: '/log-errores',
+  path: '/log-errores',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesRouteRoute = LocalesRouteImport.update({
+  id: '/locales',
+  path: '/locales',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesRouteRoute = ComunidadesRouteImport.update({
+  id: '/comunidades',
+  path: '/comunidades',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuditoriaRouteRoute = AuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -44,6 +121,83 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/auditoria': {
+      id: '/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuditoriaRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades': {
+      id: '/comunidades'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof ComunidadesRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/locales': {
+      id: '/locales'
+      path: '/locales'
+      fullPath: '/locales'
+      preLoaderRoute: typeof LocalesRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/log-errores': {
+      id: '/log-errores'
+      path: '/log-errores'
+      fullPath: '/log-errores'
+      preLoaderRoute: typeof LogErroresRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/membresias': {
+      id: '/membresias'
+      path: '/membresias'
+      fullPath: '/membresias'
+      preLoaderRoute: typeof MembresiasRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/planes-membresia': {
+      id: '/planes-membresia'
+      path: '/planes-membresia'
+      fullPath: '/planes-membresia'
+      preLoaderRoute: typeof PlanesMembresiaRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/profesionales': {
+      id: '/profesionales'
+      path: '/profesionales'
+      fullPath: '/profesionales'
+      preLoaderRoute: typeof ProfesionalesRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/reportes': {
+      id: '/reportes'
+      path: '/reportes'
+      fullPath: '/reportes'
+      preLoaderRoute: typeof ReportesRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/roles-permisos': {
+      id: '/roles-permisos'
+      path: '/roles-permisos'
+      fullPath: '/roles-permisos'
+      preLoaderRoute: typeof RolesPermisosRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/servicios': {
+      id: '/servicios'
+      path: '/servicios'
+      fullPath: '/servicios'
+      preLoaderRoute: typeof ServiciosRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/sesiones': {
+      id: '/sesiones'
+      path: '/sesiones'
+      fullPath: '/sesiones'
+      preLoaderRoute: typeof SesionesRouteImport
       parentRoute: typeof rootRoute
     }
     '/NotFoundPage': {
@@ -67,12 +221,34 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
+  '/locales': typeof LocalesRouteRoute
+  '/log-errores': typeof LogErroresRouteRoute
+  '/membresias': typeof MembresiasRouteRoute
+  '/planes-membresia': typeof PlanesMembresiaRouteRoute
+  '/profesionales': typeof ProfesionalesRouteRoute
+  '/reportes': typeof ReportesRouteRoute
+  '/roles-permisos': typeof RolesPermisosRouteRoute
+  '/servicios': typeof ServiciosRouteRoute
+  '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
+  '/locales': typeof LocalesRouteRoute
+  '/log-errores': typeof LogErroresRouteRoute
+  '/membresias': typeof MembresiasRouteRoute
+  '/planes-membresia': typeof PlanesMembresiaRouteRoute
+  '/profesionales': typeof ProfesionalesRouteRoute
+  '/reportes': typeof ReportesRouteRoute
+  '/roles-permisos': typeof RolesPermisosRouteRoute
+  '/servicios': typeof ServiciosRouteRoute
+  '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
 }
@@ -80,27 +256,103 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
+  '/locales': typeof LocalesRouteRoute
+  '/log-errores': typeof LogErroresRouteRoute
+  '/membresias': typeof MembresiasRouteRoute
+  '/planes-membresia': typeof PlanesMembresiaRouteRoute
+  '/profesionales': typeof ProfesionalesRouteRoute
+  '/reportes': typeof ReportesRouteRoute
+  '/roles-permisos': typeof RolesPermisosRouteRoute
+  '/servicios': typeof ServiciosRouteRoute
+  '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/NotFoundPage' | '/login'
+  fullPaths:
+    | '/'
+    | '/auditoria'
+    | '/comunidades'
+    | '/locales'
+    | '/log-errores'
+    | '/membresias'
+    | '/planes-membresia'
+    | '/profesionales'
+    | '/reportes'
+    | '/roles-permisos'
+    | '/servicios'
+    | '/sesiones'
+    | '/NotFoundPage'
+    | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/NotFoundPage' | '/login'
-  id: '__root__' | '/' | '/NotFoundPage' | '/login'
+  to:
+    | '/'
+    | '/auditoria'
+    | '/comunidades'
+    | '/locales'
+    | '/log-errores'
+    | '/membresias'
+    | '/planes-membresia'
+    | '/profesionales'
+    | '/reportes'
+    | '/roles-permisos'
+    | '/servicios'
+    | '/sesiones'
+    | '/NotFoundPage'
+    | '/login'
+  id:
+    | '__root__'
+    | '/'
+    | '/auditoria'
+    | '/comunidades'
+    | '/locales'
+    | '/log-errores'
+    | '/membresias'
+    | '/planes-membresia'
+    | '/profesionales'
+    | '/reportes'
+    | '/roles-permisos'
+    | '/servicios'
+    | '/sesiones'
+    | '/NotFoundPage'
+    | '/login'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditoriaRouteRoute: typeof AuditoriaRouteRoute
+  ComunidadesRouteRoute: typeof ComunidadesRouteRoute
+  LocalesRouteRoute: typeof LocalesRouteRoute
+  LogErroresRouteRoute: typeof LogErroresRouteRoute
+  MembresiasRouteRoute: typeof MembresiasRouteRoute
+  PlanesMembresiaRouteRoute: typeof PlanesMembresiaRouteRoute
+  ProfesionalesRouteRoute: typeof ProfesionalesRouteRoute
+  ReportesRouteRoute: typeof ReportesRouteRoute
+  RolesPermisosRouteRoute: typeof RolesPermisosRouteRoute
+  ServiciosRouteRoute: typeof ServiciosRouteRoute
+  SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditoriaRouteRoute: AuditoriaRouteRoute,
+  ComunidadesRouteRoute: ComunidadesRouteRoute,
+  LocalesRouteRoute: LocalesRouteRoute,
+  LogErroresRouteRoute: LogErroresRouteRoute,
+  MembresiasRouteRoute: MembresiasRouteRoute,
+  PlanesMembresiaRouteRoute: PlanesMembresiaRouteRoute,
+  ProfesionalesRouteRoute: ProfesionalesRouteRoute,
+  ReportesRouteRoute: ReportesRouteRoute,
+  RolesPermisosRouteRoute: RolesPermisosRouteRoute,
+  ServiciosRouteRoute: ServiciosRouteRoute,
+  SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
 }
@@ -116,12 +368,56 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/auditoria",
+        "/comunidades",
+        "/locales",
+        "/log-errores",
+        "/membresias",
+        "/planes-membresia",
+        "/profesionales",
+        "/reportes",
+        "/roles-permisos",
+        "/servicios",
+        "/sesiones",
         "/NotFoundPage",
         "/login"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/auditoria": {
+      "filePath": "auditoria/route.tsx"
+    },
+    "/comunidades": {
+      "filePath": "comunidades/route.tsx"
+    },
+    "/locales": {
+      "filePath": "locales/route.tsx"
+    },
+    "/log-errores": {
+      "filePath": "log-errores/route.tsx"
+    },
+    "/membresias": {
+      "filePath": "membresias/route.tsx"
+    },
+    "/planes-membresia": {
+      "filePath": "planes-membresia/route.tsx"
+    },
+    "/profesionales": {
+      "filePath": "profesionales/route.tsx"
+    },
+    "/reportes": {
+      "filePath": "reportes/route.tsx"
+    },
+    "/roles-permisos": {
+      "filePath": "roles-permisos/route.tsx"
+    },
+    "/servicios": {
+      "filePath": "servicios/route.tsx"
+    },
+    "/sesiones": {
+      "filePath": "sesiones/route.tsx"
     },
     "/NotFoundPage": {
       "filePath": "NotFoundPage.tsx"
