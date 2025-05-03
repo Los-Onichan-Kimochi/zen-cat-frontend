@@ -56,6 +56,7 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
+  // TODO: Add functions to Agregar and Carga Masiva
   useEffect(() => {
     const fetchCounts = async () => {
       try {
@@ -241,10 +242,10 @@ function ProfesionalesComponent() {
         )}
       </div>
       <div className="flex justify-end space-x-2 py-4">
-        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700" onClick={() => console.log("Add clicked")}>
-          <Plus className="mr-2 h-4 w-4" /> Agregar
+        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700 cursor-pointer" onClick={() => console.log("pORFAVOR PONGAME 20")}>
+          <Plus className="mr-2 h-4 w-4 " /> Agregar
         </Button>
-        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700" onClick={() => console.log("Bulk upload clicked")}>
+        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700 cursor-pointer" onClick={() => console.log("yo se q me quieres poner 20")}>
           <Upload className="mr-2 h-4 w-4" /> Carga Masiva
         </Button>
       </div>

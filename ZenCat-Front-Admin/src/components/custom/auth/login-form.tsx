@@ -25,6 +25,13 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  
+  const [loading2, setLoading2] = useState(false);
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [error2, setError2] = useState<string | null>(null);
+  // State to differentiate success/error in the second modal
+  const [pingSuccess, setPingSuccess] = useState(false); 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -42,8 +49,43 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     }
   };
 
+  const handlePing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading2(true);
+    setError2(null);
+    setIsModalOpen2(false);
+    setPingSuccess(false); // Reset success state
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts/1'); 
+      
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+      }
+      
+      // If response is ok, parse, stringify, and show in modal
+      const data = await response.json(); 
+      // Stringify the data with indentation for readability
+      const responseString = JSON.stringify(data, null, 2); 
+      setError2(responseString); // Use the error state to hold the success message
+      setPingSuccess(true); // Indicate success for modal title
+      setIsModalOpen2(true); // Open the modal
+      
+    } catch (err: any) {
+      console.error("Error en Ping:", err); 
+      setError2(err.message || 'Error al conectar con el servidor de ping.');
+      setPingSuccess(false); // Indicate error
+      setIsModalOpen2(true);
+    } finally {
+      setLoading2(false);
+    }
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleCloseModal2 = () => {
+    setIsModalOpen2(false);
   };
 
   return (
@@ -75,10 +117,17 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               required
               disabled={loading}
             />
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
+
+          <form onSubmit={handlePing}>
+          <Button type="submit" className="w-full mt-4 bg-blue-800 hover:bg-blue-700 cursor-pointer" disabled={loading2}>
+              {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
+            </Button>
+          </form>
+          
           <div className="mt-4 text-center text-sm text-gray-500">
             ¿No tienes una cuenta? <a href="#" className="underline">Comunícate con tu jefe</a>
           </div>
@@ -91,6 +140,14 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         onClose={handleCloseModal}
         title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
+      />
+
+      {/* Use pingSuccess state to dynamically set the title */}
+      <ErrorModal 
+        isOpen={isModalOpen2}
+        onClose={handleCloseModal2}
+        title={pingSuccess ? "Ping Exitoso! Respuesta:" : "Error en Ping de Datos"} 
+        description={error2 || 'Ha ocurrido un error.'}
       />
     </>
   );

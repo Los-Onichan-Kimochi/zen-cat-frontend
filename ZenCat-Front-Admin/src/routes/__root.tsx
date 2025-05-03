@@ -3,8 +3,8 @@ import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/rea
 import { User } from '@/types/user';
 import { authApi } from '@/api/auth/auth';
 import { useEffect, useState } from 'react';
+import { UserProvider } from '@/context/UserContext';
 
-// TODO: Implement auth JWT system
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
     try {
@@ -51,22 +51,30 @@ function RootComponent() {
         setLoadingUser(false);
       }
     };
-    fetchUser();
-  }, []);
+    if (routerState.location.pathname !== '/login') { 
+      fetchUser();
+    }
+    else {
+      setLoadingUser(false);
+      setUser(null);
+    }
+  }, [routerState.location.pathname]); 
 
   if (loadingUser) {
-    return <div>Loading...</div>;
+    return <div>Loading Application...</div>; 
   }
 
   const showLayout = user?.isAuthenticated && routerState.location.pathname !== '/login';
 
-  if (showLayout) {
-    return (
-      <MainLayout user={user!}>
+  return (
+    <UserProvider value={{ user }}>
+      {showLayout ? (
+        <MainLayout user={user!}> 
+          <Outlet />
+        </MainLayout>
+      ) : (
         <Outlet />
-      </MainLayout>
-    );
-  }
-
-  return <Outlet />;
+      )}
+    </UserProvider>
+  );
 }

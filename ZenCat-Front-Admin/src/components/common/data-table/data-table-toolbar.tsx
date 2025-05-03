@@ -101,13 +101,12 @@ export function DataTableToolbar<TData extends DataWithId>({
          {showSortButton && (
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10">
+              <Button variant="outline" size="sm" className="h-10 cursor-pointer">
                 Ordenar por
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Ordenar por Columna</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {table
                 .getAllColumns()
@@ -120,7 +119,8 @@ export function DataTableToolbar<TData extends DataWithId>({
                 .map((column) => {
                   const sortDirection = column.getIsSorted();
                   return (
-                    <DropdownMenuItem
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
                       key={column.id}
                       onClick={() => column.toggleSorting(sortDirection === 'asc', false)} 
                     >
@@ -137,7 +137,7 @@ export function DataTableToolbar<TData extends DataWithId>({
         {showFilterButton && (
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10">
+              <Button variant="outline" size="sm" className="h-10 cursor-pointer">
                 <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
@@ -152,14 +152,14 @@ export function DataTableToolbar<TData extends DataWithId>({
         )}
         {showExportButton && (
           <Button variant="outline" size="sm" className="h-10" onClick={onExportClick}>
-             <Download className="mr-2 h-4 w-4 opacity-50"/> Exportar
+             <Download className="mr-2 h-4 w-4 opacity-50 cursor-pointer"/> Exportar
           </Button>
         )}
        
         <Button
           variant="destructive"
           size="sm"
-          className="h-10"
+          className="h-10 cursor-pointer"
           onClick={handleDeleteSelected}
           disabled={!rowsSelected} 
         >

@@ -14,7 +14,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   description 
 }) => {
   return (
-    <div className="bg-gray-100 rounded-3xl shadow-xl p-6 flex items-center space-x-6 min-w-[350px]">
+    <div className="bg-white rounded-3xl shadow-xl p-6 flex items-center space-x-6 min-w-[350px]">
       <div className={`p-4 rounded-full ${iconBgColor}`}> 
         {icon} 
       </div>
