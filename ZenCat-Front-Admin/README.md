@@ -1,54 +1,68 @@
-# React + TypeScript + Vite
+# ZenCat-Front-Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es el frontend administrativo de ZenCat, construido con React y TanStack Router.
 
-Currently, two official plugins are available:
+## Estructura de Carpetas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+│
+├── api/                # Lógica para interactuar con APIs (peticiones HTTP, endpoints, etc.)
+│   └── auth/           # Endpoints y lógica de autenticación
+│
+├── components/         # Componentes reutilizables de la interfaz de usuario
+│
+├── context/            # Contextos de React para manejo de estado global (ej: usuario)
+│
+├── layouts/            # Componentes de layout (ej: MainLayout para la estructura principal)
+│
+├── routes/             # Definición de rutas y páginas principales de la app
+│   └── __root.tsx      # Ruta raíz, maneja la autenticación y el layout principal
+│
+├── types/              # Definiciones TypeScript de tipos y modelos de datos
+│
+└── utils/              # Funciones utilitarias y helpers
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Primeros Pasos tras Clonar el Repositorio
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Instalar dependencias**
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+   Asegúrate de tener instalado Node.js (recomendado v18+). Luego ejecuta:
+
+   ```bash
+   npm install
+   ```
+
+2. **Configurar variables de entorno**
+
+   Crea un archivo `.env` en la raíz del proyecto (si es necesario) y agrega las variables requeridas, por ejemplo:
+
+   ```
+   VITE_API_URL=https://tuservidor.api
+   ```
+
+   Consulta la documentación interna o pregunta al equipo si necesitas más detalles sobre las variables necesarias.
+
+3. **Ejecutar la aplicación en modo desarrollo**
+
+   ```bash
+   npm run dev
+   ```
+
+   Esto levantará el servidor de desarrollo. Usualmente estará disponible en [http://localhost:5173](http://localhost:5173) (o el puerto que indique la terminal).
+
+4. **Estructura de rutas y autenticación**
+
+   - La ruta raíz (`/`) verifica si el usuario está autenticado.
+   - Si no lo está, redirige automáticamente a `/login`.
+   - Si el usuario intenta acceder a `/login` estando autenticado, será redirigido a la raíz.
+   - El contexto de usuario (`UserContext`) está disponible en toda la app para acceder a la información del usuario autenticado.
+
+5. **Construir para producción**
+
+   ```bash
+   npm run build
+   ```
+
+   Los archivos listos para producción estarán en la carpeta `dist/`.

@@ -29,7 +29,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [loading2, setLoading2] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [error2, setError2] = useState<string | null>(null);
-  // State to differentiate success/error in the second modal
   const [pingSuccess, setPingSuccess] = useState(false); 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,7 +55,13 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen2(false);
     setPingSuccess(false); // Reset success state
     try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts/1'); 
+      const response = await fetch('http://localhost:8098/health-check/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      }); 
       
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
@@ -142,7 +147,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         description={error || 'Ha ocurrido un error.'}
       />
 
-      {/* Use pingSuccess state to dynamically set the title */}
       <ErrorModal 
         isOpen={isModalOpen2}
         onClose={handleCloseModal2}
