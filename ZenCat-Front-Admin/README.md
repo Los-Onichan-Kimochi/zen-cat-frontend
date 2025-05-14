@@ -47,14 +47,13 @@ src/
 ## 🏁 Primeros Pasos tras Clonar el Repositorio
 
 1.  **📋 Requisitos Previos**
-    *   Node.js (recomendado v18+ o la versión especificada en `.nvmrc` si existe)
-    *   npm (usualmente viene con Node.js)
+    *   [Bun](https://bun.sh/) (runtime de JavaScript y gestor de paquetes)
 
 2.  **📦 Instalar dependencias**
 
     Navega a la raíz del proyecto en tu terminal y ejecuta:
     ```bash
-    npm install
+    bun install
     ```
 
 3.  **⚙️ Configurar variables de entorno**
@@ -68,7 +67,7 @@ src/
 
 4.  **▶️ Ejecutar la aplicación en modo desarrollo**
     ```bash
-    npm run dev
+    bun run dev
     ```
     Esto iniciará el servidor de desarrollo de Vite. Por lo general, la aplicación estará disponible en [http://localhost:5173](http://localhost:5173) (o el puerto que indique la terminal). El servidor se recargará automáticamente al detectar cambios en el código.
 
@@ -76,7 +75,7 @@ src/
 
     Para revisar la calidad del código y aplicar formato, puedes usar:
     ```bash
-    npm run lint
+    bun run lint
     ```
     Es recomendable configurar tu editor para que aplique las reglas de ESLint y Prettier automáticamente al guardar.
 
@@ -89,15 +88,15 @@ src/
 
 7.  **📦 Construir para producción**
     ```bash
-    npm run build
+    bun run build
     ```
     Esto generará los archivos estáticos optimizados para producción en la carpeta `dist/`.
 
 ## 📜 Scripts Disponibles
 
-En el archivo `package.json`, encontrarás varios scripts útiles:
+En el archivo `package.json`, encontrarás varios scripts útiles que puedes ejecutar con `bun run <script>`:
 
-*   `npm run dev`: Inicia el servidor de desarrollo.
-*   `npm run build`: Compila la aplicación para producción.
-*   `npm run lint`: Ejecuta ESLint para analizar el código.
-*   `npm run preview`: Inicia un servidor local para previsualizar el build de producción.
+*   `bun run dev`: Inicia el servidor de desarrollo.
+*   `bun run build`: Compila la aplicación para producción.
+*   `bun run lint`: Ejecuta ESLint para analizar el código.
+*   `bun run preview`: Inicia un servidor local para previsualizar el build de producción.
