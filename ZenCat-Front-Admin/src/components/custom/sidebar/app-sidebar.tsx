@@ -9,6 +9,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/compone
 import { menuItems } from "@/types/navbar-items"
 import { User as UserType } from "@/types/user"
 import { useNavigate, useRouterState } from "@tanstack/react-router"
+import "@/styles/custom/no-scrollbar.css";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: UserType;
@@ -22,7 +23,7 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible="none"
-      className={cn("border-none h-full w-80 bg-black text-white transition-all duration-300 font-montserrat", className)}
+      className={cn("border-none h-full w-80 bg-black text-white transition-all duration-300 font-montserrat hide-scrollbar", className)}
       {...props}
     >
       <SidebarHeader className="flex h-[80px] items-center justify-center border-none bg-black my-5">
