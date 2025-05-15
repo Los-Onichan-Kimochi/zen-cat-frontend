@@ -159,7 +159,7 @@ export function DataTableToolbar<TData extends DataWithId>({
         <Button
           variant="destructive"
           size="sm"
-          className="h-10 cursor-pointer"
+          className="h-10 cursor-pointer font-black"
           onClick={handleDeleteSelected}
           disabled={!rowsSelected} 
         >

@@ -65,7 +65,7 @@ export function DataTable<TData>({
           ) : (
             <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                {table.getState().globalFilter ? "No results matching your search." : "No results."}
+                {table.getState().globalFilter ? "No hay resultados que coincidan con tu búsqueda." : "No hay resultados."}
               </TableCell>
             </TableRow>
           )}
