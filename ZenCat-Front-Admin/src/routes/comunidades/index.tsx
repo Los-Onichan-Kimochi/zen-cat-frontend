@@ -1,10 +1,11 @@
 'use client';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute , Link} from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { DollarSign, Users, RefreshCw, Plus, Upload, Loader2, MoreHorizontal, ArrowUpDown, CheckCircle} from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { Users, DollarSign, RefreshCw, Plus, Upload, Loader2, MoreHorizontal, ArrowUpDown, CheckCircle} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { communitiesApi } from '@/api/communities/communities';
 import { Community } from '@/types/community';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -46,10 +47,6 @@ export const Route = createFileRoute('/comunidades')({
 });
 
 function ComunidadesComponent() {
-  const [counts, setCounts] = useState(0);
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [loadingCounts, setLoadingCounts] = useState(true);
-  const [loadingCommunities, setLoadingCommunities] = useState(true);
   
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -61,39 +58,19 @@ function ComunidadesComponent() {
     pageSize: 10,
   });
 
+  const { 
+    data: communitiesData,
+    isLoading: isLoadingCommunities,
+    error: errorCommunities
+  } = useQuery<Community[], Error>({
+    queryKey: ['communities'],
+    queryFn: communitiesApi.getCommunities,
+  });
+
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // TODO: Add functions to Agregar and Carga Masiva
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        setLoadingCounts(true);
-        const fetchedCounts = await communitiesApi.getComunityCounts();
-        setCounts(fetchedCounts);
-      } catch (error) {
-        console.error("Error fetching community counts:", error);
-      } finally {
-        setLoadingCounts(false);
-      }
-    };
-    fetchCounts();
-  }, []);
-
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        setLoadingCommunities(true);
-        const fetchedProfessionals = await communitiesApi.getCommunities();
-        setCommunities(fetchedProfessionals);
-      } catch (error) {
-        console.error("Error fetching professionals:", error);
-      } finally {
-        setLoadingCommunities(false);
-      }
-    };
-    fetchCommunities();
-  }, []);
 
   const columns = useMemo<ColumnDef<Community>[]>(() => [
     {
@@ -171,7 +148,7 @@ function ComunidadesComponent() {
   ], []);
 
   const table = useReactTable({
-    data: communities,
+    data: communitiesData || [],
     columns,
     state: {
       sorting,
@@ -196,7 +173,9 @@ function ComunidadesComponent() {
     debugTable: true,
   });
 
-  const isLoading = loadingCounts || loadingCommunities;
+  const isLoading = isLoadingCommunities;
+
+  if (errorCommunities) return <p>Error cargando comunidades: {errorCommunities.message}</p>;
 
   return (
     <div className="p-6 h-full">
@@ -240,7 +219,7 @@ function ComunidadesComponent() {
         </Button>
       </div>
       <div className="mt-0 flex-grow flex flex-col">
-        {isLoading ? (
+        {isLoadingCommunities ? (
           <div className="flex-grow flex items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-gray-500" />
           </div>
