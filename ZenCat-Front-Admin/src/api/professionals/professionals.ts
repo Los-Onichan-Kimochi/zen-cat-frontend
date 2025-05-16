@@ -11,9 +11,9 @@ export const professionalsApi = {
     }
     const data = await response.json();
     if (data && Array.isArray(data.professionals)) {
-        return data.professionals;
-    } else if (Array.isArray(data)) { 
-        return data;
+      return data.professionals;
+    } else if (Array.isArray(data)) {
+      return data;
     }
     console.error('Unexpected data structure from /professional/ endpoint:', data);
     throw new Error('Unexpected data structure from professionals API for list');
@@ -24,7 +24,7 @@ export const professionalsApi = {
     if (!response.ok) {
       throw new Error(`Error fetching professional with id ${id}`);
     }
-    return response.json(); 
+    return response.json();
   },
 
   createProfessional: async (payload: CreateProfessionalPayload): Promise<Professional> => {
@@ -38,7 +38,7 @@ export const professionalsApi = {
     if (!response.ok) {
       throw new Error('Error creating professional');
     }
-    return response.json(); 
+    return response.json();
   },
 
   updateProfessional: async (id: string, payload: UpdateProfessionalPayload): Promise<Professional> => {
@@ -52,8 +52,16 @@ export const professionalsApi = {
     if (!response.ok) {
       throw new Error(`Error updating professional with id ${id}`);
     }
-    return response.json(); 
+    return response.json();
   },
-  
-  // TODO: Delete professional
-}; 
+
+  deleteProfessional: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/professional/${id}/`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Error deleting professional with id ${id}`);
+    }
+  },
+};
+
