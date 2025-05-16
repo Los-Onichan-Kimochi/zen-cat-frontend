@@ -11,4 +11,4 @@ function ServiciosComponent() {
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
     </div>
   );
-} 
+}
