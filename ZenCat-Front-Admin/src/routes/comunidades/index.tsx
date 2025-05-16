@@ -42,7 +42,7 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 
-export const Route = createFileRoute('/comunidades')({
+export const Route = createFileRoute('/comunidades/')({
   component: ComunidadesComponent,
 });
 
@@ -177,6 +177,14 @@ function ComunidadesComponent() {
 
   if (errorCommunities) return <p>Error cargando comunidades: {errorCommunities.message}</p>;
 
+  const transformComunidades = (data: any[]) => {
+    return data.map(item => ({
+      name: item["Nombre"] ?? "",
+      purpose: item["Propósito"] ?? "",
+      image_url: item["Logo"] ?? "",
+    }));
+  };
+
   return (
     <div className="p-6 h-full">
       <HeaderDescriptor title="COMUNIDADES" subtitle="LISTADO DE COMUNIDADES" />
@@ -202,13 +210,14 @@ function ComunidadesComponent() {
         />
       </div>
       <div className="flex justify-end space-x-2 py-4">
-        <Button
-          size="sm"
-          className="h-10 bg-gray-800 hover:bg-gray-700"
-          onClick={() => console.log("Agregar comunidad")}
-        >
-          <Plus className="mr-2 h-4 w-4" /> Agregar
-        </Button>
+        <Link to="/comunidades/nuevo" className="h-10">
+          <Button 
+            size="sm" 
+            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+          >
+            <Plus className="mr-2 h-4 w-4 " /> Agregar
+          </Button>
+        </Link>
 
         <Button
           size="sm"
@@ -248,12 +257,18 @@ function ComunidadesComponent() {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Comunidades"
-        onParsedData={(data) => {
-          console.log("Datos cargados:", data);
-          // Aquí puedes hacer POST a tu backend
-          // O actualizar `setCommunities` si ya tienes las comunidades procesadas
-          setShowSuccess(true);
+        transformData={transformComunidades}
+        onParsedData={async (data) => {
+          try {
+            await communitiesApi.bulkCreateCommunities(data);
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+          } catch (error) {
+            console.error(error);
+            // manejar error visualmente
+          }
         }}
+        
       />
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-md text-center space-y-4">

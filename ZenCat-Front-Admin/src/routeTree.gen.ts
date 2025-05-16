@@ -21,11 +21,12 @@ import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/r
 import { Route as MembresiasRouteImport } from './routes/membresias/route'
 import { Route as LogErroresRouteImport } from './routes/log-errores/route'
 import { Route as LocalesRouteImport } from './routes/locales/route'
-import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
 
 // Create/Update Routes
 
@@ -89,12 +90,6 @@ const LocalesRouteRoute = LocalesRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ComunidadesRouteRoute = ComunidadesRouteImport.update({
-  id: '/comunidades',
-  path: '/comunidades',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AuditoriaRouteRoute = AuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -113,9 +108,21 @@ const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ComunidadesIndexRoute = ComunidadesIndexImport.update({
+  id: '/comunidades/',
+  path: '/comunidades/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   id: '/profesionales/nuevo',
   path: '/profesionales/nuevo',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesNuevoRoute = ComunidadesNuevoImport.update({
+  id: '/comunidades/nuevo',
+  path: '/comunidades/nuevo',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -135,13 +142,6 @@ declare module '@tanstack/react-router' {
       path: '/auditoria'
       fullPath: '/auditoria'
       preLoaderRoute: typeof AuditoriaRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/comunidades': {
-      id: '/comunidades'
-      path: '/comunidades'
-      fullPath: '/comunidades'
-      preLoaderRoute: typeof ComunidadesRouteImport
       parentRoute: typeof rootRoute
     }
     '/locales': {
@@ -214,11 +214,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/comunidades/nuevo': {
+      id: '/comunidades/nuevo'
+      path: '/comunidades/nuevo'
+      fullPath: '/comunidades/nuevo'
+      preLoaderRoute: typeof ComunidadesNuevoImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/nuevo': {
       id: '/profesionales/nuevo'
       path: '/profesionales/nuevo'
       fullPath: '/profesionales/nuevo'
       preLoaderRoute: typeof ProfesionalesNuevoImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/': {
+      id: '/comunidades/'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof ComunidadesIndexImport
       parentRoute: typeof rootRoute
     }
     '/profesionales/': {
@@ -236,7 +250,6 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/comunidades': typeof ComunidadesRouteRoute
   '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
@@ -247,14 +260,15 @@ export interface FileRoutesByFullPath {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/comunidades': typeof ComunidadesRouteRoute
   '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
@@ -265,7 +279,9 @@ export interface FileRoutesByTo {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
@@ -273,7 +289,6 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/comunidades': typeof ComunidadesRouteRoute
   '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
@@ -284,7 +299,9 @@ export interface FileRoutesById {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/comunidades/': typeof ComunidadesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
 }
 
@@ -293,7 +310,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auditoria'
-    | '/comunidades'
     | '/locales'
     | '/log-errores'
     | '/membresias'
@@ -304,13 +320,14 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/comunidades'
     | '/profesionales'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auditoria'
-    | '/comunidades'
     | '/locales'
     | '/log-errores'
     | '/membresias'
@@ -321,13 +338,14 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/comunidades'
     | '/profesionales'
   id:
     | '__root__'
     | '/'
     | '/auditoria'
-    | '/comunidades'
     | '/locales'
     | '/log-errores'
     | '/membresias'
@@ -338,7 +356,9 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/comunidades/'
     | '/profesionales/'
   fileRoutesById: FileRoutesById
 }
@@ -346,7 +366,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditoriaRouteRoute: typeof AuditoriaRouteRoute
-  ComunidadesRouteRoute: typeof ComunidadesRouteRoute
   LocalesRouteRoute: typeof LocalesRouteRoute
   LogErroresRouteRoute: typeof LogErroresRouteRoute
   MembresiasRouteRoute: typeof MembresiasRouteRoute
@@ -357,14 +376,15 @@ export interface RootRouteChildren {
   SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
+  ComunidadesNuevoRoute: typeof ComunidadesNuevoRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
+  ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditoriaRouteRoute: AuditoriaRouteRoute,
-  ComunidadesRouteRoute: ComunidadesRouteRoute,
   LocalesRouteRoute: LocalesRouteRoute,
   LogErroresRouteRoute: LogErroresRouteRoute,
   MembresiasRouteRoute: MembresiasRouteRoute,
@@ -375,7 +395,9 @@ const rootRouteChildren: RootRouteChildren = {
   SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
+  ComunidadesNuevoRoute: ComunidadesNuevoRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
+  ComunidadesIndexRoute: ComunidadesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
 }
 
@@ -391,7 +413,6 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/auditoria",
-        "/comunidades",
         "/locales",
         "/log-errores",
         "/membresias",
@@ -402,7 +423,9 @@ export const routeTree = rootRoute
         "/sesiones",
         "/NotFoundPage",
         "/login",
+        "/comunidades/nuevo",
         "/profesionales/nuevo",
+        "/comunidades/",
         "/profesionales/"
       ]
     },
@@ -411,9 +434,6 @@ export const routeTree = rootRoute
     },
     "/auditoria": {
       "filePath": "auditoria/route.tsx"
-    },
-    "/comunidades": {
-      "filePath": "comunidades/route.tsx"
     },
     "/locales": {
       "filePath": "locales/route.tsx"
@@ -445,8 +465,14 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
+    "/comunidades/nuevo": {
+      "filePath": "comunidades/nuevo.tsx"
+    },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
+    },
+    "/comunidades/": {
+      "filePath": "comunidades/index.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"

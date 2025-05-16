@@ -18,6 +18,7 @@ interface BulkCreateDialogProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   onParsedData: (data: any[]) => void;
+  transformData?: (data: any[]) => any[];
 }
 
 export function BulkCreateDialog({
@@ -25,6 +26,7 @@ export function BulkCreateDialog({
   onOpenChange,
   title = "Carga Masiva de Datos",
   onParsedData,
+  transformData,
 }: BulkCreateDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,13 +77,14 @@ export function BulkCreateDialog({
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        const finalData = transformData ? transformData(jsonData) : jsonData;
 
-        if (!jsonData || jsonData.length === 0) {
+        if (!finalData || finalData.length === 0) {
           setError("El archivo está vacío o mal estructurado.");
           return;
         }
 
-        onParsedData(jsonData);
+        onParsedData(finalData);
         setSelectedFile(null);
         setError(null);
         onOpenChange(false);
