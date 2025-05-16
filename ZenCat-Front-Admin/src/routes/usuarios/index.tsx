@@ -30,12 +30,13 @@ const mockUsers: UserWithExtra[] = Array.from({ length: 10 }).map((_, i) => ({
   memberships: [],
 }));
 
-export const Route = createFileRoute('/usuarios')({
+export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
 });
 
 function UsuariosComponent() {
   const [search, setSearch] = useState("");
+  const navigate = Route.useNavigate();
 
   // Filtrado simple
   const filteredUsers = mockUsers.filter((u) =>
@@ -61,7 +62,7 @@ function UsuariosComponent() {
         <div className="flex justify-end gap-3 mb-4">
           <Button
             className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-900 transition-all"
-            onClick={() => window.location.href = '/usuarios/agregar'}
+            onClick={() => navigate({ to: '/usuarios/agregar' })}
           >
             Agregar <Plus className="w-5 h-5" />
           </Button>
