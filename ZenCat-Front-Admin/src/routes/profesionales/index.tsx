@@ -1,11 +1,12 @@
 'use client';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import { professionalsApi, ProfessionalCounts } from '@/api/professionals/professionals';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -36,16 +37,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const Route = createFileRoute('/profesionales')({
+export const Route = createFileRoute('/profesionales/')({
   component: ProfesionalesComponent,
 });
 
+interface CalculatedCounts {
+  [ProfessionalSpecialty.YOGA_TEACHER]: number;
+  [ProfessionalSpecialty.GYM_TEACHER]: number;
+  [ProfessionalSpecialty.DOCTOR]: number;
+}
+
 function ProfesionalesComponent() {
-  const [counts, setCounts] = useState<ProfessionalCounts | null>(null);
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [loadingCounts, setLoadingCounts] = useState(true);
-  const [loadingProfessionals, setLoadingProfessionals] = useState(true);
-  
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -56,36 +58,37 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
-  // TODO: Add functions to Agregar and Carga Masiva
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        setLoadingCounts(true);
-        const fetchedCounts = await professionalsApi.getProfessionalCounts();
-        setCounts(fetchedCounts);
-      } catch (error) {
-        console.error("Error fetching professional counts:", error);
-      } finally {
-        setLoadingCounts(false);
-      }
-    };
-    fetchCounts();
-  }, []);
+  const { 
+    data: professionalsData,
+    isLoading: isLoadingProfessionals,
+    error: errorProfessionals
+  } = useQuery<Professional[], Error>({
+    queryKey: ['professionals'],
+    queryFn: professionalsApi.getProfessionals,
+  });
 
-  useEffect(() => {
-    const fetchProfessionals = async () => {
-      try {
-        setLoadingProfessionals(true);
-        const fetchedProfessionals = await professionalsApi.getProfessionals();
-        setProfessionals(fetchedProfessionals);
-      } catch (error) {
-        console.error("Error fetching professionals:", error);
-      } finally {
-        setLoadingProfessionals(false);
-      }
+  const counts = useMemo<CalculatedCounts | null>(() => {
+    if (!professionalsData) return null;
+
+    const calculatedCounts: CalculatedCounts = {
+      [ProfessionalSpecialty.YOGA_TEACHER]: 0,
+      [ProfessionalSpecialty.GYM_TEACHER]: 0,
+      [ProfessionalSpecialty.DOCTOR]: 0,
     };
-    fetchProfessionals();
-  }, []);
+
+    professionalsData.forEach(prof => {
+      if (prof.specialty === ProfessionalSpecialty.YOGA_TEACHER) {
+        calculatedCounts[ProfessionalSpecialty.YOGA_TEACHER]++;
+      } else if (prof.specialty === ProfessionalSpecialty.GYM_TEACHER) {
+        calculatedCounts[ProfessionalSpecialty.GYM_TEACHER]++;
+      } else if (prof.specialty === ProfessionalSpecialty.DOCTOR) {
+        calculatedCounts[ProfessionalSpecialty.DOCTOR]++;
+      }
+    });
+    return calculatedCounts;
+  }, [professionalsData]);
+
+  const isLoadingCounts = isLoadingProfessionals;
 
   const columns = useMemo<ColumnDef<Professional>[]>(() => [
     {
@@ -128,10 +131,10 @@ function ProfesionalesComponent() {
     {
       id: "lastNames",
       header: "Apellidos",
-      accessorFn: (row: Professional) => `${row.firstLastName} ${row.secondLastName}`,
+      accessorFn: (row: Professional) => `${row.first_last_name} ${row.second_last_name || ''}`,
     },
     {
-      accessorKey: "speciality",
+      accessorKey: "specialty",
       header: "Especialidad",
     },
     {
@@ -149,7 +152,7 @@ function ProfesionalesComponent() {
       },
     },
     {
-      accessorKey: "phone",
+      accessorKey: "phone_number",
       header: "Número de celular",
     },
     {
@@ -183,7 +186,7 @@ function ProfesionalesComponent() {
   ], []);
 
   const table = useReactTable({
-    data: professionals,
+    data: professionalsData || [],
     columns,
     state: {
       sorting,
@@ -208,13 +211,15 @@ function ProfesionalesComponent() {
     debugTable: true,
   });
 
-  const isLoading = loadingCounts || loadingProfessionals;
+  const isLoading = isLoadingProfessionals;
+
+  if (errorProfessionals) return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col">
       <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
-        {loadingCounts ? (
+        {isLoadingCounts ? (
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         ) : counts ? (
           <>
@@ -238,43 +243,44 @@ function ProfesionalesComponent() {
             />
           </>
         ) : (
-          <p>No se pudieron cargar los datos.</p>
+          <p>No hay datos de profesionales para mostrar conteos.</p>
         )}
       </div>
       <div className="flex justify-end space-x-2 py-4">
-        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700 cursor-pointer" onClick={() => console.log("pORFAVOR PONGAME 20")}>
-          <Plus className="mr-2 h-4 w-4 " /> Agregar
-        </Button>
-        <Button size="sm" className="h-10 bg-gray-800 hover:bg-gray-700 cursor-pointer" onClick={() => console.log("yo se q me quieres poner 20")}>
+        <Link to="/profesionales/nuevo" className="h-10">
+          <Button 
+            size="sm" 
+            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+          >
+            <Plus className="mr-2 h-4 w-4 " /> Agregar
+          </Button>
+        </Link>
+        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("Carga Masiva clickeada")}>
           <Upload className="mr-2 h-4 w-4" /> Carga Masiva
         </Button>
       </div>
-      <div className="mt-0 flex-grow flex flex-col">
-        {isLoading ? (
-          <div className="flex-grow flex items-center justify-center">
-            <Loader2 className="h-12 w-12 animate-spin text-gray-500" />
+
+      {isLoadingProfessionals ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+        </div>
+      ) : (
+        <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+          <DataTableToolbar
+            table={table}
+            filterPlaceholder="Buscar profesionales..."
+            showSortButton={true}
+            showExportButton={true}
+            onExportClick={() => console.log("Exportar clickeado")}
+            showFilterButton={true}
+            onFilterClick={() => console.log("Filtrar por clickeado")}
+          />
+          <div className="flex-1 overflow-hidden rounded-md border">
+            <DataTable table={table} columns={columns} />
           </div>
-        ) : (
-          <div className="flex-grow flex flex-col">
-            <DataTableToolbar
-              table={table}
-              filterPlaceholder="Buscar registro o celda..."
-              showExportButton={true}
-              onExportClick={() => console.log("No hay chance de exportar XD")}
-              showFilterButton={true}
-              onFilterClick={() => console.log("No hay chance de filtrar XD")}
-              showSortButton={true}
-            />
-            <div className="flex-grow">
-              <DataTable 
-                table={table} 
-                columns={columns}
-              />
-            </div>
-            <DataTablePagination table={table} />
-          </div>
-        )}
-      </div>
+          <DataTablePagination table={table} />
+        </div>
+      )}
     </div>
   );
 } 

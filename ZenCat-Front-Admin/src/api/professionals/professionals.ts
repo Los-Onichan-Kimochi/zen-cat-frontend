@@ -1,45 +1,59 @@
-import { Professional, ProfessionalSpecialty } from '@/types/professional';
-import { dummyProfessionals } from '@/data/dummy-professionals'; // :v dummy data
+import { Professional, CreateProfessionalPayload, UpdateProfessionalPayload } from '@/types/professional';
 
-// Simulate fetching professional counts
-export interface ProfessionalCounts {
-  [ProfessionalSpecialty.YOGA_TEACHER]: number;
-  [ProfessionalSpecialty.GYM_TEACHER]: number;
-  [ProfessionalSpecialty.DOCTOR]: number;
-}
 
-// TODO: Add a real API call XD
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const professionalsApi = {
-  getProfessionalCounts: (): Promise<ProfessionalCounts> => {
-    return new Promise((resolve) => {
-      // Calculate counts dynamically from the dummy data
-      const calculatedCounts: ProfessionalCounts = {
-        [ProfessionalSpecialty.YOGA_TEACHER]: 0,
-        [ProfessionalSpecialty.GYM_TEACHER]: 0,
-        [ProfessionalSpecialty.DOCTOR]: 0,
-      };
+  getProfessionals: async (): Promise<Professional[]> => {
+    const response = await fetch(`${API_BASE_URL}/professional/`);
+    if (!response.ok) {
+      throw new Error('Error fetching professionals');
+    }
+    const data = await response.json();
+    if (data && Array.isArray(data.professionals)) {
+        return data.professionals;
+    } else if (Array.isArray(data)) { 
+        return data;
+    }
+    console.error('Unexpected data structure from /professional/ endpoint:', data);
+    throw new Error('Unexpected data structure from professionals API for list');
+  },
 
-      dummyProfessionals.forEach(prof => {
-        if (prof.speciality === ProfessionalSpecialty.YOGA_TEACHER) {
-          calculatedCounts[ProfessionalSpecialty.YOGA_TEACHER]++;
-        } else if (prof.speciality === ProfessionalSpecialty.GYM_TEACHER) {
-          calculatedCounts[ProfessionalSpecialty.GYM_TEACHER]++;
-        } else if (prof.speciality === ProfessionalSpecialty.DOCTOR) {
-          calculatedCounts[ProfessionalSpecialty.DOCTOR]++;
-        }
-      });
+  getProfessionalById: async (id: string): Promise<Professional> => {
+    const response = await fetch(`${API_BASE_URL}/professional/${id}/`);
+    if (!response.ok) {
+      throw new Error(`Error fetching professional with id ${id}`);
+    }
+    return response.json(); 
+  },
 
-      setTimeout(() => {
-        resolve(calculatedCounts); // Resolve with calculated counts
-      }, 500);
+  createProfessional: async (payload: CreateProfessionalPayload): Promise<Professional> => {
+    const response = await fetch(`${API_BASE_URL}/professional/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
+    if (!response.ok) {
+      throw new Error('Error creating professional');
+    }
+    return response.json(); 
+  },
+
+  updateProfessional: async (id: string, payload: UpdateProfessionalPayload): Promise<Professional> => {
+    const response = await fetch(`${API_BASE_URL}/professional/${id}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error(`Error updating professional with id ${id}`);
+    }
+    return response.json(); 
   },
   
-  getProfessionals: (): Promise<Professional[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(dummyProfessionals);
-      }, 700); // XDXDXD
-    });
-  },
+  // TODO: Delete professional
 }; 
