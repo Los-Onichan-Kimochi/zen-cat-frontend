@@ -1,17 +1,15 @@
-
 import { Outlet } from '@tanstack/react-router';
 import { User } from "@/types/user"
-import TopBar from "@/components/ui/TopBar"; // Importa el componente TopBar
+import { TopBar } from "@/components/ui/TopBar";
 
 
 const MainLayout = () => {
   return (
-    <div className="app-layout"> {/* Puedes añadir clases para estilos generales del layout */}
-      <TopBar /> {/* Aquí renderizamos el componente TopBar */}
+    <div className="app-layout">
+      <TopBar />
       <div className="content">
-        <Outlet /> {/* Aquí se renderizará el contenido de las rutas hijas (como tu HomeComponent) */}
+        <Outlet />
       </div>
-      {/* Puedes añadir un Footer aquí si lo tienes */}
     </div>
   );
 };

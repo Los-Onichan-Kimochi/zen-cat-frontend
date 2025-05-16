@@ -11,11 +11,53 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SignupImport } from './routes/signup'
+import { Route as PreciosImport } from './routes/precios'
+import { Route as MembresiaImport } from './routes/membresia'
+import { Route as ContactoImport } from './routes/contacto'
+import { Route as ComunidadesImport } from './routes/comunidades'
+import { Route as ComoFuncionaImport } from './routes/como-funciona'
 import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const SignupRoute = SignupImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PreciosRoute = PreciosImport.update({
+  id: '/precios',
+  path: '/precios',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MembresiaRoute = MembresiaImport.update({
+  id: '/membresia',
+  path: '/membresia',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ContactoRoute = ContactoImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesRoute = ComunidadesImport.update({
+  id: '/comunidades',
+  path: '/comunidades',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComoFuncionaRoute = ComoFuncionaImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const LoginRouteRoute = LoginRouteImport.update({
   id: '/login',
@@ -60,6 +102,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRoute
     }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades': {
+      id: '/comunidades'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof ComunidadesImport
+      parentRoute: typeof rootRoute
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoImport
+      parentRoute: typeof rootRoute
+    }
+    '/membresia': {
+      id: '/membresia'
+      path: '/membresia'
+      fullPath: '/membresia'
+      preLoaderRoute: typeof MembresiaImport
+      parentRoute: typeof rootRoute
+    }
+    '/precios': {
+      id: '/precios'
+      path: '/precios'
+      fullPath: '/precios'
+      preLoaderRoute: typeof PreciosImport
+      parentRoute: typeof rootRoute
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,12 +153,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidades': typeof ComunidadesRoute
+  '/contacto': typeof ContactoRoute
+  '/membresia': typeof MembresiaRoute
+  '/precios': typeof PreciosRoute
+  '/signup': typeof SignupRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidades': typeof ComunidadesRoute
+  '/contacto': typeof ContactoRoute
+  '/membresia': typeof MembresiaRoute
+  '/precios': typeof PreciosRoute
+  '/signup': typeof SignupRoute
 }
 
 export interface FileRoutesById {
@@ -82,14 +178,48 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidades': typeof ComunidadesRoute
+  '/contacto': typeof ContactoRoute
+  '/membresia': typeof MembresiaRoute
+  '/precios': typeof PreciosRoute
+  '/signup': typeof SignupRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/login'
+  fullPaths:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/como-funciona'
+    | '/comunidades'
+    | '/contacto'
+    | '/membresia'
+    | '/precios'
+    | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/login'
-  id: '__root__' | '/' | '/home' | '/login'
+  to:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/como-funciona'
+    | '/comunidades'
+    | '/contacto'
+    | '/membresia'
+    | '/precios'
+    | '/signup'
+  id:
+    | '__root__'
+    | '/'
+    | '/home'
+    | '/login'
+    | '/como-funciona'
+    | '/comunidades'
+    | '/contacto'
+    | '/membresia'
+    | '/precios'
+    | '/signup'
   fileRoutesById: FileRoutesById
 }
 
@@ -97,12 +227,24 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
+  ComunidadesRoute: typeof ComunidadesRoute
+  ContactoRoute: typeof ContactoRoute
+  MembresiaRoute: typeof MembresiaRoute
+  PreciosRoute: typeof PreciosRoute
+  SignupRoute: typeof SignupRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
+  ComunidadesRoute: ComunidadesRoute,
+  ContactoRoute: ContactoRoute,
+  MembresiaRoute: MembresiaRoute,
+  PreciosRoute: PreciosRoute,
+  SignupRoute: SignupRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +259,13 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/home",
-        "/login"
+        "/login",
+        "/como-funciona",
+        "/comunidades",
+        "/contacto",
+        "/membresia",
+        "/precios",
+        "/signup"
       ]
     },
     "/": {
@@ -128,6 +276,24 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login/route.tsx"
+    },
+    "/como-funciona": {
+      "filePath": "como-funciona.tsx"
+    },
+    "/comunidades": {
+      "filePath": "comunidades.tsx"
+    },
+    "/contacto": {
+      "filePath": "contacto.tsx"
+    },
+    "/membresia": {
+      "filePath": "membresia.tsx"
+    },
+    "/precios": {
+      "filePath": "precios.tsx"
+    },
+    "/signup": {
+      "filePath": "signup.tsx"
     }
   }
 }
