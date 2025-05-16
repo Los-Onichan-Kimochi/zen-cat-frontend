@@ -6,29 +6,132 @@ import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
 import { Gem, Search, Trash, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
 import HomeCard from "@/components/common/home-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-// Extiende el tipo User localmente para los mocks
-interface UserWithExtra extends User {
+export interface UserWithExtra extends User {
   address?: string;
   district?: string;
   phone?: string;
+  membershipsIds?: number[];
 }
-
+// Mock de membresías
+export const mockMemberships = [
+  {
+    id: 1,
+    comunidad: "Runners",
+    tipo: "Mensual",
+    costo: "$ 150",
+    limiteReservas: "10",
+    fechaInicio: "12 - 04 - 2025",
+    fechaFin: "12 - 05 - 2025",
+    estado: "Activo",
+    estadoColor: "bg-green-400"
+  },
+  {
+    id: 2,
+    comunidad: "Los magníficos",
+    tipo: "Anual",
+    costo: "$ 1500",
+    limiteReservas: "ilimitado",
+    fechaInicio: "12 - 04 - 2025",
+    fechaFin: "12 - 04 - 2026",
+    estado: "Activo",
+    estadoColor: "bg-green-400"
+  },
+  {
+    id: 3,
+    comunidad: "Egresados PUCP",
+    tipo: "Mensual",
+    costo: "$ 200",
+    limiteReservas: "ilimitado",
+    fechaInicio: "12 - 04 - 2025",
+    fechaFin: "12 - 05 - 2025",
+    estado: "Suspendida temporal",
+    estadoColor: "bg-yellow-400"
+  },
+];
 // Datos de ejemplo (ajustados para evitar errores de tipo)
-const mockUsers: UserWithExtra[] = Array.from({ length: 10 }).map((_, i) => ({
-  id: String(i + 1),
-  name: "Carlos Zegarra",
-  email: `carlos${i + 1}@mail.com`,
-  role: "user",
-  password: "123456",
-  isAuthenticated: false,
-  permissions: ["read"],
-  avatar: "",
-  address: "Av. Próceres 512",
-  district: "San Miguel",
-  phone: "911911911",
-  memberships: [],
-}));
+export const mockUsers: UserWithExtra[] = [
+  {
+    id: "1",
+    name: "María López",
+    email: "maria.lopez@mail.com",
+    role: "user",
+    password: "123456",
+    isAuthenticated: false,
+    permissions: ["read"],
+    avatar: "",
+    address: "Calle Falsa 123",
+    district: "Miraflores",
+    phone: "987654321",
+    membershipsIds: [1],
+  },
+  {
+    id: "2",
+    name: "Juan Pérez",
+    email: "juan.perez@mail.com",
+    role: "user",
+    password: "123456",
+    isAuthenticated: false,
+    permissions: ["read"],
+    avatar: "",
+    address: "Av. Los Héroes 456",
+    district: "San Borja",
+    phone: "912345678",
+    membershipsIds: [1,2],
+  },
+  {
+    id: "3",
+    name: "Lucía Fernández",
+    email: "lucia.fernandez@mail.com",
+    role: "user",
+    password: "123456",
+    isAuthenticated: false,
+    permissions: ["read"],
+    avatar: "",
+    address: "Jr. Las Flores 789",
+    district: "Surco",
+    phone: "934567890",
+    membershipsIds: [3],
+  },
+  {
+    id: "4",
+    name: "Carlos Ramírez",
+    email: "carlos.ramirez@mail.com",
+    role: "user",
+    password: "123456",
+    isAuthenticated: false,
+    permissions: ["read"],
+    avatar: "",
+    address: "Pasaje Sol 321",
+    district: "La Molina",
+    phone: "900123456",
+    membershipsIds: [1],
+  },
+  {
+    id: "5",
+    name: "Ana Torres",
+    email: "ana.torres@mail.com",
+    role: "user",
+    password: "123456",
+    isAuthenticated: false,
+    permissions: ["read"],
+    avatar: "",
+    address: "Av. Primavera 654",
+    district: "San Isidro",
+    phone: "955667788",
+    membershipsIds: [2],
+  },
+];
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -36,12 +139,72 @@ export const Route = createFileRoute('/usuarios/')({
 
 function UsuariosComponent() {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState(mockUsers);
+  const [userToDelete, setUserToDelete] = useState<UserWithExtra | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const navigate = Route.useNavigate();
 
   // Filtrado simple
-  const filteredUsers = mockUsers.filter((u) =>
+  const filteredUsers = users.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Selección individual
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Selección global
+  const handleSelectAll = () => {
+    if (selectedUserIds.length === filteredUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map((u) => u.id));
+    }
+  };
+
+  // Borrado individual (ya implementado)
+  const handleDeleteUser = (user: UserWithExtra) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setUserToDelete(null);
+      setIsDeleteModalOpen(false);
+      setSelectedUserIds((prev) => prev.filter((id) => id !== userToDelete.id));
+    }
+  };
+
+  // Borrado masivo
+  const handleBulkDelete = () => {
+    if (selectedUserIds.length > 0) {
+      setIsBulkDeleteModalOpen(true);
+    }
+  };
+
+  const confirmBulkDelete = () => {
+    setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
+    setSelectedUserIds([]);
+    setIsBulkDeleteModalOpen(false);
+  };
+
+  const closeDeleteModal = () => {
+    setUserToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const closeBulkDeleteModal = () => {
+    setIsBulkDeleteModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -54,7 +217,7 @@ function UsuariosComponent() {
             icon={<Gem className="w-8 h-8 text-teal-600" />}
             iconBgColor="bg-teal-100"
             title="Usuarios totales"
-            description= {mockUsers.length} 
+            description={users.length} 
           />
         </div>
         
@@ -116,7 +279,11 @@ function UsuariosComponent() {
               Exportar
             </Button>
             {/* Botón Eliminar */}
-            <Button className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 cursor-pointer">
+            <Button
+              className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 cursor-pointer"
+              onClick={handleBulkDelete}
+              disabled={selectedUserIds.length === 0}
+            >
               Eliminar <Trash className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -127,9 +294,14 @@ function UsuariosComponent() {
           <table className="min-w-full">
             <thead>
               <tr className="bg-gray-100">
-              <th className="p-2 text-left align-middle flex items-center justify-center">
-                <input type="checkbox" className="mt-1.5" />
-              </th>
+                <th className="p-2 text-left align-middle flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    className="mt-1.5"
+                    checked={selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="p-2 text-left">Nombres</th>
                 <th className="p-2 text-left">Dirección</th>
                 <th className="p-2 text-left">Distrito</th>
@@ -142,15 +314,21 @@ function UsuariosComponent() {
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b hover:bg-gray-50">
                   <td className="p-2 align-middle flex items-center justify-center">
-                    <input type="checkbox" />
+                    <input
+                      type="checkbox"
+                      checked={selectedUserIds.includes(user.id)}
+                      onChange={() => handleSelectUser(user.id)}
+                    />
                   </td>
                   <td className="p-2">{user.name}</td>
                   <td className="p-2">{user.address}</td>
                   <td className="p-2">{user.district}</td>
                   <td className="p-2">{user.phone}</td>
                   <td className="p-2">
-                    <Button className="bg-black text-white rounded-md flex items-center gap-2 px-4 py-2 h-10">
+                    <Button className="bg-black text-white rounded-md flex items-center gap-2 px-4 py-2 h-10"
+                    onClick={() => navigate({ to: '/usuarios/ver_membresia', params: { id: user.id } })}>
                       Ver membresías
+                      
                       <MoreHorizontal className="w-5 h-5" />
                     </Button>
                   </td>
@@ -158,7 +336,10 @@ function UsuariosComponent() {
                     <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-neutral-100 transition-colors">
                       <MoreHorizontal className="w-5 h-5 text-black" />
                     </button>
-                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 transition-colors">
+                    <button
+                      className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 transition-colors"
+                      onClick={() => handleDeleteUser(user)}
+                    >
                       <Trash className="w-5 h-5 text-black" />
                     </button>
                   </td>
@@ -177,6 +358,48 @@ function UsuariosComponent() {
             <Button>{">"}</Button>
           </div>
         </div>
+
+        {/* Modal de confirmación de borrado */}
+        {isDeleteModalOpen && (
+          <AlertDialog open={isDeleteModalOpen} onOpenChange={closeDeleteModal}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro que deseas eliminar este usuario?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer.<br />
+                  Usuario: <b>{userToDelete?.name}</b>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={closeDeleteModal}>Cancelar</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button variant="destructive" className="bg-red-500 hover:bg-red-600" onClick={confirmDeleteUser}>Eliminar</Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {/* Modal de confirmación de borrado masivo */}
+        {isBulkDeleteModalOpen && (
+          <AlertDialog open={isBulkDeleteModalOpen} onOpenChange={closeBulkDeleteModal}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro que deseas eliminar los usuarios seleccionados?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer.<br />
+                  Usuarios seleccionados: <b>{selectedUserIds.length}</b>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={closeBulkDeleteModal}>Cancelar</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button variant="destructive" className="bg-red-500 hover:bg-red-600" onClick={confirmBulkDelete}>Eliminar</Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   );

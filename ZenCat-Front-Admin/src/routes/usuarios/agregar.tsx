@@ -7,7 +7,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { User } from "@/types/user";
 import { authApi } from "@/api/auth/auth";
 import { RouterContext } from "@/types/router";
-import { Plus } from "lucide-react";
+import { Plus, ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Switch } from "@/components/ui/switch";
 
@@ -95,6 +95,16 @@ function AgregarUsuario() {
     <div className="min-h-screen bg-[#fafbfc] w-full">
       <div className="p-6 h-full">
         <HeaderDescriptor title="USUARIOS" subtitle="AGREGAR USUARIO" />
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white shadow font-semibold hover:bg-neutral-100"
+            onClick={() => navigate({ to: '/usuarios' })}
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Volver
+          </Button>
+        </div>
         <form onSubmit={handleSubmit}>
           <Card className="mb-6 p-6">
             <h3 className="text-xl font-bold mb-4">Datos principales del usuario</h3>
