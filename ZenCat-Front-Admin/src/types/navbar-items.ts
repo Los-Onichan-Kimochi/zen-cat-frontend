@@ -33,7 +33,7 @@ export const menuItems = [
     { title: "Profesionales", icon: Users, path: "/profesionales" },
     { title: "Locales", icon: MapPinned, path: "/locales" },
     { title: "Planes de membresia", icon: Tags, path: "/planes-membresia" },
-    { title: "Membresias", icon: Gem, path: "/membresias" },
+    { title: "Usuarios", icon: Gem, path: "/usuarios" },
     { title: "Roles y Permisos", icon: LockOpen, path: "/roles-permisos" },
     { title: "Auditoria", icon: List, path: "/auditoria" },
     { title: "Reportes", icon: ChartPie, path: "/reportes" },
