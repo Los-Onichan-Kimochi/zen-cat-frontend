@@ -80,7 +80,7 @@ function AddProfessionalPageComponent() {
   const onSubmit = async (data: ProfessionalFormData) => {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast.info("Imagen (simulada)", { description: "Subida de imagen simulada completada." });
     }
 
@@ -92,7 +92,7 @@ function AddProfessionalPageComponent() {
       specialty: data.specialty,
       email: data.email,
       phone_number: data.phone_number,
-      image_url: imageUrl, 
+      image_url: imageUrl,
     };
     createProfessionalMutation.mutate(payload);
   };
@@ -180,25 +180,25 @@ function AddProfessionalPageComponent() {
                     <img src={imagePreview} alt="Vista previa" className="object-contain h-full w-full rounded-md" />
                   ) : (
                     <div className="text-center text-gray-400">
-                      <UploadCloud size={48} className="mx-auto"/>
+                      <UploadCloud size={48} className="mx-auto" />
                       <p>Arrastra o selecciona un archivo</p>
                       <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
                     </div>
                   )}
-                   <Input 
-                    id="profileImageFile" 
-                    type="file" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  <Input
+                    id="profileImageFile"
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     accept="image/png, image/jpeg, image/gif"
-                    {...register("profileImageFile")} 
-                    onChange={handleImageChange} 
+                    {...register("profileImageFile")}
+                    onChange={handleImageChange}
                   />
                 </div>
                 {errors.profileImageFile && typeof errors.profileImageFile.message === 'string' && (
                   <p className="text-red-500 text-sm mt-1">{errors.profileImageFile.message}</p>
                 )}
               </div>
-              
+
               <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
                 <Button variant="outline" type="button" onClick={() => navigate({ to: '/profesionales' })} className="w-full sm:w-auto">Cancelar</Button>
                 <Button type="submit" disabled={createProfessionalMutation.isPending} className="w-full sm:w-auto">

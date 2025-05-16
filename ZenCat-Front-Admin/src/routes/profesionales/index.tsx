@@ -11,11 +11,11 @@ import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
+import {
+  ColumnDef,
+  Row,
+  Column,
+  Table,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -58,7 +58,7 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
-  const { 
+  const {
     data: professionalsData,
     isLoading: isLoadingProfessionals,
     error: errorProfessionals
@@ -224,19 +224,19 @@ function ProfesionalesComponent() {
         ) : counts ? (
           <>
             <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600"/>}
+              icon={<Users className="w-8 h-8 text-teal-600" />}
               iconBgColor="bg-teal-100"
               title="Profesores de yoga"
               description={counts[ProfessionalSpecialty.YOGA_TEACHER]}
             />
             <HomeCard
-              icon={<Users className="w-8 h-8 text-pink-600"/>}
+              icon={<Users className="w-8 h-8 text-pink-600" />}
               iconBgColor="bg-pink-100"
               title="Profesores de gimnasio"
               description={counts[ProfessionalSpecialty.GYM_TEACHER]}
             />
             <HomeCard
-              icon={<Users className="w-8 h-8 text-blue-600"/>}
+              icon={<Users className="w-8 h-8 text-blue-600" />}
               iconBgColor="bg-blue-100"
               title="Médicos"
               description={counts[ProfessionalSpecialty.DOCTOR]}
@@ -248,8 +248,8 @@ function ProfesionalesComponent() {
       </div>
       <div className="flex justify-end space-x-2 py-4">
         <Link to="/profesionales/nuevo" className="h-10">
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
           >
             <Plus className="mr-2 h-4 w-4 " /> Agregar

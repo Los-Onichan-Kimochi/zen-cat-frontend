@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
@@ -17,7 +18,7 @@ interface LoginFormProps {
 // TODO: Add a remember me checkbox
 // TODO: Add a forgot password modal
 // TODO: Add a register modal
- 
+
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +26,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  
   const [loading2, setLoading2] = useState(false);
-  const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [error2, setError2] = useState<string | null>(null);
-  const [pingSuccess, setPingSuccess] = useState(false); 
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [pingSuccess, setPingSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +40,31 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       const user = await authApi.login(email, password);
       onLoginSuccess(user);
     } catch (err: any) {
-      const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
-      setError(errorMessage);
+      setError(err.message || 'Error desconocido, comunícate con tu jefe.');
       setIsModalOpen(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (res: CredentialResponse) => {
+    setLoading(true);
+    setError(null);
+    setIsModalOpen(false);
+    try {
+      const user = await authApi.loginWithGoogle(res.credential!);
+      onLoginSuccess(user);
+    } catch (err: any) {
+      setError(err.message || 'Error en login con Google.');
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Error al autenticar con Google.');
+    setIsModalOpen(true);
   };
 
   const handlePing = async (e: React.FormEvent) => {
@@ -53,44 +72,22 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setLoading2(true);
     setError2(null);
     setIsModalOpen2(false);
-    setPingSuccess(false); // Reset success state
+    setPingSuccess(false);
     try {
       const response = await fetch('http://localhost:8098/health-check/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      }); 
-      
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
-      }
-      
-      // If response is ok, parse, stringify, and show in modal
-      const data = await response.json(); 
-      // Stringify the data with indentation for readability
-      const responseString = JSON.stringify(data, null, 2); 
-      setError2(responseString); // Use the error state to hold the success message
-      setPingSuccess(true); // Indicate success for modal title
-      setIsModalOpen2(true); // Open the modal
-      
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      setError2(JSON.stringify(data, null, 2));
+      setPingSuccess(true);
     } catch (err: any) {
-      console.error("Error en Ping:", err); 
       setError2(err.message || 'Error al conectar con el servidor de ping.');
-      setPingSuccess(false); // Indicate error
-      setIsModalOpen2(true);
+      setPingSuccess(false);
     } finally {
+      setIsModalOpen2(true);
       setLoading2(false);
     }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCloseModal2 = () => {
-    setIsModalOpen2(false);
   };
 
   return (
@@ -122,37 +119,54 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               required
               disabled={loading}
             />
-            <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
 
+          <div className="flex items-center my-4">
+            <div className="flex-grow h-px bg-gray-300" />
+            <span className="px-2 text-gray-500">o</span>
+            <div className="flex-grow h-px bg-gray-300" />
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+          </div>
+
           <form onSubmit={handlePing}>
-          <Button type="submit" className="w-full mt-4 bg-blue-800 hover:bg-blue-700 cursor-pointer" disabled={loading2}>
+            <Button
+              type="submit"
+              className="w-full mt-4 bg-blue-800 hover:bg-blue-700"
+              disabled={loading2}
+            >
               {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center text-sm text-gray-500">
-            ¿No tienes una cuenta? <a href="#" className="underline">Comunícate con tu jefe</a>
+            ¿No tienes una cuenta?{' '}
+            <a href="#" className="underline">Comunícate con tu jefe</a>
           </div>
-          {/* TODO: Add remember me, forgot password links here */}
         </CardContent>
       </Card>
 
-      <ErrorModal 
+      <ErrorModal
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={() => setIsModalOpen(false)}
         title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
       />
 
-      <ErrorModal 
+      <ErrorModal
         isOpen={isModalOpen2}
-        onClose={handleCloseModal2}
-        title={pingSuccess ? "Ping Exitoso! Respuesta:" : "Error en Ping de Datos"} 
+        onClose={() => setIsModalOpen2(false)}
+        title={pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'}
         description={error2 || 'Ha ocurrido un error.'}
       />
     </>
   );
-} 
+}

@@ -1,6 +1,8 @@
 import { useNavigate, createFileRoute } from '@tanstack/react-router';
 import '@/styles/custom/login.css';
 import { LoginForm } from '@/components/custom/auth/login-form';
+import { useUserContext } from '@/context/UserContext';
+import { User } from '@/types/user';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -18,19 +20,17 @@ export const Route = createFileRoute('/login')({
 // TODO: Add a register modal
 
 function LoginPage() {
+  const { setUser } = useUserContext();
   const navigate = useNavigate();
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (user: User) => {
+    setUser(user);
     navigate({ to: '/' });
   };
 
   return (
     <div className="flex min-h-screen">
-      <div 
-        className="hidden md:flex w-1/2 login-background bg-black items-center justify-center bg-cover bg-center animate-scroll-right"
-      >
-      </div>
-      {/* Right: Login Form */}
+      <div className="hidden md:flex w-1/2 login-background bg-black items-center justify-center bg-cover bg-center animate-scroll-right" />
       <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-200 bg-opacity-50 backdrop-blur-sm">
         <LoginForm onLoginSuccess={handleLoginSuccess} />
       </div>
