@@ -42,6 +42,20 @@ export const communitiesApi = {
     throw new Error('Unexpected data structure from communities API for list');
   },
 
+  updateCommunity: async (id: string, payload: UpdateCommunityPayload): Promise<Community> => {
+    const response = await fetch(`${API_BASE_URL}/community/${id}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error(`Error updating community with id ${id}`);
+    }
+    return response.json(); 
+  },
+
   bulkCreateCommunities: async (communities: CreateCommunityPayload[]): Promise<Community[]> => {
     const response = await fetch(`${API_BASE_URL}/community/bulk/`, {
       method: 'POST',
