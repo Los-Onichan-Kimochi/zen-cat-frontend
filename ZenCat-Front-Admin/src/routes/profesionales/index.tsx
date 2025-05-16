@@ -1,6 +1,6 @@
 'use client';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const Route = createFileRoute('/profesionales')({
+export const Route = createFileRoute('/profesionales/')({
   component: ProfesionalesComponent,
 });
 
@@ -247,11 +247,16 @@ function ProfesionalesComponent() {
         )}
       </div>
       <div className="flex justify-end space-x-2 py-4">
-        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("pORFAVOR PONGAME 20")}>
-          <Plus className="mr-2 h-4 w-4 " /> Agregar
-        </Button>
-        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("yo se q me quieres poner 20")}>
-          <Upload className="mr-2 h-4 w-4 " /> Carga Masiva
+        <Link to="/profesionales/nuevo" className="h-10">
+          <Button 
+            size="sm" 
+            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+          >
+            <Plus className="mr-2 h-4 w-4 " /> Agregar
+          </Button>
+        </Link>
+        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("Carga Masiva clickeada")}>
+          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
         </Button>
       </div>
 
@@ -261,9 +266,14 @@ function ProfesionalesComponent() {
         </div>
       ) : (
         <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
-          <DataTableToolbar 
-            table={table} 
+          <DataTableToolbar
+            table={table}
             filterPlaceholder="Buscar profesionales..."
+            showSortButton={true}
+            showExportButton={true}
+            onExportClick={() => console.log("Exportar clickeado")}
+            showFilterButton={true}
+            onFilterClick={() => console.log("Filtrar por clickeado")}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
             <DataTable table={table} columns={columns} />
