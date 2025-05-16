@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,18 +6,37 @@ import { Upload } from "lucide-react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { User } from "@/types/user";
 import { authApi } from "@/api/auth/auth";
-import { RouterContext } from "@/types/router";
-import { Plus, ChevronLeft } from "lucide-react";
+import {  ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Switch } from "@/components/ui/switch";
+import { mockUsers, UserWithExtra } from "./index";
+
+interface SearchParams {
+  id: string;
+}
+
+interface LoaderData {
+  user: User;
+  userId: string;
+}
 
 export const Route = createFileRoute('/usuarios/editar')({
-  beforeLoad: async () => {
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    if (!search.id || typeof search.id !== 'string') {
+      throw new Error('ID is required');
+    }
+    return { id: search.id };
+  },
+  loaderDeps: ({ search }) => ({ id: search.id }),
+  loader: async ({ deps }): Promise<LoaderData> => {
     try {
       const user = await authApi.getCurrentUser();
-      return { user };
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return { user, userId: deps.id };
     } catch (error) {
-      console.error('Error en beforeLoad:', error);
+      console.error('Error en loader:', error);
       throw redirect({
         to: '/login',
       });
@@ -27,7 +46,9 @@ export const Route = createFileRoute('/usuarios/editar')({
 });
 
 function EditarUsuario() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { userId } = Route.useLoaderData();
+  const [userData, setUserData] = useState<UserWithExtra | null>(null);
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
@@ -38,8 +59,43 @@ function EditarUsuario() {
     celular: '',
     tipoDoc: '',
     numDoc: '',
-    // ... otros campos si es necesario
+    region: '',
+    provincia: '',
+    distrito: '',
+    calle: '',
+    edificio: '',
+    referencia: ''
   });
+
+  useEffect(() => {
+    // Buscar el usuario en los datos mock
+    const user = mockUsers.find(u => u.id === userId);
+    if (user) {
+      setUserData(user);
+      // Separar el nombre completo en partes
+      const nameParts = user.name.split(' ');
+      const nombres = nameParts[0];
+      const primerApellido = nameParts[1] || '';
+      const segundoApellido = nameParts[2] || '';
+
+      setForm({
+        nombres,
+        primerApellido,
+        segundoApellido,
+        correo: user.email,
+        celular: user.phone || '',
+        tipoDoc: 'DNI', // Valor por defecto
+        numDoc: '', // No tenemos este dato en el mock
+        region: '', // No tenemos este dato en el mock
+        provincia: '', // No tenemos este dato en el mock
+        distrito: user.district || '',
+        calle: user.address || '',
+        edificio: '', // No tenemos este dato en el mock
+        referencia: '' // No tenemos este dato en el mock
+      });
+    }
+  }, [userId]);
+
   const [errors, setErrors] = useState({
     correo: '',
     celular: '',
@@ -87,6 +143,10 @@ function EditarUsuario() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  if (!userData) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -170,27 +230,27 @@ function EditarUsuario() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="region" className="block font-medium mb-1">Región</label>
-                  <Input id="region" placeholder="Seleccione una región" />
+                  <Input id="region" name="region" value={form.region} onChange={handleChange} placeholder="Seleccione una región" />
                 </div>
                 <div>
                   <label htmlFor="provincia" className="block font-medium mb-1">Provincia</label>
-                  <Input id="provincia" placeholder="Seleccione una provincia" />
+                  <Input id="provincia" name="provincia" value={form.provincia} onChange={handleChange} placeholder="Seleccione una provincia" />
                 </div>
                 <div>
                   <label htmlFor="distrito" className="block font-medium mb-1">Distrito</label>
-                  <Input id="distrito" placeholder="Seleccione un distrito" />
+                  <Input id="distrito" name="distrito" value={form.distrito} onChange={handleChange} placeholder="Seleccione un distrito" />
                 </div>
                 <div>
                   <label htmlFor="calle" className="block font-medium mb-1">Calle/ Avenida</label>
-                  <Input id="calle" placeholder="Núm" />
+                  <Input id="calle" name="calle" value={form.calle} onChange={handleChange} placeholder="Núm" />
                 </div>
                 <div>
                   <label htmlFor="edificio" className="block font-medium mb-1">Nro. de edificio</label>
-                  <Input id="edificio" placeholder="Núm" />
+                  <Input id="edificio" name="edificio" value={form.edificio} onChange={handleChange} placeholder="Núm" />
                 </div>
                 <div>
                   <label htmlFor="referencia" className="block font-medium mb-1">Referencia</label>
-                  <Input id="referencia" placeholder="Núm" />
+                  <Input id="referencia" name="referencia" value={form.referencia} onChange={handleChange} placeholder="Núm" />
                 </div>
               </div>
             </Card>

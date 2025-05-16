@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { User } from "@/types/user";
 import { authApi } from "@/api/auth/auth";
-import { RouterContext } from "@/types/router";
-import { Plus, ChevronLeft } from "lucide-react";
+import {  ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Switch } from "@/components/ui/switch";
 

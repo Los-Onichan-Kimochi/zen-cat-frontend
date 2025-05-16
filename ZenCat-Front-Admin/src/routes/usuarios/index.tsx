@@ -206,6 +206,14 @@ function UsuariosComponent() {
     setIsBulkDeleteModalOpen(false);
   };
 
+  const handleEditUser = (userId: string) => {
+    navigate({ 
+      to: '/usuarios/editar',
+      search: { id: userId },
+      replace: true
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
       <div className="p-6 h-full">
@@ -306,7 +314,6 @@ function UsuariosComponent() {
                 <th className="p-2 text-left">Dirección</th>
                 <th className="p-2 text-left">Distrito</th>
                 <th className="p-2 text-left">Teléfono</th>
-                <th className="p-2 text-left">Membresías</th>
                 <th className="p-2"></th>
               </tr>
             </thead>
@@ -324,17 +331,9 @@ function UsuariosComponent() {
                   <td className="p-2">{user.address}</td>
                   <td className="p-2">{user.district}</td>
                   <td className="p-2">{user.phone}</td>
-                  <td className="p-2">
-                    <Button className="bg-black text-white rounded-md flex items-center gap-2 px-4 py-2 h-10"
-                    onClick={() => navigate({ to: '/usuarios/ver_membresia', params: { id: user.id } })}>
-                      Ver membresías
-                      
-                      <MoreHorizontal className="w-5 h-5" />
-                    </Button>
-                  </td>
                   <td className="p-2 flex gap-2">
                     <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-neutral-100 transition-colors"
-                    onClick={() => navigate({ to: '/usuarios/editar', params: { id: user.id } })}>
+                    onClick={() => handleEditUser(user.id)}>
                       <MoreHorizontal className="w-5 h-5 text-black" />
                     </button>
                     <button

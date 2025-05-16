@@ -211,7 +211,6 @@ function ProfesionalesComponent() {
     debugTable: true,
   });
 
-  const isLoading = isLoadingProfessionals;
 
   if (errorProfessionals) return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
 
