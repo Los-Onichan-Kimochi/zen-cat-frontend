@@ -1,13 +1,203 @@
+'use client';
+
 import { createFileRoute } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { DollarSign, Users, RefreshCw } from 'lucide-react'; // Import from lucide-react
+import { DollarSign, Users, RefreshCw, Plus, Upload, Loader2, MoreHorizontal, ArrowUpDown, CheckCircle} from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { communitiesApi } from '@/api/communities/communities';
+import { Community } from '@/types/community';
+import { DataTable } from '@/components/common/data-table/data-table';
+import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
+import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
+import { 
+  ColumnDef, 
+  Row, 
+  Column, 
+  Table, 
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+  PaginationState,
+} from '@tanstack/react-table';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { BulkCreateDialog } from "@/components/common/bulk-create-dialog"
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute('/comunidades')({
   component: ComunidadesComponent,
 });
 
 function ComunidadesComponent() {
+  const [counts, setCounts] = useState(0);
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [loadingCounts, setLoadingCounts] = useState(true);
+  const [loadingCommunities, setLoadingCommunities] = useState(true);
+  
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // TODO: Add functions to Agregar and Carga Masiva
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        setLoadingCounts(true);
+        const fetchedCounts = await communitiesApi.getComunityCounts();
+        setCounts(fetchedCounts);
+      } catch (error) {
+        console.error("Error fetching community counts:", error);
+      } finally {
+        setLoadingCounts(false);
+      }
+    };
+    fetchCounts();
+  }, []);
+
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        setLoadingCommunities(true);
+        const fetchedProfessionals = await communitiesApi.getCommunities();
+        setCommunities(fetchedProfessionals);
+      } catch (error) {
+        console.error("Error fetching professionals:", error);
+      } finally {
+        setLoadingCommunities(false);
+      }
+    };
+    fetchCommunities();
+  }, []);
+
+  const columns = useMemo<ColumnDef<Community>[]>(() => [
+    {
+      id: "select",
+      header: ({ table }: { table: Table<Community> }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }: { row: Row<Community> }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value: boolean | 'indeterminate') => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: "Código",
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }: { column: Column<Community, unknown> }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nombre
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "purpose",
+      header: "Propósito",
+    },
+    {
+      id: "actions",
+      cell: ({ row }: { row: Row<Community> }) => {
+        const professional = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(professional.id)}
+              >
+                Copiar ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+              <DropdownMenuItem>Editar</DropdownMenuItem>
+              <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ], []);
+
+  const table = useReactTable({
+    data: communities,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+      pagination,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: false,
+    enableRowSelection: true,
+    debugTable: true,
+  });
+
+  const isLoading = loadingCounts || loadingCommunities;
+
   return (
     <div className="p-6 h-full">
       <HeaderDescriptor title="COMUNIDADES" subtitle="LISTADO DE COMUNIDADES" />
@@ -32,6 +222,74 @@ function ComunidadesComponent() {
           description={56}
         />
       </div>
+      <div className="flex justify-end space-x-2 py-4">
+        <Button
+          size="sm"
+          className="h-10 bg-gray-800 hover:bg-gray-700"
+          onClick={() => console.log("Agregar comunidad")}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Agregar
+        </Button>
+
+        <Button
+          size="sm"
+          className="h-10 bg-gray-800 hover:bg-gray-700"
+          onClick={() => setShowUploadDialog(true)}
+        >
+          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
+        </Button>
+      </div>
+      <div className="mt-0 flex-grow flex flex-col">
+        {isLoading ? (
+          <div className="flex-grow flex items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <div className="flex-grow flex flex-col">
+            <DataTableToolbar
+              table={table}
+              filterPlaceholder="Buscar registro o celda..."
+              showExportButton={true}
+              onExportClick={() => console.log("No hay chance de exportar XD")}
+              showFilterButton={true}
+              onFilterClick={() => console.log("No hay chance de filtrar XD")}
+              showSortButton={true}
+            />
+            <div className="flex-grow">
+              <DataTable 
+                table={table} 
+                columns={columns}
+              />
+            </div>
+            <DataTablePagination table={table} />
+          </div>
+        )}
+      </div>
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Comunidades"
+        onParsedData={(data) => {
+          console.log("Datos cargados:", data);
+          // Aquí puedes hacer POST a tu backend
+          // O actualizar `setCommunities` si ya tienes las comunidades procesadas
+          setShowSuccess(true);
+        }}
+      />
+      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <DialogContent className="max-w-md text-center space-y-4">
+          <div className="flex justify-center items-center">
+            <CheckCircle className="h-20 w-20" strokeWidth={1} />
+          </div>
+          <h2 className="text-lg font-semibold">La carga se realizó exitosamente</h2>
+          <Button
+            className="mx-auto bg-gray-800 hover:bg-gray-700 px-6"
+            onClick={() => setShowSuccess(false)}
+          >
+            Salir
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
