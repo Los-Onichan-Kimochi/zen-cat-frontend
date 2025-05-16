@@ -333,7 +333,8 @@ function UsuariosComponent() {
                     </Button>
                   </td>
                   <td className="p-2 flex gap-2">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-neutral-100 transition-colors">
+                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-neutral-100 transition-colors"
+                    onClick={() => navigate({ to: '/usuarios/editar', params: { id: user.id } })}>
                       <MoreHorizontal className="w-5 h-5 text-black" />
                     </button>
                     <button
