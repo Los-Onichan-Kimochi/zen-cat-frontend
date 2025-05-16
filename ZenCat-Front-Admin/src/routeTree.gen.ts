@@ -25,6 +25,7 @@ import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as UsuariosAgregarRouteImport } from './routes/usuarios/agregar/route'
 
 // Create/Update Routes
 
@@ -110,6 +111,12 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const UsuariosAgregarRouteRoute = UsuariosAgregarRouteImport.update({
+  id: '/agregar',
+  path: '/agregar',
+  getParentRoute: () => UsuariosRouteRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -214,10 +221,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/usuarios/agregar': {
+      id: '/usuarios/agregar'
+      path: '/agregar'
+      fullPath: '/usuarios/agregar'
+      preLoaderRoute: typeof UsuariosAgregarRouteImport
+      parentRoute: typeof UsuariosRouteImport
+    }
   }
 }
 
 // Create and export the route tree
+
+interface UsuariosRouteRouteChildren {
+  UsuariosAgregarRouteRoute: typeof UsuariosAgregarRouteRoute
+}
+
+const UsuariosRouteRouteChildren: UsuariosRouteRouteChildren = {
+  UsuariosAgregarRouteRoute: UsuariosAgregarRouteRoute,
+}
+
+const UsuariosRouteRouteWithChildren = UsuariosRouteRoute._addFileChildren(
+  UsuariosRouteRouteChildren,
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -231,9 +257,10 @@ export interface FileRoutesByFullPath {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
-  '/usuarios': typeof UsuariosRouteRoute
+  '/usuarios': typeof UsuariosRouteRouteWithChildren
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRouteRoute
 }
 
 export interface FileRoutesByTo {
@@ -248,9 +275,10 @@ export interface FileRoutesByTo {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
-  '/usuarios': typeof UsuariosRouteRoute
+  '/usuarios': typeof UsuariosRouteRouteWithChildren
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRouteRoute
 }
 
 export interface FileRoutesById {
@@ -266,9 +294,10 @@ export interface FileRoutesById {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
-  '/usuarios': typeof UsuariosRouteRoute
+  '/usuarios': typeof UsuariosRouteRouteWithChildren
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRouteRoute
 }
 
 export interface FileRouteTypes {
@@ -288,6 +317,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/NotFoundPage'
     | '/login'
+    | '/usuarios/agregar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -304,6 +334,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/NotFoundPage'
     | '/login'
+    | '/usuarios/agregar'
   id:
     | '__root__'
     | '/'
@@ -320,6 +351,7 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/NotFoundPage'
     | '/login'
+    | '/usuarios/agregar'
   fileRoutesById: FileRoutesById
 }
 
@@ -335,7 +367,7 @@ export interface RootRouteChildren {
   RolesPermisosRouteRoute: typeof RolesPermisosRouteRoute
   ServiciosRouteRoute: typeof ServiciosRouteRoute
   SesionesRouteRoute: typeof SesionesRouteRoute
-  UsuariosRouteRoute: typeof UsuariosRouteRoute
+  UsuariosRouteRoute: typeof UsuariosRouteRouteWithChildren
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
 }
@@ -352,7 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   RolesPermisosRouteRoute: RolesPermisosRouteRoute,
   ServiciosRouteRoute: ServiciosRouteRoute,
   SesionesRouteRoute: SesionesRouteRoute,
-  UsuariosRouteRoute: UsuariosRouteRoute,
+  UsuariosRouteRoute: UsuariosRouteRouteWithChildren,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
 }
@@ -417,13 +449,20 @@ export const routeTree = rootRoute
       "filePath": "sesiones/route.tsx"
     },
     "/usuarios": {
-      "filePath": "usuarios/route.tsx"
+      "filePath": "usuarios/route.tsx",
+      "children": [
+        "/usuarios/agregar"
+      ]
     },
     "/NotFoundPage": {
       "filePath": "NotFoundPage.tsx"
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/usuarios/agregar": {
+      "filePath": "usuarios/agregar/route.tsx",
+      "parent": "/usuarios"
     }
   }
 }
