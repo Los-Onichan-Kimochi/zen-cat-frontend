@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import Presentacion from '../../components/custom/presentacion';
+import { Hero } from '../../components/ui/Home/SliderTop';
+import { ExploraSpan } from '../../components/ui/Home/ExploraSpan';
+import CardGrid from '../../components/ui/Home/CardGrid';
+import { BottomSpan } from '../../components/ui/Home/BottomSpan';
 
 export const Route = createFileRoute('/home')({
   component: HomeComponent,
@@ -8,10 +11,10 @@ export const Route = createFileRoute('/home')({
 export function HomeComponent() {
   return (
     <div>
-      <h1>¡Bienvenido a la Página de Inicio!</h1>
-      <Presentacion />
-      <p>Este es el contenido principal de tu página de inicio.</p>
-      <button onClick={() => alert('¡Hiciste clic!')}>Haz clic aquí</button>
+      <Hero />
+      <ExploraSpan />
+      <CardGrid />
+      <BottomSpan />
     </div>
   );
 }
