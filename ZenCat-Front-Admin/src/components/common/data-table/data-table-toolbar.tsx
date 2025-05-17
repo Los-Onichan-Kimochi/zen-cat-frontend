@@ -1,18 +1,21 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Table, Column } from '@tanstack/react-table'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Trash2, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react"
+import * as React from 'react';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Table, Column } from '@tanstack/react-table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Trash2, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import {
-    DropdownMenu,
-    DropdownMenuItem,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+import { professionalsApi } from '@/api/professionals/professionals';
 
 interface DataWithId {
   id: string | number;
@@ -31,10 +34,9 @@ interface DataTableToolbarProps<TData> {
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
-  if (typeof column.columnDef.header === 'string') {
-    return column.columnDef.header;
-  }
-  return column.id;
+  return typeof column.columnDef.header === 'string'
+    ? column.columnDef.header
+    : column.id;
 }
 
 export function DataTableToolbar<TData extends DataWithId>({
@@ -47,45 +49,46 @@ export function DataTableToolbar<TData extends DataWithId>({
   showSortButton = false,
   enableDeleteButton = true,
 }: DataTableToolbarProps<TData>) {
+  const queryClient = useQueryClient();
 
-  const isFiltered = table.getState().globalFilter?.length > 0
-  const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0
+  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<void, Error, string>({
+    mutationFn: (id) => professionalsApi.deleteProfessional(id),
+    onSuccess: (_, id) => {
+      toast.success('Profesional eliminado', { description: `ID ${id}` });
+      queryClient.invalidateQueries({ queryKey: ['professionals'] });
 
-  const [filterValue, setFilterValue] = React.useState(
-    (table.getState().globalFilter as string) ?? ''
-  )
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar', { description: err.message });
+    },
+  });
+
+  const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
+  const [filterValue, setFilterValue] = React.useState((table.getState().globalFilter as string) ?? '');
 
   React.useEffect(() => {
-    const initialValue = (table.getState().globalFilter as string) ?? ''
-    if (filterValue !== initialValue) {
-      const timeout = setTimeout(() => {
-        table.setGlobalFilter(filterValue)
-      }, 300)
-
-      return () => clearTimeout(timeout)
+    const initial = (table.getState().globalFilter as string) ?? '';
+    if (filterValue !== initial) {
+      const timeout = setTimeout(() => table.setGlobalFilter(filterValue), 300);
+      return () => clearTimeout(timeout);
     }
-  }, [filterValue, table.setGlobalFilter])
+  }, [filterValue, table]);
 
   React.useEffect(() => {
-    const externalFilter = (table.getState().globalFilter as string) ?? '';
-    if (externalFilter !== filterValue) {
-         setFilterValue(externalFilter);
-      }
+    const external = (table.getState().globalFilter as string) ?? '';
+    if (external !== filterValue) setFilterValue(external);
   }, [table.getState().globalFilter]);
 
   const handleDeleteSelected = () => {
     const selectedIds = table
       .getFilteredSelectedRowModel()
-      .rows.filter(row => row.original && typeof row.original.id !== 'undefined')
-      .map(row => row.original.id);
-    
-    if (selectedIds.length > 0) {
-        console.log("Deleting rows with IDs:", selectedIds);
-        // TODO: Implement actual delete logic (e.g., API call)
-    } else {
-        console.log("Delete clicked, but no rows selected or no valid IDs found.");
-    }
-    table.resetRowSelection(); 
+      .rows
+      .map((row) => row.original.id as string);
+
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`¿Eliminar ${selectedIds.length} profesional(es)?`)) return;
+    selectedIds.forEach((id) => deleteProfessional(id));
+    table.resetRowSelection();
   };
 
   return (
@@ -94,70 +97,61 @@ export function DataTableToolbar<TData extends DataWithId>({
         <Input
           placeholder={filterPlaceholder}
           value={filterValue}
-          onChange={(event) => setFilterValue(event.target.value)}
+          onChange={(e) => setFilterValue(e.target.value)}
           className="max-w-sm h-10"
         />
       </div>
-
       <div className="flex items-center space-x-2 ml-4">
-         {showSortButton && (
-           <DropdownMenu>
+        {showSortButton && (
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 cursor-pointer">
-                Ordenar por
-                <ChevronDown className="ml-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-10">
+                Ordenar por<ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuSeparator />
               {table
                 .getAllColumns()
-                .filter(
-                  (column) =>
-                    column.getCanSort() &&
-                    column.id !== 'select' &&
-                    column.id !== 'actions'
-                )
-                .map((column) => {
-                  const sortDirection = column.getIsSorted();
+                .filter((col) => col.getCanSort() && col.id !== 'select' && col.id !== 'actions')
+                .map((col) => {
+                  const dir = col.getIsSorted();
                   return (
-                    <DropdownMenuItem 
-                      className="cursor-pointer"
-                      key={column.id}
-                      onClick={() => column.toggleSorting(sortDirection === 'asc', false)} 
+                    <DropdownMenuItem
+                      key={col.id}
+                      onClick={() => col.toggleSorting(dir === 'asc', false)}
                     >
-                      <span className="flex-1 pr-2">{getColumnDisplayName(column)}</span>
-                      {sortDirection === 'asc' && <ArrowUp className="h-4 w-4 text-muted-foreground" />}
-                      {sortDirection === 'desc' && <ArrowDown className="h-4 w-4 text-muted-foreground" />}
-                      {!sortDirection && <ArrowUpDown className="h-4 w-4 text-muted-foreground opacity-50" />}
+                      <span className="flex-1 pr-2">{getColumnDisplayName(col)}</span>
+                      {dir === 'asc' && <ArrowUp className="h-4 w-4" />}
+                      {dir === 'desc' && <ArrowDown className="h-4 w-4" />}
+                      {!dir && <ArrowUpDown className="h-4 w-4 opacity-50" />}
                     </DropdownMenuItem>
                   );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-         )}
+        )}
         {showFilterButton && (
-           <DropdownMenu>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 cursor-pointer">
-                <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por
-                <ChevronDown className="ml-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-10">
+                <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por<ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Filtrar por...</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Opción A</DropdownMenuItem>
-              <DropdownMenuItem>Opción B</DropdownMenuItem>
+              <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
+              <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
         {showExportButton && (
           <Button variant="outline" size="sm" className="h-10" onClick={onExportClick}>
-             <Download className="mr-2 h-4 w-4 opacity-50 cursor-pointer"/> Exportar
+            <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
           </Button>
         )}
-        {enableDeleteButton && (
+       {enableDeleteButton && ( 
           <Button
             variant="destructive"
             size="sm"
@@ -170,5 +164,5 @@ export function DataTableToolbar<TData extends DataWithId>({
         )}
       </div>
     </div>
-  )
-} 
+  );
+}
