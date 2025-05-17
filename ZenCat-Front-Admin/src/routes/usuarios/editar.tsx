@@ -3,52 +3,36 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload } from "lucide-react";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { User } from "@/types/user";
-import { authApi } from "@/api/auth/auth";
-import {  ChevronLeft } from "lucide-react";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
+import { getUsers, UserWithExtra, updateUser } from '@/mocks/users';
 import { Switch } from "@/components/ui/switch";
-import { mockUsers, UserWithExtra } from "./index";
-
-interface SearchParams {
-  id: string;
-}
-
-interface LoaderData {
-  user: User;
-  userId: string;
-}
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute('/usuarios/editar')({
-  validateSearch: (search: Record<string, unknown>): SearchParams => {
-    if (!search.id || typeof search.id !== 'string') {
-      throw new Error('ID is required');
-    }
-    return { id: search.id };
-  },
-  loaderDeps: ({ search }) => ({ id: search.id }),
-  loader: async ({ deps }): Promise<LoaderData> => {
-    try {
-      const user = await authApi.getCurrentUser();
-      if (!user) {
-        throw new Error('User not found');
-      }
-      return { user, userId: deps.id };
-    } catch (error) {
-      console.error('Error en loader:', error);
-      throw redirect({
-        to: '/login',
-      });
-    }
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      id: search.id as string,
+    };
   },
   component: EditarUsuario,
 });
 
 function EditarUsuario() {
   const navigate = useNavigate();
-  const { userId } = Route.useLoaderData();
-  const [userData, setUserData] = useState<UserWithExtra | null>(null);
+  const search = useSearch({ from: '/usuarios/editar' });
+  const userId = search.id;
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
@@ -67,16 +51,26 @@ function EditarUsuario() {
     referencia: ''
   });
 
+  const [errors, setErrors] = useState({
+    correo: '',
+    celular: '',
+    tipoDoc: '',
+    nombres: '',
+    primerApellido: '',
+  });
+
+  const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+
+  // Cargar datos del usuario al montar el componente
   useEffect(() => {
-    // Buscar el usuario en los datos mock
-    const user = mockUsers.find(u => u.id === userId);
+    const users = getUsers();
+    const user = users.find(u => u.id === userId);
     if (user) {
-      setUserData(user);
       // Separar el nombre completo en partes
       const nameParts = user.name.split(' ');
-      const nombres = nameParts[0];
+      const nombres = nameParts[0] || '';
       const primerApellido = nameParts[1] || '';
-      const segundoApellido = nameParts[2] || '';
+      const segundoApellido = nameParts.slice(2).join(' ') || '';
 
       setForm({
         nombres,
@@ -84,24 +78,20 @@ function EditarUsuario() {
         segundoApellido,
         correo: user.email,
         celular: user.phone || '',
-        tipoDoc: 'DNI', // Valor por defecto
-        numDoc: '', // No tenemos este dato en el mock
-        region: '', // No tenemos este dato en el mock
-        provincia: '', // No tenemos este dato en el mock
+        tipoDoc: '', // No tenemos este dato en el modelo
+        numDoc: '', // No tenemos este dato en el modelo
+        region: '', // No tenemos este dato en el modelo
+        provincia: '', // No tenemos este dato en el modelo
         distrito: user.district || '',
         calle: user.address || '',
-        edificio: '', // No tenemos este dato en el mock
-        referencia: '' // No tenemos este dato en el mock
+        edificio: '', // No tenemos este dato en el modelo
+        referencia: '' // No tenemos este dato en el modelo
       });
+
+      // Habilitar onboarding si hay datos
+      setOnboardingEnabled(!!(user.phone || user.address || user.district));
     }
   }, [userId]);
-
-  const [errors, setErrors] = useState({
-    correo: '',
-    celular: '',
-    tipoDoc: '',
-  });
-  const [onboardingEnabled, setOnboardingEnabled] = useState(true);
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
@@ -111,22 +101,47 @@ function EditarUsuario() {
   // Validaciones simples
   const validate = () => {
     let valid = true;
-    const newErrors: typeof errors = { correo: '', celular: '', tipoDoc: '' };
+    const newErrors = {
+      correo: '',
+      celular: '',
+      tipoDoc: '',
+      nombres: '',
+      primerApellido: '',
+    };
+    
+    // Validar nombres
+    if (!form.nombres.trim()) {
+      newErrors.nombres = 'Los nombres son requeridos';
+      valid = false;
+    }
+
+    // Validar primer apellido
+    if (!form.primerApellido.trim()) {
+      newErrors.primerApellido = 'El primer apellido es requerido';
+      valid = false;
+    }
+
     // Correo
     if (!form.correo.match(/^\S+@\S+\.\S+$/)) {
       newErrors.correo = 'Ingrese un correo válido';
       valid = false;
     }
-    // Celular (solo números y longitud 9-15)
-    if (!form.celular.match(/^\d{9,15}$/)) {
-      newErrors.celular = 'Ingrese un número de celular válido';
-      valid = false;
+
+    // Solo validar celular y tipo de documento si el onboarding está habilitado
+    if (onboardingEnabled) {
+      // Celular (solo números y longitud 9-15)
+      if (form.celular && !form.celular.match(/^\d{9,15}$/)) {
+        newErrors.celular = 'Ingrese un número de celular válido';
+        valid = false;
+      }
+
+      // Tipo de documento
+      if (form.tipoDoc && !form.tipoDoc) {
+        newErrors.tipoDoc = 'Seleccione un tipo de documento';
+        valid = false;
+      }
     }
-    // Tipo de documento
-    if (!form.tipoDoc) {
-      newErrors.tipoDoc = 'Seleccione un tipo de documento';
-      valid = false;
-    }
+
     setErrors(newErrors);
     return valid;
   };
@@ -135,18 +150,40 @@ function EditarUsuario() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    // Aquí iría la lógica de guardado
-    // navigate({ to: '/usuarios' }); // Descomentar si quieres redirigir tras guardar
+    setIsConfirmDialogOpen(true);
+  };
+
+  const confirmUpdate = () => {
+    const users = getUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    // Crear el usuario actualizado
+    const updatedUser: UserWithExtra = {
+      ...user,
+      name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
+      email: form.correo,
+      address: onboardingEnabled ? form.calle : '',
+      district: onboardingEnabled ? form.distrito : '',
+      phone: onboardingEnabled ? form.celular : '',
+    };
+
+    try {
+      // Actualizar el usuario usando la función de mockData
+      updateUser(updatedUser);
+      
+      // Redirigir a la lista de usuarios
+      navigate({ to: '/usuarios' });
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      alert('Error al actualizar usuario');
+    }
   };
 
   // Handler para cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  if (!userData) {
-    return <div>Cargando...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -170,10 +207,12 @@ function EditarUsuario() {
                 <div>
                   <label htmlFor="nombres" className="block font-medium mb-1">Nombres</label>
                   <Input id="nombres" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Ingrese los nombres del usuario" />
+                  {errors.nombres && <span className="text-red-500 text-sm">{errors.nombres}</span>}
                 </div>
                 <div>
                   <label htmlFor="primer-apellido" className="block font-medium mb-1">Primer apellido</label>
                   <Input id="primer-apellido" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Ingrese el primer apellido del usuario" />
+                  {errors.primerApellido && <span className="text-red-500 text-sm">{errors.primerApellido}</span>}
                 </div>
                 <div>
                   <label htmlFor="segundo-apellido" className="block font-medium mb-1">Segundo apellido</label>
@@ -266,6 +305,24 @@ function EditarUsuario() {
           </div>
         </form>
       </div>
+
+      {/* Diálogo de confirmación */}
+      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas guardar los cambios?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción actualizará la información del usuario.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="default" onClick={confirmUpdate}>Confirmar</Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

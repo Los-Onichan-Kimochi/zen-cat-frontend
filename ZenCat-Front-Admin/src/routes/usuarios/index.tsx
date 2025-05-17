@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { createFileRoute } from '@tanstack/react-router';
+import React, { useState, useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ChevronLeft, Search, ChevronDown } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
-import { Gem, Search, Trash, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { Gem, Trash, MoreHorizontal, Plus } from 'lucide-react';
 import HomeCard from "@/components/common/home-card";
 import {
   AlertDialog,
@@ -16,122 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-export interface UserWithExtra extends User {
-  address?: string;
-  district?: string;
-  phone?: string;
-  membershipsIds?: number[];
-}
-// Mock de membresías
-export const mockMemberships = [
-  {
-    id: 1,
-    comunidad: "Runners",
-    tipo: "Mensual",
-    costo: "$ 150",
-    limiteReservas: "10",
-    fechaInicio: "12 - 04 - 2025",
-    fechaFin: "12 - 05 - 2025",
-    estado: "Activo",
-    estadoColor: "bg-green-400"
-  },
-  {
-    id: 2,
-    comunidad: "Los magníficos",
-    tipo: "Anual",
-    costo: "$ 1500",
-    limiteReservas: "ilimitado",
-    fechaInicio: "12 - 04 - 2025",
-    fechaFin: "12 - 04 - 2026",
-    estado: "Activo",
-    estadoColor: "bg-green-400"
-  },
-  {
-    id: 3,
-    comunidad: "Egresados PUCP",
-    tipo: "Mensual",
-    costo: "$ 200",
-    limiteReservas: "ilimitado",
-    fechaInicio: "12 - 04 - 2025",
-    fechaFin: "12 - 05 - 2025",
-    estado: "Suspendida temporal",
-    estadoColor: "bg-yellow-400"
-  },
-];
-// Datos de ejemplo (ajustados para evitar errores de tipo)
-export const mockUsers: UserWithExtra[] = [
-  {
-    id: "1",
-    name: "María López",
-    email: "maria.lopez@mail.com",
-    role: "user",
-    password: "123456",
-    isAuthenticated: false,
-    permissions: ["read"],
-    avatar: "",
-    address: "Calle Falsa 123",
-    district: "Miraflores",
-    phone: "987654321",
-    membershipsIds: [1],
-  },
-  {
-    id: "2",
-    name: "Juan Pérez",
-    email: "juan.perez@mail.com",
-    role: "user",
-    password: "123456",
-    isAuthenticated: false,
-    permissions: ["read"],
-    avatar: "",
-    address: "Av. Los Héroes 456",
-    district: "San Borja",
-    phone: "912345678",
-    membershipsIds: [1,2],
-  },
-  {
-    id: "3",
-    name: "Lucía Fernández",
-    email: "lucia.fernandez@mail.com",
-    role: "user",
-    password: "123456",
-    isAuthenticated: false,
-    permissions: ["read"],
-    avatar: "",
-    address: "Jr. Las Flores 789",
-    district: "Surco",
-    phone: "934567890",
-    membershipsIds: [3],
-  },
-  {
-    id: "4",
-    name: "Carlos Ramírez",
-    email: "carlos.ramirez@mail.com",
-    role: "user",
-    password: "123456",
-    isAuthenticated: false,
-    permissions: ["read"],
-    avatar: "",
-    address: "Pasaje Sol 321",
-    district: "La Molina",
-    phone: "900123456",
-    membershipsIds: [1],
-  },
-  {
-    id: "5",
-    name: "Ana Torres",
-    email: "ana.torres@mail.com",
-    role: "user",
-    password: "123456",
-    isAuthenticated: false,
-    permissions: ["read"],
-    avatar: "",
-    address: "Av. Primavera 654",
-    district: "San Isidro",
-    phone: "955667788",
-    membershipsIds: [2],
-  },
-];
+import { getUsers, UserWithExtra, updateUser, addNewUser, deleteUser, deleteUsers } from '@/mocks/users';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -139,17 +25,57 @@ export const Route = createFileRoute('/usuarios/')({
 
 function UsuariosComponent() {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<UserWithExtra[]>([]);
   const [userToDelete, setUserToDelete] = useState<UserWithExtra | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const navigate = Route.useNavigate();
+  const [sortField, setSortField] = useState<keyof UserWithExtra>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'user'>('all');
+  const navigate = useNavigate();
 
-  // Filtrado simple
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Cargar usuarios al montar el componente
+  useEffect(() => {
+    setUsers(getUsers());
+  }, []);
+
+  // Filtrar y ordenar usuarios
+  const filteredAndSortedUsers = users
+    .filter(user => {
+      // Filtro de búsqueda
+      const searchMatch = 
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase()) ||
+        user.phone?.toLowerCase().includes(search.toLowerCase()) ||
+        user.district?.toLowerCase().includes(search.toLowerCase());
+
+      // Filtro de estado
+      const statusMatch = 
+        filterStatus === 'all' || 
+        (filterStatus === 'active' && user.isAuthenticated) ||
+        (filterStatus === 'inactive' && !user.isAuthenticated);
+
+      // Filtro de rol
+      const roleMatch = 
+        filterRole === 'all' || 
+        user.role === filterRole;
+
+      return searchMatch && statusMatch && roleMatch;
+    })
+    .sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      return 0;
+    });
 
   // Selección individual
   const handleSelectUser = (userId: string) => {
@@ -162,14 +88,14 @@ function UsuariosComponent() {
 
   // Selección global
   const handleSelectAll = () => {
-    if (selectedUserIds.length === filteredUsers.length) {
+    if (selectedUserIds.length === filteredAndSortedUsers.length) {
       setSelectedUserIds([]);
     } else {
-      setSelectedUserIds(filteredUsers.map((u) => u.id));
+      setSelectedUserIds(filteredAndSortedUsers.map((u) => u.id));
     }
   };
 
-  // Borrado individual (ya implementado)
+  // Borrado individual
   const handleDeleteUser = (user: UserWithExtra) => {
     setUserToDelete(user);
     setIsDeleteModalOpen(true);
@@ -177,7 +103,8 @@ function UsuariosComponent() {
 
   const confirmDeleteUser = () => {
     if (userToDelete) {
-      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      const updatedUsers = deleteUser(userToDelete.id);
+      setUsers(updatedUsers);
       setUserToDelete(null);
       setIsDeleteModalOpen(false);
       setSelectedUserIds((prev) => prev.filter((id) => id !== userToDelete.id));
@@ -192,7 +119,8 @@ function UsuariosComponent() {
   };
 
   const confirmBulkDelete = () => {
-    setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
+    const updatedUsers = deleteUsers(selectedUserIds);
+    setUsers(updatedUsers);
     setSelectedUserIds([]);
     setIsBulkDeleteModalOpen(false);
   };
@@ -212,6 +140,16 @@ function UsuariosComponent() {
       search: { id: userId },
       replace: true
     });
+  };
+
+  // Función para manejar el ordenamiento
+  const handleSort = (field: keyof UserWithExtra) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
   };
 
   return (
@@ -252,7 +190,7 @@ function UsuariosComponent() {
               <Search className="w-5 h-5" />
             </span>
             <Input
-              placeholder="Busca tu registro o celda"
+              placeholder="Buscar por nombre, email, teléfono o distrito"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 w-full h-10"
@@ -265,10 +203,25 @@ function UsuariosComponent() {
               <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
                 Ordenar por <ChevronDown className="w-4 h-4" />
               </Button>
-              {/* Dropdown menu ejemplo */}
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Nombre</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Fecha</button>
+              <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
+                <button 
+                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
+                  onClick={() => handleSort('name')}
+                >
+                  Nombre {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+                <button 
+                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
+                  onClick={() => handleSort('email')}
+                >
+                  Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
+                <button 
+                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
+                  onClick={() => handleSort('district')}
+                >
+                  Distrito {sortField === 'district' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </button>
               </div>
             </div>
             {/* Dropdown Filtrar por */}
@@ -276,10 +229,45 @@ function UsuariosComponent() {
               <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
                 Filtrar por <ChevronDown className="w-4 h-4" />
               </Button>
-              {/* Dropdown menu ejemplo */}
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Activos</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Inactivos</button>
+              <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
+                <div className="px-4 py-2 font-semibold border-b">Estado</div>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'all' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterStatus('all')}
+                >
+                  Todos
+                </button>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'active' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterStatus('active')}
+                >
+                  Activos
+                </button>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'inactive' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterStatus('inactive')}
+                >
+                  Inactivos
+                </button>
+                <div className="px-4 py-2 font-semibold border-b">Rol</div>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'all' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterRole('all')}
+                >
+                  Todos
+                </button>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'admin' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterRole('admin')}
+                >
+                  Administradores
+                </button>
+                <button 
+                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'user' ? 'bg-neutral-100' : ''}`}
+                  onClick={() => setFilterRole('user')}
+                >
+                  Usuarios
+                </button>
               </div>
             </div>
             {/* Botón Exportar */}
@@ -306,7 +294,7 @@ function UsuariosComponent() {
                   <input
                     type="checkbox"
                     className="mt-1.5"
-                    checked={selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0}
+                    checked={selectedUserIds.length === filteredAndSortedUsers.length && filteredAndSortedUsers.length > 0}
                     onChange={handleSelectAll}
                   />
                 </th>
@@ -318,7 +306,7 @@ function UsuariosComponent() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {filteredAndSortedUsers.map((user) => (
                 <tr key={user.id} className="border-b hover:bg-gray-50">
                   <td className="p-2 align-middle flex items-center justify-center">
                     <input
@@ -352,7 +340,7 @@ function UsuariosComponent() {
         {/* Paginación */}
         <div className="flex justify-between items-center mt-4">
           <div>Registros por página: 10</div>
-          <div>1 – 10 de {filteredUsers.length} registros</div>
+          <div>1 – 10 de {filteredAndSortedUsers.length} registros</div>
           <div className="flex gap-2">
             <Button>{"<"}</Button>
             <Button>{">"}</Button>

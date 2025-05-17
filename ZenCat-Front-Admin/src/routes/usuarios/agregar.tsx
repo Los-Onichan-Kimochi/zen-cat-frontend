@@ -5,11 +5,20 @@ import { Card } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { authApi } from "@/api/auth/auth";
-import {  ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Switch } from "@/components/ui/switch";
-
-
+import { addNewUser, UserWithExtra, mockUsers } from '@/mocks/users';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute('/usuarios/agregar')({
   beforeLoad: async () => {
@@ -26,9 +35,9 @@ export const Route = createFileRoute('/usuarios/agregar')({
   component: AgregarUsuario,
 });
 
-
 function AgregarUsuario() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
@@ -39,13 +48,22 @@ function AgregarUsuario() {
     celular: '',
     tipoDoc: '',
     numDoc: '',
-    // ... otros campos si es necesario
+    region: '',
+    provincia: '',
+    distrito: '',
+    calle: '',
+    edificio: '',
+    referencia: ''
   });
+
   const [errors, setErrors] = useState({
     correo: '',
     celular: '',
     tipoDoc: '',
+    nombres: '',
+    primerApellido: '',
   });
+
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
 
   // Handler para el botón Cancelar
@@ -56,22 +74,47 @@ function AgregarUsuario() {
   // Validaciones simples
   const validate = () => {
     let valid = true;
-    const newErrors: typeof errors = { correo: '', celular: '', tipoDoc: '' };
+    const newErrors = {
+      correo: '',
+      celular: '',
+      tipoDoc: '',
+      nombres: '',
+      primerApellido: '',
+    };
+    
+    // Validar nombres
+    if (!form.nombres.trim()) {
+      newErrors.nombres = 'Los nombres son requeridos';
+      valid = false;
+    }
+
+    // Validar primer apellido
+    if (!form.primerApellido.trim()) {
+      newErrors.primerApellido = 'El primer apellido es requerido';
+      valid = false;
+    }
+
     // Correo
     if (!form.correo.match(/^\S+@\S+\.\S+$/)) {
       newErrors.correo = 'Ingrese un correo válido';
       valid = false;
     }
-    // Celular (solo números y longitud 9-15)
-    if (!form.celular.match(/^\d{9,15}$/)) {
-      newErrors.celular = 'Ingrese un número de celular válido';
-      valid = false;
+
+    // Solo validar celular y tipo de documento si el onboarding está habilitado
+    if (onboardingEnabled) {
+      // Celular (solo números y longitud 9-15)
+      if (form.celular && !form.celular.match(/^\d{9,15}$/)) {
+        newErrors.celular = 'Ingrese un número de celular válido';
+        valid = false;
+      }
+
+      // Tipo de documento
+      if (form.tipoDoc && !form.tipoDoc) {
+        newErrors.tipoDoc = 'Seleccione un tipo de documento';
+        valid = false;
+      }
     }
-    // Tipo de documento
-    if (!form.tipoDoc) {
-      newErrors.tipoDoc = 'Seleccione un tipo de documento';
-      valid = false;
-    }
+
     setErrors(newErrors);
     return valid;
   };
@@ -80,8 +123,34 @@ function AgregarUsuario() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    // Aquí iría la lógica de guardado
-    // navigate({ to: '/usuarios' }); // Descomentar si quieres redirigir tras guardar
+    setIsConfirmDialogOpen(true);
+  };
+
+  const confirmCreate = () => {
+    // Crear el nuevo usuario
+    const newUser: Omit<UserWithExtra, 'id'> = {
+      name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
+      email: form.correo,
+      role: "user",
+      password: "123456", // Contraseña por defecto
+      isAuthenticated: false,
+      permissions: ["read"],
+      avatar: "",
+      address: onboardingEnabled ? form.calle : '',
+      district: onboardingEnabled ? form.distrito : '',
+      phone: onboardingEnabled ? form.celular : '',
+    };
+
+    try {
+      // Agregar el usuario usando la función de mockData
+      addNewUser(newUser);
+      
+      // Redirigir a la lista de usuarios
+      navigate({ to: '/usuarios' });
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      alert('Error al crear usuario');
+    }
   };
 
   // Handler para cambios en los inputs
@@ -111,10 +180,12 @@ function AgregarUsuario() {
                 <div>
                   <label htmlFor="nombres" className="block font-medium mb-1">Nombres</label>
                   <Input id="nombres" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Ingrese los nombres del usuario" />
+                  {errors.nombres && <span className="text-red-500 text-sm">{errors.nombres}</span>}
                 </div>
                 <div>
                   <label htmlFor="primer-apellido" className="block font-medium mb-1">Primer apellido</label>
                   <Input id="primer-apellido" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Ingrese el primer apellido del usuario" />
+                  {errors.primerApellido && <span className="text-red-500 text-sm">{errors.primerApellido}</span>}
                 </div>
                 <div>
                   <label htmlFor="segundo-apellido" className="block font-medium mb-1">Segundo apellido</label>
@@ -171,27 +242,27 @@ function AgregarUsuario() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="region" className="block font-medium mb-1">Región</label>
-                  <Input id="region" placeholder="Seleccione una región" />
+                  <Input id="region" name="region" value={form.region} onChange={handleChange} placeholder="Seleccione una región" />
                 </div>
                 <div>
                   <label htmlFor="provincia" className="block font-medium mb-1">Provincia</label>
-                  <Input id="provincia" placeholder="Seleccione una provincia" />
+                  <Input id="provincia" name="provincia" value={form.provincia} onChange={handleChange} placeholder="Seleccione una provincia" />
                 </div>
                 <div>
                   <label htmlFor="distrito" className="block font-medium mb-1">Distrito</label>
-                  <Input id="distrito" placeholder="Seleccione un distrito" />
+                  <Input id="distrito" name="distrito" value={form.distrito} onChange={handleChange} placeholder="Seleccione un distrito" />
                 </div>
                 <div>
                   <label htmlFor="calle" className="block font-medium mb-1">Calle/ Avenida</label>
-                  <Input id="calle" placeholder="Núm" />
+                  <Input id="calle" name="calle" value={form.calle} onChange={handleChange} placeholder="Núm" />
                 </div>
                 <div>
                   <label htmlFor="edificio" className="block font-medium mb-1">Nro. de edificio</label>
-                  <Input id="edificio" placeholder="Núm" />
+                  <Input id="edificio" name="edificio" value={form.edificio} onChange={handleChange} placeholder="Núm" />
                 </div>
                 <div>
                   <label htmlFor="referencia" className="block font-medium mb-1">Referencia</label>
-                  <Input id="referencia" placeholder="Núm" />
+                  <Input id="referencia" name="referencia" value={form.referencia} onChange={handleChange} placeholder="Núm" />
                 </div>
               </div>
             </Card>
@@ -207,6 +278,24 @@ function AgregarUsuario() {
           </div>
         </form>
       </div>
+
+      {/* Diálogo de confirmación */}
+      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas crear el usuario?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción creará un nuevo usuario en el sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="default" onClick={confirmCreate}>Confirmar</Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
