@@ -1,11 +1,13 @@
 'use client';
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
+import { toast } from 'sonner';
+import { LocalProvider } from '@/context/LocalesContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -36,7 +38,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+export const Route = createFileRoute('/locales/')({
+  component: () => (
+    <LocalProvider>
+      <LocalesComponent />
+    </LocalProvider>
+  ),
+});
 function LocalesComponent(){
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
