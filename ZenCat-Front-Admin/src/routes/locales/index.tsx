@@ -230,7 +230,7 @@ function LocalesComponent(){
     <div className="p-6 h-full flex flex-col">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
        <div className="flex justify-end space-x-2 py-4">
-        <Link to="/profesionales/nuevo" className="h-10">
+        <Link to="/locales/nuevo" className="h-10">
           <Button 
             size="sm" 
             className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
