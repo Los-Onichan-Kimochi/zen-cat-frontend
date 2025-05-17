@@ -1,7 +1,8 @@
 'use client';
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { ProfessionalProvider } from '@/context/ProfesionalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
@@ -34,9 +35,14 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
+import { useProfessional } from '@/context/ProfesionalesContext';
 
 export const Route = createFileRoute('/profesionales/')({
-  component: ProfesionalesComponent,
+  component: () => (
+    <ProfessionalProvider>
+      <ProfesionalesComponent />
+    </ProfessionalProvider>
+  ),
 });
 
 interface CalculatedCounts {
@@ -46,6 +52,8 @@ interface CalculatedCounts {
 }
 
 function ProfesionalesComponent() {
+  const navigate = useNavigate();
+  const { setCurrent } = useProfessional();
   const queryClient = useQueryClient();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -152,16 +160,24 @@ function ProfesionalesComponent() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(prof.id)}>Copiar ID</DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(prof.id)}>
+                Copiar ID
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  localStorage.setItem('currentProfessional', prof.id);
+                  navigate({ to: `/profesionales/ver` });
+                }}
+              >
+                Ver detalles
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!window.confirm(`¿Eliminar profesional?`)) return;
+                  if (!window.confirm('¿Eliminar profesional?')) return;
                   deleteProfessional(prof.id);
                 }}
               >
@@ -172,7 +188,7 @@ function ProfesionalesComponent() {
         );
       },
     },
-  ], [deleteProfessional]);
+  ], [deleteProfessional, navigate, setCurrent]);
 
   const table = useReactTable({
     data: professionalsData || [],
@@ -221,7 +237,6 @@ function ProfesionalesComponent() {
         <Button size="sm" className="bg-gray-800 hover:bg-gray-700" onClick={() => console.log('Carga masiva')}>
           <Upload className="mr-2 h-4 w-4" /> Carga Masiva
         </Button>
-
       </div>
 
       {isLoadingProfessionals ? (
