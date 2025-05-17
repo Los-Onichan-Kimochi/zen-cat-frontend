@@ -5,7 +5,8 @@
   import HomeCard from '@/components/common/home-card';
   import { Locate, DollarSign, Plus, Upload, Loader2, MoreHorizontal, ArrowUpDown, CheckCircle} from 'lucide-react';
   import { useMemo, useState } from 'react';
-  import { useQuery, useQueryClient } from '@tanstack/react-query';
+  import { toast } from 'sonner';
+  import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
   import { communitiesApi } from '@/api/communities/communities';
   import { Community } from '@/types/community';
   import { DataTable } from '@/components/common/data-table/data-table';
@@ -74,6 +75,18 @@
       queryFn: communitiesApi.getCommunities,
     });
 
+    const { mutate: deleteCommunity, isPending: isDeleting } = useMutation<void, Error, string>({
+      mutationFn: (id) => communitiesApi.deleteCommunity(id),
+      onSuccess: (_, id) => {
+        toast.success('Comunidad eliminada', { description: `ID ${id}` });
+        queryClient.invalidateQueries({ queryKey: ['communities'] });
+        setRowSelection({});
+      },
+      onError: (err) => {
+        toast.error('Error al eliminar', { description: err.message });
+      },
+    });
+
     const counts = useMemo(() => {
       if (!communitiesData) return null;
     
@@ -106,10 +119,6 @@
         enableHiding: false,
       },
       {
-        accessorKey: "id",
-        header: "Código",
-      },
-      {
         accessorKey: "name",
         header: ({ column }: { column: Column<Community, unknown> }) => {
           return (
@@ -132,9 +141,9 @@
         header: "Cantidad de miembros",
       },
       {
-        id: "actions",
-        cell: ({ row }: { row: Row<Community> }) => {
-          const professional = row.original;
+        id: 'actions',
+        cell: ({ row }) => {
+          const com = row.original;
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -145,21 +154,26 @@
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(professional.id)}
-                >
-                  Copiar ID
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(com.id)}>Copiar ID</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Ver detalles</DropdownMenuItem>
                 <DropdownMenuItem>Editar</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!window.confirm(`¿Eliminar comunidad?`)) return;
+                    deleteCommunity(com.id);
+                  }}
+                >
+                  Eliminar
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           );
         },
       },
-    ], []);
+    ], [deleteCommunity]);
 
     const table = useReactTable({
       data: communitiesData || [],

@@ -56,6 +56,15 @@ export const communitiesApi = {
     return response.json(); 
   },
 
+  deleteCommunity: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/community/${id}/`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Error deleting community with id ${id}`);
+    }
+  },
+
   bulkCreateCommunities: async (communities: CreateCommunityPayload[]): Promise<Community[]> => {
     const response = await fetch(`${API_BASE_URL}/community/bulk/`, {
       method: 'POST',
