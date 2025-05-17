@@ -97,7 +97,7 @@ function AddLocalPageComponent(){
         province: data.province,
         region: data.region,
         reference: data.reference,
-        capacity: data.capacity,
+        capacity: Number(data.capacity),
         image_url: data.image_url,
       };
       createLocalMutation.mutate(payload);
@@ -130,7 +130,7 @@ function AddLocalPageComponent(){
                     {errors.building_number && <p className="text-red-500 text-sm mt-1">{errors.building_number.message}</p>}
                   </div>
                   <div>
-                    <Label htmlFor="district" className="mb-2">Correo electrónico</Label>
+                    <Label htmlFor="district" className="mb-2">Distrito</Label>
                     <Input id="district" type="district" {...register("district")} placeholder="Ingrese el district" />
                     {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district.message}</p>}
                   </div>

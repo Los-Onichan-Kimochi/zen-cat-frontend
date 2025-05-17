@@ -163,10 +163,6 @@ function LocalesComponent(){
         },
       },
       {
-        accessorKey: "phone_number",
-        header: "Número de celular",
-      },
-      {
         id: "actions",
         cell: ({ row }: { row: Row<Local> }) => {
           const local = row.original;
