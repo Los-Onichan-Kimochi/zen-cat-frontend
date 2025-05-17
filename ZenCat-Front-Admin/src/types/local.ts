@@ -13,7 +13,7 @@ export interface Local{
 
 // Tipos para los payloads de creación y actualización
 export interface CreateLocalPayloadLocal{
-    id: string;
+    //id: string;
     local_name: string;
     street_name: string;
     building_number: string;

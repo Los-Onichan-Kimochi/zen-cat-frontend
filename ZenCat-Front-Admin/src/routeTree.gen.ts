@@ -20,13 +20,14 @@ import { Route as ReportesRouteImport } from './routes/reportes/route'
 import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/route'
 import { Route as MembresiasRouteImport } from './routes/membresias/route'
 import { Route as LogErroresRouteImport } from './routes/log-errores/route'
-import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as LocalesIndexImport } from './routes/locales/index'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as LocalesNuevoImport } from './routes/locales/nuevo'
 
 // Create/Update Routes
 
@@ -84,12 +85,6 @@ const LogErroresRouteRoute = LogErroresRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LocalesRouteRoute = LocalesRouteImport.update({
-  id: '/locales',
-  path: '/locales',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const ComunidadesRouteRoute = ComunidadesRouteImport.update({
   id: '/comunidades',
   path: '/comunidades',
@@ -114,6 +109,12 @@ const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LocalesIndexRoute = LocalesIndexImport.update({
+  id: '/locales/',
+  path: '/locales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ProfesionalesVerRoute = ProfesionalesVerImport.update({
   id: '/profesionales/ver',
   path: '/profesionales/ver',
@@ -123,6 +124,12 @@ const ProfesionalesVerRoute = ProfesionalesVerImport.update({
 const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   id: '/profesionales/nuevo',
   path: '/profesionales/nuevo',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesNuevoRoute = LocalesNuevoImport.update({
+  id: '/locales/nuevo',
+  path: '/locales/nuevo',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -149,13 +156,6 @@ declare module '@tanstack/react-router' {
       path: '/comunidades'
       fullPath: '/comunidades'
       preLoaderRoute: typeof ComunidadesRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/locales': {
-      id: '/locales'
-      path: '/locales'
-      fullPath: '/locales'
-      preLoaderRoute: typeof LocalesRouteImport
       parentRoute: typeof rootRoute
     }
     '/log-errores': {
@@ -221,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/locales/nuevo': {
+      id: '/locales/nuevo'
+      path: '/locales/nuevo'
+      fullPath: '/locales/nuevo'
+      preLoaderRoute: typeof LocalesNuevoImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/nuevo': {
       id: '/profesionales/nuevo'
       path: '/profesionales/nuevo'
@@ -233,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/profesionales/ver'
       fullPath: '/profesionales/ver'
       preLoaderRoute: typeof ProfesionalesVerImport
+      parentRoute: typeof rootRoute
+    }
+    '/locales/': {
+      id: '/locales/'
+      path: '/locales'
+      fullPath: '/locales'
+      preLoaderRoute: typeof LocalesIndexImport
       parentRoute: typeof rootRoute
     }
     '/profesionales/': {
@@ -251,7 +265,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
   '/comunidades': typeof ComunidadesRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
@@ -261,8 +274,10 @@ export interface FileRoutesByFullPath {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/locales/nuevo': typeof LocalesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/locales': typeof LocalesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
@@ -270,7 +285,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
   '/comunidades': typeof ComunidadesRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
@@ -280,8 +294,10 @@ export interface FileRoutesByTo {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/locales/nuevo': typeof LocalesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/locales': typeof LocalesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
@@ -290,7 +306,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
   '/comunidades': typeof ComunidadesRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/membresias': typeof MembresiasRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
@@ -300,8 +315,10 @@ export interface FileRoutesById {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/locales/nuevo': typeof LocalesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/locales/': typeof LocalesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
 }
 
@@ -311,7 +328,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auditoria'
     | '/comunidades'
-    | '/locales'
     | '/log-errores'
     | '/membresias'
     | '/planes-membresia'
@@ -321,15 +337,16 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/locales/nuevo'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/locales'
     | '/profesionales'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auditoria'
     | '/comunidades'
-    | '/locales'
     | '/log-errores'
     | '/membresias'
     | '/planes-membresia'
@@ -339,15 +356,16 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/locales/nuevo'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/locales'
     | '/profesionales'
   id:
     | '__root__'
     | '/'
     | '/auditoria'
     | '/comunidades'
-    | '/locales'
     | '/log-errores'
     | '/membresias'
     | '/planes-membresia'
@@ -357,8 +375,10 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
+    | '/locales/nuevo'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/locales/'
     | '/profesionales/'
   fileRoutesById: FileRoutesById
 }
@@ -367,7 +387,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditoriaRouteRoute: typeof AuditoriaRouteRoute
   ComunidadesRouteRoute: typeof ComunidadesRouteRoute
-  LocalesRouteRoute: typeof LocalesRouteRoute
   LogErroresRouteRoute: typeof LogErroresRouteRoute
   MembresiasRouteRoute: typeof MembresiasRouteRoute
   PlanesMembresiaRouteRoute: typeof PlanesMembresiaRouteRoute
@@ -377,8 +396,10 @@ export interface RootRouteChildren {
   SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
+  LocalesNuevoRoute: typeof LocalesNuevoRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
+  LocalesIndexRoute: typeof LocalesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
 }
 
@@ -386,7 +407,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditoriaRouteRoute: AuditoriaRouteRoute,
   ComunidadesRouteRoute: ComunidadesRouteRoute,
-  LocalesRouteRoute: LocalesRouteRoute,
   LogErroresRouteRoute: LogErroresRouteRoute,
   MembresiasRouteRoute: MembresiasRouteRoute,
   PlanesMembresiaRouteRoute: PlanesMembresiaRouteRoute,
@@ -396,8 +416,10 @@ const rootRouteChildren: RootRouteChildren = {
   SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
+  LocalesNuevoRoute: LocalesNuevoRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
+  LocalesIndexRoute: LocalesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
 }
 
@@ -414,7 +436,6 @@ export const routeTree = rootRoute
         "/",
         "/auditoria",
         "/comunidades",
-        "/locales",
         "/log-errores",
         "/membresias",
         "/planes-membresia",
@@ -424,8 +445,10 @@ export const routeTree = rootRoute
         "/sesiones",
         "/NotFoundPage",
         "/login",
+        "/locales/nuevo",
         "/profesionales/nuevo",
         "/profesionales/ver",
+        "/locales/",
         "/profesionales/"
       ]
     },
@@ -437,9 +460,6 @@ export const routeTree = rootRoute
     },
     "/comunidades": {
       "filePath": "comunidades/route.tsx"
-    },
-    "/locales": {
-      "filePath": "locales/route.tsx"
     },
     "/log-errores": {
       "filePath": "log-errores/route.tsx"
@@ -468,11 +488,17 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
+    "/locales/nuevo": {
+      "filePath": "locales/nuevo.tsx"
+    },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
     },
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"
+    },
+    "/locales/": {
+      "filePath": "locales/index.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
