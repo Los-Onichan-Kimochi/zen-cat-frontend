@@ -24,6 +24,7 @@ import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
@@ -105,6 +106,12 @@ const IndexRoute = IndexImport.update({
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfesionalesVerRoute = ProfesionalesVerImport.update({
+  id: '/profesionales/ver',
+  path: '/profesionales/ver',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -228,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesNuevoImport
       parentRoute: typeof rootRoute
     }
+    '/profesionales/ver': {
+      id: '/profesionales/ver'
+      path: '/profesionales/ver'
+      fullPath: '/profesionales/ver'
+      preLoaderRoute: typeof ProfesionalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/comunidades/': {
       id: '/comunidades/'
       path: '/comunidades'
@@ -262,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
@@ -281,6 +296,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
@@ -301,6 +317,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
 }
@@ -322,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/comunidades'
     | '/profesionales'
   fileRoutesByTo: FileRoutesByTo
@@ -340,6 +358,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/comunidades'
     | '/profesionales'
   id:
@@ -358,6 +377,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/comunidades/nuevo'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/comunidades/'
     | '/profesionales/'
   fileRoutesById: FileRoutesById
@@ -378,6 +398,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ComunidadesNuevoRoute: typeof ComunidadesNuevoRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
+  ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
 }
@@ -397,6 +418,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ComunidadesNuevoRoute: ComunidadesNuevoRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
+  ProfesionalesVerRoute: ProfesionalesVerRoute,
   ComunidadesIndexRoute: ComunidadesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
 }
@@ -425,6 +447,7 @@ export const routeTree = rootRoute
         "/login",
         "/comunidades/nuevo",
         "/profesionales/nuevo",
+        "/profesionales/ver",
         "/comunidades/",
         "/profesionales/"
       ]
@@ -470,6 +493,9 @@ export const routeTree = rootRoute
     },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
+    },
+    "/profesionales/ver": {
+      "filePath": "profesionales/ver.tsx"
     },
     "/comunidades/": {
       "filePath": "comunidades/index.tsx"
