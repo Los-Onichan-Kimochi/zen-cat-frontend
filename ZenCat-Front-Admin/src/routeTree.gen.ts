@@ -25,6 +25,7 @@ import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 
 // Create/Update Routes
@@ -110,6 +111,12 @@ const IndexRoute = IndexImport.update({
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfesionalesVerRoute = ProfesionalesVerImport.update({
+  id: '/profesionales/ver',
+  path: '/profesionales/ver',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -221,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesNuevoImport
       parentRoute: typeof rootRoute
     }
+    '/profesionales/ver': {
+      id: '/profesionales/ver'
+      path: '/profesionales/ver'
+      fullPath: '/profesionales/ver'
+      preLoaderRoute: typeof ProfesionalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/': {
       id: '/profesionales/'
       path: '/profesionales'
@@ -248,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
@@ -266,6 +281,7 @@ export interface FileRoutesByTo {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
 }
 
@@ -285,6 +301,7 @@ export interface FileRoutesById {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
 }
 
@@ -305,6 +322,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/profesionales'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -322,6 +340,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/profesionales'
   id:
     | '__root__'
@@ -339,6 +358,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/profesionales/'
   fileRoutesById: FileRoutesById
 }
@@ -358,6 +378,7 @@ export interface RootRouteChildren {
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
+  ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
 }
 
@@ -376,6 +397,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
+  ProfesionalesVerRoute: ProfesionalesVerRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
 }
 
@@ -403,6 +425,7 @@ export const routeTree = rootRoute
         "/NotFoundPage",
         "/login",
         "/profesionales/nuevo",
+        "/profesionales/ver",
         "/profesionales/"
       ]
     },
@@ -447,6 +470,9 @@ export const routeTree = rootRoute
     },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
+    },
+    "/profesionales/ver": {
+      "filePath": "profesionales/ver.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
