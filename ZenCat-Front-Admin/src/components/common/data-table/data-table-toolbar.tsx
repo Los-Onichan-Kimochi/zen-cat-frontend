@@ -27,6 +27,7 @@ interface DataTableToolbarProps<TData> {
   showExportButton?: boolean
   onExportClick?: () => void
   showSortButton?: boolean
+  enableDeleteButton?: boolean
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
@@ -44,6 +45,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   showExportButton = false,
   onExportClick,
   showSortButton = false,
+  enableDeleteButton = true,
 }: DataTableToolbarProps<TData>) {
 
   const isFiltered = table.getState().globalFilter?.length > 0
@@ -155,16 +157,17 @@ export function DataTableToolbar<TData extends DataWithId>({
              <Download className="mr-2 h-4 w-4 opacity-50 cursor-pointer"/> Exportar
           </Button>
         )}
-       
-        <Button
-          variant="destructive"
-          size="sm"
-          className="h-10 cursor-pointer font-black"
-          onClick={handleDeleteSelected}
-          disabled={!rowsSelected} 
-        >
-          <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-        </Button>
+        {enableDeleteButton && (
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-10 cursor-pointer font-black"
+            onClick={handleDeleteSelected}
+            disabled={!rowsSelected} 
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+          </Button>
+        )}
       </div>
     </div>
   )
