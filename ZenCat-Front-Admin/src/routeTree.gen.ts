@@ -28,6 +28,7 @@ import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
 import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia'
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
+import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 
 // Create/Update Routes
@@ -131,6 +132,12 @@ const UsuariosEditarRoute = UsuariosEditarImport.update({
 const UsuariosAgregarRoute = UsuariosAgregarImport.update({
   id: '/usuarios/agregar',
   path: '/usuarios/agregar',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfesionalesVerRoute = ProfesionalesVerImport.update({
+  id: '/profesionales/ver',
+  path: '/profesionales/ver',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -256,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsuariosVermembresiaImport
       parentRoute: typeof rootRoute
     }
+    '/profesionales/ver': {
+      id: '/profesionales/ver'
+      path: '/profesionales/ver'
+      fullPath: '/profesionales/ver'
+      preLoaderRoute: typeof ProfesionalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/': {
       id: '/profesionales/'
       path: '/profesionales'
@@ -292,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -313,6 +328,7 @@ export interface FileRoutesByTo {
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -335,6 +351,7 @@ export interface FileRoutesById {
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
 }
@@ -358,6 +375,7 @@ export interface FileRouteTypes {
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
+    | '/profesionales/ver'
     | '/profesionales'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
@@ -378,6 +396,7 @@ export interface FileRouteTypes {
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
+    | '/profesionales/ver'
     | '/profesionales'
     | '/usuarios'
   id:
@@ -398,6 +417,7 @@ export interface FileRouteTypes {
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
+    | '/profesionales/ver'
     | '/profesionales/'
     | '/usuarios/'
   fileRoutesById: FileRoutesById
@@ -420,6 +440,7 @@ export interface RootRouteChildren {
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
+  ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
 }
@@ -441,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
+  ProfesionalesVerRoute: ProfesionalesVerRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
 }
@@ -473,6 +495,8 @@ export const routeTree = rootRoute
         "/usuarios/ver_membresia",
         "/profesionales/",
         "/usuarios/"
+        "/profesionales/ver",
+        "/profesionales/"
       ]
     },
     "/": {
@@ -522,6 +546,9 @@ export const routeTree = rootRoute
     },
     "/usuarios/ver_membresia": {
       "filePath": "usuarios/ver_membresia.tsx"
+    },
+    "/profesionales/ver": {
+      "filePath": "profesionales/ver.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
