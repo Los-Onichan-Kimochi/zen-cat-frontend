@@ -242,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesNuevoImport
       parentRoute: typeof rootRoute
     }
+    '/profesionales/ver': {
+      id: '/profesionales/ver'
+      path: '/profesionales/ver'
+      fullPath: '/profesionales/ver'
+      preLoaderRoute: typeof ProfesionalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/usuarios/agregar': {
       id: '/usuarios/agregar'
       path: '/usuarios/agregar'
@@ -261,13 +268,6 @@ declare module '@tanstack/react-router' {
       path: '/usuarios/ver_membresia'
       fullPath: '/usuarios/ver_membresia'
       preLoaderRoute: typeof UsuariosVermembresiaImport
-      parentRoute: typeof rootRoute
-    }
-    '/profesionales/ver': {
-      id: '/profesionales/ver'
-      path: '/profesionales/ver'
-      fullPath: '/profesionales/ver'
-      preLoaderRoute: typeof ProfesionalesVerImport
       parentRoute: typeof rootRoute
     }
     '/profesionales/': {
@@ -303,10 +303,10 @@ export interface FileRoutesByFullPath {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
-  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -325,10 +325,10 @@ export interface FileRoutesByTo {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
-  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -348,10 +348,10 @@ export interface FileRoutesById {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
-  '/profesionales/ver': typeof ProfesionalesVerRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
 }
@@ -372,10 +372,10 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
-    | '/profesionales/ver'
     | '/profesionales'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
@@ -393,10 +393,10 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
-    | '/profesionales/ver'
     | '/profesionales'
     | '/usuarios'
   id:
@@ -414,10 +414,10 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/profesionales/nuevo'
+    | '/profesionales/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
-    | '/profesionales/ver'
     | '/profesionales/'
     | '/usuarios/'
   fileRoutesById: FileRoutesById
@@ -437,10 +437,10 @@ export interface RootRouteChildren {
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
+  ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
-  ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
 }
@@ -459,10 +459,10 @@ const rootRouteChildren: RootRouteChildren = {
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
+  ProfesionalesVerRoute: ProfesionalesVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
-  ProfesionalesVerRoute: ProfesionalesVerRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
 }
@@ -490,13 +490,12 @@ export const routeTree = rootRoute
         "/NotFoundPage",
         "/login",
         "/profesionales/nuevo",
+        "/profesionales/ver",
         "/usuarios/agregar",
         "/usuarios/editar",
         "/usuarios/ver_membresia",
         "/profesionales/",
         "/usuarios/"
-        "/profesionales/ver",
-        "/profesionales/"
       ]
     },
     "/": {
@@ -538,6 +537,9 @@ export const routeTree = rootRoute
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
     },
+    "/profesionales/ver": {
+      "filePath": "profesionales/ver.tsx"
+    },
     "/usuarios/agregar": {
       "filePath": "usuarios/agregar.tsx"
     },
@@ -546,9 +548,6 @@ export const routeTree = rootRoute
     },
     "/usuarios/ver_membresia": {
       "filePath": "usuarios/ver_membresia.tsx"
-    },
-    "/profesionales/ver": {
-      "filePath": "profesionales/ver.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"

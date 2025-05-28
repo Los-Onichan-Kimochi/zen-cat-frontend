@@ -164,8 +164,7 @@ function AgregarUsuario() {
         <HeaderDescriptor title="USUARIOS" subtitle="AGREGAR USUARIO" />
         <div className="mb-4">
           <Button
-            variant="outline"
-            className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white shadow font-semibold hover:bg-neutral-100"
+            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-2"
             onClick={() => navigate({ to: '/usuarios' })}
           >
             <ChevronLeft className="w-5 h-5" />

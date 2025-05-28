@@ -170,13 +170,13 @@ function UsuariosComponent() {
         {/* Botones Agregar y Carga Masiva */}
         <div className="flex justify-end gap-3 mb-4">
           <Button
-            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-900 transition-all"
+            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
             onClick={() => navigate({ to: '/usuarios/agregar' })}
           >
             Agregar <Plus className="w-5 h-5" />
           </Button>
           <Button
-            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-900 transition-all"
+            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
           >
             Carga Masiva <Plus className="w-5 h-5" />
           </Button>
@@ -200,7 +200,7 @@ function UsuariosComponent() {
           <div className="flex gap-2 items-center ml-auto">
             {/* Dropdown Ordenar por */}
             <div className="relative group">
-              <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
+              <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
                 Ordenar por <ChevronDown className="w-4 h-4" />
               </Button>
               <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
@@ -226,7 +226,7 @@ function UsuariosComponent() {
             </div>
             {/* Dropdown Filtrar por */}
             <div className="relative group">
-              <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
+              <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
                 Filtrar por <ChevronDown className="w-4 h-4" />
               </Button>
               <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
@@ -271,12 +271,12 @@ function UsuariosComponent() {
               </div>
             </div>
             {/* Botón Exportar */}
-            <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 cursor-pointer">
+            <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out cursor-pointer">
               Exportar
             </Button>
             {/* Botón Eliminar */}
             <Button
-              className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 cursor-pointer"
+              className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-200 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out cursor-pointer"
               onClick={handleBulkDelete}
               disabled={selectedUserIds.length === 0}
             >
@@ -320,7 +320,7 @@ function UsuariosComponent() {
                   <td className="p-2">{user.district}</td>
                   <td className="p-2">{user.phone}</td>
                   <td className="p-2 flex gap-2">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-neutral-100 transition-colors"
+                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 transition-colors"
                     onClick={() => handleEditUser(user.id)}>
                       <MoreHorizontal className="w-5 h-5 text-black" />
                     </button>
