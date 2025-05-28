@@ -153,10 +153,6 @@
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(com.id)}>Copiar ID</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Ver detalles</DropdownMenuItem>
                 <DropdownMenuItem>Editar</DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-red-600"

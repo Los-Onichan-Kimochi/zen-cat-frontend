@@ -24,8 +24,8 @@ import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
-import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
+import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
 
@@ -109,15 +109,15 @@ const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProfesionalesVerRoute = ProfesionalesVerImport.update({
-  id: '/profesionales/ver',
-  path: '/profesionales/ver',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const ComunidadesIndexRoute = ComunidadesIndexImport.update({
   id: '/comunidades/',
   path: '/comunidades/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfesionalesVerRoute = ProfesionalesVerImport.update({
+  id: '/profesionales/ver',
+  path: '/profesionales/ver',
   getParentRoute: () => rootRoute,
 } as any)
 
