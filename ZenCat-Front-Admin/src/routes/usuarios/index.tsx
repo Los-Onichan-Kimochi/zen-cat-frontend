@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, Search, ChevronDown } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -34,11 +34,28 @@ function UsuariosComponent() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'user'>('all');
+  const [openOrder, setOpenOrder] = useState(false);
+  const [openFilter, setOpenFilter] = useState(false);
+  const orderRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // Cargar usuarios al montar el componente
   useEffect(() => {
     setUsers(getUsers());
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (orderRef.current && !orderRef.current.contains(event.target as Node)) {
+        setOpenOrder(false);
+      }
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setOpenFilter(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Filtrar y ordenar usuarios
@@ -199,79 +216,100 @@ function UsuariosComponent() {
           {/* Botones de acción alineados a la derecha */}
           <div className="flex gap-2 items-center ml-auto">
             {/* Dropdown Ordenar por */}
-            <div className="relative group">
-              <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
+            <div className="relative" ref={orderRef}>
+              <Button
+                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
+                onClick={() => setOpenOrder((prev) => !prev)}
+                type="button"
+              >
                 Ordenar por <ChevronDown className="w-4 h-4" />
               </Button>
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
-                <button 
-                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
-                  onClick={() => handleSort('name')}
-                >
-                  Nombre {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-                <button 
-                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
-                  onClick={() => handleSort('email')}
-                >
-                  Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-                <button 
-                  className="block w-full text-left px-4 py-2 hover:bg-neutral-100"
-                  onClick={() => handleSort('district')}
-                >
-                  Distrito {sortField === 'district' && (sortDirection === 'asc' ? '↑' : '↓')}
-                </button>
-              </div>
+              {openOrder && (
+                <div className="absolute z-50 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => { handleSort('name'); setOpenOrder(false); }}
+                  >
+                    Nombre {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </button>
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => { handleSort('email'); setOpenOrder(false); }}
+                  >
+                    Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </button>
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => { handleSort('district'); setOpenOrder(false); }}
+                  >
+                    Distrito {sortField === 'district' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </button>
+                </div>
+              )}
             </div>
             {/* Dropdown Filtrar por */}
-            <div className="relative group">
-              <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
+            <div className="relative" ref={filterRef}>
+              <Button
+                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
+                onClick={() => setOpenFilter((prev) => !prev)}
+                type="button"
+              >
                 Filtrar por <ChevronDown className="w-4 h-4" />
               </Button>
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
-                <div className="px-4 py-2 font-semibold border-b">Estado</div>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'all' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterStatus('all')}
-                >
-                  Todos
-                </button>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'active' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterStatus('active')}
-                >
-                  Activos
-                </button>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterStatus === 'inactive' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterStatus('inactive')}
-                >
-                  Inactivos
-                </button>
-                <div className="px-4 py-2 font-semibold border-b">Rol</div>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'all' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterRole('all')}
-                >
-                  Todos
-                </button>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'admin' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterRole('admin')}
-                >
-                  Administradores
-                </button>
-                <button 
-                  className={`block w-full text-left px-4 py-2 hover:bg-neutral-100 ${filterRole === 'user' ? 'bg-neutral-100' : ''}`}
-                  onClick={() => setFilterRole('user')}
-                >
-                  Usuarios
-                </button>
-              </div>
+              {openFilter && (
+                <div className="absolute z-50 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
+                  <div className="px-4 py-2 font-semibold border-b">Estado</div>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'all' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterStatus('all'); setOpenFilter(false); }}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'active' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterStatus('active'); setOpenFilter(false); }}
+                  >
+                    Activos
+                  </button>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'inactive' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterStatus('inactive'); setOpenFilter(false); }}
+                  >
+                    Inactivos
+                  </button>
+                  <div className="px-4 py-2 font-semibold border-b">Rol</div>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'all' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterRole('all'); setOpenFilter(false); }}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'admin' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterRole('admin'); setOpenFilter(false); }}
+                  >
+                    Administradores
+                  </button>
+                  <button
+                    type="button"
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'user' ? 'bg-gray-100' : ''}`}
+                    onClick={() => { setFilterRole('user'); setOpenFilter(false); }}
+                  >
+                    Usuarios
+                  </button>
+                </div>
+              )}
             </div>
             {/* Botón Exportar */}
-            <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out cursor-pointer">
+            <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
               Exportar
             </Button>
             {/* Botón Eliminar */}
@@ -302,6 +340,7 @@ function UsuariosComponent() {
                 <th className="p-2 text-left">Dirección</th>
                 <th className="p-2 text-left">Distrito</th>
                 <th className="p-2 text-left">Teléfono</th>
+                <th className="p-2 text-left">Membresías</th>
                 <th className="p-2"></th>
               </tr>
             </thead>
@@ -319,13 +358,21 @@ function UsuariosComponent() {
                   <td className="p-2">{user.address}</td>
                   <td className="p-2">{user.district}</td>
                   <td className="p-2">{user.phone}</td>
+                  <td className="p-2">
+                    <Button
+                      className="h-9 px-4 bg-white border border-neutral-300 text-black rounded-lg flex items-center gap-2 shadow-sm hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
+                      onClick={() => navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } })}
+                    >
+                      Membresías ...
+                    </Button>
+                  </td>
                   <td className="p-2 flex gap-2">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 transition-colors"
-                    onClick={() => handleEditUser(user.id)}>
+                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 hover:shadow-md transition-all duration-200"
+                      onClick={() => handleEditUser(user.id)}>
                       <MoreHorizontal className="w-5 h-5 text-black" />
                     </button>
                     <button
-                      className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 hover:shadow-md transition-all duration-200"
                       onClick={() => handleDeleteUser(user)}
                     >
                       <Trash className="w-5 h-5 text-black" />

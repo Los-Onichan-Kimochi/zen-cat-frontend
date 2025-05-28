@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export const Route = createFileRoute('/usuarios/ver_membresia')({
 function VerMembresia() {
   const search = useSearch({ from: '/usuarios/ver_membresia' }) as { id: string };
   const userId = search.id;
+  const navigate = useNavigate();
 
   // Encontrar el usuario por ID
   const user = mockUsers.find(u => u.id === userId);
@@ -23,15 +24,35 @@ function VerMembresia() {
     user?.membershipsIds?.includes(m.id)
   );
 
+  // Estado para los dropdowns
+  const [openOrder, setOpenOrder] = useState(false);
+  const [openFilter, setOpenFilter] = useState(false);
+
+  // Cierra el dropdown si haces click fuera
+  const orderRef = useRef(null);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (orderRef.current && !orderRef.current.contains(event.target)) {
+        setOpenOrder(false);
+      }
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setOpenFilter(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
       <div className="p-6 h-full">
         <HeaderDescriptor title="USUARIOS" subtitle="VER MEMBRESÍAS" />
         <div className="mb-4">
           <Button
-            variant="outline"
-            className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white shadow font-semibold hover:bg-neutral-100"
-            onClick={() => window.history.back()}
+            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-2"
+            onClick={() => navigate({ to: '/usuarios' })}
           >
             <ChevronLeft className="w-5 h-5" />
             Volver
@@ -53,29 +74,65 @@ function VerMembresia() {
           {/* Botones de acción alineados a la derecha */}
           <div className="flex gap-2 items-center ml-auto">
             {/* Dropdown Ordenar por */}
-            <div className="relative group">
-              <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
+            <div className="relative" ref={orderRef}>
+              <Button
+                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
+                onClick={() => setOpenOrder((prev) => !prev)}
+                type="button"
+              >
                 Ordenar por <ChevronDown className="w-4 h-4" />
               </Button>
-              {/* Dropdown menu ejemplo */}
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Nombre</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Fecha</button>
-              </div>
+              {openOrder && (
+                <div className="absolute z-50 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-300"
+                    onClick={() => { /* falta logica para ordenar */ }}
+                  >
+                    Nombre
+                  </button>
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-300"
+                    onClick={() => { /* falta logica para ordenar */ }}
+                  >
+                    Fecha
+                  </button>
+                </div>
+              )}
             </div>
             {/* Dropdown Filtrar por */}
-            <div className="relative group">
-              <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 flex items-center gap-1 cursor-pointer">
+            <div className="relative" ref={filterRef}>
+              <Button
+                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
+                onClick={() => setOpenFilter((prev) => !prev)}
+                type="button"
+              >
                 Filtrar por <ChevronDown className="w-4 h-4" />
               </Button>
-              {/* Dropdown menu ejemplo */}
-              <div className="hidden group-hover:block absolute z-10 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Activos</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-neutral-100">Inactivos</button>
-              </div>
+              {openFilter && (
+                <div className="absolute z-50 mt-1 w-40 bg-white border border-neutral-200 rounded shadow-lg">
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-300"
+                    onClick={() => { /* falta logica para ordenar */ }}
+                  >
+                    <span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-200">
+                      Activo
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-300"
+                    onClick={() => { /* falta logica para ordenar */ }}
+                  >
+                    Inactivos
+                  </button>
+                </div>
+              )}
             </div>
             {/* Botón Exportar */}
-            <Button className="h-10 bg-transparent border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 focus:bg-neutral-100 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-150 cursor-pointer">
+            <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
               Exportar
             </Button>
           </div>
