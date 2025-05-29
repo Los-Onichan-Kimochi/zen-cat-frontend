@@ -42,7 +42,7 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
               className={cn(
                 "flex h-14 items-center justify-start gap-4 px-6 transition-all duration-200",
                 "text-white cursor-pointer py-10",
-                activePath === item.path
+                activePath.startsWith(item.path)
                   ? "font-extrabold text-black bg-white hover:bg-gray-200"
                   : "font-normal text-white bg-black hover:bg-zinc-900",
               )}
@@ -51,7 +51,7 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
               <item.icon
                 className={cn(
                   "h-5 w-5 min-w-5 transition-transform duration-300",
-                  activePath === item.path ? "text-black scale-150" : "text-gray-300",
+                  activePath.startsWith(item.path) ? "text-black scale-150" : "text-gray-300",
                 )}
               />
               <span className="text-xl transition-opacity duration-300 ">
