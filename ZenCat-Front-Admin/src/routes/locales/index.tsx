@@ -101,7 +101,7 @@ function LocalesComponent(){
             </Button>
           );
         },
-        cell: ({ row }: { row: Row<Local> }) => <div>{row.getValue("name")}</div>
+        cell: ({ row }: { row: Row<Local> }) => <div>{row.getValue("local_name")}</div>
       },
       //{
       //  id: "lastNames",
