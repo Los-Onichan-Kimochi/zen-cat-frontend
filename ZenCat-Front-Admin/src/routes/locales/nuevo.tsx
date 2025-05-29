@@ -31,8 +31,8 @@ const localFromSchema = z.object({
   province: z.string().min(1, { message: "La provincia es requerida." }),
   region: z.string().min(1, { message: "La región es requerida." }),
   reference: z.string().min(1, { message: "La referencia es requerida." }),
-  capacity: z.number().min(2, { message: "La capacidad debe ser mayor o igual a 2." }),
-  image_url: z.string().min(1, { message: "La URL de la imagen es requerida." }),
+  capacity: z.number().min(2, { message: "La capacidad debe ser un numero entero mayor o igual a 2." }),
+  image_url: z.any().optional(),
 });
 
 type LocalFormData = z.infer<typeof localFromSchema>;
@@ -151,7 +151,7 @@ function AddLocalPageComponent(){
                   </div>
                   <div>
                     <Label htmlFor="capacity" className="mb-2">Capacidad</Label>
-                    <Input id="capacity" type="tel" {...register("capacity")} placeholder="Ingrese la capacidad" />
+                    <Input id="capacity" type="number" {...register("capacity", { valueAsNumber: true })} placeholder="Ingrese la capacidad"/>
                     {errors.capacity && <p className="text-red-500 text-sm mt-1">{errors.capacity.message}</p>}
                   </div>
                 </div>

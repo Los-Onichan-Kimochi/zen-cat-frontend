@@ -1,4 +1,4 @@
-import { Local, CreateLocalPayload, UpdateLocalPayloadLocal } from '@/types/local';
+import { Local, CreateLocalPayload, UpdateLocalPayload } from '@/types/local';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -30,7 +30,7 @@ export const localsApi = {
         }
         return response.json(); 
     },
-    updateLocal: async (id: string, payload: UpdateLocalPayloadLocal): Promise<Local> => {
+    updateLocal: async (id: string, payload: UpdateLocalPayload): Promise<Local> => {
         const response = await fetch(`${API_BASE_URL}/local/${id}/`, {
             method: 'PATCH',
             headers: {

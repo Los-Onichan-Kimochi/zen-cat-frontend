@@ -25,4 +25,4 @@ export interface CreateLocalPayload{
     image_url: string;
 }
 
-export type UpdateLocalPayloadLocal = Partial<CreateLocalPayload>;
+export type UpdateLocalPayload = Partial<CreateLocalPayload>;
