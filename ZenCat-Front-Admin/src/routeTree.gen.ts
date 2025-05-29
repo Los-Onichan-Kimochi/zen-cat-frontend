@@ -24,6 +24,10 @@ import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as UsuariosIndexImport } from './routes/usuarios/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
+import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia'
+import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
+import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
@@ -105,6 +109,30 @@ const UsuariosIndexRoute = UsuariosIndexImport.update({
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesIndexRoute = ComunidadesIndexImport.update({
+  id: '/comunidades/',
+  path: '/comunidades/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const UsuariosVermembresiaRoute = UsuariosVermembresiaImport.update({
+  id: '/usuarios/ver_membresia',
+  path: '/usuarios/ver_membresia',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const UsuariosEditarRoute = UsuariosEditarImport.update({
+  id: '/usuarios/editar',
+  path: '/usuarios/editar',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const UsuariosAgregarRoute = UsuariosAgregarImport.update({
+  id: '/usuarios/agregar',
+  path: '/usuarios/agregar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -228,13 +256,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesVerImport
       parentRoute: typeof rootRoute
     }
-    '/comunidades/': {
-      id: '/comunidades/'
-      path: '/comunidades'
-      fullPath: '/comunidades'
-      preLoaderRoute: typeof ComunidadesIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/usuarios/agregar': {
       id: '/usuarios/agregar'
       path: '/usuarios/agregar'
@@ -254,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/usuarios/ver_membresia'
       fullPath: '/usuarios/ver_membresia'
       preLoaderRoute: typeof UsuariosVermembresiaImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/': {
+      id: '/comunidades/'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof ComunidadesIndexImport
       parentRoute: typeof rootRoute
     }
     '/profesionales/': {
@@ -290,10 +318,10 @@ export interface FileRoutesByFullPath {
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -313,10 +341,10 @@ export interface FileRoutesByTo {
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
@@ -337,10 +365,10 @@ export interface FileRoutesById {
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades/': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
+  '/comunidades/': typeof ComunidadesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
 }
@@ -362,10 +390,10 @@ export interface FileRouteTypes {
     | '/comunidades/nuevo'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/comunidades'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
+    | '/comunidades'
     | '/profesionales'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
@@ -406,10 +434,10 @@ export interface FileRouteTypes {
     | '/comunidades/nuevo'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/comunidades/'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
+    | '/comunidades/'
     | '/profesionales/'
     | '/usuarios/'
   fileRoutesById: FileRoutesById
@@ -430,10 +458,10 @@ export interface RootRouteChildren {
   ComunidadesNuevoRoute: typeof ComunidadesNuevoRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
-  ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
+  ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
 }
@@ -453,10 +481,10 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesNuevoRoute: ComunidadesNuevoRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
-  ComunidadesIndexRoute: ComunidadesIndexRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
+  ComunidadesIndexRoute: ComunidadesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
 }
@@ -485,11 +513,10 @@ export const routeTree = rootRoute
         "/comunidades/nuevo",
         "/profesionales/nuevo",
         "/profesionales/ver",
-        "/comunidades/",
-        "/profesionales/"
         "/usuarios/agregar",
         "/usuarios/editar",
         "/usuarios/ver_membresia",
+        "/comunidades/",
         "/profesionales/",
         "/usuarios/"
       ]
@@ -536,9 +563,6 @@ export const routeTree = rootRoute
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"
     },
-    "/comunidades/": {
-      "filePath": "comunidades/index.tsx"
-    },
     "/usuarios/agregar": {
       "filePath": "usuarios/agregar.tsx"
     },
@@ -547,6 +571,9 @@ export const routeTree = rootRoute
     },
     "/usuarios/ver_membresia": {
       "filePath": "usuarios/ver_membresia.tsx"
+    },
+    "/comunidades/": {
+      "filePath": "comunidades/index.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
