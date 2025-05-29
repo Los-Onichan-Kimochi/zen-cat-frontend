@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
-import { CreateLocalPayloadLocal } from '@/types/local';
+import { CreateLocalPayload } from '@/types/local';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ function AddLocalPageComponent(){
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<CreateLocalPayloadLocal>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<LocalFormData>({
     resolver: zodResolver(localFromSchema),
     defaultValues: {
         local_name:'',
@@ -59,9 +59,9 @@ function AddLocalPageComponent(){
   });
 
     const createLocalMutation = useMutation({
-      mutationFn: async (data: CreateLocalPayloadLocal) => localsApi.createLocal(data),
+      mutationFn: async (data: CreateLocalPayload) => localsApi.createLocal(data),
       onSuccess: () => {
-        toast.success("Profesional Creado", { description: "El local ha sido agregado exitosamente." });
+        toast.success("Local Creado", { description: "El local ha sido agregado exitosamente." });
         queryClient.invalidateQueries({ queryKey: ['locals'] });
         navigate({ to: '/locales' });
       },
@@ -82,14 +82,14 @@ function AddLocalPageComponent(){
     }
   };
 
-    const onSubmit = async (data: CreateLocalPayloadLocal) => {
+    const onSubmit = async (data: LocalFormData) => {
       let imageUrl = 'https://via.placeholder.com/150';
       if (imageFile) {
         await new Promise(resolve => setTimeout(resolve, 1000)); 
         toast.info("Imagen (simulada)", { description: "Subida de imagen simulada completada." });
       }
   
-      const payload: CreateLocalPayloadLocal = {
+      const payload: CreateLocalPayload = {
         local_name: data.local_name,
         street_name: data.street_name,
         building_number: data.building_number,
@@ -97,7 +97,7 @@ function AddLocalPageComponent(){
         province: data.province,
         region: data.region,
         reference: data.reference,
-        capacity: Number(data.capacity),
+        capacity: data.capacity,
         image_url: data.image_url,
       };
       createLocalMutation.mutate(payload);

@@ -12,7 +12,7 @@ export interface Local{
 }
 
 // Tipos para los payloads de creación y actualización
-export interface CreateLocalPayloadLocal{
+export interface CreateLocalPayload{
     //id: string;
     local_name: string;
     street_name: string;
@@ -25,4 +25,4 @@ export interface CreateLocalPayloadLocal{
     image_url: string;
 }
 
-export type UpdateLocalPayloadLocal = Partial<CreateLocalPayloadLocal>;
+export type UpdateLocalPayloadLocal = Partial<CreateLocalPayload>;

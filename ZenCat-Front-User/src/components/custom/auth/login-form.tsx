@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import {GoogleLogin} from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from '@tanstack/react-router'
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
@@ -87,11 +87,13 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen2(false);
   };
 
+  const navigate = useNavigate();
+
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
     console.log(decodedToken)
-    //navigate("/home")
+    navigate({ to: '/home' });
   };
 
   return (
