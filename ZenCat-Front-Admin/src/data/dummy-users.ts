@@ -50,5 +50,5 @@ export const dummyUsers: User[] = [
     isAuthenticated: true,
     permissions: ["read", "write", "delete", "manage_users", "manage_system"],
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=developer"
-  }
+  },
 ]; 
