@@ -8,6 +8,7 @@ import { ErrorModal } from '@/components/custom/common/error-modal';
 import {GoogleLogin} from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
 import { useNavigate } from '@tanstack/react-router'
+import { useAuth } from '@/context/AuthContext';
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
@@ -36,6 +37,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       const user = await authApi.login(email, password);
       onLoginSuccess(user);
+      login(user)
     } catch (err: any) {
       const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);
@@ -89,11 +91,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
     console.log(decodedToken)
-    navigate({ to: '/home' });
+    
+    // Extraer solo nombre y primer apellido
+    const fullName = decodedToken.name || '';
+    const nameParts = fullName.split(' ');
+    const shortName = nameParts[0] || fullName;
+
+    login({
+        id: decodedToken.sub,
+        name: shortName,
+        email: decodedToken.email,
+        imageUrl: decodedToken.picture,
+      });
+    navigate({ to: '/' });
   };
 
   return (
@@ -107,6 +123,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <p className="text-gray-500 text-sm text-center">Inicia sesión en tu cuenta para continuar</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-1">
             <label className="block text-gray-700 text-sm">Correo electrónico</label>
             <Input
@@ -133,6 +150,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
             Iniciar sesión
           </Button>
+          </form>
 
           {/* Sección "O puedes iniciar sesión con:" */}
           <div className="relative my-4">

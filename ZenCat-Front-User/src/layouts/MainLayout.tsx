@@ -1,9 +1,8 @@
+import React from 'react';
 import { Outlet } from '@tanstack/react-router';
-import { User } from "@/types/user"
-import { TopBar } from "@/components/ui/TopBar";
+import { TopBar } from '@/components/ui/TopBar';
 
-
-const MainLayout = () => {
+const MainLayout: React.FC = () => {
   return (
     <div className="app-layout">
       <TopBar />
