@@ -7,9 +7,9 @@ import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { communitiesApi } from '@/api/communities/communities';
 import { CreateCommunityPayload } from '@/types/community';
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -102,12 +102,10 @@ function AddCommunityPageComponent() {
               </div>
               <div>
                 <Label htmlFor="purpose" className="mb-2">Propósito</Label>
-                <textarea
+                <Textarea
                   id="purpose"
                   {...register("purpose")}
                   placeholder="Ingrese un propósito"
-                  className="w-full border rounded px-3 py-2"
-                  rows={5}
                 />
                 {errors.purpose && <p className="text-red-500 text-sm mt-1">{errors.purpose.message}</p>}
               </div>

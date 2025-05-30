@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Table, Column } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash2, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Trash, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -156,7 +156,7 @@ export function DataTableToolbar<TData extends DataWithId>({
           onClick={handleDeleteSelected}
           disabled={!rowsSelected || isDeleting}
         >
-          <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+          <Trash className="mr-2 h-4 w-4" /> Eliminar
         </Button>
       </div>
     </div>

@@ -30,6 +30,7 @@ import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
 
 // Create/Update Routes
@@ -118,12 +119,6 @@ const ComunidadesIndexRoute = ComunidadesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ComunidadesIndexRoute = ComunidadesIndexImport.update({
-  id: '/comunidades/',
-  path: '/comunidades/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const UsuariosVermembresiaRoute = UsuariosVermembresiaImport.update({
   id: '/usuarios/ver_membresia',
   path: '/usuarios/ver_membresia',
@@ -151,6 +146,12 @@ const ProfesionalesVerRoute = ProfesionalesVerImport.update({
 const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   id: '/profesionales/nuevo',
   path: '/profesionales/nuevo',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesVerRoute = ComunidadesVerImport.update({
+  id: '/comunidades/ver',
+  path: '/comunidades/ver',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -248,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComunidadesNuevoImport
       parentRoute: typeof rootRoute
     }
+    '/comunidades/ver': {
+      id: '/comunidades/ver'
+      path: '/comunidades/ver'
+      fullPath: '/comunidades/ver'
+      preLoaderRoute: typeof ComunidadesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/nuevo': {
       id: '/profesionales/nuevo'
       path: '/profesionales/nuevo'
@@ -260,13 +268,6 @@ declare module '@tanstack/react-router' {
       path: '/profesionales/ver'
       fullPath: '/profesionales/ver'
       preLoaderRoute: typeof ProfesionalesVerImport
-      parentRoute: typeof rootRoute
-    }
-    '/comunidades/': {
-      id: '/comunidades/'
-      path: '/comunidades'
-      fullPath: '/comunidades'
-      preLoaderRoute: typeof ComunidadesIndexImport
       parentRoute: typeof rootRoute
     }
     '/usuarios/agregar': {
@@ -329,9 +330,9 @@ export interface FileRoutesByFullPath {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
@@ -353,9 +354,9 @@ export interface FileRoutesByTo {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
@@ -378,9 +379,9 @@ export interface FileRoutesById {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/comunidades/': typeof ComunidadesIndexRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
@@ -404,9 +405,9 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/comunidades/nuevo'
+    | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/comunidades'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
@@ -427,9 +428,9 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/comunidades/nuevo'
+    | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/comunidades'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
@@ -450,9 +451,9 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/comunidades/nuevo'
+    | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/comunidades/'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
@@ -475,9 +476,9 @@ export interface RootRouteChildren {
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
   ComunidadesNuevoRoute: typeof ComunidadesNuevoRoute
+  ComunidadesVerRoute: typeof ComunidadesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
-  ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
@@ -499,9 +500,9 @@ const rootRouteChildren: RootRouteChildren = {
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
   ComunidadesNuevoRoute: ComunidadesNuevoRoute,
+  ComunidadesVerRoute: ComunidadesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
-  ComunidadesIndexRoute: ComunidadesIndexRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
@@ -532,9 +533,9 @@ export const routeTree = rootRoute
         "/NotFoundPage",
         "/login",
         "/comunidades/nuevo",
+        "/comunidades/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
-        "/comunidades/",
         "/usuarios/agregar",
         "/usuarios/editar",
         "/usuarios/ver_membresia",
@@ -579,14 +580,14 @@ export const routeTree = rootRoute
     "/comunidades/nuevo": {
       "filePath": "comunidades/nuevo.tsx"
     },
+    "/comunidades/ver": {
+      "filePath": "comunidades/ver.tsx"
+    },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
     },
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"
-    },
-    "/comunidades/": {
-      "filePath": "comunidades/index.tsx"
     },
     "/usuarios/agregar": {
       "filePath": "usuarios/agregar.tsx"
@@ -596,10 +597,9 @@ export const routeTree = rootRoute
     },
     "/usuarios/ver_membresia": {
       "filePath": "usuarios/ver_membresia.tsx"
-=========
+    },
     "/comunidades/": {
       "filePath": "comunidades/index.tsx"
->>>>>>>>> Temporary merge branch 2
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
