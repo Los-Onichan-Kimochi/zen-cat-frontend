@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 
 export const Route = createFileRoute('/profesionales/ver')({
     component: SeeProfessionalPageComponent,
@@ -19,7 +19,6 @@ export function SeeProfessionalPageComponent() {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
 
-    // estados controlados para cada campo
     const [name, setName] = useState('');
     const [firstLast, setFirstLast] = useState('');
     const [secondLast, setSecondLast] = useState('');
@@ -41,7 +40,6 @@ export function SeeProfessionalPageComponent() {
         queryFn: () => professionalsApi.getProfessionalById(id!),
     });
 
-    // inicializar estados al cargar prof
     useEffect(() => {
         if (prof) {
             setName(prof.name);
@@ -54,7 +52,11 @@ export function SeeProfessionalPageComponent() {
     }, [prof]);
 
     if (isLoading) {
-        return <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin w-12 h-12" /></div>;
+        return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="animate-spin w-12 h-12" />
+            </div>
+        );
     }
     if (error || !prof) {
         navigate({ to: '/profesionales' });
@@ -62,36 +64,45 @@ export function SeeProfessionalPageComponent() {
     }
 
     return (
-        <div className="max-w-xl mx-auto p-6">
-            <HeaderDescriptor title="Ver Profesional" />
-            <Card>
+        <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
+            <HeaderDescriptor title="PROFESIONALES" subtitle="VER PROFESIONALES" />
+
+            <Card className="mt-6 flex-grow">
                 <CardHeader>
                     <CardTitle>Datos del profesional</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label htmlFor="name">Nombres</Label>
-                        <Input id="name" value={name} onChange={e => setName(e.target.value)} disabled={!isEditing} />
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="grid grid-cols-1 gap-y-6">
+                        <div>
+                            <Label htmlFor="name">Nombres</Label>
+                            <Input id="name" value={name} onChange={e => setName(e.target.value)} disabled={!isEditing} />
+                        </div>
+                        <div>
+                            <Label htmlFor="first_last_name">Primer Apellido</Label>
+                            <Input id="first_last_name" value={firstLast} onChange={e => setFirstLast(e.target.value)} disabled={!isEditing} />
+                        </div>
+                        <div>
+                            <Label htmlFor="second_last_name">Segundo Apellido</Label>
+                            <Input id="second_last_name" value={secondLast} onChange={e => setSecondLast(e.target.value)} disabled={!isEditing} />
+                        </div>
+                        <div>
+                            <Label htmlFor="specialty">Especialidad</Label>
+                            <Input id="specialty" value={specialty} onChange={e => setSpecialty(e.target.value)} disabled={!isEditing} />
+                        </div>
+                        <div>
+                            <Label htmlFor="email">Correo electrónico</Label>
+                            <Input id="email" value={email} onChange={e => setEmail(e.target.value)} disabled={!isEditing} />
+                        </div>
+                        <div>
+                            <Label htmlFor="phone_number">Teléfono</Label>
+                            <Input id="phone_number" value={phone} type="text" inputMode="numeric" onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} disabled={!isEditing} />
+                        </div>
                     </div>
-                    <div>
-                        <Label htmlFor="first_last_name">Primer Apellido</Label>
-                        <Input id="first_last_name" value={firstLast} onChange={e => setFirstLast(e.target.value)} disabled={!isEditing} />
-                    </div>
-                    <div>
-                        <Label htmlFor="second_last_name">Segundo Apellido</Label>
-                        <Input id="second_last_name" value={secondLast} onChange={e => setSecondLast(e.target.value)} disabled={!isEditing} />
-                    </div>
-                    <div>
-                        <Label htmlFor="specialty">Especialidad</Label>
-                        <Input id="specialty" value={specialty} onChange={e => setSpecialty(e.target.value)} disabled={!isEditing} />
-                    </div>
-                    <div>
-                        <Label htmlFor="email">Correo electrónico</Label>
-                        <Input id="email" value={email} onChange={e => setEmail(e.target.value)} disabled={!isEditing} />
-                    </div>
-                    <div>
-                        <Label htmlFor="phone_number">Teléfono</Label>
-                        <Input id="phone_number" value={phone} onChange={e => setPhone(e.target.value)} disabled={!isEditing} />
+                    <div className="flex flex-col items-center justify-center">
+                        <Label htmlFor="profileImageFile" className="mb-2 self-start">Foto de perfil</Label>
+                        <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
+                            <UploadCloud size={48} className="text-gray-400" />
+                        </div>
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-end space-x-2">
