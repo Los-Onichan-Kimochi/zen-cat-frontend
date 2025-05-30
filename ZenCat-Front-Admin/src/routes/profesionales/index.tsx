@@ -6,7 +6,7 @@ import { ProfessionalProvider } from '@/context/ProfesionalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload } from 'lucide-react';
+import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   ColumnDef,
@@ -23,6 +23,16 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -36,7 +46,6 @@ import { DataTablePagination } from '@/components/common/data-table/data-table-p
 import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { useProfessional } from '@/context/ProfesionalesContext';
-
 export const Route = createFileRoute('/profesionales/')({
   component: () => (
     <ProfessionalProvider>
@@ -61,6 +70,9 @@ function ProfesionalesComponent() {
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
 
   const { data: professionalsData, isLoading: isLoadingProfessionals, error: errorProfessionals } =
     useQuery<Professional[], Error>({
@@ -152,39 +164,28 @@ function ProfesionalesComponent() {
       cell: ({ row }) => {
         const prof = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(prof.id)}>
-                Copiar ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  localStorage.setItem('currentProfessional', prof.id);
-                  navigate({ to: `/profesionales/ver` });
-                }}
-              >
-                Ver detalles
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-red-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!window.confirm('¿Eliminar profesional?')) return;
-                  deleteProfessional(prof.id);
-                }}
-              >
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-2">
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                localStorage.setItem('currentProfessional', prof.id);
+                navigate({ to: `/profesionales/ver` });
+              }}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setProfToDelete(prof);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },
@@ -208,7 +209,7 @@ function ProfesionalesComponent() {
     enableRowSelection: true,
   });
 
-  const selectedIds = table.getSelectedRowModel().flatRows.map((r) => r.original.id);
+  const btnSizeClasses = "h-11 w-28 px-4";
 
   if (errorProfessionals) return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
 
@@ -230,12 +231,28 @@ function ProfesionalesComponent() {
 
       <div className="flex justify-end space-x-2 py-4">
         <Link to="/profesionales/nuevo">
-          <Button size="sm" className="bg-gray-800 hover:bg-gray-700">
-            <Plus className="mr-2 h-4 w-4" /> Agregar
+          <Button
+            size="sm"
+            className={`bg-black text-white font-bold rounded-lg flex items-center justify-between shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out ${btnSizeClasses}`}
+          >
+            <span>Agregar</span>
+            <Plus className="w-5 h-5" />
           </Button>
         </Link>
-        <Button size="sm" className="bg-gray-800 hover:bg-gray-700" onClick={() => console.log('Carga masiva')}>
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
+
+        <Button
+          size="sm"
+          className={`
+            bg-black text-white font-bold rounded-lg
+            grid grid-rows-2 grid-cols-[1fr_auto] items-center
+            shadow hover:bg-gray-800 hover:scale-105 active:scale-95
+            transition-all duration-200 ease-in-out
+            ${btnSizeClasses}
+          `}
+        >
+          <span className="row-start-1 col-start-1">Carga</span>
+          <span className="row-start-2 col-start-1">Masiva</span>
+          <Plus className="row-span-2 col-start-2 justify-self-center w-5 h-5" />
         </Button>
       </div>
 
@@ -260,6 +277,34 @@ function ProfesionalesComponent() {
           <DataTablePagination table={table} />
         </div>
       )}
+
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas eliminar este profesional?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">Profesional: {profToDelete?.name}</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (profToDelete) deleteProfessional(profToDelete.id);
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
+export default ProfesionalesComponent;

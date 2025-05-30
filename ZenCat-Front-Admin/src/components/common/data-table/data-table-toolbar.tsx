@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Table, Column } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Trash2, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +15,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import { professionalsApi } from '@/api/professionals/professionals';
 
 interface DataWithId {
@@ -49,20 +59,23 @@ export function DataTableToolbar<TData extends DataWithId>({
 }: DataTableToolbarProps<TData>) {
   const queryClient = useQueryClient();
 
-  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<void, Error, string>({
-    mutationFn: (id) => professionalsApi.deleteProfessional(id),
-    onSuccess: (_, id) => {
-      toast.success('Profesional eliminado', { description: `ID ${id}` });
+  const { mutate: bulkDeleteProfessionals, isPending: isBulkDeleting } = useMutation<void, Error, string[]>({
+    mutationFn: (ids) => professionalsApi.bulkDeleteProfessionals(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Profesionales eliminados', { description: `${ids.length} registros` });
       queryClient.invalidateQueries({ queryKey: ['professionals'] });
-
+      table.resetRowSelection();
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al eliminar múltiples profesionales', { description: err.message });
     },
   });
 
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
   const [filterValue, setFilterValue] = React.useState((table.getState().globalFilter as string) ?? '');
+
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = React.useState(false);
+  const [idsToDelete, setIdsToDelete] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const initial = (table.getState().globalFilter as string) ?? '';
@@ -80,85 +93,113 @@ export function DataTableToolbar<TData extends DataWithId>({
   const handleDeleteSelected = () => {
     const selectedIds = table
       .getFilteredSelectedRowModel()
-      .rows
-      .map((row) => row.original.id as string);
-
+      .rows.map((row) => row.original.id as string);
     if (selectedIds.length === 0) return;
-    if (!window.confirm(`¿Eliminar ${selectedIds.length} profesional(es)?`)) return;
-    selectedIds.forEach((id) => deleteProfessional(id));
-    table.resetRowSelection();
+    setIdsToDelete(selectedIds);
+    setIsBulkDeleteModalOpen(true);
   };
 
   return (
-    <div className="flex items-center justify-between py-4">
-      <div className="flex items-center flex-1">
-        <Input
-          placeholder={filterPlaceholder}
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-          className="max-w-sm h-10"
-        />
-      </div>
-      <div className="flex items-center space-x-2 ml-4">
-        {showSortButton && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10">
-                Ordenar por<ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuSeparator />
-              {table
-                .getAllColumns()
-                .filter((col) => col.getCanSort() && col.id !== 'select' && col.id !== 'actions')
-                .map((col) => {
-                  const dir = col.getIsSorted();
-                  return (
-                    <DropdownMenuItem
-                      key={col.id}
-                      onClick={() => col.toggleSorting(dir === 'asc', false)}
-                    >
-                      <span className="flex-1 pr-2">{getColumnDisplayName(col)}</span>
-                      {dir === 'asc' && <ArrowUp className="h-4 w-4" />}
-                      {dir === 'desc' && <ArrowDown className="h-4 w-4" />}
-                      {!dir && <ArrowUpDown className="h-4 w-4 opacity-50" />}
-                    </DropdownMenuItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-        {showFilterButton && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10">
-                <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por<ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filtrar por...</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
-              <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-        {showExportButton && (
-          <Button variant="outline" size="sm" className="h-10" onClick={onExportClick}>
-            <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
+    <>
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center flex-1">
+          <Input
+            placeholder={filterPlaceholder}
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            className="max-w-sm h-10"
+          />
+        </div>
+        <div className="flex items-center space-x-2 ml-4">
+          {showSortButton && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-10">
+                  Ordenar por<ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter((col) => col.getCanSort() && col.id !== 'select' && col.id !== 'actions')
+                  .map((col) => {
+                    const dir = col.getIsSorted();
+                    return (
+                      <DropdownMenuItem
+                        key={col.id}
+                        onClick={() => col.toggleSorting(dir === 'asc', false)}
+                      >
+                        <span className="flex-1 pr-2">{getColumnDisplayName(col)}</span>
+                        {dir === 'asc' && <ArrowUp className="h-4 w-4" />}
+                        {dir === 'desc' && <ArrowDown className="h-4 w-4" />}
+                        {!dir && <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </DropdownMenuItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {showFilterButton && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-10">
+                  <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Filtrar por...</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
+                <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {showExportButton && (
+            <Button variant="outline" size="sm" className="h-10" onClick={onExportClick}>
+              <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-10 font-black"
+            onClick={handleDeleteSelected}
+            disabled={!rowsSelected || isBulkDeleting}
+          >
+            Eliminar <Trash2 className="mr-2 h-4 w-4" />
           </Button>
-        )}
-        <Button
-          variant="destructive"
-          size="sm"
-          className="h-10 font-black"
-          onClick={handleDeleteSelected}
-          disabled={!rowsSelected || isDeleting}
-        >
-          <Trash className="mr-2 h-4 w-4" /> Eliminar
-        </Button>
+        </div>
       </div>
-    </div>
+
+      <AlertDialog open={isBulkDeleteModalOpen} onOpenChange={setIsBulkDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar profesionales seleccionados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.<br />
+              Profesionales seleccionados: <strong>{idsToDelete.length}</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsBulkDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  bulkDeleteProfessionals(idsToDelete);
+                  setIsBulkDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
