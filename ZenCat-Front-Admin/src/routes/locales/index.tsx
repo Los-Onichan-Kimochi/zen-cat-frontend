@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { LocalProvider, useLocal } from '@/context/LocalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, Gem } from 'lucide-react';
+import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
@@ -267,16 +267,16 @@ function LocalesComponent(){
   return (
     <div className="p-6 h-full flex flex-col">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
-      <div className="mb-6 flex items-center">
+      <div className="mb-6 flex items-center gap-4">
         <HomeCard
-          icon={<Gem className="w-8 h-8 text-teal-600" />}
+          icon={<MapPin className="w-8 h-8 text-teal-600" />}
           iconBgColor="bg-teal-100"
           title="Locales totales"
           description={localsData?.length || 0} 
         />
         <HomeCard
-          icon={<Gem className="w-8 h-8 text-teal-600" />}
-          iconBgColor="bg-teal-100"
+          icon={<MapPin className="w-8 h-8 text-blue-600" />}
+          iconBgColor="bg-blue-100"
           title="Region con mayor cantidad de locales: "
           description={maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'}
         />

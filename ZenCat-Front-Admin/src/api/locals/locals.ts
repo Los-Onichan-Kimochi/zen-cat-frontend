@@ -57,5 +57,17 @@ export const localsApi = {
         if (!response.ok) {
             throw new Error(`Error deleting local with id ${id}`);
         }
-    },
+    }/*,
+    bulkDeleteLocals: async (ids: string[]): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/locals/bulk-delete/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ locals: ids }),
+    });
+    if (!response.ok) {
+      throw new Error('Error bulk deleting locals');
+    }
+  }*/
 };

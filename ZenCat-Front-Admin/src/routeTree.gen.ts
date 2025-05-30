@@ -30,7 +30,7 @@ import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
-import { Route as LocalesNuevoImport } from './routes/locales/agregar'
+import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 
 // Create/Update Routes
 
