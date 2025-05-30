@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { Loader2, UploadCloud } from 'lucide-react';
 import '../../index.css';
 
-export const Route = createFileRoute('/locales/nuevo')({
+export const Route = createFileRoute('/locales/agregar')({
   component: AddLocalPageComponent,
 })
 

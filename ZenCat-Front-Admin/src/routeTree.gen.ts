@@ -235,10 +235,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/locales/agrear': {
-      id: '/locales/agrear'
-      path: '/locales/agrear'
-      fullPath: '/locales/agrear'
+    '/locales/agregar': {
+      id: '/locales/agregar'
+      path: '/locales/agregar'
+      fullPath: '/locales/agregar'
       preLoaderRoute: typeof LocalesAgregarImport
       parentRoute: typeof rootRoute
     }
