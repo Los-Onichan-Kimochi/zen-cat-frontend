@@ -111,17 +111,17 @@ function AddProfessionalPageComponent() {
             <div className="grid grid-cols-1 gap-y-6">
               <div>
                 <Label htmlFor="name" className="mb-2">Nombres</Label>
-                <Input id="name" {...register("name")} placeholder="Ingrese los nombres del profesional" />
+                <Input id="name" type="text" {...register("name")} placeholder="Ingrese los nombres del profesional" />
                 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
               </div>
               <div>
                 <Label htmlFor="first_last_name" className="mb-2">Primer apellido</Label>
-                <Input id="first_last_name" {...register("first_last_name")} placeholder="Ingrese el primer apellido" />
+                <Input id="first_last_name" type="text" {...register("first_last_name")} placeholder="Ingrese el primer apellido" />
                 {errors.first_last_name && <p className="text-red-500 text-sm mt-1">{errors.first_last_name.message}</p>}
               </div>
               <div>
                 <Label htmlFor="second_last_name" className="mb-2">Segundo apellido (Opcional)</Label>
-                <Input id="second_last_name" {...register("second_last_name")} placeholder="Ingrese el segundo apellido" />
+                <Input id="second_last_name" type="text"  {...register("second_last_name")} placeholder="Ingrese el segundo apellido" />
               </div>
               <div>
                 <Label htmlFor="type" className="mb-2">Tipo de profesional</Label>

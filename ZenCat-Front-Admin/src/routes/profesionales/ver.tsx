@@ -156,6 +156,7 @@ export function SeeProfessionalPageComponent() {
                                 <Label htmlFor="email">Correo electrónico</Label>
                                 <Input
                                     id="email"
+                                    type="email"
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     disabled={!isEditing}
