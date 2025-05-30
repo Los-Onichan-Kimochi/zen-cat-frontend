@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { PersonIcon } from '@radix-ui/react-icons';
+import { PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 import { useAuth } from '@/context/AuthContext'; // importa tu hook
 
 export const TopBar = () => {
@@ -39,19 +39,22 @@ export const TopBar = () => {
       <div className="flex items-center space-x-4">
         {user ? (
           <div className="flex items-center space-x-3">
-            {user.imageUrl && (
+            {user.imageUrl ? (
               <img
                 src={user.imageUrl}
                 alt="Avatar"
                 className="h-8 w-8 rounded-full object-cover"
               />
+            ) : (
+              <PersonIcon className="h-8 w-8 text-white rounded-full bg-gray-500 p-1" />
             )}
             <span className="hidden sm:block">{user.name || user.email}</span>
             <button
               onClick={logout}
-              className="px-3 py-1 border border-white rounded-full hover:bg-white hover:text-black transition"
+              className="p-2 rounded-full hover:bg-white hover:text-black transition"
+              aria-label="Cerrar sesión"
             >
-              Cerrar sesión
+              <ExitIcon className="h-5 w-5" />
             </button>
           </div>
         ) : (
@@ -72,7 +75,7 @@ export const TopBar = () => {
           </>
         )}
       </div>
-
+      
       {/* botón hamburguesa para móvil */}
       <button className="md:hidden focus:outline-none">
         {/* aquí podrías poner un icono de menú */}
