@@ -131,7 +131,7 @@ function AddLocalPageComponent(){
                   </div>
                   <div>
                     <Label htmlFor="district" className="mb-2">Distrito</Label>
-                    <Input id="district" type="district" {...register("district")} placeholder="Ingrese el district" />
+                    <Input id="district" type="district" {...register("district")} placeholder="Ingrese el distrito" />
                     {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district.message}</p>}
                   </div>
                   <div>
@@ -185,7 +185,7 @@ function AddLocalPageComponent(){
                   </div>
                   
                   <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-                    <Button variant="outline" type="button" onClick={() => navigate({ to: '/profesionales' })} className="w-full sm:w-auto">Cancelar</Button>
+                    <Button variant="outline" type="button" onClick={() => navigate({ to: '/locales' })} className="w-full sm:w-auto">Cancelar</Button>
                     <Button type="submit" disabled={createLocalMutation.isPending} className="w-full sm:w-auto">
                       {createLocalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
                     </Button>
