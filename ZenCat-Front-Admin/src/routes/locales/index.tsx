@@ -69,7 +69,7 @@ function LocalesComponent(){
     pageSize: 10,
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [profToDelete, setProfToDelete] = useState<Local | null>(null);
+  const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
   const { 
     data: localsData,
     isLoading: isLoadingLocals,
@@ -205,30 +205,30 @@ function LocalesComponent(){
       {
         id: 'actions',
         cell: ({ row }) => {
-          const prof = row.original;
+          const local = row.original;
           return (
             <div className="flex items-center space-x-2">
               <Button
                 className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
-                  localStorage.setItem('currentLocal', prof.id);
-                  navigate({ to: `/profesionales/ver` });
+                  localStorage.setItem('currentLocal', local.id);
+                  navigate({ to: `/locales` });
                 }}
               >
                 <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setProfToDelete(prof);
-                      setIsDeleteModalOpen(true);
-                    }}
-                  >
+              </Button>
+              <Button
+                className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLocalToDelete(local);
+                  setIsDeleteModalOpen(true);
+                }}
+                >
                     <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
+              </Button>
+            </div>
           );
         },
       },
@@ -314,6 +314,35 @@ function LocalesComponent(){
           <DataTablePagination table={table} />
         </div>
       )}
+    <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro que deseas eliminar este local?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer.
+                  <div className="mt-2 font-medium">Local: {localToDelete?.local_name}</div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="space-x-2">
+                <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      if (localToDelete) deleteLocal(localToDelete.id);
+                      setIsDeleteModalOpen(false);
+                    }}
+                  >
+                    Eliminar
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
     </div>
+
   );
+  
 }
+
+export default LocalesComponent;
