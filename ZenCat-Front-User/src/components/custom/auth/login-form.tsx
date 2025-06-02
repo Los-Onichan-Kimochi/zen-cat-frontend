@@ -174,7 +174,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
           {/* Enlace "¿Olvidaste tu contraseña?" */}
           <div className="text-center text-sm text-gray-500 mt-2">
-            <a href="#" className="hover:underline">¿Olvidaste tu contraseña? Presiona aquí</a>
+            <Link to="/forgot" className="hover:underline">¿Olvidaste tu contraseña? Presiona aquí</Link>
           </div>
 
           {/* Botón de "Ping de datos" reintegrado */}
