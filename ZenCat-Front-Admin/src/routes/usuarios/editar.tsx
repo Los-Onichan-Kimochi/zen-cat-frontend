@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -36,6 +36,7 @@ function EditarUsuario() {
   const queryClient = useQueryClient();
   const search = useSearch({ from: '/usuarios/editar' });
   const userId = search.id;
+  const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Query para obtener el usuario
@@ -50,6 +51,8 @@ function EditarUsuario() {
     onSuccess: () => {
       toast.success("Usuario actualizado", { description: "El usuario ha sido actualizado exitosamente." });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      setIsEditing(false);
+      setIsConfirmDialogOpen(false);
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
@@ -59,6 +62,22 @@ function EditarUsuario() {
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
+    nombres: '',
+    primerApellido: '',
+    segundoApellido: '',
+    correo: '',
+    celular: '',
+    tipoDoc: '',
+    numDoc: '',
+    region: '',
+    provincia: '',
+    distrito: '',
+    calle: '',
+    edificio: '',
+    referencia: ''
+  });
+
+  const [initialValues, setInitialValues] = useState({
     nombres: '',
     primerApellido: '',
     segundoApellido: '',
@@ -86,14 +105,14 @@ function EditarUsuario() {
 
   // Cargar datos del usuario al montar el componente
   useEffect(() => {
-    if (user) {
+    if (user && initialValues.nombres === '') {
       // Separar el nombre completo en partes
       const nameParts = user.name.split(' ');
       const nombres = nameParts[0] || '';
       const primerApellido = nameParts[1] || '';
       const segundoApellido = nameParts.slice(2).join(' ') || '';
 
-      setForm({
+      const newForm = {
         nombres,
         primerApellido,
         segundoApellido,
@@ -107,16 +126,24 @@ function EditarUsuario() {
         calle: user.address || '',
         edificio: '', // No tenemos este dato en el modelo
         referencia: '' // No tenemos este dato en el modelo
-      });
+      };
+
+      setForm(newForm);
+      setInitialValues(newForm);
 
       // Habilitar onboarding si hay datos
       setOnboardingEnabled(!!(user.phone || user.address || user.district));
     }
-  }, [user]);
+  }, [user, initialValues.nombres]);
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
-    navigate({ to: '/usuarios' });
+    if (isEditing) {
+      setForm(initialValues);
+      setIsEditing(false);
+    } else {
+      navigate({ to: '/usuarios' });
+    }
   };
 
   // Validaciones simples
@@ -170,6 +197,11 @@ function EditarUsuario() {
   // Handler para el submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
     if (!validate()) return;
     setIsConfirmDialogOpen(true);
   };
@@ -195,8 +227,21 @@ function EditarUsuario() {
   };
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="animate-spin w-12 h-12" />
+      </div>
+    );
   }
+
+  const hasChanges = 
+    form.nombres !== initialValues.nombres ||
+    form.primerApellido !== initialValues.primerApellido ||
+    form.segundoApellido !== initialValues.segundoApellido ||
+    form.correo !== initialValues.correo ||
+    form.celular !== initialValues.celular ||
+    form.distrito !== initialValues.distrito ||
+    form.calle !== initialValues.calle;
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -205,10 +250,10 @@ function EditarUsuario() {
         <div className="mb-4">
           <Button
             className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-2"
-            onClick={() => navigate({ to: '/usuarios' })}
+            onClick={handleCancel}
           >
             <ChevronLeft className="w-5 h-5" />
-            Volver
+            {isEditing ? 'Cancelar' : 'Volver'}
           </Button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -218,21 +263,21 @@ function EditarUsuario() {
               <div className="flex flex-col gap-4">
                 <div>
                   <label htmlFor="nombres" className="block font-medium mb-1">Nombres</label>
-                  <Input id="nombres" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Ingrese los nombres del usuario" />
+                  <Input id="nombres" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Ingrese los nombres del usuario" disabled={!isEditing} />
                   {errors.nombres && <span className="text-red-500 text-sm">{errors.nombres}</span>}
                 </div>
                 <div>
                   <label htmlFor="primer-apellido" className="block font-medium mb-1">Primer apellido</label>
-                  <Input id="primer-apellido" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Ingrese el primer apellido del usuario" />
+                  <Input id="primer-apellido" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Ingrese el primer apellido del usuario" disabled={!isEditing} />
                   {errors.primerApellido && <span className="text-red-500 text-sm">{errors.primerApellido}</span>}
                 </div>
                 <div>
                   <label htmlFor="segundo-apellido" className="block font-medium mb-1">Segundo apellido</label>
-                  <Input id="segundo-apellido" name="segundoApellido" value={form.segundoApellido} onChange={handleChange} placeholder="Ingrese el segundo apellido del usuario" />
+                  <Input id="segundo-apellido" name="segundoApellido" value={form.segundoApellido} onChange={handleChange} placeholder="Ingrese el segundo apellido del usuario" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="correo" className="block font-medium mb-1">Correo electrónico</label>
-                  <Input id="correo" name="correo" value={form.correo} onChange={handleChange} placeholder="Ingrese el correo electrónico del profesional" type="email" />
+                  <Input id="correo" name="correo" value={form.correo} onChange={handleChange} placeholder="Ingrese el correo electrónico del profesional" type="email" disabled={!isEditing} />
                   {errors.correo && <span className="text-red-500 text-sm">{errors.correo}</span>}
                 </div>
               </div>
@@ -241,7 +286,7 @@ function EditarUsuario() {
                 <div className="flex flex-col items-center justify-center border border-neutral-300 rounded-lg h-40 mb-2 bg-white">
                   <Upload className="w-16 h-16 text-neutral-400" />
                 </div>
-                <Input type="file" />
+                <Input type="file" disabled={!isEditing} />
                 <span className="text-sm text-neutral-500">Sin archivos seleccionados</span>
               </div>
             </div>
@@ -260,12 +305,12 @@ function EditarUsuario() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label htmlFor="celular" className="block font-medium mb-1">Número de celular</label>
-                  <Input id="celular" name="celular" value={form.celular} onChange={handleChange} placeholder="Ingrese el número de teléfono" />
+                  <Input id="celular" name="celular" value={form.celular} onChange={handleChange} placeholder="Ingrese el número de teléfono" disabled={!isEditing} />
                   {errors.celular && <span className="text-red-500 text-sm">{errors.celular}</span>}
                 </div>
                 <div>
                   <label htmlFor="tipo-doc" className="block font-medium mb-1">Tipo de documento</label>
-                  <select id="tipo-doc" name="tipoDoc" value={form.tipoDoc} onChange={handleChange} className="w-full h-10 px-3 border border-gray-300 rounded-md">
+                  <select id="tipo-doc" name="tipoDoc" value={form.tipoDoc} onChange={handleChange} className="w-full h-10 px-3 border border-gray-300 rounded-md" disabled={!isEditing}>
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
                     <option value="Foreign Card">Foreign Card</option>
@@ -274,46 +319,48 @@ function EditarUsuario() {
                 </div>
                 <div>
                   <label htmlFor="num-doc" className="block font-medium mb-1">Número de documento</label>
-                  <Input id="num-doc" name="numDoc" value={form.numDoc} onChange={handleChange} placeholder="Ingrese el número del documento" />
+                  <Input id="num-doc" name="numDoc" value={form.numDoc} onChange={handleChange} placeholder="Ingrese el número del documento" disabled={!isEditing} />
                 </div>
               </div>
               <div className="mb-4 font-semibold">Dirección</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="region" className="block font-medium mb-1">Región</label>
-                  <Input id="region" name="region" value={form.region} onChange={handleChange} placeholder="Seleccione una región" />
+                  <Input id="region" name="region" value={form.region} onChange={handleChange} placeholder="Seleccione una región" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="provincia" className="block font-medium mb-1">Provincia</label>
-                  <Input id="provincia" name="provincia" value={form.provincia} onChange={handleChange} placeholder="Seleccione una provincia" />
+                  <Input id="provincia" name="provincia" value={form.provincia} onChange={handleChange} placeholder="Seleccione una provincia" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="distrito" className="block font-medium mb-1">Distrito</label>
-                  <Input id="distrito" name="distrito" value={form.distrito} onChange={handleChange} placeholder="Seleccione un distrito" />
+                  <Input id="distrito" name="distrito" value={form.distrito} onChange={handleChange} placeholder="Seleccione un distrito" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="calle" className="block font-medium mb-1">Calle/ Avenida</label>
-                  <Input id="calle" name="calle" value={form.calle} onChange={handleChange} placeholder="Núm" />
+                  <Input id="calle" name="calle" value={form.calle} onChange={handleChange} placeholder="Núm" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="edificio" className="block font-medium mb-1">Nro. de edificio</label>
-                  <Input id="edificio" name="edificio" value={form.edificio} onChange={handleChange} placeholder="Núm" />
+                  <Input id="edificio" name="edificio" value={form.edificio} onChange={handleChange} placeholder="Núm" disabled={!isEditing} />
                 </div>
                 <div>
                   <label htmlFor="referencia" className="block font-medium mb-1">Referencia</label>
-                  <Input id="referencia" name="referencia" value={form.referencia} onChange={handleChange} placeholder="Núm" />
+                  <Input id="referencia" name="referencia" value={form.referencia} onChange={handleChange} placeholder="Núm" disabled={!isEditing} />
                 </div>
               </div>
             </Card>
           )}
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={handleCancel}>Cancelar</Button>
+            <Button variant="outline" type="button" onClick={handleCancel}>
+              {isEditing ? 'Cancelar' : 'Volver'}
+            </Button>
             <Button
               variant="default"
               type="submit"
-              disabled={updateUserMutation.isPending}
+              disabled={updateUserMutation.isPending || (isEditing && !hasChanges)}
             >
-              {updateUserMutation.isPending ? 'Guardando...' : 'Guardar'}
+              {updateUserMutation.isPending ? 'Guardando...' : isEditing ? 'Guardar' : 'Editar'}
             </Button>
           </div>
         </form>

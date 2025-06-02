@@ -152,12 +152,12 @@ export function DataTableToolbar<TData extends DataWithId>({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10">
-                  <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por
+                  <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filtrar por...</DropdownMenuLabel>
+                <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
                 <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>
@@ -172,11 +172,11 @@ export function DataTableToolbar<TData extends DataWithId>({
           <Button
             variant="destructive"
             size="sm"
-            className="h-10 font-black"
+            className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-200 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out cursor-pointer"
             onClick={handleDeleteSelected}
             disabled={!rowsSelected || isBulkDeleting}
           >
-            Eliminar <Trash2 className="mr-2 h-4 w-4" />
+            Eliminar <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </div>
