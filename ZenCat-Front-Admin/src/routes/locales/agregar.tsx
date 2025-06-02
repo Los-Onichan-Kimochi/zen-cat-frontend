@@ -247,7 +247,7 @@ function AddLocalPageComponent(){
                 </div>
     
                 {/* Columna Derecha para foto de perfil y botones */}
-                <div className="flex flex-col space-y-6">
+                <div className="flex flex-col space-y-40">
                   <div className="flex flex-col">
                     <Label htmlFor="profileImageFile" className="mb-2 self-start">Foto del local</Label>
                     <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
@@ -275,9 +275,9 @@ function AddLocalPageComponent(){
                   </div>
                   
                   <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-                    <Button variant="outline" type="button" onClick={() => navigate({ to: '/locales' })} className="w-full sm:w-auto">Cancelar</Button>
-                    <Button type="submit" disabled={createLocalMutation.isPending} className="w-full sm:w-auto">
-                      {createLocalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
+                    <Button variant="outline" type="button" onClick={() => navigate({ to: '/locales' })} className="w-full sm:w-auto h-12 text-lg px-6">Cancelar</Button>
+                    <Button type="submit" disabled={createLocalMutation.isPending} className="w-full sm:w-auto h-12 text-lg px-6">
+                      {createLocalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin " />} Guardar
                     </Button>
                   </div>
                 </div>

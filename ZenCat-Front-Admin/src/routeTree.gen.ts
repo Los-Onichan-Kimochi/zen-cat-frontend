@@ -30,6 +30,7 @@ import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as LocalesVerImport } from './routes/locales/ver'
 import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 
 // Create/Update Routes
@@ -148,6 +149,12 @@ const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LocalesVerRoute = LocalesVerImport.update({
+  id: '/locales/ver',
+  path: '/locales/ver',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const LocalesAgregarRoute = LocalesAgregarImport.update({
   id: '/locales/agregar',
   path: '/locales/agregar',
@@ -242,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocalesAgregarImport
       parentRoute: typeof rootRoute
     }
+    '/locales/ver': {
+      id: '/locales/ver'
+      path: '/locales/ver'
+      fullPath: '/locales/ver'
+      preLoaderRoute: typeof LocalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/nuevo': {
       id: '/profesionales/nuevo'
       path: '/profesionales/nuevo'
@@ -316,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
@@ -339,6 +354,7 @@ export interface FileRoutesByTo {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
@@ -363,6 +379,7 @@ export interface FileRoutesById {
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
@@ -388,6 +405,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/usuarios/agregar'
@@ -410,6 +428,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/usuarios/agregar'
@@ -432,6 +451,7 @@ export interface FileRouteTypes {
     | '/NotFoundPage'
     | '/login'
     | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/usuarios/agregar'
@@ -456,6 +476,7 @@ export interface RootRouteChildren {
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
   LocalesAgregarRoute: typeof LocalesAgregarRoute
+  LocalesVerRoute: typeof LocalesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
@@ -479,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
   LocalesAgregarRoute: LocalesAgregarRoute,
+  LocalesVerRoute: LocalesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
@@ -511,6 +533,7 @@ export const routeTree = rootRoute
         "/NotFoundPage",
         "/login",
         "/locales/agregar",
+        "/locales/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
         "/usuarios/agregar",
@@ -556,6 +579,9 @@ export const routeTree = rootRoute
     },
     "/locales/agregar": {
       "filePath": "locales/agregar.tsx"
+    },
+    "/locales/ver": {
+      "filePath": "locales/ver.tsx"
     },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"

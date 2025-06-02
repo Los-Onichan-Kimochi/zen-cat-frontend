@@ -213,7 +213,7 @@ function LocalesComponent(){
                 onClick={(e) => {
                   e.stopPropagation();
                   localStorage.setItem('currentLocal', local.id);
-                  navigate({ to: `/locales` });
+                  navigate({ to: `/locales/ver` });
                 }}
               >
                 <MoreHorizontal className="h-4 w-4" />
