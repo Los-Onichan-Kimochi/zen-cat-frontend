@@ -11,23 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SignupImport } from './routes/signup'
 import { Route as PreciosImport } from './routes/precios'
 import { Route as MembresiaImport } from './routes/membresia'
 import { Route as ContactoImport } from './routes/contacto'
 import { Route as ComunidadesImport } from './routes/comunidades'
 import { Route as ComoFuncionaImport } from './routes/como-funciona'
+import { Route as SignupRouteImport } from './routes/signup/route'
 import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
-
-const SignupRoute = SignupImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const PreciosRoute = PreciosImport.update({
   id: '/precios',
@@ -56,6 +50,12 @@ const ComunidadesRoute = ComunidadesImport.update({
 const ComoFuncionaRoute = ComoFuncionaImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignupRouteRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -102,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRoute
     }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/como-funciona': {
       id: '/como-funciona'
       path: '/como-funciona'
@@ -137,13 +144,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreciosImport
       parentRoute: typeof rootRoute
     }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -153,24 +153,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
-  '/signup': typeof SignupRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
-  '/signup': typeof SignupRoute
 }
 
 export interface FileRoutesById {
@@ -178,12 +178,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
-  '/signup': typeof SignupRoute
 }
 
 export interface FileRouteTypes {
@@ -192,34 +192,34 @@ export interface FileRouteTypes {
     | '/'
     | '/home'
     | '/login'
+    | '/signup'
     | '/como-funciona'
     | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/precios'
-    | '/signup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/home'
     | '/login'
+    | '/signup'
     | '/como-funciona'
     | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/precios'
-    | '/signup'
   id:
     | '__root__'
     | '/'
     | '/home'
     | '/login'
+    | '/signup'
     | '/como-funciona'
     | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/precios'
-    | '/signup'
   fileRoutesById: FileRoutesById
 }
 
@@ -227,24 +227,24 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
+  SignupRouteRoute: typeof SignupRouteRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadesRoute: typeof ComunidadesRoute
   ContactoRoute: typeof ContactoRoute
   MembresiaRoute: typeof MembresiaRoute
   PreciosRoute: typeof PreciosRoute
-  SignupRoute: typeof SignupRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
+  SignupRouteRoute: SignupRouteRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadesRoute: ComunidadesRoute,
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
   PreciosRoute: PreciosRoute,
-  SignupRoute: SignupRoute,
 }
 
 export const routeTree = rootRoute
@@ -260,12 +260,12 @@ export const routeTree = rootRoute
         "/",
         "/home",
         "/login",
+        "/signup",
         "/como-funciona",
         "/comunidades",
         "/contacto",
         "/membresia",
-        "/precios",
-        "/signup"
+        "/precios"
       ]
     },
     "/": {
@@ -276,6 +276,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login/route.tsx"
+    },
+    "/signup": {
+      "filePath": "signup/route.tsx"
     },
     "/como-funciona": {
       "filePath": "como-funciona.tsx"
@@ -291,9 +294,6 @@ export const routeTree = rootRoute
     },
     "/precios": {
       "filePath": "precios.tsx"
-    },
-    "/signup": {
-      "filePath": "signup.tsx"
     }
   }
 }

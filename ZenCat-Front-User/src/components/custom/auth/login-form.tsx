@@ -7,12 +7,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import {GoogleLogin} from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate,Link } from '@tanstack/react-router'
 import { useAuth } from '@/context/AuthContext';
 
-interface LoginFormProps {
-  onLoginSuccess: (user: User) => void;
-}
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -172,7 +169,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           </div>
           {/* Sección "¿Si no tienes cuenta te puedes registrar?" */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            ¿Si no tienes cuenta te puedes registrar? <a href="#" className="font-semibold text-blue-600 hover:underline">Registrarse</a>
+            ¿Si no tienes cuenta te puedes registrar? <Link to="/signup" className="font-semibold text-blue-600 hover:underline">Registrarse</Link>
           </div>
 
           {/* Enlace "¿Olvidaste tu contraseña?" */}
