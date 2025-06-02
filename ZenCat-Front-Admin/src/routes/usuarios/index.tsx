@@ -17,7 +17,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getUsers, UserWithExtra, updateUser, addNewUser, deleteUser, deleteUsers } from '@/mocks/users';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { toast } from "sonner";
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -25,12 +27,11 @@ export const Route = createFileRoute('/usuarios/')({
 
 function UsuariosComponent() {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<UserWithExtra[]>([]);
-  const [userToDelete, setUserToDelete] = useState<UserWithExtra | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [sortField, setSortField] = useState<keyof UserWithExtra>('name');
+  const [sortField, setSortField] = useState<keyof User>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'user'>('all');
@@ -39,11 +40,37 @@ function UsuariosComponent() {
   const orderRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    setUsers(getUsers());
-  }, []);
+  // Query para obtener usuarios
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ['usuarios'],
+    queryFn: () => usuariosApi.getUsuarios(),
+  });
+
+  // Mutation para eliminar usuario
+  const deleteUserMutation = useMutation({
+    mutationFn: (id: string) => usuariosApi.deleteUsuario(id),
+    onSuccess: () => {
+      toast.success("Usuario eliminado", { description: "El usuario ha sido eliminado exitosamente." });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+    },
+    onError: (error) => {
+      toast.error("Error al eliminar usuario", { description: error.message || "No se pudo eliminar el usuario." });
+    },
+  });
+
+  // Mutation para eliminar usuarios en bulk
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: string[]) => usuariosApi.bulkDeleteUsuarios(ids),
+    onSuccess: () => {
+      toast.success("Usuarios eliminados", { description: "Los usuarios han sido eliminados exitosamente." });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+    },
+    onError: (error) => {
+      toast.error("Error al eliminar usuarios", { description: error.message || "No se pudieron eliminar los usuarios." });
+    },
+  });
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,9 +91,7 @@ function UsuariosComponent() {
       // Filtro de búsqueda
       const searchMatch = 
         user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase()) ||
-        user.phone?.toLowerCase().includes(search.toLowerCase()) ||
-        user.district?.toLowerCase().includes(search.toLowerCase());
+        user.email.toLowerCase().includes(search.toLowerCase());
 
       // Filtro de estado
       const statusMatch = 
@@ -113,15 +138,14 @@ function UsuariosComponent() {
   };
 
   // Borrado individual
-  const handleDeleteUser = (user: UserWithExtra) => {
+  const handleDeleteUser = (user: User) => {
     setUserToDelete(user);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDeleteUser = () => {
     if (userToDelete) {
-      const updatedUsers = deleteUser(userToDelete.id);
-      setUsers(updatedUsers);
+      deleteUserMutation.mutate(userToDelete.id);
       setUserToDelete(null);
       setIsDeleteModalOpen(false);
       setSelectedUserIds((prev) => prev.filter((id) => id !== userToDelete.id));
@@ -136,8 +160,7 @@ function UsuariosComponent() {
   };
 
   const confirmBulkDelete = () => {
-    const updatedUsers = deleteUsers(selectedUserIds);
-    setUsers(updatedUsers);
+    bulkDeleteMutation.mutate(selectedUserIds);
     setSelectedUserIds([]);
     setIsBulkDeleteModalOpen(false);
   };
@@ -160,7 +183,7 @@ function UsuariosComponent() {
   };
 
   // Función para manejar el ordenamiento
-  const handleSort = (field: keyof UserWithExtra) => {
+  const handleSort = (field: keyof User) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -168,6 +191,10 @@ function UsuariosComponent() {
       setSortDirection('asc');
     }
   };
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">

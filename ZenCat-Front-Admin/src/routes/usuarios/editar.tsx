@@ -6,8 +6,11 @@ import { Upload } from "lucide-react";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { getUsers, UserWithExtra, updateUser } from '@/mocks/users';
 import { Switch } from "@/components/ui/switch";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { UpdateUserPayload } from '@/types/user';
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,9 +33,29 @@ export const Route = createFileRoute('/usuarios/editar')({
 
 function EditarUsuario() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const search = useSearch({ from: '/usuarios/editar' });
   const userId = search.id;
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+
+  // Query para obtener el usuario
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['usuario', userId],
+    queryFn: () => usuariosApi.getUsuarioById(userId),
+  });
+
+  // Mutation para actualizar usuario
+  const updateUserMutation = useMutation({
+    mutationFn: (data: UpdateUserPayload) => usuariosApi.updateUsuario(userId, data),
+    onSuccess: () => {
+      toast.success("Usuario actualizado", { description: "El usuario ha sido actualizado exitosamente." });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      navigate({ to: '/usuarios' });
+    },
+    onError: (error) => {
+      toast.error("Error al actualizar usuario", { description: error.message || "No se pudo actualizar el usuario." });
+    },
+  });
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
@@ -63,8 +86,6 @@ function EditarUsuario() {
 
   // Cargar datos del usuario al montar el componente
   useEffect(() => {
-    const users = getUsers();
-    const user = users.find(u => u.id === userId);
     if (user) {
       // Separar el nombre completo en partes
       const nameParts = user.name.split(' ');
@@ -91,7 +112,7 @@ function EditarUsuario() {
       // Habilitar onboarding si hay datos
       setOnboardingEnabled(!!(user.phone || user.address || user.district));
     }
-  }, [userId]);
+  }, [user]);
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
@@ -154,36 +175,28 @@ function EditarUsuario() {
   };
 
   const confirmUpdate = () => {
-    const users = getUsers();
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    // Crear el usuario actualizado
-    const updatedUser: UserWithExtra = {
-      ...user,
+    const payload: UpdateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
-      address: onboardingEnabled ? form.calle : '',
-      district: onboardingEnabled ? form.distrito : '',
-      phone: onboardingEnabled ? form.celular : '',
     };
 
-    try {
-      // Actualizar el usuario usando la función de mockData
-      updateUser(updatedUser);
-      
-      // Redirigir a la lista de usuarios
-      navigate({ to: '/usuarios' });
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      alert('Error al actualizar usuario');
+    if (onboardingEnabled) {
+      payload.address = form.calle;
+      payload.district = form.distrito;
+      payload.phone = form.celular;
     }
+
+    updateUserMutation.mutate(payload);
   };
 
   // Handler para cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -298,8 +311,9 @@ function EditarUsuario() {
             <Button
               variant="default"
               type="submit"
+              disabled={updateUserMutation.isPending}
             >
-              Guardar
+              {updateUserMutation.isPending ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
         </form>
