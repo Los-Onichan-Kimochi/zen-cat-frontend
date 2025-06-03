@@ -60,12 +60,16 @@ export function SeeLocalPageComponent(){
     const [reference, setReference] = useState('');
     const [capacity, setCapacity] = useState(0);
     const [image_url, setImageUrl] = useState('');
+
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedProvince, setSelectedProvince] = useState('');
+    const [selectedDistrict, setSelectedDistrict] = useState('');
       const filteredProvinces = provinces.filter(
-        (province) => province.department_id === region
+        (province) => province.department_id === selectedRegion
       );
     
       const filteredDistricts = districts.filter(
-        (district) => district.province_id === province
+        (district) => district.province_id === selectedProvince
       );
     const id = typeof window !== 'undefined'
         ? localStorage.getItem('currentLocal')
@@ -102,6 +106,14 @@ export function SeeLocalPageComponent(){
                 image_url: local.image_url
             })
         }
+        const selectedReg = regions.find(r => r.name === local?.region);
+        setSelectedRegion(selectedReg?.id || '');
+
+        const selectedProv = provinces.find(p => p.name === local?.province);
+        setSelectedProvince(selectedProv?.id || '');
+
+        const selectedDist = districts.find(d => d.name === local?.district);
+        setSelectedDistrict(selectedDist?.id || '');
     }, [local, initialValues.local_name]);
     if(isLoading){
         return(
@@ -161,18 +173,22 @@ export function SeeLocalPageComponent(){
                                     {isEditing ? (
                                         <Select onValueChange={(val) => {
                                             const selected = regions.find(r => r.id === val);
+                                            setSelectedRegion(selected?.id || '');
                                             setRegion(selected?.name || '');
+                                            setSelectedProvince('');
                                             setProvince('');
+                                            setSelectedDistrict('');
                                             setDistrict('');
                                         }}
-                                            value = {regions.find(r => r.name === region)?.id ?? ''}
+                                            value = {regions.find(r => r.id === selectedRegion)?.name || ''}
+                                            defaultValue={region}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecciona una región" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {regions.map((r) => (
-                                                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                                                {regions.map((region) => (
+                                                    <SelectItem key={region.id} value={region.id}>{region.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -184,19 +200,22 @@ export function SeeLocalPageComponent(){
                                     <Label htmlFor="province" className="mb-2">Provincia</Label>
                                     {isEditing ? (
                                         <Select  onValueChange={(val) => {
-                                            const selected = provinces.find((p) => p.id === val);
+                                            const selected = filteredProvinces.find((p) => p.id === val);
+                                            setSelectedProvince(selected?.id || '');
                                             setProvince(selected?.name || '');
+                                            setSelectedDistrict('');
                                             setDistrict('');
                                         }} 
-                                            value={provinces.find(p => p.name === province)?.id ?? ''}
+                                            value={provinces.find(p => p.id === selectedProvince)?.name || ''}
+                                            defaultValue={province}  
                                             disabled={!region}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecciona una provincia" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {provinces.map((p) => (
-                                                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                                {filteredProvinces.map((province) => (
+                                                    <SelectItem key={province.id} value={province.id}>{province.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -208,18 +227,20 @@ export function SeeLocalPageComponent(){
                                     <Label htmlFor="district" className="mb-2">Distrito</Label>
                                     {isEditing ? (
                                         <Select onValueChange={(val) => {
-                                            const selected = districts.find((d) => d.id === val);
+                                            const selected = filteredDistricts.find((d) => d.id === val);
+                                            setSelectedDistrict(selected?.id || '');
                                             setDistrict(selected?.name || ''); // ← guardar el name
                                         }}
-                                        value= {districts.find(d => d.name === district)?.id ?? ''} 
+                                        value= {districts.find(d => d.id === selectedDistrict)?.name || ''} 
+                                        defaultValue={district}
                                         disabled={!province}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecciona un distrito" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {districts.map((d) => (
-                                                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                                                {filteredDistricts.map((district) => (
+                                                    <SelectItem key={district.id} value={district.id}>{district.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -318,6 +339,7 @@ export function SeeLocalPageComponent(){
                                     })
                                     setIsEditing(false);
                                     setIsEditConfirmOpen(false);
+                                    navigate({ to: '/locales' });
                                 }}
                         >
                             Confirmar
