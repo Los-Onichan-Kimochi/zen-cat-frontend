@@ -17,6 +17,7 @@ import { Route as ContactoImport } from './routes/contacto'
 import { Route as ComunidadesImport } from './routes/comunidades'
 import { Route as ComoFuncionaImport } from './routes/como-funciona'
 import { Route as SignupRouteImport } from './routes/signup/route'
+import { Route as ReservaRouteImport } from './routes/reserva/route'
 import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as ForgotRouteImport } from './routes/forgot/route'
@@ -57,6 +58,12 @@ const ComoFuncionaRoute = ComoFuncionaImport.update({
 const SignupRouteRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ReservaRouteRoute = ReservaRouteImport.update({
+  id: '/reserva',
+  path: '/reserva',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -116,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRoute
     }
+    '/reserva': {
+      id: '/reserva'
+      path: '/reserva'
+      fullPath: '/reserva'
+      preLoaderRoute: typeof ReservaRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -168,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/reserva': typeof ReservaRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
@@ -181,6 +196,7 @@ export interface FileRoutesByTo {
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/reserva': typeof ReservaRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
@@ -195,6 +211,7 @@ export interface FileRoutesById {
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/reserva': typeof ReservaRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
@@ -210,6 +227,7 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/home'
     | '/login'
+    | '/reserva'
     | '/signup'
     | '/como-funciona'
     | '/comunidades'
@@ -222,6 +240,7 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/home'
     | '/login'
+    | '/reserva'
     | '/signup'
     | '/como-funciona'
     | '/comunidades'
@@ -234,6 +253,7 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/home'
     | '/login'
+    | '/reserva'
     | '/signup'
     | '/como-funciona'
     | '/comunidades'
@@ -248,6 +268,7 @@ export interface RootRouteChildren {
   ForgotRouteRoute: typeof ForgotRouteRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
+  ReservaRouteRoute: typeof ReservaRouteRoute
   SignupRouteRoute: typeof SignupRouteRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadesRoute: typeof ComunidadesRoute
@@ -261,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotRouteRoute: ForgotRouteRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
+  ReservaRouteRoute: ReservaRouteRoute,
   SignupRouteRoute: SignupRouteRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadesRoute: ComunidadesRoute,
@@ -283,6 +305,7 @@ export const routeTree = rootRoute
         "/forgot",
         "/home",
         "/login",
+        "/reserva",
         "/signup",
         "/como-funciona",
         "/comunidades",
@@ -302,6 +325,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login/route.tsx"
+    },
+    "/reserva": {
+      "filePath": "reserva/route.tsx"
     },
     "/signup": {
       "filePath": "signup/route.tsx"
