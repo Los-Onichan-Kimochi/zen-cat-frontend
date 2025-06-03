@@ -19,6 +19,7 @@ import { Route as ComoFuncionaImport } from './routes/como-funciona'
 import { Route as SignupRouteImport } from './routes/signup/route'
 import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
+import { Route as ForgotRouteImport } from './routes/forgot/route'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -71,6 +72,12 @@ const HomeRouteRoute = HomeRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ForgotRouteRoute = ForgotRouteImport.update({
+  id: '/forgot',
+  path: '/forgot',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
@@ -86,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/forgot': {
+      id: '/forgot'
+      path: '/forgot'
+      fullPath: '/forgot'
+      preLoaderRoute: typeof ForgotRouteImport
       parentRoute: typeof rootRoute
     }
     '/home': {
@@ -151,6 +165,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/signup': typeof SignupRouteRoute
@@ -163,6 +178,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/signup': typeof SignupRouteRoute
@@ -176,6 +192,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/signup': typeof SignupRouteRoute
@@ -190,6 +207,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot'
     | '/home'
     | '/login'
     | '/signup'
@@ -201,6 +219,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot'
     | '/home'
     | '/login'
     | '/signup'
@@ -212,6 +231,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/forgot'
     | '/home'
     | '/login'
     | '/signup'
@@ -225,6 +245,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ForgotRouteRoute: typeof ForgotRouteRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
   SignupRouteRoute: typeof SignupRouteRoute
@@ -237,6 +258,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ForgotRouteRoute: ForgotRouteRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
   SignupRouteRoute: SignupRouteRoute,
@@ -258,6 +280,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/forgot",
         "/home",
         "/login",
         "/signup",
@@ -270,6 +293,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/forgot": {
+      "filePath": "forgot/route.tsx"
     },
     "/home": {
       "filePath": "home/route.tsx"
