@@ -1,13 +1,24 @@
-'use client';
-
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
-import { ProfessionalProvider } from '@/context/ProfesionalesContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useMemo } from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Search, Filter, Download, ArrowUpDown, MoreHorizontal, Plus, Trash, Loader2 } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { User } from "@/types/user";
+import { Gem } from 'lucide-react';
+import HomeCard from "@/components/common/home-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { toast } from "sonner";
 import {
   ColumnDef,
   useReactTable,
@@ -21,48 +32,16 @@ import {
   PaginationState,
 } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { professionalsApi } from '@/api/professionals/professionals';
-import { Professional, ProfessionalSpecialty } from '@/types/professional';
-import { useProfessional } from '@/context/ProfesionalesContext';
-export const Route = createFileRoute('/profesionales/')({
-  component: () => (
-    <ProfessionalProvider>
-      <ProfesionalesComponent />
-    </ProfessionalProvider>
-  ),
+
+export const Route = createFileRoute('/usuarios/')({
+  component: UsuariosComponent,
 });
 
-interface CalculatedCounts {
-  [ProfessionalSpecialty.YOGA_TEACHER]: number;
-  [ProfessionalSpecialty.GYM_TEACHER]: number;
-  [ProfessionalSpecialty.DOCTOR]: number;
-}
-
-function ProfesionalesComponent() {
+function UsuariosComponent() {
   const navigate = useNavigate();
-  const { setCurrent } = useProfessional();
   const queryClient = useQueryClient();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -72,19 +51,20 @@ function ProfesionalesComponent() {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  const { data: professionalsData, isLoading: isLoadingProfessionals, error: errorProfessionals } =
-    useQuery<Professional[], Error>({
-      queryKey: ['professionals'],
-      queryFn: professionalsApi.getProfessionals,
-    });
+  // Query para obtener usuarios
+  const { data: usersData, isLoading: isLoadingUsers, error: errorUsers } = useQuery<User[], Error>({
+    queryKey: ['usuarios'],
+    queryFn: () => usuariosApi.getUsuarios(),
+  });
 
-  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<void, Error, string>({
-    mutationFn: (id) => professionalsApi.deleteProfessional(id),
+  // Mutation para eliminar usuario
+  const { mutate: deleteUser, isPending: isDeleting } = useMutation<void, Error, string>({
+    mutationFn: (id) => usuariosApi.deleteUsuario(id),
     onSuccess: (_, id) => {
-      toast.success('Profesional eliminado', { description: `ID ${id}` });
-      queryClient.invalidateQueries({ queryKey: ['professionals'] });
+      toast.success('Usuario eliminado', { description: `Usuario eliminado exitosamente` });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       setRowSelection({});
     },
     onError: (err) => {
@@ -92,30 +72,7 @@ function ProfesionalesComponent() {
     },
   });
 
-  const counts = useMemo<CalculatedCounts | null>(() => {
-    if (!professionalsData) return null;
-    const c: CalculatedCounts = {
-      [ProfessionalSpecialty.YOGA_TEACHER]: 0,
-      [ProfessionalSpecialty.GYM_TEACHER]: 0,
-      [ProfessionalSpecialty.DOCTOR]: 0,
-    };
-    professionalsData.forEach((p) => {
-      switch (p.specialty) {
-        case ProfessionalSpecialty.YOGA_TEACHER:
-          c[ProfessionalSpecialty.YOGA_TEACHER]++;
-          break;
-        case ProfessionalSpecialty.GYM_TEACHER:
-          c[ProfessionalSpecialty.GYM_TEACHER]++;
-          break;
-        case ProfessionalSpecialty.DOCTOR:
-          c[ProfessionalSpecialty.DOCTOR]++;
-          break;
-      }
-    });
-    return c;
-  }, [professionalsData]);
-
-  const columns = useMemo<ColumnDef<Professional>[]>(() => [
+  const columns = useMemo<ColumnDef<User>[]>(() => [
     {
       id: 'select',
       header: ({ table }) => (
@@ -145,32 +102,58 @@ function ProfesionalesComponent() {
       cell: ({ row }) => <div>{row.getValue('name')}</div>,
     },
     {
-      id: 'lastNames',
-      header: 'Apellidos',
-      accessorFn: (row) => `${row.first_last_name} ${row.second_last_name || ''}`,
+      accessorKey: 'address',
+      header: 'Dirección',
+      cell: ({ row }) => <div>{row.getValue('address') || '-'}</div>,
     },
-    { accessorKey: 'specialty', header: 'Especialidad' },
+    {
+      accessorKey: 'district',
+      header: 'Distrito',
+      cell: ({ row }) => <div>{row.getValue('district') || '-'}</div>,
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Teléfono',
+      cell: ({ row }) => <div>{row.getValue('phone') || '-'}</div>,
+    },
     {
       accessorKey: 'email',
       header: ({ column }) => (
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
+          Email <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
     },
-    { accessorKey: 'phone_number', header: 'Número de celular' },
+    {
+      id: 'memberships',
+      header: 'Membresías',
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <Button
+            className="h-9 px-4 bg-white border border-neutral-300 text-black rounded-lg flex items-center gap-2 shadow-sm hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
+            onClick={() => navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } })}
+          >
+            Membresías ...
+          </Button>
+        );
+      },
+    },
     {
       id: 'actions',
       cell: ({ row }) => {
-        const prof = row.original;
+        const user = row.original;
         return (
           <div className="flex items-center space-x-2">
             <Button
               className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
-                localStorage.setItem('currentProfessional', prof.id);
-                navigate({ to: `/profesionales/ver` });
+                navigate({ 
+                  to: '/usuarios/editar',
+                  search: { id: user.id },
+                  replace: true
+                });
               }}
             >
               <MoreHorizontal className="h-4 w-4" />
@@ -179,7 +162,7 @@ function ProfesionalesComponent() {
               className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
-                setProfToDelete(prof);
+                setUserToDelete(user);
                 setIsDeleteModalOpen(true);
               }}
             >
@@ -189,10 +172,10 @@ function ProfesionalesComponent() {
         );
       },
     },
-  ], [deleteProfessional, navigate, setCurrent]);
+  ], [navigate]);
 
   const table = useReactTable({
-    data: professionalsData || [],
+    data: usersData || [],
     columns,
     state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter, pagination },
     onSortingChange: setSorting,
@@ -211,26 +194,27 @@ function ProfesionalesComponent() {
 
   const btnSizeClasses = "h-11 w-28 px-4";
 
-  if (errorProfessionals) return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
+  if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col">
-      <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
+      <HeaderDescriptor title="USUARIOS" subtitle="LISTADO DE USUARIOS" />
 
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
-        {counts ? (
-          <>
-            <HomeCard icon={<Users className="w-8 h-8 text-teal-600" />} iconBgColor="bg-teal-100" title="Yoga" description={counts[ProfessionalSpecialty.YOGA_TEACHER]} />
-            <HomeCard icon={<Users className="w-8 h-8 text-pink-600" />} iconBgColor="bg-pink-100" title="Gimnasio" description={counts[ProfessionalSpecialty.GYM_TEACHER]} />
-            <HomeCard icon={<Users className="w-8 h-8 text-blue-600" />} iconBgColor="bg-blue-100" title="Médicos" description={counts[ProfessionalSpecialty.DOCTOR]} />
-          </>
+        {usersData ? (
+          <HomeCard
+            icon={<Gem className="w-8 h-8 text-teal-600" />}
+            iconBgColor="bg-teal-100"
+            title="Usuarios totales"
+            description={usersData.length}
+          />
         ) : (
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         )}
       </div>
 
       <div className="flex justify-end space-x-2 py-4">
-        <Link to="/profesionales/nuevo">
+        <Link to="/usuarios/agregar">
           <Button
             size="sm"
             className={`bg-black text-white font-bold rounded-lg flex items-center justify-between shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out ${btnSizeClasses}`}
@@ -256,7 +240,7 @@ function ProfesionalesComponent() {
         </Button>
       </div>
 
-      {isLoadingProfessionals ? (
+      {isLoadingUsers ? (
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
         </div>
@@ -264,7 +248,7 @@ function ProfesionalesComponent() {
         <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
           <DataTableToolbar
             table={table}
-            filterPlaceholder="Buscar profesionales..."
+            filterPlaceholder="Buscar usuarios..."
             showSortButton
             showFilterButton
             showExportButton
@@ -281,10 +265,10 @@ function ProfesionalesComponent() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar este profesional?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás seguro que deseas eliminar este usuario?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">Profesional: {profToDelete?.name}</div>
+              <div className="mt-2 font-medium">Usuario: {userToDelete?.name}</div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="space-x-2">
@@ -292,8 +276,9 @@ function ProfesionalesComponent() {
             <AlertDialogAction asChild>
               <Button
                 variant="destructive"
+                className="bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-200 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out"
                 onClick={() => {
-                  if (profToDelete) deleteProfessional(profToDelete.id);
+                  if (userToDelete) deleteUser(userToDelete.id);
                   setIsDeleteModalOpen(false);
                 }}
               >
@@ -307,4 +292,4 @@ function ProfesionalesComponent() {
   );
 }
 
-export default ProfesionalesComponent;
+export default UsuariosComponent; 

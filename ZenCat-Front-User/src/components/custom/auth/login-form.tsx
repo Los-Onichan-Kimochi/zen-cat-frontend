@@ -7,11 +7,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import {GoogleLogin} from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
-import {useNavigate} from "react-router-dom"
+import { useNavigate,Link } from '@tanstack/react-router'
+import { useAuth } from '@/context/AuthContext';
 
-interface LoginFormProps {
-  onLoginSuccess: (user: User) => void;
-}
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -36,6 +34,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       const user = await authApi.login(email, password);
       onLoginSuccess(user);
+      login(user)
     } catch (err: any) {
       const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);
@@ -87,11 +86,27 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen2(false);
   };
 
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
     console.log(decodedToken)
-    //navigate("/home")
+    
+    // Extraer solo nombre y primer apellido
+    const fullName = decodedToken.name || '';
+    const nameParts = fullName.split(' ');
+    const shortName = nameParts[0] || fullName;
+
+    login({
+        id: decodedToken.sub,
+        name: shortName,
+        email: decodedToken.email,
+        imageUrl: decodedToken.picture,
+      });
+    navigate({ to: '/' });
   };
 
   return (
@@ -105,6 +120,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <p className="text-gray-500 text-sm text-center">Inicia sesión en tu cuenta para continuar</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-1">
             <label className="block text-gray-700 text-sm">Correo electrónico</label>
             <Input
@@ -131,6 +147,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
             Iniciar sesión
           </Button>
+          </form>
 
           {/* Sección "O puedes iniciar sesión con:" */}
           <div className="relative my-4">
@@ -152,12 +169,12 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           </div>
           {/* Sección "¿Si no tienes cuenta te puedes registrar?" */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            ¿Si no tienes cuenta te puedes registrar? <a href="#" className="font-semibold text-blue-600 hover:underline">Registrarse</a>
+            ¿Si no tienes cuenta te puedes registrar? <Link to="/signup" className="font-semibold text-blue-600 hover:underline">Registrarse</Link>
           </div>
 
           {/* Enlace "¿Olvidaste tu contraseña?" */}
           <div className="text-center text-sm text-gray-500 mt-2">
-            <a href="#" className="hover:underline">¿Olvidaste tu contraseña? Presiona aquí</a>
+            <Link to="/forgot" className="hover:underline">¿Olvidaste tu contraseña? Presiona aquí</Link>
           </div>
 
           {/* Botón de "Ping de datos" reintegrado */}

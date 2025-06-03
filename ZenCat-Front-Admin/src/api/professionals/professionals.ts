@@ -63,5 +63,18 @@ export const professionalsApi = {
       throw new Error(`Error deleting professional with id ${id}`);
     }
   },
+
+  bulkDeleteProfessionals: async (ids: string[]): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/professional/bulk-delete/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ professionals: ids }),
+    });
+    if (!response.ok) {
+      throw new Error('Error bulk deleting professionals');
+    }
+  }
 };
 
