@@ -25,6 +25,7 @@ import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ServiciosIndexImport } from './routes/servicios/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as ServiciosServicioVerImport } from './routes/servicios/servicio-ver'
 import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servicio-nuevo'
 import { Route as ServiciosAgregarProfesionalesImport } from './routes/servicios/agregar-profesionales'
 import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agregar-locales'
@@ -114,6 +115,12 @@ const ServiciosIndexRoute = ServiciosIndexImport.update({
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosServicioVerRoute = ServiciosServicioVerImport.update({
+  id: '/servicios/servicio-ver',
+  path: '/servicios/servicio-ver',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -271,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServiciosServicioNuevoImport
       parentRoute: typeof rootRoute
     }
+    '/servicios/servicio-ver': {
+      id: '/servicios/servicio-ver'
+      path: '/servicios/servicio-ver'
+      fullPath: '/servicios/servicio-ver'
+      preLoaderRoute: typeof ServiciosServicioVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/': {
       id: '/profesionales/'
       path: '/profesionales'
@@ -308,6 +322,7 @@ export interface FileRoutesByFullPath {
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
 }
@@ -330,6 +345,7 @@ export interface FileRoutesByTo {
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
 }
@@ -353,6 +369,7 @@ export interface FileRoutesById {
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
 }
@@ -377,6 +394,7 @@ export interface FileRouteTypes {
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/profesionales'
     | '/servicios'
   fileRoutesByTo: FileRoutesByTo
@@ -398,6 +416,7 @@ export interface FileRouteTypes {
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/profesionales'
     | '/servicios'
   id:
@@ -419,6 +438,7 @@ export interface FileRouteTypes {
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/profesionales/'
     | '/servicios/'
   fileRoutesById: FileRoutesById
@@ -442,6 +462,7 @@ export interface RootRouteChildren {
   ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
   ServiciosAgregarProfesionalesRoute: typeof ServiciosAgregarProfesionalesRoute
   ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
+  ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
 }
@@ -464,6 +485,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
   ServiciosAgregarProfesionalesRoute: ServiciosAgregarProfesionalesRoute,
   ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
+  ServiciosServicioVerRoute: ServiciosServicioVerRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
 }
@@ -495,6 +517,7 @@ export const routeTree = rootRoute
         "/servicios/agregar-locales",
         "/servicios/agregar-profesionales",
         "/servicios/servicio-nuevo",
+        "/servicios/servicio-ver",
         "/profesionales/",
         "/servicios/"
       ]
@@ -549,6 +572,9 @@ export const routeTree = rootRoute
     },
     "/servicios/servicio-nuevo": {
       "filePath": "servicios/servicio-nuevo.tsx"
+    },
+    "/servicios/servicio-ver": {
+      "filePath": "servicios/servicio-ver.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"

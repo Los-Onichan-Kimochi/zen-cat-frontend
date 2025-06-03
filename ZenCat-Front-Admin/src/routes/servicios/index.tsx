@@ -11,6 +11,7 @@ import { Service, ServiceType } from '@/types/service';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
+import { useNavigate } from '@tanstack/react-router';
 import { 
   ColumnDef, 
   Row, 
@@ -48,6 +49,7 @@ interface CalculatedCounts {
 }
 
 function ServiciosComponent() {
+  const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -156,7 +158,14 @@ function ServiciosComponent() {
                 Copiar ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  localStorage.setItem('currentService', professional .id);
+                  navigate({ to: `/servicios/servicio-ver` });
+                }}
+              >
+                Ver detalles
+              </DropdownMenuItem>
               <DropdownMenuItem>Editar</DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
             </DropdownMenuContent>
