@@ -271,27 +271,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesVerImport
       parentRoute: typeof rootRoute
     }
-    '/usuarios/agregar': {
-      id: '/usuarios/agregar'
-      path: '/usuarios/agregar'
-      fullPath: '/usuarios/agregar'
-      preLoaderRoute: typeof UsuariosAgregarImport
-      parentRoute: typeof rootRoute
-    }
-    '/usuarios/editar': {
-      id: '/usuarios/editar'
-      path: '/usuarios/editar'
-      fullPath: '/usuarios/editar'
-      preLoaderRoute: typeof UsuariosEditarImport
-      parentRoute: typeof rootRoute
-    }
-    '/usuarios/ver_membresia': {
-      id: '/usuarios/ver_membresia'
-      path: '/usuarios/ver_membresia'
-      fullPath: '/usuarios/ver_membresia'
-      preLoaderRoute: typeof UsuariosVermembresiaImport
-      parentRoute: typeof rootRoute
-    }
     '/servicios/agregar-locales': {
       id: '/servicios/agregar-locales'
       path: '/servicios/agregar-locales'
@@ -320,6 +299,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServiciosServicioVerImport
       parentRoute: typeof rootRoute
     }
+    '/usuarios/agregar': {
+      id: '/usuarios/agregar'
+      path: '/usuarios/agregar'
+      fullPath: '/usuarios/agregar'
+      preLoaderRoute: typeof UsuariosAgregarImport
+      parentRoute: typeof rootRoute
+    }
+    '/usuarios/editar': {
+      id: '/usuarios/editar'
+      path: '/usuarios/editar'
+      fullPath: '/usuarios/editar'
+      preLoaderRoute: typeof UsuariosEditarImport
+      parentRoute: typeof rootRoute
+    }
+    '/usuarios/ver_membresia': {
+      id: '/usuarios/ver_membresia'
+      path: '/usuarios/ver_membresia'
+      fullPath: '/usuarios/ver_membresia'
+      preLoaderRoute: typeof UsuariosVermembresiaImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/': {
       id: '/profesionales/'
       path: '/profesionales'
@@ -327,18 +327,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesIndexImport
       parentRoute: typeof rootRoute
     }
-    '/usuarios/': {
-      id: '/usuarios/'
-      path: '/usuarios'
-      fullPath: '/usuarios'
-      preLoaderRoute: typeof UsuariosIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/servicios/': {
       id: '/servicios/'
       path: '/servicios'
       fullPath: '/servicios'
       preLoaderRoute: typeof ServiciosIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/usuarios/': {
+      id: '/usuarios/'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -360,16 +360,16 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/usuarios/agregar': typeof UsuariosAgregarRoute
-  '/usuarios/editar': typeof UsuariosEditarRoute
-  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRoute
+  '/usuarios/editar': typeof UsuariosEditarRoute
+  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/profesionales': typeof ProfesionalesIndexRoute
-  '/usuarios': typeof UsuariosIndexRoute
   '/servicios': typeof ServiciosIndexRoute
+  '/usuarios': typeof UsuariosIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -386,16 +386,16 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/usuarios/agregar': typeof UsuariosAgregarRoute
-  '/usuarios/editar': typeof UsuariosEditarRoute
-  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRoute
+  '/usuarios/editar': typeof UsuariosEditarRoute
+  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/profesionales': typeof ProfesionalesIndexRoute
-  '/usuarios': typeof UsuariosIndexRoute
   '/servicios': typeof ServiciosIndexRoute
+  '/usuarios': typeof UsuariosIndexRoute
 }
 
 export interface FileRoutesById {
@@ -413,16 +413,16 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
-  '/usuarios/agregar': typeof UsuariosAgregarRoute
-  '/usuarios/editar': typeof UsuariosEditarRoute
-  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
+  '/usuarios/agregar': typeof UsuariosAgregarRoute
+  '/usuarios/editar': typeof UsuariosEditarRoute
+  '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
-  '/usuarios/': typeof UsuariosIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
+  '/usuarios/': typeof UsuariosIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -441,16 +441,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/usuarios/agregar'
-    | '/usuarios/editar'
-    | '/usuarios/ver_membresia'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
+    | '/usuarios/agregar'
+    | '/usuarios/editar'
+    | '/usuarios/ver_membresia'
     | '/profesionales'
-    | '/usuarios'
     | '/servicios'
+    | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -466,16 +466,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/usuarios/agregar'
-    | '/usuarios/editar'
-    | '/usuarios/ver_membresia'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
+    | '/usuarios/agregar'
+    | '/usuarios/editar'
+    | '/usuarios/ver_membresia'
     | '/profesionales'
-    | '/usuarios'
     | '/servicios'
+    | '/usuarios'
   id:
     | '__root__'
     | '/'
@@ -491,16 +491,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
-    | '/usuarios/agregar'
-    | '/usuarios/editar'
-    | '/usuarios/ver_membresia'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
+    | '/usuarios/agregar'
+    | '/usuarios/editar'
+    | '/usuarios/ver_membresia'
     | '/profesionales/'
-    | '/usuarios/'
     | '/servicios/'
+    | '/usuarios/'
   fileRoutesById: FileRoutesById
 }
 
@@ -518,16 +518,16 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
-  UsuariosAgregarRoute: typeof UsuariosAgregarRoute
-  UsuariosEditarRoute: typeof UsuariosEditarRoute
-  UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
   ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
   ServiciosAgregarProfesionalesRoute: typeof ServiciosAgregarProfesionalesRoute
   ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
   ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
+  UsuariosAgregarRoute: typeof UsuariosAgregarRoute
+  UsuariosEditarRoute: typeof UsuariosEditarRoute
+  UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
-  UsuariosIndexRoute: typeof UsuariosIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
+  UsuariosIndexRoute: typeof UsuariosIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -544,16 +544,16 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
-  UsuariosAgregarRoute: UsuariosAgregarRoute,
-  UsuariosEditarRoute: UsuariosEditarRoute,
-  UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
   ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
   ServiciosAgregarProfesionalesRoute: ServiciosAgregarProfesionalesRoute,
   ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
   ServiciosServicioVerRoute: ServiciosServicioVerRoute,
+  UsuariosAgregarRoute: UsuariosAgregarRoute,
+  UsuariosEditarRoute: UsuariosEditarRoute,
+  UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
-  UsuariosIndexRoute: UsuariosIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
+  UsuariosIndexRoute: UsuariosIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -579,17 +579,16 @@ export const routeTree = rootRoute
         "/login",
         "/profesionales/nuevo",
         "/profesionales/ver",
-        "/usuarios/agregar",
-        "/usuarios/editar",
-        "/usuarios/ver_membresia",
-        "/profesionales/",
-        "/usuarios/"
         "/servicios/agregar-locales",
         "/servicios/agregar-profesionales",
         "/servicios/servicio-nuevo",
         "/servicios/servicio-ver",
+        "/usuarios/agregar",
+        "/usuarios/editar",
+        "/usuarios/ver_membresia",
         "/profesionales/",
-        "/servicios/"
+        "/servicios/",
+        "/usuarios/"
       ]
     },
     "/": {
@@ -631,15 +630,6 @@ export const routeTree = rootRoute
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"
     },
-    "/usuarios/agregar": {
-      "filePath": "usuarios/agregar.tsx"
-    },
-    "/usuarios/editar": {
-      "filePath": "usuarios/editar.tsx"
-    },
-    "/usuarios/ver_membresia": {
-      "filePath": "usuarios/ver_membresia.tsx"
-    },
     "/servicios/agregar-locales": {
       "filePath": "servicios/agregar-locales.tsx"
     },
@@ -652,14 +642,23 @@ export const routeTree = rootRoute
     "/servicios/servicio-ver": {
       "filePath": "servicios/servicio-ver.tsx"
     },
+    "/usuarios/agregar": {
+      "filePath": "usuarios/agregar.tsx"
+    },
+    "/usuarios/editar": {
+      "filePath": "usuarios/editar.tsx"
+    },
+    "/usuarios/ver_membresia": {
+      "filePath": "usuarios/ver_membresia.tsx"
+    },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
     },
-    "/usuarios/": {
-      "filePath": "usuarios/index.tsx"
-    },
     "/servicios/": {
       "filePath": "servicios/index.tsx"
+    },
+    "/usuarios/": {
+      "filePath": "usuarios/index.tsx"
     }
   }
 }

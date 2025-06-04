@@ -7,11 +7,14 @@ import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucid
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
+import { professionalsApi } from '@/api/professionals/professionals';
 import { Service, ServiceType } from '@/types/service';
+import { Professional } from '@/types/professional';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { useNavigate } from '@tanstack/react-router';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
+import { useEffect } from 'react';
 import { 
   ColumnDef, 
   Row, 
@@ -39,14 +42,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 
+
 export const Route = createFileRoute('/servicios/agregar-profesionales')({
   component: ProfesionalesComponent,
 });
 
-interface CalculatedCounts {
-  [ServiceType.PRESENCIAL_SERVICE]: number;
-  [ServiceType.VIRTUAL_SERVICE]: number;
-}
 
 function ProfesionalesComponent() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -60,55 +60,47 @@ function ProfesionalesComponent() {
   });
 
   const { 
-    data: servicesData,
-    isLoading: isLoadingServices,
-    error: errorServices
-  } = useQuery<Service[], Error>({
-    queryKey: ['services'],
-    queryFn: servicesApi.getServices,
+    data: professionalsData,
+    isLoading: isLoadingProfessionals,
+    error: errorProfessionals
+  } = useQuery<Professional[], Error>({
+    queryKey: ['professionals'],
+    queryFn: professionalsApi.getProfessionals,
   });
 
   const navigate = useNavigate();
 
-  const counts = useMemo<CalculatedCounts | null>(() => {
-    if (!servicesData) return null;
+  const isLoadingCounts = isLoadingProfessionals;
 
-    const calculatedCounts: CalculatedCounts = {
-      [ServiceType.PRESENCIAL_SERVICE]: 0,
-      [ServiceType.VIRTUAL_SERVICE]: 0,
-    };
+  useEffect(() => {
+  const stored = localStorage.getItem('profesionalesSeleccionados');
+  if (stored && professionalsData) {
+    const restored = JSON.parse(stored) as Professional[];
 
-    servicesData.forEach(serv => {
-      if (serv.is_virtual === true) {
-        calculatedCounts[ServiceType.VIRTUAL_SERVICE]++;
-      } else if (serv.is_virtual === false) {
-        calculatedCounts[ServiceType.PRESENCIAL_SERVICE]++;
-      }
+    const newRowSelection: Record<string, boolean> = {};
+    restored.forEach((prof) => {
+      newRowSelection[prof.id.toString()] = true;
     });
-    return calculatedCounts;
-  }, [servicesData]);
 
-  const isLoadingCounts = isLoadingServices;
+    setRowSelection(newRowSelection);
+  }
 
+}, [professionalsData]);
 
-
-  const columns = useMemo<ColumnDef<Service>[]>(() => [
+  const columns = useMemo<ColumnDef<Professional>[]>(() => [
     {
-      id: "select",
-      header: ({ table }: { table: Table<Service> }) => (
+      id: 'select',
+      header: ({ table }) => (
         <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value)}
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
           aria-label="Select all"
         />
       ),
-      cell: ({ row }: { row: Row<Service> }) => (
+      cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value: boolean | 'indeterminate') => row.toggleSelected(!!value)}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
           aria-label="Select row"
         />
       ),
@@ -116,64 +108,35 @@ function ProfesionalesComponent() {
       enableHiding: false,
     },
     {
-      accessorKey: "name",
-      header: ({ column }: { column: Column<Service, unknown> }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Nombre
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }: { row: Row<Service> }) => <div>{row.getValue("name")}</div>
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Nombres <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
     },
     {
-      id: "is_virtual",
-      header: "¿Es virtual?",
-      accessorFn: (row: Service) => row.is_virtual ? "Sí" : "No",
+      id: 'lastNames',
+      header: 'Apellidos',
+      accessorFn: (row) => `${row.first_last_name} ${row.second_last_name || ''}`,
     },
+    { accessorKey: 'specialty', header: 'Especialidad' },
     {
-      
-      id: "description",
-      header: "Descripción",
-      accessorFn: (row: Service) => row.description,
+      accessorKey: 'email',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
     },
-    {
-      id: "actions",
-      cell: ({ row }: { row: Row<Service> }) => {
-        const professional = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(professional.id)}
-              >
-                Copiar ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
+    { accessorKey: 'phone_number', header: 'Número de celular' },
   ], []);
 
   const table = useReactTable({
-    data: servicesData || [],
+    data: professionalsData || [],
     columns,
+    getRowId: (row) => row.id.toString(), 
     state: {
       sorting,
       columnFilters,
@@ -197,18 +160,18 @@ function ProfesionalesComponent() {
     debugTable: true,
   });
 
-  const isLoading = isLoadingServices;
+  const isLoading = isLoadingProfessionals;
 
   const selectedProfessionals = table.getSelectedRowModel().rows.map(row => row.original);
 
-  if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
+  if (errorProfessionals) return <p>Error cargando servicios: {errorProfessionals.message}</p>;
   
 
   return (
     <div className="p-6 h-full flex flex-col">
-      <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
+      <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
 
-      {isLoadingServices ? (
+      {isLoadingProfessionals ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
         </div>
@@ -230,16 +193,14 @@ function ProfesionalesComponent() {
             <Button variant="outline" type="button" onClick={() => navigate({ to: '/servicios/servicio-nuevo' })} className="w-full sm:w-auto">Cancelar</Button>
             <Button
               type="button"
-              disabled={isLoadingServices || selectedProfessionals.length === 0}
-              onClick={() =>
-                navigate({
-                  to: '/servicios/servicio-nuevo',
-                  //state: { profesionalesSeleccionados: selectedProfessionals }
-                })
-              }
+              disabled={isLoadingProfessionals || selectedProfessionals.length === 0}
+              onClick={() => {
+                localStorage.setItem('profesionalesSeleccionados', JSON.stringify(selectedProfessionals));
+                navigate({ to: '/servicios/servicio-nuevo' });
+              }}
               className="w-full sm:w-auto"
             >
-              {isLoadingServices && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
+              {isLoadingProfessionals && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
             </Button>
           </div>
         </div>

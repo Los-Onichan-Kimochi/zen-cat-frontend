@@ -15,8 +15,11 @@ import { toast } from "sonner";
 import { useState } from 'react';
 import { Loader2, UploadCloud,  Plus, Upload} from 'lucide-react';
 import '../../index.css';
+import { Professional } from '@/types/professional';
 import { CreateServicePayload } from '@/types/service';
 import { servicesApi } from '@/api/services/services';
+import { serviceProfessionalApi } from '@/api/services/service_professionals';
+
 import { 
   ColumnDef, 
   Row, 
@@ -39,6 +42,7 @@ import { useRouterState } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/servicios/servicio-nuevo')({
   component: AddServicePageComponent,
+  
 });
 
 
@@ -57,9 +61,9 @@ function AddServicePageComponent() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  
 
-  const { register, handleSubmit, control, formState: { errors }, watch } = useForm<ServiceFormData>({
+
+  const { register, handleSubmit, control, formState: { errors }, watch, reset } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceFormSchema),
     defaultValues: {
       name: '',
@@ -97,9 +101,9 @@ function AddServicePageComponent() {
   const match = useMatch({ from: '/servicios/servicio-nuevo' });
 
   const locationState = useRouterState({ select: (s) => s.location.state }) as {
-  profesionalesSeleccionados?: any[];
-  lugaresSeleccionados?: any[];
-} | null;
+    profesionalesSeleccionados?: any[];
+    lugaresSeleccionados?: any[];
+  } | null;
 
   const lugaresIniciales = locationState?.lugaresSeleccionados ?? [];
   const profesionalesIniciales = locationState?.profesionalesSeleccionados ?? [];
@@ -108,13 +112,24 @@ function AddServicePageComponent() {
   const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState(profesionalesIniciales);
 
   useEffect(() => {
-    if (locationState?.lugaresSeleccionados) {
-      setLugaresSeleccionados(locationState.lugaresSeleccionados);
-    }
-    if (locationState?.profesionalesSeleccionados) {
-      setProfesionalesSeleccionados(locationState.profesionalesSeleccionados);
-    }
-  }, [locationState]);
+    const draft = localStorage.getItem('draftService');
+      if (draft) {
+        const values = JSON.parse(draft);
+        reset(values); 
+        localStorage.removeItem('draftService');
+      }
+
+    const storedProfesionales = localStorage.getItem('profesionalesSeleccionados');
+      if (storedProfesionales) {
+        try {
+          console.log('Cargado desde localStorage:', JSON.parse(storedProfesionales));
+          setProfesionalesSeleccionados(JSON.parse(storedProfesionales));
+          localStorage.removeItem('profesionalesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
+        } catch (error) {
+          console.error('Error al parsear profesionales guardados', error);
+        }
+      }
+  }, []);
 
   
 
@@ -131,9 +146,31 @@ function AddServicePageComponent() {
       description: data.description,
       image_url: imageUrl, 
     };
-    createServiceMutation.mutate(payload);
 
-    
+
+    try {
+    const newService = await servicesApi.createService(payload);
+
+    // 2. Bulk create de ServiceProfessional
+      if (profesionalesSeleccionados.length > 0) {
+        const bulkPayload = {
+          service_professionals: profesionalesSeleccionados.map((prof) => ({
+            service_id: newService.id,
+            professional_id: prof.id,
+          })),
+        };
+        await serviceProfessionalApi.bulkCreateServiceProfessionals(bulkPayload);
+      }
+
+      toast.success("Servicio y profesionales asociados creados correctamente.");
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      navigate({ to: '/servicios' });
+    } catch (error: any) {
+      toast.error("Error al crear servicio o asociar profesionales", { description: error.message });
+    }
+
+
+
   };
 
 
@@ -149,6 +186,18 @@ function AddServicePageComponent() {
     {
       accessorKey: 'second_last_name',
       header: 'Segundo Apellido',
+    },
+    {
+      accessorKey: 'specialty',
+      header: 'Especialidad',
+    },
+    {
+      accessorKey: 'email',
+      header: 'Correo Electrónico',
+    },
+    {
+      accessorKey: 'phone_number',
+      header: 'Número de Celular',
     },
   ];
 
@@ -280,12 +329,13 @@ function AddServicePageComponent() {
           <CardContent>
             <div className="flex justify-end space-x-2 py-4">
               <Button
-                onClick={() =>
-                  navigate({
-                    to: '/servicios/agregar-profesionales',
-                    state: { profesionalesSeleccionados } as any
-                  })
-                }
+                onClick={() => {
+                  
+                  const data = watch(); // obtiene valores actuales del form
+                  localStorage.setItem('draftService', JSON.stringify(data));
+                  localStorage.setItem('profesionalesSeleccionados', JSON.stringify(profesionalesSeleccionados));
+                  navigate({ to: '/servicios/agregar-profesionales' });
+                }}
               >
                 <Plus className="mr-2 h-4 w-4" /> Agregar Profesional
               </Button>
