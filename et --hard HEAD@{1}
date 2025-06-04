@@ -1,0 +1,57 @@
+[33m6abd801[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/add-bulk-create-communities[m[33m, [m[1;31morigin/feat/add-bulk-create-communities[m[33m)[m HEAD@{0}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m07e27f0[m HEAD@{1}: checkout: moving from main to feat/add-bulk-create-communities
+[33m00a2d70[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{2}: pull: Fast-forward
+[33m737441e[m HEAD@{3}: checkout: moving from feat/add-bulk-create-communities to main
+[33m07e27f0[m HEAD@{4}: commit: Solo quiero lo del main x5
+[33me1d034a[m HEAD@{5}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m3fdd392[m HEAD@{6}: checkout: moving from main to feat/add-bulk-create-communities
+[33m737441e[m HEAD@{7}: pull: Fast-forward
+[33mb434082[m HEAD@{8}: checkout: moving from feat/add-bulk-create-communities to main
+[33m3fdd392[m HEAD@{9}: commit: Solo quiero lo del main x2
+[33m847d4fd[m HEAD@{10}: commit (merge): aaa
+[33me19175f[m HEAD@{11}: commit: aaaa
+[33m4424fd6[m HEAD@{12}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m16b54bd[m HEAD@{13}: checkout: moving from main to feat/add-bulk-create-communities
+[33mb434082[m HEAD@{14}: checkout: moving from feat/add-bulk-create-communities to main
+[33m16b54bd[m HEAD@{15}: reset: moving to 16b54bdb2b6d551329b7d5c9215486e8ad2e9926
+[33m3b3c917[m HEAD@{16}: commit: aaaaaaaaa
+[33mc473f54[m HEAD@{17}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m16b54bd[m HEAD@{18}: checkout: moving from main to feat/add-bulk-create-communities
+[33mb434082[m HEAD@{19}: checkout: moving from main to main
+[33mb434082[m HEAD@{20}: pull: Fast-forward
+[33m15e9521[m HEAD@{21}: checkout: moving from feat/add-bulk-create-communities to main
+[33m16b54bd[m HEAD@{22}: commit: Solo quiero lo del main
+[33m95af41c[m HEAD@{23}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m8023d38[m HEAD@{24}: checkout: moving from main to feat/add-bulk-create-communities
+[33m15e9521[m HEAD@{25}: pull: Fast-forward
+[33mae61162[m HEAD@{26}: checkout: moving from feat/add-bulk-create-communities to main
+[33m8023d38[m HEAD@{27}: commit: aaaaaaaaaa
+[33mc65808a[m HEAD@{28}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33mc65808a[m HEAD@{29}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33mc65808a[m HEAD@{30}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33mc65808a[m HEAD@{31}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33mc65808a[m HEAD@{32}: merge main: Merge made by the 'ort' strategy.
+[33m297c2cc[m HEAD@{33}: checkout: moving from main to feat/add-bulk-create-communities
+[33mae61162[m HEAD@{34}: pull: Fast-forward
+[33m30771ca[m HEAD@{35}: checkout: moving from feat/add-bulk-create-communities to main
+[33m297c2cc[m HEAD@{36}: commit: aaaaaaaa
+[33m2bdbb45[m HEAD@{37}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33m2bdbb45[m HEAD@{38}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33m2bdbb45[m HEAD@{39}: checkout: moving from feat/add-bulk-create-communities to feat/add-bulk-create-communities
+[33m2bdbb45[m HEAD@{40}: merge main: Merge made by the 'ort' strategy.
+[33m333f487[m HEAD@{41}: checkout: moving from main to feat/add-bulk-create-communities
+[33m30771ca[m HEAD@{42}: pull: Fast-forward
+[33m0d70e36[m[33m ([m[1;31morigin/feat/template/add-page-add[m[33m)[m HEAD@{43}: checkout: moving from feat/add-bulk-create-communities to main
+[33m333f487[m HEAD@{44}: commit: oaa
+[33m7d78ccf[m HEAD@{45}: commit: Prueba de piboncios
+[33m73aa9d1[m HEAD@{46}: commit (merge): Merge branch 'main' into feat/add-bulk-create-communities
+[33m8233e97[m HEAD@{47}: checkout: moving from main to feat/add-bulk-create-communities
+[33m0d70e36[m[33m ([m[1;31morigin/feat/template/add-page-add[m[33m)[m HEAD@{48}: pull: Fast-forward
+[33m1a0c194[m HEAD@{49}: checkout: moving from feat/add-bulk-create-communities to main
+[33m8233e97[m HEAD@{50}: merge main: Merge made by the 'ort' strategy.
+[33mb64a6ba[m HEAD@{51}: checkout: moving from main to feat/add-bulk-create-communities
+[33m1a0c194[m HEAD@{52}: pull: Fast-forward
+[33m6eeb142[m HEAD@{53}: checkout: moving from feat/add-bulk-create-communities to main
+[33mb64a6ba[m HEAD@{54}: commit: Prueba de papurris
+[33m6eeb142[m HEAD@{55}: checkout: moving from main to feat/add-bulk-create-communities
+[33m6eeb142[m HEAD@{56}: clone: from https://github.com/Los-Onichan-Kimochi/zen-cat-frontend
