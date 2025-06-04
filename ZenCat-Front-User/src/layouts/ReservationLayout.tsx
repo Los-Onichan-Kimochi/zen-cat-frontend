@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from '@tanstack/react-router';
 import { TopBar } from '@/components/ui/TopBar';
 
-const MainLayout: React.FC = () => {
+const ReservationLayout: React.FC = () => {
   return (
     <div className="app-layout">
       <TopBar />
@@ -13,4 +13,4 @@ const MainLayout: React.FC = () => {
   );
 };
 
-export default MainLayout;
+export { ReservationLayout };

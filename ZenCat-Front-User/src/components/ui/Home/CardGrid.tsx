@@ -1,32 +1,32 @@
-import * as React from "react";
-import Card from "./Card";
+import * as React from 'react';
+import Card from './Card';
 
-import runnersImage from "../../../images/Home/image151(1).png";
-import ciclistasImage from "../../../images/Home/image148.png";
-import musicosImage from "../../../images/Home/image151.png";
-import mamasImage from "../../../images/Home/image150.png";
+import runnersImage from '../../../images/Home/image151(1).png';
+import ciclistasImage from '../../../images/Home/image148.png';
+import musicosImage from '../../../images/Home/image151.png';
+import mamasImage from '../../../images/Home/image150.png';
 
 export const CardGrid: React.FC = () => {
   const cards = [
     {
-      title: "Runners",
+      title: 'Runners',
       imageUrl: runnersImage, // Use imported image
-      to: "/actividades/runners",
+      to: '/actividades/runners',
     },
     {
-      title: "Ciclistas",
+      title: 'Ciclistas',
       imageUrl: ciclistasImage, // Use imported image
-      to: "/actividades/ciclistas",
+      to: '/actividades/ciclistas',
     },
     {
-      title: "Músicos",
+      title: 'Músicos',
       imageUrl: musicosImage, // Use imported image
-      to: "/actividades/musicos",
+      to: '/actividades/musicos',
     },
     {
-      title: "Mamás",
+      title: 'Mamás',
       imageUrl: mamasImage, // Use imported image
-      to: "/actividades/mamas",
+      to: '/actividades/mamas',
     },
   ];
 

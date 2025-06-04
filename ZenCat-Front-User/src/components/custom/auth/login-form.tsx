@@ -5,11 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import {GoogleLogin} from "@react-oauth/google"
-import { jwtDecode } from "jwt-decode"
-import { useNavigate,Link } from '@tanstack/react-router'
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
-
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -24,8 +23,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error2, setError2] = useState<string | null>(null);
   const [pingSuccess, setPingSuccess] = useState(false);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -34,9 +31,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       const user = await authApi.login(email, password);
       onLoginSuccess(user);
-      login(user)
+      login(user);
     } catch (err: any) {
-      const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
+      const errorMessage =
+        err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -55,12 +53,14 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error HTTP: ${response.status} ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -69,7 +69,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       setPingSuccess(true);
       setIsModalOpen2(true);
     } catch (err: any) {
-      console.error("Error en Ping:", err);
+      console.error('Error en Ping:', err);
       setError2(err.message || 'Error al conectar con el servidor de ping.');
       setPingSuccess(false);
       setIsModalOpen2(true);
@@ -93,19 +93,19 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
-    console.log(decodedToken)
-    
+    console.log(decodedToken);
+
     // Extraer solo nombre y primer apellido
     const fullName = decodedToken.name || '';
     const nameParts = fullName.split(' ');
     const shortName = nameParts[0] || fullName;
 
     login({
-        id: decodedToken.sub,
-        name: shortName,
-        email: decodedToken.email,
-        imageUrl: decodedToken.picture,
-      });
+      id: decodedToken.sub,
+      name: shortName,
+      email: decodedToken.email,
+      imageUrl: decodedToken.picture,
+    });
     navigate({ to: '/' });
   };
 
@@ -117,36 +117,44 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />
           </div>
           <h2 className="text-2xl font-bold text-center">Bienvenido</h2>
-          <p className="text-gray-500 text-sm text-center">Inicia sesión en tu cuenta para continuar</p>
+          <p className="text-gray-500 text-sm text-center">
+            Inicia sesión en tu cuenta para continuar
+          </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Correo electrónico</label>
-            <Input
-              type="email"
-              placeholder="Ingrese su correo electrónico"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoFocus
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">
+                Correo electrónico
+              </label>
+              <Input
+                type="email"
+                placeholder="Ingrese su correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">Contraseña</label>
+              <Input
+                type="password"
+                placeholder="Ingrese su contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
               disabled={loading}
-            />
-          </div>
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Contraseña</label>
-            <Input
-              type="password"
-              placeholder="Ingrese su contraseña"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-          <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-            Iniciar sesión
-          </Button>
+            >
+              Iniciar sesión
+            </Button>
           </form>
 
           {/* Sección "O puedes iniciar sesión con:" */}
@@ -155,31 +163,45 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase text-gray-500">
-              <span className="bg-white px-2">O puedes iniciar sesión con:</span>
+              <span className="bg-white px-2">
+                O puedes iniciar sesión con:
+              </span>
             </div>
           </div>
           <div className="relative flex justify-center">
             <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => console.log("Login failed")}
-            theme="outline"
-            size="large"
-            width="2000"
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.log('Login failed')}
+              theme="outline"
+              size="large"
+              width="2000"
             />
           </div>
           {/* Sección "¿Si no tienes cuenta te puedes registrar?" */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            ¿Si no tienes cuenta te puedes registrar? <Link to="/signup" className="font-semibold text-blue-600 hover:underline">Registrarse</Link>
+            ¿Si no tienes cuenta te puedes registrar?{' '}
+            <Link
+              to="/signup"
+              className="font-semibold text-blue-600 hover:underline"
+            >
+              Registrarse
+            </Link>
           </div>
 
           {/* Enlace "¿Olvidaste tu contraseña?" */}
           <div className="text-center text-sm text-gray-500 mt-2">
-            <Link to="/forgot" className="hover:underline">¿Olvidaste tu contraseña? Presiona aquí</Link>
+            <Link to="/forgot" className="hover:underline">
+              ¿Olvidaste tu contraseña? Presiona aquí
+            </Link>
           </div>
 
           {/* Botón de "Ping de datos" reintegrado */}
           <form onSubmit={handlePing} className="mt-4">
-            <Button type="submit" className="w-full cursor-pointer bg-blue-800 hover:bg-blue-700" disabled={loading2}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer bg-blue-800 hover:bg-blue-700"
+              disabled={loading2}
+            >
               {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
             </Button>
           </form>
@@ -197,7 +219,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       <ErrorModal
         isOpen={isModalOpen2}
         onClose={handleCloseModal2}
-        title={pingSuccess ? "Ping Exitoso! Respuesta:" : "Error en Ping de Datos"}
+        title={
+          pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'
+        }
         description={error2 || 'Ha ocurrido un error.'}
       />
     </>

@@ -4,35 +4,35 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate,Link } from '@tanstack/react-router'
+import { useNavigate, Link } from '@tanstack/react-router';
 
-export function SignupForm(){
+export function SignupForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isModalOpen2, setIsModalOpen2] = useState(false); //modal para registro exitoso
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [isModalOpen2, setIsModalOpen2] = useState(false);//modal para registro exitoso
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault(); //evita el refresh por defecto
-        setLoading(true);
-        setError(null);
-        setIsModalOpen(false);
-        try {
-          //POST
-          console.log('Usuario registrado');
-        } catch (err: any) {
-          const errorMessage = err.message || 'Error desconocido al intentar registrarte.';
-          setError(errorMessage);
-          setIsModalOpen(true);
-        } finally {
-          setLoading(false);
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); //evita el refresh por defecto
+    setLoading(true);
+    setError(null);
+    setIsModalOpen(false);
+    try {
+      //POST
+      console.log('Usuario registrado');
+    } catch (err: any) {
+      const errorMessage =
+        err.message || 'Error desconocido al intentar registrarte.';
+      setError(errorMessage);
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -50,68 +50,75 @@ export function SignupForm(){
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Nombre completo</label>
-            <Input
-              type="nombre"
-              placeholder="Ingrese su nombre completo"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-              autoFocus
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">
+                Nombre completo
+              </label>
+              <Input
+                type="nombre"
+                placeholder="Ingrese su nombre completo"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoFocus
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">
+                Correo electrónico
+              </label>
+              <Input
+                type="email"
+                placeholder="Ingrese su correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">Contraseña</label>
+              <Input
+                type="password"
+                placeholder="Ingrese su contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-1">
+              <label className="block text-gray-700 text-sm">
+                Confirmar su contraseña
+              </label>
+              <Input
+                type="password"
+                placeholder="Ingrese su contraseña otra vez"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
               disabled={loading}
-            />
-          </div>  
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Correo electrónico</label>
-            <Input
-              type="email"
-              placeholder="Ingrese su correo electrónico"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoFocus
-              disabled={loading}
-            />
-          </div>
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Contraseña</label>
-            <Input
-              type="password"
-              placeholder="Ingrese su contraseña"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-          <div className="grid gap-1">
-            <label className="block text-gray-700 text-sm">Confirmar su contraseña</label>
-            <Input
-              type="password"
-              placeholder="Ingrese su contraseña otra vez"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-          <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-            Registrarse
-          </Button>
+            >
+              Registrarse
+            </Button>
           </form>
-          
-
         </CardContent>
       </Card>
 
       <ErrorModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            title="Error al intentar iniciar sesión"
-            description={error || 'Ha ocurrido un error.'}
-        />
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Error al intentar iniciar sesión"
+        description={error || 'Ha ocurrido un error.'}
+      />
     </>
   );
-
 }

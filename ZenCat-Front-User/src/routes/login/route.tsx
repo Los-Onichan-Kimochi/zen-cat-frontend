@@ -1,10 +1,9 @@
-import {useNavigate, createFileRoute } from '@tanstack/react-router';
-import {LoginForm} from '@/components/custom/auth/login-form'
+import { useNavigate, createFileRoute } from '@tanstack/react-router';
+import { LoginForm } from '@/components/custom/auth/login-form';
 
 export const Route = createFileRoute('/login')({
   component: LoginComponent,
 });
-
 
 export function LoginComponent() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export function LoginComponent() {
   };
   return (
     <div className="flex items-center justify-center h-screen">
-      <LoginForm onLoginSuccess={handleLoginSuccess}/>
+      <LoginForm onLoginSuccess={handleLoginSuccess} />
     </div>
   );
 }
