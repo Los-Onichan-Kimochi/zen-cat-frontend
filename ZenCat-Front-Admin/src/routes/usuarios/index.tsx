@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, Search, ChevronDown } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Search, Filter, Download, ArrowUpDown, MoreHorizontal, Plus, Trash, Loader2 } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
-import { Gem, Trash, MoreHorizontal, Plus } from 'lucide-react';
+import { Gem } from 'lucide-react';
 import HomeCard from "@/components/common/home-card";
 import {
   AlertDialog,
@@ -17,425 +16,278 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getUsers, UserWithExtra, updateUser, addNewUser, deleteUser, deleteUsers } from '@/mocks/users';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { toast } from "sonner";
+import {
+  ColumnDef,
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+  PaginationState,
+} from '@tanstack/react-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DataTable } from '@/components/common/data-table/data-table';
+import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
+import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
 });
 
 function UsuariosComponent() {
-  const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<UserWithExtra[]>([]);
-  const [userToDelete, setUserToDelete] = useState<UserWithExtra | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [sortField, setSortField] = useState<keyof UserWithExtra>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'user'>('all');
-  const [openOrder, setOpenOrder] = useState(false);
-  const [openFilter, setOpenFilter] = useState(false);
-  const orderRef = useRef<HTMLDivElement>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
 
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    setUsers(getUsers());
-  }, []);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (orderRef.current && !orderRef.current.contains(event.target as Node)) {
-        setOpenOrder(false);
-      }
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setOpenFilter(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // Query para obtener usuarios
+  const { data: usersData, isLoading: isLoadingUsers, error: errorUsers } = useQuery<User[], Error>({
+    queryKey: ['usuarios'],
+    queryFn: () => usuariosApi.getUsuarios(),
+  });
 
-  // Filtrar y ordenar usuarios
-  const filteredAndSortedUsers = users
-    .filter(user => {
-      // Filtro de búsqueda
-      const searchMatch = 
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase()) ||
-        user.phone?.toLowerCase().includes(search.toLowerCase()) ||
-        user.district?.toLowerCase().includes(search.toLowerCase());
+  // Mutation para eliminar usuario
+  const { mutate: deleteUser, isPending: isDeleting } = useMutation<void, Error, string>({
+    mutationFn: (id) => usuariosApi.deleteUsuario(id),
+    onSuccess: (_, id) => {
+      toast.success('Usuario eliminado', { description: `Usuario eliminado exitosamente` });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      setRowSelection({});
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar', { description: err.message });
+    },
+  });
 
-      // Filtro de estado
-      const statusMatch = 
-        filterStatus === 'all' || 
-        (filterStatus === 'active' && user.isAuthenticated) ||
-        (filterStatus === 'inactive' && !user.isAuthenticated);
+  const columns = useMemo<ColumnDef<User>[]>(() => [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Nombres <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    },
+    {
+      accessorKey: 'address',
+      header: 'Dirección',
+      cell: ({ row }) => <div>{row.getValue('address') || '-'}</div>,
+    },
+    {
+      accessorKey: 'district',
+      header: 'Distrito',
+      cell: ({ row }) => <div>{row.getValue('district') || '-'}</div>,
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Teléfono',
+      cell: ({ row }) => <div>{row.getValue('phone') || '-'}</div>,
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Email <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+    },
+    {
+      id: 'memberships',
+      header: 'Membresías',
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <Button
+            className="h-9 px-4 bg-white border border-neutral-300 text-black rounded-lg flex items-center gap-2 shadow-sm hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
+            onClick={() => navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } })}
+          >
+            Membresías ...
+          </Button>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="flex items-center space-x-2">
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate({ 
+                  to: '/usuarios/editar',
+                  search: { id: user.id },
+                  replace: true
+                });
+              }}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setUserToDelete(user);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ], [navigate]);
 
-      // Filtro de rol
-      const roleMatch = 
-        filterRole === 'all' || 
-        user.role === filterRole;
+  const table = useReactTable({
+    data: usersData || [],
+    columns,
+    state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter, pagination },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: false,
+    enableRowSelection: true,
+  });
 
-      return searchMatch && statusMatch && roleMatch;
-    })
-    .sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
+  const btnSizeClasses = "h-11 w-28 px-4";
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      return 0;
-    });
-
-  // Selección individual
-  const handleSelectUser = (userId: string) => {
-    setSelectedUserIds((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  // Selección global
-  const handleSelectAll = () => {
-    if (selectedUserIds.length === filteredAndSortedUsers.length) {
-      setSelectedUserIds([]);
-    } else {
-      setSelectedUserIds(filteredAndSortedUsers.map((u) => u.id));
-    }
-  };
-
-  // Borrado individual
-  const handleDeleteUser = (user: UserWithExtra) => {
-    setUserToDelete(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    if (userToDelete) {
-      const updatedUsers = deleteUser(userToDelete.id);
-      setUsers(updatedUsers);
-      setUserToDelete(null);
-      setIsDeleteModalOpen(false);
-      setSelectedUserIds((prev) => prev.filter((id) => id !== userToDelete.id));
-    }
-  };
-
-  // Borrado masivo
-  const handleBulkDelete = () => {
-    if (selectedUserIds.length > 0) {
-      setIsBulkDeleteModalOpen(true);
-    }
-  };
-
-  const confirmBulkDelete = () => {
-    const updatedUsers = deleteUsers(selectedUserIds);
-    setUsers(updatedUsers);
-    setSelectedUserIds([]);
-    setIsBulkDeleteModalOpen(false);
-  };
-
-  const closeDeleteModal = () => {
-    setUserToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const closeBulkDeleteModal = () => {
-    setIsBulkDeleteModalOpen(false);
-  };
-
-  const handleEditUser = (userId: string) => {
-    navigate({ 
-      to: '/usuarios/editar',
-      search: { id: userId },
-      replace: true
-    });
-  };
-
-  // Función para manejar el ordenamiento
-  const handleSort = (field: keyof UserWithExtra) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
+  if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] w-full">
-      <div className="p-6 h-full">
-        <HeaderDescriptor title="USUARIOS" subtitle="LISTADO DE USUARIOS" />
+    <div className="p-6 h-full flex flex-col">
+      <HeaderDescriptor title="USUARIOS" subtitle="LISTADO DE USUARIOS" />
 
-        {/* Tarjeta resumen */}
-        <div className="mb-6 flex items-center">
+      <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
+        {usersData ? (
           <HomeCard
             icon={<Gem className="w-8 h-8 text-teal-600" />}
             iconBgColor="bg-teal-100"
             title="Usuarios totales"
-            description={users.length} 
+            description={usersData.length}
           />
-        </div>
-        
-        {/* Botones Agregar y Carga Masiva */}
-        <div className="flex justify-end gap-3 mb-4">
-          <Button
-            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
-            onClick={() => navigate({ to: '/usuarios/agregar' })}
-          >
-            Agregar <Plus className="w-5 h-5" />
-          </Button>
-          <Button
-            className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
-          >
-            Carga Masiva <Plus className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Barra de acciones */}
-        <div className="flex items-center justify-between gap-2 mb-4 w-full">
-          {/* Input de búsqueda con ícono */}
-          <div className="relative w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-              <Search className="w-5 h-5" />
-            </span>
-            <Input
-              placeholder="Buscar por nombre, email, teléfono o distrito"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 w-full h-10"
-            />
-          </div>
-          {/* Botones de acción alineados a la derecha */}
-          <div className="flex gap-2 items-center ml-auto">
-            {/* Dropdown Ordenar por */}
-            <div className="relative" ref={orderRef}>
-              <Button
-                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
-                onClick={() => setOpenOrder((prev) => !prev)}
-                type="button"
-              >
-                Ordenar por <ChevronDown className="w-4 h-4" />
-              </Button>
-              {openOrder && (
-                <div className="absolute z-50 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => { handleSort('name'); setOpenOrder(false); }}
-                  >
-                    Nombre {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => { handleSort('email'); setOpenOrder(false); }}
-                  >
-                    Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => { handleSort('district'); setOpenOrder(false); }}
-                  >
-                    Distrito {sortField === 'district' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* Dropdown Filtrar por */}
-            <div className="relative" ref={filterRef}>
-              <Button
-                className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer"
-                onClick={() => setOpenFilter((prev) => !prev)}
-                type="button"
-              >
-                Filtrar por <ChevronDown className="w-4 h-4" />
-              </Button>
-              {openFilter && (
-                <div className="absolute z-50 mt-1 w-48 bg-white border border-neutral-200 rounded shadow-lg">
-                  <div className="px-4 py-2 font-semibold border-b">Estado</div>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'all' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterStatus('all'); setOpenFilter(false); }}
-                  >
-                    Todos
-                  </button>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'active' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterStatus('active'); setOpenFilter(false); }}
-                  >
-                    Activos
-                  </button>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterStatus === 'inactive' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterStatus('inactive'); setOpenFilter(false); }}
-                  >
-                    Inactivos
-                  </button>
-                  <div className="px-4 py-2 font-semibold border-b">Rol</div>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'all' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterRole('all'); setOpenFilter(false); }}
-                  >
-                    Todos
-                  </button>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'admin' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterRole('admin'); setOpenFilter(false); }}
-                  >
-                    Administradores
-                  </button>
-                  <button
-                    type="button"
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filterRole === 'user' ? 'bg-gray-100' : ''}`}
-                    onClick={() => { setFilterRole('user'); setOpenFilter(false); }}
-                  >
-                    Usuarios
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* Botón Exportar */}
-            <Button className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-1 cursor-pointer">
-              Exportar
-            </Button>
-            {/* Botón Eliminar */}
-            <Button
-              className="h-10 bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-200 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out cursor-pointer"
-              onClick={handleBulkDelete}
-              disabled={selectedUserIds.length === 0}
-            >
-              Eliminar <Trash className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Tabla */}
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2 text-left align-middle flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    className="mt-1.5"
-                    checked={selectedUserIds.length === filteredAndSortedUsers.length && filteredAndSortedUsers.length > 0}
-                    onChange={handleSelectAll}
-                  />
-                </th>
-                <th className="p-2 text-left">Nombres</th>
-                <th className="p-2 text-left">Dirección</th>
-                <th className="p-2 text-left">Distrito</th>
-                <th className="p-2 text-left">Teléfono</th>
-                <th className="p-2 text-left">Membresías</th>
-                <th className="p-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAndSortedUsers.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                  <td className="p-2 align-middle flex items-center justify-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedUserIds.includes(user.id)}
-                      onChange={() => handleSelectUser(user.id)}
-                    />
-                  </td>
-                  <td className="p-2">{user.name}</td>
-                  <td className="p-2">{user.address}</td>
-                  <td className="p-2">{user.district}</td>
-                  <td className="p-2">{user.phone}</td>
-                  <td className="p-2">
-                    <Button
-                      className="h-9 px-4 bg-white border border-neutral-300 text-black rounded-lg flex items-center gap-2 shadow-sm hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
-                      onClick={() => navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } })}
-                    >
-                      Membresías ...
-                    </Button>
-                  </td>
-                  <td className="p-2 flex gap-2">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 hover:shadow-md transition-all duration-200"
-                      onClick={() => handleEditUser(user.id)}>
-                      <MoreHorizontal className="w-5 h-5 text-black" />
-                    </button>
-                    <button
-                      className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-400 hover:bg-red-100 hover:shadow-md transition-all duration-200"
-                      onClick={() => handleDeleteUser(user)}
-                    >
-                      <Trash className="w-5 h-5 text-black" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginación */}
-        <div className="flex justify-between items-center mt-4">
-          <div>Registros por página: 10</div>
-          <div>1 – 10 de {filteredAndSortedUsers.length} registros</div>
-          <div className="flex gap-2">
-            <Button>{"<"}</Button>
-            <Button>{">"}</Button>
-          </div>
-        </div>
-
-        {/* Modal de confirmación de borrado */}
-        {isDeleteModalOpen && (
-          <AlertDialog open={isDeleteModalOpen} onOpenChange={closeDeleteModal}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro que deseas eliminar este usuario?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer.<br />
-                  Usuario: <b>{userToDelete?.name}</b>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={closeDeleteModal}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction asChild>
-                  <Button variant="destructive" className="bg-red-500 hover:bg-red-600" onClick={confirmDeleteUser}>Eliminar</Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-
-        {/* Modal de confirmación de borrado masivo */}
-        {isBulkDeleteModalOpen && (
-          <AlertDialog open={isBulkDeleteModalOpen} onOpenChange={closeBulkDeleteModal}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro que deseas eliminar los usuarios seleccionados?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer.<br />
-                  Usuarios seleccionados: <b>{selectedUserIds.length}</b>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={closeBulkDeleteModal}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction asChild>
-                  <Button variant="destructive" className="bg-red-500 hover:bg-red-600" onClick={confirmBulkDelete}>Eliminar</Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        ) : (
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         )}
       </div>
+
+      <div className="flex justify-end space-x-2 py-4">
+        <Link to="/usuarios/agregar">
+          <Button
+            size="sm"
+            className={`bg-black text-white font-bold rounded-lg flex items-center justify-between shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out ${btnSizeClasses}`}
+          >
+            <span>Agregar</span>
+            <Plus className="w-5 h-5" />
+          </Button>
+        </Link>
+
+        <Button
+          size="sm"
+          className={`
+            bg-black text-white font-bold rounded-lg
+            grid grid-rows-2 grid-cols-[1fr_auto] items-center
+            shadow hover:bg-gray-800 hover:scale-105 active:scale-95
+            transition-all duration-200 ease-in-out
+            ${btnSizeClasses}
+          `}
+        >
+          <span className="row-start-1 col-start-1">Carga</span>
+          <span className="row-start-2 col-start-1">Masiva</span>
+          <Plus className="row-span-2 col-start-2 justify-self-center w-5 h-5" />
+        </Button>
+      </div>
+
+      {isLoadingUsers ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+        </div>
+      ) : (
+        <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+          <DataTableToolbar
+            table={table}
+            filterPlaceholder="Buscar usuarios..."
+            showSortButton
+            showFilterButton
+            showExportButton
+            onFilterClick={() => console.log('Filtrar')}
+            onExportClick={() => console.log('Exportar')}
+          />
+          <div className="flex-1 overflow-hidden rounded-md border">
+            <DataTable table={table} columns={columns} />
+          </div>
+          <DataTablePagination table={table} />
+        </div>
+      )}
+
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas eliminar este usuario?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">Usuario: {userToDelete?.name}</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                className="bg-red-400 text-white flex items-center gap-2 hover:bg-red-500 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-200 rounded-lg shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out"
+                onClick={() => {
+                  if (userToDelete) deleteUser(userToDelete.id);
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

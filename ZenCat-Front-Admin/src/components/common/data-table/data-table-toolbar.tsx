@@ -52,6 +52,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   showExportButton = false,
   exportFileName = 'data',
   showSortButton = false,
+  enableDeleteButton = true,
 }: DataTableToolbarProps<TData>) {
 
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
@@ -175,12 +176,12 @@ export function DataTableToolbar<TData extends DataWithId>({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10">
-                  <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar por
+                  <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filtrar por...</DropdownMenuLabel>
+                <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
                 <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>

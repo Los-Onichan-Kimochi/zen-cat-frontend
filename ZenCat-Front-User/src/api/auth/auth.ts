@@ -1,5 +1,5 @@
 import { User } from "@/types/user";
-import { dummyUsers } from "@/data/dummy-users";
+import { dummyClients } from "@/data/dummy-clients";
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -9,7 +9,7 @@ export const authApi = {
   async login(email: string, password: string): Promise<User> {
     await delay(1000);
     
-    const user = dummyUsers.find(u => u.email === email);
+    const user = dummyClients.find(u => u.email === email);
     if (!user) {
       throw new Error("Usuario no encontrado");
     }
@@ -22,7 +22,7 @@ export const authApi = {
   },
 
   async getCurrentUser(): Promise<User | null> {
-    return dummyUsers[0];
+    return dummyClients[0];
   },
 
   // Simulate logout
@@ -32,11 +32,11 @@ export const authApi = {
 
   async getAllUsers(): Promise<User[]> {
     await delay(1000);
-    return dummyUsers;
+    return dummyClients;
   },
 
   async getUserById(id: string): Promise<User | null> {
     await delay(500);
-    return dummyUsers.find(user => user.id === id) || null;
+    return dummyClients.find(user => user.id === id) || null;
   }
 }; 

@@ -14,7 +14,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as NotFoundPageImport } from './routes/NotFoundPage'
 import { Route as SesionesRouteImport } from './routes/sesiones/route'
-import { Route as ServiciosRouteImport } from './routes/servicios/route'
 import { Route as RolesPermisosRouteImport } from './routes/roles-permisos/route'
 import { Route as ReportesRouteImport } from './routes/reportes/route'
 import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/route'
@@ -23,11 +22,16 @@ import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as UsuariosIndexImport } from './routes/usuarios/index'
+import { Route as ServiciosIndexImport } from './routes/servicios/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
 import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia'
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
+import { Route as ServiciosServicioVerImport } from './routes/servicios/servicio-ver'
+import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servicio-nuevo'
+import { Route as ServiciosAgregarProfesionalesImport } from './routes/servicios/agregar-profesionales'
+import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agregar-locales'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
@@ -51,12 +55,6 @@ const NotFoundPageRoute = NotFoundPageImport.update({
 const SesionesRouteRoute = SesionesRouteImport.update({
   id: '/sesiones',
   path: '/sesiones',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ServiciosRouteRoute = ServiciosRouteImport.update({
-  id: '/servicios',
-  path: '/servicios',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -108,6 +106,12 @@ const UsuariosIndexRoute = UsuariosIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ServiciosIndexRoute = ServiciosIndexImport.update({
+  id: '/servicios/',
+  path: '/servicios/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
@@ -135,6 +139,31 @@ const UsuariosEditarRoute = UsuariosEditarImport.update({
 const UsuariosAgregarRoute = UsuariosAgregarImport.update({
   id: '/usuarios/agregar',
   path: '/usuarios/agregar',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosServicioVerRoute = ServiciosServicioVerImport.update({
+  id: '/servicios/servicio-ver',
+  path: '/servicios/servicio-ver',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosServicioNuevoRoute = ServiciosServicioNuevoImport.update({
+  id: '/servicios/servicio-nuevo',
+  path: '/servicios/servicio-nuevo',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosAgregarProfesionalesRoute =
+  ServiciosAgregarProfesionalesImport.update({
+    id: '/servicios/agregar-profesionales',
+    path: '/servicios/agregar-profesionales',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const ServiciosAgregarLocalesRoute = ServiciosAgregarLocalesImport.update({
+  id: '/servicios/agregar-locales',
+  path: '/servicios/agregar-locales',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -222,13 +251,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RolesPermisosRouteImport
       parentRoute: typeof rootRoute
     }
-    '/servicios': {
-      id: '/servicios'
-      path: '/servicios'
-      fullPath: '/servicios'
-      preLoaderRoute: typeof ServiciosRouteImport
-      parentRoute: typeof rootRoute
-    }
     '/sesiones': {
       id: '/sesiones'
       path: '/sesiones'
@@ -285,6 +307,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesVerImport
       parentRoute: typeof rootRoute
     }
+    '/servicios/agregar-locales': {
+      id: '/servicios/agregar-locales'
+      path: '/servicios/agregar-locales'
+      fullPath: '/servicios/agregar-locales'
+      preLoaderRoute: typeof ServiciosAgregarLocalesImport
+      parentRoute: typeof rootRoute
+    }
+    '/servicios/agregar-profesionales': {
+      id: '/servicios/agregar-profesionales'
+      path: '/servicios/agregar-profesionales'
+      fullPath: '/servicios/agregar-profesionales'
+      preLoaderRoute: typeof ServiciosAgregarProfesionalesImport
+      parentRoute: typeof rootRoute
+    }
+    '/servicios/servicio-nuevo': {
+      id: '/servicios/servicio-nuevo'
+      path: '/servicios/servicio-nuevo'
+      fullPath: '/servicios/servicio-nuevo'
+      preLoaderRoute: typeof ServiciosServicioNuevoImport
+      parentRoute: typeof rootRoute
+    }
+    '/servicios/servicio-ver': {
+      id: '/servicios/servicio-ver'
+      path: '/servicios/servicio-ver'
+      fullPath: '/servicios/servicio-ver'
+      preLoaderRoute: typeof ServiciosServicioVerImport
+      parentRoute: typeof rootRoute
+    }
     '/usuarios/agregar': {
       id: '/usuarios/agregar'
       path: '/usuarios/agregar'
@@ -320,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfesionalesIndexImport
       parentRoute: typeof rootRoute
     }
+    '/servicios/': {
+      id: '/servicios/'
+      path: '/servicios'
+      fullPath: '/servicios'
+      preLoaderRoute: typeof ServiciosIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/usuarios/': {
       id: '/usuarios/'
       path: '/usuarios'
@@ -340,7 +397,6 @@ export interface FileRoutesByFullPath {
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
   '/roles-permisos': typeof RolesPermisosRouteRoute
-  '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
@@ -349,11 +405,16 @@ export interface FileRoutesByFullPath {
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
+  '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
+  '/servicios': typeof ServiciosIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
 
@@ -365,7 +426,6 @@ export interface FileRoutesByTo {
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
   '/roles-permisos': typeof RolesPermisosRouteRoute
-  '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
@@ -374,11 +434,16 @@ export interface FileRoutesByTo {
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
+  '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades': typeof ComunidadesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
+  '/servicios': typeof ServiciosIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
 }
 
@@ -391,7 +456,6 @@ export interface FileRoutesById {
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
   '/roles-permisos': typeof RolesPermisosRouteRoute
-  '/servicios': typeof ServiciosRouteRoute
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
@@ -400,11 +464,16 @@ export interface FileRoutesById {
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
+  '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
+  '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
+  '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades/': typeof ComunidadesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
+  '/servicios/': typeof ServiciosIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
 }
 
@@ -418,7 +487,6 @@ export interface FileRouteTypes {
     | '/planes-membresia'
     | '/reportes'
     | '/roles-permisos'
-    | '/servicios'
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
@@ -427,11 +495,16 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/servicios/agregar-locales'
+    | '/servicios/agregar-profesionales'
+    | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades'
     | '/profesionales'
+    | '/servicios'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -442,7 +515,6 @@ export interface FileRouteTypes {
     | '/planes-membresia'
     | '/reportes'
     | '/roles-permisos'
-    | '/servicios'
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
@@ -451,11 +523,16 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/servicios/agregar-locales'
+    | '/servicios/agregar-profesionales'
+    | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades'
     | '/profesionales'
+    | '/servicios'
     | '/usuarios'
   id:
     | '__root__'
@@ -466,7 +543,6 @@ export interface FileRouteTypes {
     | '/planes-membresia'
     | '/reportes'
     | '/roles-permisos'
-    | '/servicios'
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
@@ -475,11 +551,16 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
+    | '/servicios/agregar-locales'
+    | '/servicios/agregar-profesionales'
+    | '/servicios/servicio-nuevo'
+    | '/servicios/servicio-ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades/'
     | '/profesionales/'
+    | '/servicios/'
     | '/usuarios/'
   fileRoutesById: FileRoutesById
 }
@@ -492,7 +573,6 @@ export interface RootRouteChildren {
   PlanesMembresiaRouteRoute: typeof PlanesMembresiaRouteRoute
   ReportesRouteRoute: typeof ReportesRouteRoute
   RolesPermisosRouteRoute: typeof RolesPermisosRouteRoute
-  ServiciosRouteRoute: typeof ServiciosRouteRoute
   SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
@@ -501,11 +581,16 @@ export interface RootRouteChildren {
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
+  ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
+  ServiciosAgregarProfesionalesRoute: typeof ServiciosAgregarProfesionalesRoute
+  ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
+  ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
+  ServiciosIndexRoute: typeof ServiciosIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
 }
 
@@ -517,7 +602,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlanesMembresiaRouteRoute: PlanesMembresiaRouteRoute,
   ReportesRouteRoute: ReportesRouteRoute,
   RolesPermisosRouteRoute: RolesPermisosRouteRoute,
-  ServiciosRouteRoute: ServiciosRouteRoute,
   SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
@@ -526,11 +610,16 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesVerRoute: ComunidadesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
+  ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
+  ServiciosAgregarProfesionalesRoute: ServiciosAgregarProfesionalesRoute,
+  ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
+  ServiciosServicioVerRoute: ServiciosServicioVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
   ComunidadesIndexRoute: ComunidadesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
+  ServiciosIndexRoute: ServiciosIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
 }
 
@@ -551,7 +640,6 @@ export const routeTree = rootRoute
         "/planes-membresia",
         "/reportes",
         "/roles-permisos",
-        "/servicios",
         "/sesiones",
         "/NotFoundPage",
         "/login",
@@ -560,11 +648,16 @@ export const routeTree = rootRoute
         "/comunidades/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
+        "/servicios/agregar-locales",
+        "/servicios/agregar-profesionales",
+        "/servicios/servicio-nuevo",
+        "/servicios/servicio-ver",
         "/usuarios/agregar",
         "/usuarios/editar",
         "/usuarios/ver_membresia",
         "/comunidades/",
         "/profesionales/",
+        "/servicios/",
         "/usuarios/"
       ]
     },
@@ -588,9 +681,6 @@ export const routeTree = rootRoute
     },
     "/roles-permisos": {
       "filePath": "roles-permisos/route.tsx"
-    },
-    "/servicios": {
-      "filePath": "servicios/route.tsx"
     },
     "/sesiones": {
       "filePath": "sesiones/route.tsx"
@@ -616,6 +706,18 @@ export const routeTree = rootRoute
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"
     },
+    "/servicios/agregar-locales": {
+      "filePath": "servicios/agregar-locales.tsx"
+    },
+    "/servicios/agregar-profesionales": {
+      "filePath": "servicios/agregar-profesionales.tsx"
+    },
+    "/servicios/servicio-nuevo": {
+      "filePath": "servicios/servicio-nuevo.tsx"
+    },
+    "/servicios/servicio-ver": {
+      "filePath": "servicios/servicio-ver.tsx"
+    },
     "/usuarios/agregar": {
       "filePath": "usuarios/agregar.tsx"
     },
@@ -630,6 +732,9 @@ export const routeTree = rootRoute
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
+    },
+    "/servicios/": {
+      "filePath": "servicios/index.tsx"
     },
     "/usuarios/": {
       "filePath": "usuarios/index.tsx"

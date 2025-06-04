@@ -8,7 +8,10 @@ import { authApi } from "@/api/auth/auth";
 import { ChevronLeft } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Switch } from "@/components/ui/switch";
-import { addNewUser, UserWithExtra, mockUsers } from '@/mocks/users';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { CreateUserPayload } from '@/types/user';
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +40,7 @@ export const Route = createFileRoute('/usuarios/agregar')({
 
 function AgregarUsuario() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Estados para los campos y errores
@@ -65,6 +69,18 @@ function AgregarUsuario() {
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+
+  const createUserMutation = useMutation({
+    mutationFn: async (data: CreateUserPayload) => usuariosApi.createUsuario(data),
+    onSuccess: () => {
+      toast.success("Usuario Creado", { description: "El usuario ha sido agregado exitosamente." });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      navigate({ to: '/usuarios' });
+    },
+    onError: (error) => {
+      toast.error("Error al crear usuario", { description: error.message || "No se pudo crear el usuario." });
+    },
+  });
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
@@ -127,30 +143,22 @@ function AgregarUsuario() {
   };
 
   const confirmCreate = () => {
-    // Crear el nuevo usuario
-    const newUser: Omit<UserWithExtra, 'id'> = {
+    const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
       role: "user",
       password: "123456", // Contraseña por defecto
-      isAuthenticated: false,
       permissions: ["read"],
       avatar: "",
-      address: onboardingEnabled ? form.calle : '',
-      district: onboardingEnabled ? form.distrito : '',
-      phone: onboardingEnabled ? form.celular : '',
     };
 
-    try {
-      // Agregar el usuario usando la función de mockData
-      addNewUser(newUser);
-      
-      // Redirigir a la lista de usuarios
-      navigate({ to: '/usuarios' });
-    } catch (error) {
-      console.error('Error al crear usuario:', error);
-      alert('Error al crear usuario');
+    if (onboardingEnabled) {
+      payload.address = form.calle;
+      payload.district = form.distrito;
+      payload.phone = form.celular;
     }
+
+    createUserMutation.mutate(payload);
   };
 
   // Handler para cambios en los inputs

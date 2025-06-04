@@ -117,7 +117,7 @@ function VerMembresia() {
                     className="block w-full text-left px-4 py-2 hover:bg-gray-300"
                     onClick={() => { /* falta logica para ordenar */ }}
                   >
-                    <span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-200">
+                    <span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-600">
                       Activo
                     </span>
                   </button>

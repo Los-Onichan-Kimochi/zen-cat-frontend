@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router';
-import { PersonIcon } from '@radix-ui/react-icons';
+import { PersonIcon, ExitIcon } from '@radix-ui/react-icons';
+import { useAuth } from '@/context/AuthContext'; // importa tu hook
 
 export const TopBar = () => {
+  const { user, logout } = useAuth();
   return (
     <nav className="bg-black text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50">
       {/* Logo */}
@@ -33,23 +35,47 @@ export const TopBar = () => {
         </Link>
       </div>
 
-      {/* Acciones (login / signup) */}
+      {/* Acciones (login / signup) o info usuario */}
       <div className="flex items-center space-x-4">
-        <Link
-          to="/login"
-          className="flex items-center px-4 py-2 border border-white rounded-full hover:bg-white hover:text-black transition"
-        >
-          <PersonIcon className="mr-2 h-5 w-5" />
-          Iniciar sesión
-        </Link>
-        <Link
-          to="/signup"
-          className="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition"
-        >
-          Comienza ahora
-        </Link>
+        {user ? (
+          <div className="flex items-center space-x-3">
+            {user.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt="Avatar"
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <PersonIcon className="h-8 w-8 text-white rounded-full bg-gray-500 p-1" />
+            )}
+            <span className="hidden sm:block">{user.name || user.email}</span>
+            <button
+              onClick={logout}
+              className="p-2 rounded-full hover:bg-white hover:text-black transition"
+              aria-label="Cerrar sesión"
+            >
+              <ExitIcon className="h-5 w-5" />
+            </button>
+          </div>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="flex items-center px-4 py-2 border border-white rounded-full hover:bg-white hover:text-black transition"
+            >
+              <PersonIcon className="mr-2 h-5 w-5" />
+              Iniciar sesión
+            </Link>
+            <Link
+              to="/signup"
+              className="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition"
+            >
+              Comienza ahora
+            </Link>
+          </>
+        )}
       </div>
-
+      
       {/* botón hamburguesa para móvil */}
       <button className="md:hidden focus:outline-none">
         {/* aquí podrías poner un icono de menú */}
