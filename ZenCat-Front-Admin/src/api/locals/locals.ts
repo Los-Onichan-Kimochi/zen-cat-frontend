@@ -59,15 +59,28 @@ export const localsApi = {
         }
     },
     bulkDeleteLocals: async (ids: string[]): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/local/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ locals: ids }),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting locals');
-    }
-  }
+        const response = await fetch(`${API_BASE_URL}/local/bulk-delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+            body: JSON.stringify({ locals: ids }),
+        });
+        if (!response.ok) {
+            throw new Error('Error bulk deleting locals');
+        }
+    },
+    bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {
+        const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ locals }),
+        });
+        if (!response.ok) {
+            throw new Error('Error bulk creating locals');
+        }
+        return response.json();
+    },
 };
