@@ -52,7 +52,6 @@ export function DataTableToolbar<TData extends DataWithId>({
   showExportButton = false,
   exportFileName = 'data',
   showSortButton = false,
-  enableDeleteButton = true,
 }: DataTableToolbarProps<TData>) {
 
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
