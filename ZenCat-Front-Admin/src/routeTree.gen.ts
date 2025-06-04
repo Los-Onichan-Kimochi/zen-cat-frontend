@@ -18,15 +18,13 @@ import { Route as RolesPermisosRouteImport } from './routes/roles-permisos/route
 import { Route as ReportesRouteImport } from './routes/reportes/route'
 import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/route'
 import { Route as LogErroresRouteImport } from './routes/log-errores/route'
-import { Route as LocalesRouteImport } from './routes/locales/route'
-import { Route as ComunidadesRouteImport } from './routes/comunidades/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as UsuariosIndexImport } from './routes/usuarios/index'
 import { Route as ServiciosIndexImport } from './routes/servicios/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
-import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as LocalesIndexImport } from './routes/locales/index'
+import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia'
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
@@ -36,11 +34,11 @@ import { Route as ServiciosAgregarProfesionalesImport } from './routes/servicios
 import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agregar-locales'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as LocalesVerImport } from './routes/locales/ver'
+import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
 import { Route as ComunidadesAgregarImport } from './routes/comunidades/agregar'
-import { Route as LocalesVerImport } from './routes/locales/ver'
-import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 
 // Create/Update Routes
 
@@ -116,15 +114,15 @@ const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ComunidadesIndexRoute = ComunidadesIndexImport.update({
-  id: '/comunidades/',
-  path: '/comunidades/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const LocalesIndexRoute = LocalesIndexImport.update({
   id: '/locales/',
   path: '/locales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesIndexRoute = ComunidadesIndexImport.update({
+  id: '/comunidades/',
+  path: '/comunidades/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -183,6 +181,18 @@ const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LocalesVerRoute = LocalesVerImport.update({
+  id: '/locales/ver',
+  path: '/locales/ver',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesAgregarRoute = LocalesAgregarImport.update({
+  id: '/locales/agregar',
+  path: '/locales/agregar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ComunidadesVerRoute = ComunidadesVerImport.update({
   id: '/comunidades/ver',
   path: '/comunidades/ver',
@@ -199,18 +209,6 @@ const ComunidadesAgregarServiciosRoute =
 const ComunidadesAgregarRoute = ComunidadesAgregarImport.update({
   id: '/comunidades/agregar',
   path: '/comunidades/agregar',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LocalesVerRoute = LocalesVerImport.update({
-  id: '/locales/ver',
-  path: '/locales/ver',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LocalesAgregarRoute = LocalesAgregarImport.update({
-  id: '/locales/agregar',
-  path: '/locales/agregar',
   getParentRoute: () => rootRoute,
 } as any)
 
