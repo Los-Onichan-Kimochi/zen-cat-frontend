@@ -41,13 +41,14 @@ interface DataWithId {
 }
 
 interface DataTableToolbarProps<TData> {
-  table: Table<TData>;
-  filterPlaceholder: string;
-  showFilterButton?: boolean;
-  onFilterClick?: () => void;
-  showExportButton?: boolean;
-  onExportClick?: () => void;
-  showSortButton?: boolean;
+  table: Table<TData>
+  filterPlaceholder: string
+  showFilterButton?: boolean
+  onFilterClick?: () => void
+  showExportButton?: boolean
+  onExportClick?: () => void
+  showSortButton?: boolean
+  enableDeleteButton?: boolean
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
@@ -64,6 +65,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   showExportButton = false,
   onExportClick,
   showSortButton = false,
+  enableDeleteButton = true,
 }: DataTableToolbarProps<TData>) {
   const queryClient = useQueryClient();
 
