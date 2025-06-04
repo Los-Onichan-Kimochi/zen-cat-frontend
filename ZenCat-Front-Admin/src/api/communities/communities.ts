@@ -1,5 +1,4 @@
 import { Community , CreateCommunityPayload, UpdateCommunityPayload } from '@/types/community';
-import { dummyCommunities } from '@/data/dummy-communities'; // :v dummy data
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -19,12 +18,18 @@ export const communitiesApi = {
     return response.json(); 
   },
 
-  getComunityCounts: (): Promise<number> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(dummyCommunities.length); // Resolve with calculated counts
-      }, 500);
+  bulkCreateCommunities: async (communities: CreateCommunityPayload[]): Promise<Community[]> => {
+    const response = await fetch(`${API_BASE_URL}/community/bulk-create/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ communities }),
     });
+    if (!response.ok) {
+      throw new Error('Error creating community');
+    }
+    return response.json(); 
   },
 
   getCommunities: async (): Promise<Community[]> => {
@@ -73,17 +78,17 @@ export const communitiesApi = {
     }
   },
 
-  bulkCreateCommunities: async (communities: CreateCommunityPayload[]): Promise<Community[]> => {
-    const response = await fetch(`${API_BASE_URL}/community/bulk/`, {
-      method: 'POST',
+  bulkDeleteCommunities: async (ids: string[]): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/community/bulk-delete/`, {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ communities }),
+      body: JSON.stringify({ communities: ids }),
     });
     if (!response.ok) {
-      throw new Error('Error creating community');
+      throw new Error('Error bulk deleting communities');
     }
-    return response.json(); 
-  },
+  }
+
 }; 

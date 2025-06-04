@@ -31,7 +31,8 @@ import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
-import { Route as ComunidadesNuevoImport } from './routes/comunidades/nuevo'
+import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
+import { Route as ComunidadesAgregarImport } from './routes/comunidades/agregar'
 
 // Create/Update Routes
 
@@ -155,9 +156,16 @@ const ComunidadesVerRoute = ComunidadesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ComunidadesNuevoRoute = ComunidadesNuevoImport.update({
-  id: '/comunidades/nuevo',
-  path: '/comunidades/nuevo',
+const ComunidadesAgregarServiciosRoute =
+  ComunidadesAgregarServiciosImport.update({
+    id: '/comunidades/agregar-servicios',
+    path: '/comunidades/agregar-servicios',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const ComunidadesAgregarRoute = ComunidadesAgregarImport.update({
+  id: '/comunidades/agregar',
+  path: '/comunidades/agregar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -242,11 +250,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/comunidades/nuevo': {
-      id: '/comunidades/nuevo'
-      path: '/comunidades/nuevo'
-      fullPath: '/comunidades/nuevo'
-      preLoaderRoute: typeof ComunidadesNuevoImport
+    '/comunidades/agregar': {
+      id: '/comunidades/agregar'
+      path: '/comunidades/agregar'
+      fullPath: '/comunidades/agregar'
+      preLoaderRoute: typeof ComunidadesAgregarImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/agregar-servicios': {
+      id: '/comunidades/agregar-servicios'
+      path: '/comunidades/agregar-servicios'
+      fullPath: '/comunidades/agregar-servicios'
+      preLoaderRoute: typeof ComunidadesAgregarServiciosImport
       parentRoute: typeof rootRoute
     }
     '/comunidades/ver': {
@@ -329,7 +344,8 @@ export interface FileRoutesByFullPath {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -353,7 +369,8 @@ export interface FileRoutesByTo {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -378,7 +395,8 @@ export interface FileRoutesById {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/nuevo': typeof ComunidadesNuevoRoute
+  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -404,7 +422,8 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/nuevo'
+    | '/comunidades/agregar'
+    | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -427,7 +446,8 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/nuevo'
+    | '/comunidades/agregar'
+    | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -450,7 +470,8 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/nuevo'
+    | '/comunidades/agregar'
+    | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -475,7 +496,8 @@ export interface RootRouteChildren {
   SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
-  ComunidadesNuevoRoute: typeof ComunidadesNuevoRoute
+  ComunidadesAgregarRoute: typeof ComunidadesAgregarRoute
+  ComunidadesAgregarServiciosRoute: typeof ComunidadesAgregarServiciosRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
@@ -499,7 +521,8 @@ const rootRouteChildren: RootRouteChildren = {
   SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
-  ComunidadesNuevoRoute: ComunidadesNuevoRoute,
+  ComunidadesAgregarRoute: ComunidadesAgregarRoute,
+  ComunidadesAgregarServiciosRoute: ComunidadesAgregarServiciosRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
@@ -532,7 +555,8 @@ export const routeTree = rootRoute
         "/sesiones",
         "/NotFoundPage",
         "/login",
-        "/comunidades/nuevo",
+        "/comunidades/agregar",
+        "/comunidades/agregar-servicios",
         "/comunidades/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
@@ -577,8 +601,11 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
-    "/comunidades/nuevo": {
-      "filePath": "comunidades/nuevo.tsx"
+    "/comunidades/agregar": {
+      "filePath": "comunidades/agregar.tsx"
+    },
+    "/comunidades/agregar-servicios": {
+      "filePath": "comunidades/agregar-servicios.tsx"
     },
     "/comunidades/ver": {
       "filePath": "comunidades/ver.tsx"

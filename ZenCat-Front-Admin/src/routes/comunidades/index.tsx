@@ -3,7 +3,7 @@
 import { createFileRoute , Link} from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { Locate, Plus, Upload, Loader2, CircleEllipsis, ArrowUpDown, CheckCircle, Trash, } from 'lucide-react';
+import { Locate, Plus, Upload, Loader2, MoreHorizontal, CheckCircle, Trash, } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,23 +26,12 @@ import {
 } from '@tanstack/react-table';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-
 import { BulkCreateDialog } from "@/components/common/bulk-create-dialog"
 import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 
 export const Route = createFileRoute('/comunidades/')({
   component: ComunidadesComponent,
@@ -69,7 +58,7 @@ function ComunidadesComponent() {
     pageSize: 10,
   });
 
-  const { 
+  const {
     data: communitiesData,
     isLoading: isLoadingCommunities,
     error: errorCommunities
@@ -90,6 +79,18 @@ function ComunidadesComponent() {
     },
   });
 
+  const { mutate: bulkDeleteCommunities, isPending: isBulkDeleting } = useMutation<void, Error, string[]>({
+    mutationFn: (ids) => communitiesApi.bulkDeleteCommunities(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Comunidades eliminadas', { description: `${ids.length} registros` });
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      table.resetRowSelection();
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar múltiples comunidades', { description: err.message });
+    },
+  });
+
   const counts = useMemo(() => {
     if (!communitiesData) return null;
     return {
@@ -102,7 +103,7 @@ function ComunidadesComponent() {
     {
       id: "select",
       header: ({ table }) => (
-        <Checkbox className='border-gray-400'
+        <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -112,7 +113,7 @@ function ComunidadesComponent() {
         />
       ),
       cell: ({ row }) => (
-        <Checkbox className='border-gray-400'
+        <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
@@ -120,66 +121,64 @@ function ComunidadesComponent() {
       ),
       enableSorting: false,
       enableHiding: false,
+      meta: {className: "w-[36px] px-3"},
+    },
+    {
+      accessorKey: "id",
+      header: "Código",
+      cell: ({row}) => {
+        const value = row.getValue("id") as string;
+        return (
+          <div className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap" title={value}>{value}</div>
+        );
+      },
+      meta: {className: "w-[150px]"},
     },
     {
       accessorKey: "name",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center justify-start gap-1 w-full text-left font-semibold text-base">
-          Nombre
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Nombre",
     },
     {
       accessorKey: "purpose",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center justify-start gap-1 w-full text-left font-semibold text-base">
-          Propósito
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Propósito",
     },
     {
       accessorKey: "number_subscriptions",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center justify-start gap-1 w-full text-left font-semibold text-base">
-          Cantidad de miembros
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Cantidad de miembros",
     },
     {
       id: "actions",
+      header:"Acciones",
       cell: ({ row }) => {
         const com = row.original;
-        const buttonClasses = "w-8 h-8 p-0 flex items-center justify-center rounded-full hover:bg-gray-200 hover:shadow-md transition-all duration-200";
         return (
           <div className="flex gap-2 items-center">
             <Link to="/comunidades/ver" search={{ id: com.id }}>
-              <Button size="sm" variant="ghost" className={buttonClasses}>
-                <CircleEllipsis style={{ width: "25px", height: "25px" }} className="text-black" />
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="h-8 w-8 p-0 border border-black rounded-full flex items-center justify-center hover:bg-gray-200 hover:shadow-md transition-all duration-200">
+                <MoreHorizontal className="!w-5 !h-5"/>
               </Button>
             </Link>
             <Button
               size="sm"
               variant="ghost"
-              className={buttonClasses}
+              className="h-8 w-8 p-0 border border-black rounded-full flex items-center justify-center hover:bg-red-200 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 setCommunityToDelete(com);
                 setIsDeleteModalOpen(true);
               }}
             >
-              <Trash style={{ width: "25px", height: "25px" }} className="text-black" />
+              <Trash className="!w-5 !h-5"/>
             </Button>
           </div>
         );
       },
+      meta: {className: "w-[100px]"},
     },
-  ], [deleteCommunity]);
+  ], [deleteCommunity, bulkDeleteCommunities]);
 
 
   const table = useReactTable({
@@ -208,24 +207,10 @@ function ComunidadesComponent() {
     debugTable: true,
   });
 
-  // Borrado individual
-  const confirmDeleteCommunity = () => {
-    if (communityToDelete) {
-      deleteCommunity(communityToDelete.id);
-      setCommunityToDelete(null);
-      setIsDeleteModalOpen(false);
-    }
-  };
-
-  const closeDeleteModal = () => {
-    setCommunityToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
   if (errorCommunities) return <p>Error cargando comunidades: {errorCommunities.message}</p>;
 
   return (
-    <div className="p-6 h-full">
+    <div className="p-6 h-full font-montserrat">
       <HeaderDescriptor title="COMUNIDADES" subtitle="LISTADO DE COMUNIDADES" />
 
       {/* Tarjeta resumen */}
@@ -239,21 +224,21 @@ function ComunidadesComponent() {
       </div>
 
       <div className="flex justify-end gap-3 mb-4">
-        <Link to="/comunidades/nuevo" className="h-10">
+        <Link to="/comunidades/agregar" className="h-10">
           <Button 
             size="sm" 
-            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+            className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
           >
-            <Plus className="mr-2 h-4 w-4 " /> Agregar
+            <Plus className="mr-2 h-4 w-4"/> Agregar
           </Button>
         </Link>
 
         <Button
           size="sm"
-          className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+          className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
           onClick={() => setShowUploadDialog(true)}
         >
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
+          <Upload className="mr-2 h-4 w-4"/> Carga Masiva
         </Button>
       </div>
       <div className="mt-0 flex-grow flex flex-col">
@@ -265,9 +250,12 @@ function ComunidadesComponent() {
           <div className="flex-grow flex flex-col">
             <DataTableToolbar
               table={table}
+              onBulkDelete={bulkDeleteCommunities}
+              isBulkDeleting={isBulkDeleting}
+              showBulkDeleteButton={true}
               filterPlaceholder="Buscar registro o celda..."
               showExportButton={true}
-              onExportClick={() => console.log("No hay chance de exportar XD")}
+              exportFileName="comunidades"
               showFilterButton={true}
               onFilterClick={() => console.log("No hay chance de filtrar XD")}
               showSortButton={true}
@@ -300,31 +288,17 @@ function ComunidadesComponent() {
           }
         }}
       />
-      
-      {/* Modal de confirmación de borrado */}
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={closeDeleteModal}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar esta comunidad?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer.<br />
-              Comunidad: <b>{communityToDelete?.name}</b>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeleteModal}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                variant="destructive"
-                className="bg-red-500 hover:bg-red-600"
-                onClick={confirmDeleteCommunity}
-              >
-                Eliminar
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+      <ConfirmDeleteSingleDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        title="¿Estas seguro que deseas eliminar esta comunidad?"
+        entity="Comunidad"
+        itemName={communityToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (communityToDelete) deleteCommunity(communityToDelete.id);
+        }}
+        />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-md text-center space-y-4">
