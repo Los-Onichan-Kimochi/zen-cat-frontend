@@ -114,7 +114,7 @@ function ComunidadesComponent() {
           data={communitiesData}
           onBulkDelete={handleBulkDelete}
           isBulkDeleting={bulkDeleteMutation.isPending}
-          onDeleteClick={(com) => {
+          onDelete={(com) => {
             setCommunityToDelete(com);
             setIsDeleteModalOpen(true);
           }}

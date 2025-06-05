@@ -2,7 +2,7 @@
 
 import { Service } from '@/types/service';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { useTableState } from '@/hooks/use-table-state';
+import { useDataTable } from '@/hooks/use-data-table';
 import { getCommunityServiceColumns } from './community-service-columns';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -28,7 +28,7 @@ export function CommunityServiceTable({
     rowSelection, setRowSelection,
     globalFilter, setGlobalFilter,
     pagination, setPagination,
-  } = useTableState();
+  } = useDataTable();
 
   const columns = getCommunityServiceColumns(onDeleteClick);
 

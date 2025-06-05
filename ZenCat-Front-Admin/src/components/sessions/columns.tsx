@@ -2,7 +2,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Session, SessionState } from '@/types/session';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, MoreHorizontal, Trash, Eye, Calendar, Clock, Users } from 'lucide-react';
+import { MoreHorizontal, Trash, Eye, Calendar, Clock, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -57,14 +57,14 @@ export function getSessionColumns({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
       ),
@@ -73,23 +73,14 @@ export function getSessionColumns({
     },
     {
       accessorKey: 'title',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Título <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: 'Título',
       cell: ({ row }) => (
         <div className="font-medium">{row.getValue('title')}</div>
       ),
     },
     {
       accessorKey: 'date',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          <Calendar className="mr-2 h-4 w-4" />
-          Fecha <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Fecha",
       cell: ({ row }) => {
         const date = row.getValue('date') as string;
         try {
@@ -127,11 +118,7 @@ export function getSessionColumns({
     },
     {
       accessorKey: 'state',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Estado <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Estado",
       cell: ({ row }) => {
         const state = row.getValue('state') as SessionState;
         return (

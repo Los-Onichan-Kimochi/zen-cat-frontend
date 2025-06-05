@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Trash, MoreHorizontal } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
+interface GetCommunityColumnsProps {
+  onDelete: (community: Community) => void;
+}
+
 export function getCommunityColumns({
-  onDeleteClick,
-}: {
-  onDeleteClick: (community: Community) => void;
-}): ColumnDef<Community>[] {
+  onDelete,
+}: GetCommunityColumnsProps): ColumnDef<Community>[] {
   return [
     {
       id: "select",
@@ -72,7 +74,7 @@ export function getCommunityColumns({
               size="sm"
               variant="ghost"
               className="h-8 w-8 p-0 border border-black rounded-full hover:bg-red-200"
-              onClick={() => onDeleteClick(com)}
+              onClick={() => onDelete(com)}
             >
               <Trash className="!w-5 !h-5" />
             </Button>
