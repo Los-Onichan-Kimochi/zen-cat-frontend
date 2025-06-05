@@ -89,6 +89,17 @@ function LocalesComponent(){
       toast.error('Error al eliminar', { description: err.message });
     },
   });
+  const {mutate: bulkDeleteLocals,isPending: isBulkDeleting} = useMutation<void, Error, string[]>({
+    mutationFn: (ids) => localsApi.bulkDeleteLocals(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Locales eliminados', { description: `IDs ${ids}` });
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
+      setRowSelection({});
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar múltiples locales', { description: err.message });
+    },
+  })
   const regionCounts = localsData?.reduce((acc, local) => {
       const region = local.region; // Asegúrate de que `region` es el nombre correcto
       acc[region] = (acc[region] || 0) + 1;
@@ -232,7 +243,7 @@ function LocalesComponent(){
           );
         },
       },
-    ], [deleteLocal, navigate, setCurrent]);
+    ], [deleteLocal, bulkDeleteLocals,navigate, setCurrent]);
 
   const table = useReactTable({
     data: localsData || [],
@@ -301,10 +312,13 @@ function LocalesComponent(){
         <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
           <DataTableToolbar
             table={table}
+            onBulkDelete={bulkDeleteLocals}
+            isBulkDeleting={isBulkDeleting}
             filterPlaceholder="Buscar locales..."
             showSortButton={true}
             showExportButton={true}
-            onExportClick={() => console.log("Exportar clickeado")}
+            //onExportClick={() => console.log("Exportar clickeado")}
+            exportFileName="locales"
             showFilterButton={true}
             onFilterClick={() => console.log("Filtrar por clickeado")}
           />
@@ -314,31 +328,31 @@ function LocalesComponent(){
           <DataTablePagination table={table} />
         </div>
       )}
-    <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro que deseas eliminar este local?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer.
-                  <div className="mt-2 font-medium">Local: {localToDelete?.local_name}</div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="space-x-2">
-                <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction asChild>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      if (localToDelete) deleteLocal(localToDelete.id);
-                      setIsDeleteModalOpen(false);
-                    }}
-                  >
-                    Eliminar
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas eliminar este local?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">Local: {localToDelete?.local_name}</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (localToDelete) deleteLocal(localToDelete.id);
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
 
   );
