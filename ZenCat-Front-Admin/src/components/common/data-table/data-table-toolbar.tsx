@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface DataWithId {
-  id?: string | number;
+  id: string | number;
   [key: string]: any;
 }
 

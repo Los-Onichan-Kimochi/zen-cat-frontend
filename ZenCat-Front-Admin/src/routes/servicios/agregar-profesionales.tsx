@@ -2,7 +2,6 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import HomeCard from '@/components/common/home-card';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -32,16 +31,6 @@ import {
 } from '@tanstack/react-table';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-
 
 export const Route = createFileRoute('/servicios/agregar-profesionales')({
   component: ProfesionalesComponent,
@@ -73,19 +62,19 @@ function ProfesionalesComponent() {
   const isLoadingCounts = isLoadingProfessionals;
 
   useEffect(() => {
-  const stored = localStorage.getItem('profesionalesSeleccionados');
-  if (stored && professionalsData) {
-    const restored = JSON.parse(stored) as Professional[];
+    const stored = localStorage.getItem('profesionalesSeleccionados');
+    if (stored && professionalsData) {
+      const restored = JSON.parse(stored) as Professional[];
 
-    const newRowSelection: Record<string, boolean> = {};
-    restored.forEach((prof) => {
-      newRowSelection[prof.id.toString()] = true;
-    });
+      const newRowSelection: Record<string, boolean> = {};
+      restored.forEach((prof) => {
+        newRowSelection[prof.id.toString()] = true;
+      });
 
-    setRowSelection(newRowSelection);
-  }
+      setRowSelection(newRowSelection);
+    }
 
-}, [professionalsData]);
+  }, [professionalsData]);
 
   const columns = useMemo<ColumnDef<Professional>[]>(() => [
     {

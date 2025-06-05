@@ -1,6 +1,6 @@
 'use client';
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { toast } from 'sonner';
 import { LocalProvider, useLocal } from '@/context/LocalesContext';
@@ -10,25 +10,6 @@ import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPi
 import { useMemo, useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { DataTable } from '@/components/common/data-table/data-table';
-import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
-import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  PaginationState,
-} from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -72,15 +53,7 @@ function LocalesComponent(){
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);

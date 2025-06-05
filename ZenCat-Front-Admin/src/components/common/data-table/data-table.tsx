@@ -18,7 +18,7 @@ import {
 
 interface DataTableProps<TData> {
   table: TanStackTable<TData> 
-   columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData, any>[]
 }
 
 export function DataTable<TData>({ 

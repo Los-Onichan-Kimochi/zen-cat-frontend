@@ -4,7 +4,7 @@ import { createFileRoute , useNavigate} from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -31,7 +31,6 @@ export const Route = createFileRoute('/comunidades/agregar-servicios')({
 
 function AddCommunityServicePageComponent() {
   
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -52,39 +51,32 @@ function AddCommunityServicePageComponent() {
     queryFn: servicesApi.getServices,
   });
 
-    // Handler para el botón Cancelar
+  // Handler para el botón Cancelar
   const handleCancel = () => {
-    navigate({ to: '/comunidades/agregar' });
+    navigate({ to: '/comunidades/agregar-comunidad' });
   };
 
   const handleGuardar = () => {
-    const selected = table.getSelectedRowModel().rows.map(row => ({
-      service: row.original,
-    }));
+    const selected = table.getSelectedRowModel().rows.map(row => row.original);
 
-    localStorage.setItem("selectedServices", JSON.stringify(selected));
+    sessionStorage.setItem("draftSelectedServices", JSON.stringify(selected));
 
-    navigate({ to: '/comunidades/agregar' });
+    navigate({ to: '/comunidades/agregar-comunidad' });
   };
 
-  const [initialSelected, setInitialSelected] = useState<Record<string, boolean>>({});
-
   useEffect(() => {
-    const saved = localStorage.getItem("selectedServices");
-    if (saved && servicesData) {
-      try {
-        const parsed = JSON.parse(saved);
-        const selectedMap: Record<string, boolean> = {};
+    const stored = sessionStorage.getItem('draftSelectedServices');
+    if (stored && servicesData) {
+      const restored = JSON.parse(stored) as Service[];
 
-        parsed.forEach((item: any) => {
-          selectedMap[item.service.id] = true;
-        });
+      const newRowSelection: Record<string, boolean> = {};
+      restored.forEach((serv) => {
+        newRowSelection[serv.id.toString()] = true;
+      });
 
-        setInitialSelected(selectedMap);
-      } catch {
-        setInitialSelected({});
-      }
+      setRowSelection(newRowSelection);
     }
+
   }, [servicesData]);
 
   //Define the columns of the table  
@@ -124,15 +116,15 @@ function AddCommunityServicePageComponent() {
     },
   ], []);
 
-
   const table = useReactTable({
     data: servicesData || [],
     columns,
+    getRowId: (row) => row.id.toString(), 
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection: Object.keys(rowSelection).length === 0 ? initialSelected : rowSelection,
+      rowSelection,
       globalFilter,
       pagination,
     },
@@ -151,7 +143,7 @@ function AddCommunityServicePageComponent() {
     debugTable: true,
   });
 
-  if (errorServices) return <p>Error cargando comunidades: {errorServices.message}</p>;
+  if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
     <div className="p-6 h-full font-montserrat">
@@ -160,7 +152,7 @@ function AddCommunityServicePageComponent() {
       <div className="mb-4">
         <Button
           variant="outline" size="default" 
-          onClick={() => navigate({ to: '/comunidades/agregar' })}
+          onClick={() => navigate({ to: '/comunidades/agregar-comunidad' })}
         >
           <ChevronLeft className="w-5 h-5" />
           Volver
@@ -195,8 +187,8 @@ function AddCommunityServicePageComponent() {
         )}
       </div>
       <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-        <Button variant="outline" type="button" onClick={() => navigate({ to: '/comunidades' })} className="w-full sm:w-auto">Cancelar</Button>
-        <Button onClick={handleGuardar} className="w-full sm:w-auto">
+        <Button variant="outline" type="button" className="h-10 w-30 text-base" onClick={handleCancel}>Cancelar</Button>
+        <Button onClick={handleGuardar} className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800">
           Guardar
         </Button>
       </div>

@@ -4,13 +4,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const communityServicesApi = {
 
-  bulkCreateCommunyServices: async (communityServices: CreateCommunityServicePayload[]): Promise<CommunityService[]> => {
+  bulkCreateCommunityServices: async (communityServices: CreateCommunityServicePayload[]): Promise<CommunityService[]> => {
+    console.log('Creating community services:', communityServices);
     const response = await fetch(`${API_BASE_URL}/community-service/bulk-create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ communityServices }),
+      body: JSON.stringify({ community_services: communityServices }),
     });
     if (!response.ok) {
       throw new Error('Error creating services for community');
