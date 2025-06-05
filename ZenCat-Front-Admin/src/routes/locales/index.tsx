@@ -48,6 +48,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog} from '@/components/common/confirm-delete-dialogs';
+
 export const Route = createFileRoute('/locales/')({
   component: () => (
     <LocalProvider>
@@ -328,7 +334,27 @@ function LocalesComponent(){
           <DataTablePagination table={table} />
         </div>
       )}
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+      <ConfirmDeleteSingleDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        title="¿Estas seguro que deseas eliminar este local?"
+        entity="Comunidad"
+        itemName={localToDelete?.local_name ?? ''}
+        onConfirm={() => {
+          if (localToDelete) deleteLocal(localToDelete.id);
+          setIsDeleteModalOpen(false);
+        }}
+      />
+      
+    </div>
+
+  );
+  
+}
+
+export default LocalesComponent;
+/*
+<AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro que deseas eliminar este local?</AlertDialogTitle>
@@ -353,10 +379,5 @@ function LocalesComponent(){
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
 
-  );
-  
-}
-
-export default LocalesComponent;
+*/
