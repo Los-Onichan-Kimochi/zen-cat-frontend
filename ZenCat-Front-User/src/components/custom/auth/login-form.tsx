@@ -32,9 +32,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setError(null);
     setIsModalOpen(false);
     try {
-      const user = await authApi.login(email, password);
+      const response = await fetch("http://localhost:8098/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+        "email": email,
+        "password": password
+      }),
+      });
+      if (!response.ok) {
+        const errBody = await response.json();
+        throw new Error(errBody?.message || "Error al loguear usuario");
+      }
+      const json = await response.json();
+      const user= json.user;
       onLoginSuccess(user);
       login(user)
+      navigate({ to: "/" }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);

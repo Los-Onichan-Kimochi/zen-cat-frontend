@@ -18,12 +18,12 @@ import { Route as RolesPermisosRouteImport } from './routes/roles-permisos/route
 import { Route as ReportesRouteImport } from './routes/reportes/route'
 import { Route as PlanesMembresiaRouteImport } from './routes/planes-membresia/route'
 import { Route as LogErroresRouteImport } from './routes/log-errores/route'
-import { Route as LocalesRouteImport } from './routes/locales/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as UsuariosIndexImport } from './routes/usuarios/index'
 import { Route as ServiciosIndexImport } from './routes/servicios/index'
 import { Route as ProfesionalesIndexImport } from './routes/profesionales/index'
+import { Route as LocalesIndexImport } from './routes/locales/index'
 import { Route as ComunidadesIndexImport } from './routes/comunidades/index'
 import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia'
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
@@ -34,6 +34,8 @@ import { Route as ServiciosAgregarProfesionalesImport } from './routes/servicios
 import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agregar-locales'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as LocalesVerImport } from './routes/locales/ver'
+import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesTestImport } from './routes/comunidades/test'
 import { Route as ComunidadesAsaasImport } from './routes/comunidades/asaas'
@@ -86,12 +88,6 @@ const LogErroresRouteRoute = LogErroresRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LocalesRouteRoute = LocalesRouteImport.update({
-  id: '/locales',
-  path: '/locales',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AuditoriaRouteRoute = AuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -119,6 +115,12 @@ const ServiciosIndexRoute = ServiciosIndexImport.update({
 const ProfesionalesIndexRoute = ProfesionalesIndexImport.update({
   id: '/profesionales/',
   path: '/profesionales/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesIndexRoute = LocalesIndexImport.update({
+  id: '/locales/',
+  path: '/locales/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -180,6 +182,18 @@ const ProfesionalesVerRoute = ProfesionalesVerImport.update({
 const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
   id: '/profesionales/nuevo',
   path: '/profesionales/nuevo',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesVerRoute = LocalesVerImport.update({
+  id: '/locales/ver',
+  path: '/locales/ver',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LocalesAgregarRoute = LocalesAgregarImport.update({
+  id: '/locales/agregar',
+  path: '/locales/agregar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -245,13 +259,6 @@ declare module '@tanstack/react-router' {
       path: '/auditoria'
       fullPath: '/auditoria'
       preLoaderRoute: typeof AuditoriaRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/locales': {
-      id: '/locales'
-      path: '/locales'
-      fullPath: '/locales'
-      preLoaderRoute: typeof LocalesRouteImport
       parentRoute: typeof rootRoute
     }
     '/log-errores': {
@@ -352,6 +359,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComunidadesVerImport
       parentRoute: typeof rootRoute
     }
+    '/locales/agregar': {
+      id: '/locales/agregar'
+      path: '/locales/agregar'
+      fullPath: '/locales/agregar'
+      preLoaderRoute: typeof LocalesAgregarImport
+      parentRoute: typeof rootRoute
+    }
+    '/locales/ver': {
+      id: '/locales/ver'
+      path: '/locales/ver'
+      fullPath: '/locales/ver'
+      preLoaderRoute: typeof LocalesVerImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/nuevo': {
       id: '/profesionales/nuevo'
       path: '/profesionales/nuevo'
@@ -422,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComunidadesIndexImport
       parentRoute: typeof rootRoute
     }
+    '/locales/': {
+      id: '/locales/'
+      path: '/locales'
+      fullPath: '/locales'
+      preLoaderRoute: typeof LocalesIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/profesionales/': {
       id: '/profesionales/'
       path: '/profesionales'
@@ -451,7 +479,6 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
@@ -466,6 +493,8 @@ export interface FileRoutesByFullPath {
   '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
+  '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
@@ -476,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades': typeof ComunidadesIndexRoute
+  '/locales': typeof LocalesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
@@ -484,7 +514,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
@@ -499,6 +528,8 @@ export interface FileRoutesByTo {
   '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
+  '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
@@ -509,6 +540,7 @@ export interface FileRoutesByTo {
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades': typeof ComunidadesIndexRoute
+  '/locales': typeof LocalesIndexRoute
   '/profesionales': typeof ProfesionalesIndexRoute
   '/servicios': typeof ServiciosIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
@@ -518,7 +550,6 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/auditoria': typeof AuditoriaRouteRoute
-  '/locales': typeof LocalesRouteRoute
   '/log-errores': typeof LogErroresRouteRoute
   '/planes-membresia': typeof PlanesMembresiaRouteRoute
   '/reportes': typeof ReportesRouteRoute
@@ -533,6 +564,8 @@ export interface FileRoutesById {
   '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
+  '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/ver': typeof LocalesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
@@ -543,6 +576,7 @@ export interface FileRoutesById {
   '/usuarios/editar': typeof UsuariosEditarRoute
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute
   '/comunidades/': typeof ComunidadesIndexRoute
+  '/locales/': typeof LocalesIndexRoute
   '/profesionales/': typeof ProfesionalesIndexRoute
   '/servicios/': typeof ServiciosIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
@@ -553,7 +587,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auditoria'
-    | '/locales'
     | '/log-errores'
     | '/planes-membresia'
     | '/reportes'
@@ -568,6 +601,8 @@ export interface FileRouteTypes {
     | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
+    | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -578,6 +613,7 @@ export interface FileRouteTypes {
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades'
+    | '/locales'
     | '/profesionales'
     | '/servicios'
     | '/usuarios'
@@ -585,7 +621,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auditoria'
-    | '/locales'
     | '/log-errores'
     | '/planes-membresia'
     | '/reportes'
@@ -600,6 +635,8 @@ export interface FileRouteTypes {
     | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
+    | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -610,6 +647,7 @@ export interface FileRouteTypes {
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades'
+    | '/locales'
     | '/profesionales'
     | '/servicios'
     | '/usuarios'
@@ -617,7 +655,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auditoria'
-    | '/locales'
     | '/log-errores'
     | '/planes-membresia'
     | '/reportes'
@@ -632,6 +669,8 @@ export interface FileRouteTypes {
     | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
+    | '/locales/agregar'
+    | '/locales/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -642,6 +681,7 @@ export interface FileRouteTypes {
     | '/usuarios/editar'
     | '/usuarios/ver_membresia'
     | '/comunidades/'
+    | '/locales/'
     | '/profesionales/'
     | '/servicios/'
     | '/usuarios/'
@@ -651,7 +691,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditoriaRouteRoute: typeof AuditoriaRouteRoute
-  LocalesRouteRoute: typeof LocalesRouteRoute
   LogErroresRouteRoute: typeof LogErroresRouteRoute
   PlanesMembresiaRouteRoute: typeof PlanesMembresiaRouteRoute
   ReportesRouteRoute: typeof ReportesRouteRoute
@@ -666,6 +705,8 @@ export interface RootRouteChildren {
   ComunidadesAsaasRoute: typeof ComunidadesAsaasRoute
   ComunidadesTestRoute: typeof ComunidadesTestRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
+  LocalesAgregarRoute: typeof LocalesAgregarRoute
+  LocalesVerRoute: typeof LocalesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
@@ -676,6 +717,7 @@ export interface RootRouteChildren {
   UsuariosEditarRoute: typeof UsuariosEditarRoute
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute
+  LocalesIndexRoute: typeof LocalesIndexRoute
   ProfesionalesIndexRoute: typeof ProfesionalesIndexRoute
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
@@ -684,7 +726,6 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditoriaRouteRoute: AuditoriaRouteRoute,
-  LocalesRouteRoute: LocalesRouteRoute,
   LogErroresRouteRoute: LogErroresRouteRoute,
   PlanesMembresiaRouteRoute: PlanesMembresiaRouteRoute,
   ReportesRouteRoute: ReportesRouteRoute,
@@ -699,6 +740,8 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesAsaasRoute: ComunidadesAsaasRoute,
   ComunidadesTestRoute: ComunidadesTestRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
+  LocalesAgregarRoute: LocalesAgregarRoute,
+  LocalesVerRoute: LocalesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
   ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
@@ -709,6 +752,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsuariosEditarRoute: UsuariosEditarRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
   ComunidadesIndexRoute: ComunidadesIndexRoute,
+  LocalesIndexRoute: LocalesIndexRoute,
   ProfesionalesIndexRoute: ProfesionalesIndexRoute,
   ServiciosIndexRoute: ServiciosIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
@@ -726,7 +770,6 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/auditoria",
-        "/locales",
         "/log-errores",
         "/planes-membresia",
         "/reportes",
@@ -741,6 +784,8 @@ export const routeTree = rootRoute
         "/comunidades/asaas",
         "/comunidades/test",
         "/comunidades/ver",
+        "/locales/agregar",
+        "/locales/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
         "/servicios/agregar-locales",
@@ -751,6 +796,7 @@ export const routeTree = rootRoute
         "/usuarios/editar",
         "/usuarios/ver_membresia",
         "/comunidades/",
+        "/locales/",
         "/profesionales/",
         "/servicios/",
         "/usuarios/"
@@ -761,9 +807,6 @@ export const routeTree = rootRoute
     },
     "/auditoria": {
       "filePath": "auditoria/route.tsx"
-    },
-    "/locales": {
-      "filePath": "locales/route.tsx"
     },
     "/log-errores": {
       "filePath": "log-errores/route.tsx"
@@ -807,6 +850,12 @@ export const routeTree = rootRoute
     "/comunidades/ver": {
       "filePath": "comunidades/ver.tsx"
     },
+    "/locales/agregar": {
+      "filePath": "locales/agregar.tsx"
+    },
+    "/locales/ver": {
+      "filePath": "locales/ver.tsx"
+    },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"
     },
@@ -836,6 +885,9 @@ export const routeTree = rootRoute
     },
     "/comunidades/": {
       "filePath": "comunidades/index.tsx"
+    },
+    "/locales/": {
+      "filePath": "locales/index.tsx"
     },
     "/profesionales/": {
       "filePath": "profesionales/index.tsx"
