@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { User } from '@/types/user';
-import { authApi } from '@/api/auth/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -10,7 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 
-export function LoginForm({ onLoginSuccess }: LoginFormProps) {
+export function LoginForm({ onLoginSuccess }: LoginFormProps) { 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,9 +27,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setError(null);
     setIsModalOpen(false);
     try {
-      const user = await authApi.login(email, password);
+      const response = await fetch('http://localhost:8098/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+      if (!response.ok) {
+        const errBody = await response.json();
+        throw new Error(errBody?.message || 'Error al loguear usuario');
+      }
+      const json = await response.json();
+      const user = json.user;
       onLoginSuccess(user);
       login(user);
+      navigate({ to: '/' }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido, comunicate con tu jefe.';

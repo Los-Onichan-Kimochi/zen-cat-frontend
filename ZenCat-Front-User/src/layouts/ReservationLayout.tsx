@@ -24,11 +24,10 @@ const ReservationLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 px-6 md:px-12 py-8">
-
       <div className="text-center">
         <h2 className="text-lg">Realizar una reserva</h2>
         <h1 className="text-2xl font-bold">Servicio</h1>
-        <span className="text-muted">-</span> 
+        <span className="text-muted">-</span>
         {/* TODO: Add dynamic service name*/}
       </div>
 

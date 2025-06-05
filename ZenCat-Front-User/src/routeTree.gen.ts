@@ -10,22 +10,22 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as PreciosImport } from './routes/precios'
-import { Route as MembresiaImport } from './routes/membresia'
-import { Route as ContactoImport } from './routes/contacto'
-import { Route as ComunidadesImport } from './routes/comunidades'
-import { Route as ComoFuncionaImport } from './routes/como-funciona'
-import { Route as SignupRouteImport } from './routes/signup/route'
-import { Route as ReservaRouteImport } from './routes/reserva/route'
-import { Route as LoginRouteImport } from './routes/login/route'
-import { Route as HomeRouteImport } from './routes/home/route'
-import { Route as ForgotRouteImport } from './routes/forgot/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as ReservaServiciosImport } from './routes/reserva/servicios'
-import { Route as ReservaLugarImport } from './routes/reserva/lugar'
-import { Route as ReservaHorarioImport } from './routes/reserva/horario'
-import { Route as ReservaConfirmacionImport } from './routes/reserva/confirmacion'
+import { Route as rootRoute } from './routes/__root';
+import { Route as PreciosImport } from './routes/precios';
+import { Route as MembresiaImport } from './routes/membresia';
+import { Route as ContactoImport } from './routes/contacto';
+import { Route as ComunidadesImport } from './routes/comunidades';
+import { Route as ComoFuncionaImport } from './routes/como-funciona';
+import { Route as SignupRouteImport } from './routes/signup/route';
+import { Route as ReservaRouteImport } from './routes/reserva/route';
+import { Route as LoginRouteImport } from './routes/login/route';
+import { Route as HomeRouteImport } from './routes/home/route';
+import { Route as ForgotRouteImport } from './routes/forgot/route';
+import { Route as IndexImport } from './routes/index';
+import { Route as ReservaServiciosImport } from './routes/reserva/servicios';
+import { Route as ReservaLugarImport } from './routes/reserva/lugar';
+import { Route as ReservaHorarioImport } from './routes/reserva/horario';
+import { Route as ReservaConfirmacionImport } from './routes/reserva/confirmacion';
 
 // Create/Update Routes
 
@@ -33,211 +33,211 @@ const PreciosRoute = PreciosImport.update({
   id: '/precios',
   path: '/precios',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const MembresiaRoute = MembresiaImport.update({
   id: '/membresia',
   path: '/membresia',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ContactoRoute = ContactoImport.update({
   id: '/contacto',
   path: '/contacto',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ComunidadesRoute = ComunidadesImport.update({
   id: '/comunidades',
   path: '/comunidades',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ComoFuncionaRoute = ComoFuncionaImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const SignupRouteRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ReservaRouteRoute = ReservaRouteImport.update({
   id: '/reserva',
   path: '/reserva',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const LoginRouteRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const HomeRouteRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ForgotRouteRoute = ForgotRouteImport.update({
   id: '/forgot',
   path: '/forgot',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ReservaServiciosRoute = ReservaServiciosImport.update({
   id: '/servicios',
   path: '/servicios',
   getParentRoute: () => ReservaRouteRoute,
-} as any)
+} as any);
 
 const ReservaLugarRoute = ReservaLugarImport.update({
   id: '/lugar',
   path: '/lugar',
   getParentRoute: () => ReservaRouteRoute,
-} as any)
+} as any);
 
 const ReservaHorarioRoute = ReservaHorarioImport.update({
   id: '/horario',
   path: '/horario',
   getParentRoute: () => ReservaRouteRoute,
-} as any)
+} as any);
 
 const ReservaConfirmacionRoute = ReservaConfirmacionImport.update({
   id: '/confirmacion',
   path: '/confirmacion',
   getParentRoute: () => ReservaRouteRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
     '/forgot': {
-      id: '/forgot'
-      path: '/forgot'
-      fullPath: '/forgot'
-      preLoaderRoute: typeof ForgotRouteImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/forgot';
+      path: '/forgot';
+      fullPath: '/forgot';
+      preLoaderRoute: typeof ForgotRouteImport;
+      parentRoute: typeof rootRoute;
+    };
     '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/home';
+      path: '/home';
+      fullPath: '/home';
+      preLoaderRoute: typeof HomeRouteImport;
+      parentRoute: typeof rootRoute;
+    };
     '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/login';
+      path: '/login';
+      fullPath: '/login';
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRoute;
+    };
     '/reserva': {
-      id: '/reserva'
-      path: '/reserva'
-      fullPath: '/reserva'
-      preLoaderRoute: typeof ReservaRouteImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/reserva';
+      path: '/reserva';
+      fullPath: '/reserva';
+      preLoaderRoute: typeof ReservaRouteImport;
+      parentRoute: typeof rootRoute;
+    };
     '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/signup';
+      path: '/signup';
+      fullPath: '/signup';
+      preLoaderRoute: typeof SignupRouteImport;
+      parentRoute: typeof rootRoute;
+    };
     '/como-funciona': {
-      id: '/como-funciona'
-      path: '/como-funciona'
-      fullPath: '/como-funciona'
-      preLoaderRoute: typeof ComoFuncionaImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/como-funciona';
+      path: '/como-funciona';
+      fullPath: '/como-funciona';
+      preLoaderRoute: typeof ComoFuncionaImport;
+      parentRoute: typeof rootRoute;
+    };
     '/comunidades': {
-      id: '/comunidades'
-      path: '/comunidades'
-      fullPath: '/comunidades'
-      preLoaderRoute: typeof ComunidadesImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/comunidades';
+      path: '/comunidades';
+      fullPath: '/comunidades';
+      preLoaderRoute: typeof ComunidadesImport;
+      parentRoute: typeof rootRoute;
+    };
     '/contacto': {
-      id: '/contacto'
-      path: '/contacto'
-      fullPath: '/contacto'
-      preLoaderRoute: typeof ContactoImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/contacto';
+      path: '/contacto';
+      fullPath: '/contacto';
+      preLoaderRoute: typeof ContactoImport;
+      parentRoute: typeof rootRoute;
+    };
     '/membresia': {
-      id: '/membresia'
-      path: '/membresia'
-      fullPath: '/membresia'
-      preLoaderRoute: typeof MembresiaImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/membresia';
+      path: '/membresia';
+      fullPath: '/membresia';
+      preLoaderRoute: typeof MembresiaImport;
+      parentRoute: typeof rootRoute;
+    };
     '/precios': {
-      id: '/precios'
-      path: '/precios'
-      fullPath: '/precios'
-      preLoaderRoute: typeof PreciosImport
-      parentRoute: typeof rootRoute
-    }
+      id: '/precios';
+      path: '/precios';
+      fullPath: '/precios';
+      preLoaderRoute: typeof PreciosImport;
+      parentRoute: typeof rootRoute;
+    };
     '/reserva/confirmacion': {
-      id: '/reserva/confirmacion'
-      path: '/confirmacion'
-      fullPath: '/reserva/confirmacion'
-      preLoaderRoute: typeof ReservaConfirmacionImport
-      parentRoute: typeof ReservaRouteImport
-    }
+      id: '/reserva/confirmacion';
+      path: '/confirmacion';
+      fullPath: '/reserva/confirmacion';
+      preLoaderRoute: typeof ReservaConfirmacionImport;
+      parentRoute: typeof ReservaRouteImport;
+    };
     '/reserva/horario': {
-      id: '/reserva/horario'
-      path: '/horario'
-      fullPath: '/reserva/horario'
-      preLoaderRoute: typeof ReservaHorarioImport
-      parentRoute: typeof ReservaRouteImport
-    }
+      id: '/reserva/horario';
+      path: '/horario';
+      fullPath: '/reserva/horario';
+      preLoaderRoute: typeof ReservaHorarioImport;
+      parentRoute: typeof ReservaRouteImport;
+    };
     '/reserva/lugar': {
-      id: '/reserva/lugar'
-      path: '/lugar'
-      fullPath: '/reserva/lugar'
-      preLoaderRoute: typeof ReservaLugarImport
-      parentRoute: typeof ReservaRouteImport
-    }
+      id: '/reserva/lugar';
+      path: '/lugar';
+      fullPath: '/reserva/lugar';
+      preLoaderRoute: typeof ReservaLugarImport;
+      parentRoute: typeof ReservaRouteImport;
+    };
     '/reserva/servicios': {
-      id: '/reserva/servicios'
-      path: '/servicios'
-      fullPath: '/reserva/servicios'
-      preLoaderRoute: typeof ReservaServiciosImport
-      parentRoute: typeof ReservaRouteImport
-    }
+      id: '/reserva/servicios';
+      path: '/servicios';
+      fullPath: '/reserva/servicios';
+      preLoaderRoute: typeof ReservaServiciosImport;
+      parentRoute: typeof ReservaRouteImport;
+    };
   }
 }
 
 // Create and export the route tree
 
 interface ReservaRouteRouteChildren {
-  ReservaConfirmacionRoute: typeof ReservaConfirmacionRoute
-  ReservaHorarioRoute: typeof ReservaHorarioRoute
-  ReservaLugarRoute: typeof ReservaLugarRoute
-  ReservaServiciosRoute: typeof ReservaServiciosRoute
+  ReservaConfirmacionRoute: typeof ReservaConfirmacionRoute;
+  ReservaHorarioRoute: typeof ReservaHorarioRoute;
+  ReservaLugarRoute: typeof ReservaLugarRoute;
+  ReservaServiciosRoute: typeof ReservaServiciosRoute;
 }
 
 const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
@@ -245,69 +245,69 @@ const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
   ReservaHorarioRoute: ReservaHorarioRoute,
   ReservaLugarRoute: ReservaLugarRoute,
   ReservaServiciosRoute: ReservaServiciosRoute,
-}
+};
 
 const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
   ReservaRouteRouteChildren,
-)
+);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/forgot': typeof ForgotRouteRoute
-  '/home': typeof HomeRouteRoute
-  '/login': typeof LoginRouteRoute
-  '/reserva': typeof ReservaRouteRouteWithChildren
-  '/signup': typeof SignupRouteRoute
-  '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
-  '/contacto': typeof ContactoRoute
-  '/membresia': typeof MembresiaRoute
-  '/precios': typeof PreciosRoute
-  '/reserva/confirmacion': typeof ReservaConfirmacionRoute
-  '/reserva/horario': typeof ReservaHorarioRoute
-  '/reserva/lugar': typeof ReservaLugarRoute
-  '/reserva/servicios': typeof ReservaServiciosRoute
+  '/': typeof IndexRoute;
+  '/forgot': typeof ForgotRouteRoute;
+  '/home': typeof HomeRouteRoute;
+  '/login': typeof LoginRouteRoute;
+  '/reserva': typeof ReservaRouteRouteWithChildren;
+  '/signup': typeof SignupRouteRoute;
+  '/como-funciona': typeof ComoFuncionaRoute;
+  '/comunidades': typeof ComunidadesRoute;
+  '/contacto': typeof ContactoRoute;
+  '/membresia': typeof MembresiaRoute;
+  '/precios': typeof PreciosRoute;
+  '/reserva/confirmacion': typeof ReservaConfirmacionRoute;
+  '/reserva/horario': typeof ReservaHorarioRoute;
+  '/reserva/lugar': typeof ReservaLugarRoute;
+  '/reserva/servicios': typeof ReservaServiciosRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/forgot': typeof ForgotRouteRoute
-  '/home': typeof HomeRouteRoute
-  '/login': typeof LoginRouteRoute
-  '/reserva': typeof ReservaRouteRouteWithChildren
-  '/signup': typeof SignupRouteRoute
-  '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
-  '/contacto': typeof ContactoRoute
-  '/membresia': typeof MembresiaRoute
-  '/precios': typeof PreciosRoute
-  '/reserva/confirmacion': typeof ReservaConfirmacionRoute
-  '/reserva/horario': typeof ReservaHorarioRoute
-  '/reserva/lugar': typeof ReservaLugarRoute
-  '/reserva/servicios': typeof ReservaServiciosRoute
+  '/': typeof IndexRoute;
+  '/forgot': typeof ForgotRouteRoute;
+  '/home': typeof HomeRouteRoute;
+  '/login': typeof LoginRouteRoute;
+  '/reserva': typeof ReservaRouteRouteWithChildren;
+  '/signup': typeof SignupRouteRoute;
+  '/como-funciona': typeof ComoFuncionaRoute;
+  '/comunidades': typeof ComunidadesRoute;
+  '/contacto': typeof ContactoRoute;
+  '/membresia': typeof MembresiaRoute;
+  '/precios': typeof PreciosRoute;
+  '/reserva/confirmacion': typeof ReservaConfirmacionRoute;
+  '/reserva/horario': typeof ReservaHorarioRoute;
+  '/reserva/lugar': typeof ReservaLugarRoute;
+  '/reserva/servicios': typeof ReservaServiciosRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/forgot': typeof ForgotRouteRoute
-  '/home': typeof HomeRouteRoute
-  '/login': typeof LoginRouteRoute
-  '/reserva': typeof ReservaRouteRouteWithChildren
-  '/signup': typeof SignupRouteRoute
-  '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
-  '/contacto': typeof ContactoRoute
-  '/membresia': typeof MembresiaRoute
-  '/precios': typeof PreciosRoute
-  '/reserva/confirmacion': typeof ReservaConfirmacionRoute
-  '/reserva/horario': typeof ReservaHorarioRoute
-  '/reserva/lugar': typeof ReservaLugarRoute
-  '/reserva/servicios': typeof ReservaServiciosRoute
+  __root__: typeof rootRoute;
+  '/': typeof IndexRoute;
+  '/forgot': typeof ForgotRouteRoute;
+  '/home': typeof HomeRouteRoute;
+  '/login': typeof LoginRouteRoute;
+  '/reserva': typeof ReservaRouteRouteWithChildren;
+  '/signup': typeof SignupRouteRoute;
+  '/como-funciona': typeof ComoFuncionaRoute;
+  '/comunidades': typeof ComunidadesRoute;
+  '/contacto': typeof ContactoRoute;
+  '/membresia': typeof MembresiaRoute;
+  '/precios': typeof PreciosRoute;
+  '/reserva/confirmacion': typeof ReservaConfirmacionRoute;
+  '/reserva/horario': typeof ReservaHorarioRoute;
+  '/reserva/lugar': typeof ReservaLugarRoute;
+  '/reserva/servicios': typeof ReservaServiciosRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/forgot'
@@ -323,8 +323,8 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios'
-  fileRoutesByTo: FileRoutesByTo
+    | '/reserva/servicios';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/forgot'
@@ -340,7 +340,7 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios'
+    | '/reserva/servicios';
   id:
     | '__root__'
     | '/'
@@ -357,22 +357,22 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios'
-  fileRoutesById: FileRoutesById
+    | '/reserva/servicios';
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ForgotRouteRoute: typeof ForgotRouteRoute
-  HomeRouteRoute: typeof HomeRouteRoute
-  LoginRouteRoute: typeof LoginRouteRoute
-  ReservaRouteRoute: typeof ReservaRouteRouteWithChildren
-  SignupRouteRoute: typeof SignupRouteRoute
-  ComoFuncionaRoute: typeof ComoFuncionaRoute
-  ComunidadesRoute: typeof ComunidadesRoute
-  ContactoRoute: typeof ContactoRoute
-  MembresiaRoute: typeof MembresiaRoute
-  PreciosRoute: typeof PreciosRoute
+  IndexRoute: typeof IndexRoute;
+  ForgotRouteRoute: typeof ForgotRouteRoute;
+  HomeRouteRoute: typeof HomeRouteRoute;
+  LoginRouteRoute: typeof LoginRouteRoute;
+  ReservaRouteRoute: typeof ReservaRouteRouteWithChildren;
+  SignupRouteRoute: typeof SignupRouteRoute;
+  ComoFuncionaRoute: typeof ComoFuncionaRoute;
+  ComunidadesRoute: typeof ComunidadesRoute;
+  ContactoRoute: typeof ContactoRoute;
+  MembresiaRoute: typeof MembresiaRoute;
+  PreciosRoute: typeof PreciosRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -387,11 +387,11 @@ const rootRouteChildren: RootRouteChildren = {
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
   PreciosRoute: PreciosRoute,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {
