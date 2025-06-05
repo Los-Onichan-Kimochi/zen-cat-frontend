@@ -1,29 +1,26 @@
 'use client';
 
-import { Community } from '@/types/community';
+import { Service } from '@/types/service';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { getCommunityColumns } from './columns';
-import { useCommunityTable } from '@/hooks/use-community-table';
+import { useTableState } from '@/hooks/use-table-state';
+import { getCommunityServiceColumns } from './community-service-columns';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { useEffect } from 'react';
 
-interface CommunityTableProps {
-  data: Community[];
+interface CommunityServiceTableProps {
+  data: Service[];
+  onDeleteClick: (service: Service) => void;
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
-  onDeleteClick: (community: Community) => void;
-  resetRowSelectionTrigger?: number;
 }
 
-export function CommunityTable({
+export function CommunityServiceTable({
   data,
+  onDeleteClick,
   onBulkDelete,
   isBulkDeleting,
-  onDeleteClick,
-  resetRowSelectionTrigger,
-}: CommunityTableProps) {
+}: CommunityServiceTableProps) {
   const {
     sorting, setSorting,
     columnFilters, setColumnFilters,
@@ -31,9 +28,9 @@ export function CommunityTable({
     rowSelection, setRowSelection,
     globalFilter, setGlobalFilter,
     pagination, setPagination,
-  } = useCommunityTable();
+  } = useTableState();
 
-  const columns = getCommunityColumns({ onDeleteClick });
+  const columns = getCommunityServiceColumns(onDeleteClick);
 
   const table = useReactTable({
     data,
@@ -56,27 +53,23 @@ export function CommunityTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: false,
     enableRowSelection: true,
     debugTable: true,
   });
-
-  useEffect(() => {
-    table.resetRowSelection();
-    setRowSelection({});
-  }, [resetRowSelectionTrigger]);
 
   return (
     <>
       <DataTableToolbar
         table={table}
-        onBulkDelete={onBulkDelete}
+        onBulkDelete={(ids: string[]) => onBulkDelete(ids)}
         isBulkDeleting={isBulkDeleting}
         showBulkDeleteButton
-        showExportButton
-        filterPlaceholder="Buscar comunidad..."
-        exportFileName="comunidades"
+        showExportButton={false}
+        filterPlaceholder="Buscar servicio..."
+        exportFileName="servicios"
         showFilterButton
-        onFilterClick={() => console.log("Filtrar")}
+        onFilterClick={() => console.log('Abrir filtros')}
         showSortButton
       />
       <DataTable table={table} columns={columns} />

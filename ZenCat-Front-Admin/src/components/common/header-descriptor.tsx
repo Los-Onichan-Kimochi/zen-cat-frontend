@@ -8,7 +8,7 @@ interface HeaderDescriptorProps {
 
 const HeaderDescriptor: React.FC<HeaderDescriptorProps> = ({ title, subtitle }) => {
   return (
-    <div className="mb-10 relative inline-block"> 
+    <div className="mb-8 relative inline-block"> 
       <h1 className="font-montserrat text-5xl font-black text-black m-0 p-0 pb-2.5 inline-block tracking-wide">
         {title}
       </h1>

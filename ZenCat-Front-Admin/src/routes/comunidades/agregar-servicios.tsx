@@ -187,8 +187,8 @@ function AddCommunityServicePageComponent() {
         )}
       </div>
       <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-        <Button variant="outline" type="button" onClick={handleCancel}>Cancelar</Button>
-        <Button onClick={handleGuardar} className="w-full sm:w-auto">
+        <Button variant="outline" type="button" className="h-10 w-30 text-base" onClick={handleCancel}>Cancelar</Button>
+        <Button onClick={handleGuardar} className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800">
           Guardar
         </Button>
       </div>
