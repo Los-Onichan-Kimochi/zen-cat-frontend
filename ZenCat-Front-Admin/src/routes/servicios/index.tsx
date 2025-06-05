@@ -3,7 +3,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, Plus, Upload } from 'lucide-react';
+import { ViewToolbar } from '@/components/common/view-toolbar';
+import { Users, Loader2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
@@ -98,7 +99,7 @@ function ServiciosComponent() {
   if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
         {isLoadingCounts ? (
@@ -122,19 +123,12 @@ function ServiciosComponent() {
           <p>No hay datos de servicios para mostrar conteos.</p>
         )}
       </div>
-      <div className="flex justify-end space-x-2 py-4">
-        <Link to="/servicios/servicio-nuevo" className="h-10">
-          <Button 
-            size="sm" 
-            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
-          >
-            <Plus className="mr-2 h-4 w-4 " /> Agregar
-          </Button>
-        </Link>
-        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("Carga Masiva clickeada")}>
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
+      <ViewToolbar
+        onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
+        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoadingServices ? (
         <div className="flex justify-center items-center h-64">

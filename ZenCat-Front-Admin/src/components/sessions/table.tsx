@@ -12,6 +12,7 @@ interface SessionsTableProps {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
+  onViewReservations?: (session: Session) => void;
   onBulkDelete?: (sessions: Session[]) => void;
   isBulkDeleting?: boolean;
 }
@@ -20,7 +21,8 @@ export function SessionsTable({
   data, 
   onEdit, 
   onDelete, 
-  onView, 
+  onView,
+  onViewReservations,
   onBulkDelete,
   isBulkDeleting = false
 }: SessionsTableProps) {
@@ -33,7 +35,12 @@ export function SessionsTable({
     pagination, setPagination,
   } = useDataTable();
 
-  const columns = getSessionColumns({ onEdit, onDelete, onView });
+  const columns = getSessionColumns({ 
+    onEdit, 
+    onDelete, 
+    onView, 
+    onViewReservations 
+  });
 
   const table = useReactTable({
     data,

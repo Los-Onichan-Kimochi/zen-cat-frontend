@@ -2,6 +2,7 @@
 
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,8 +13,7 @@ import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 import { CommunityTable } from '@/components/community/community-table';
 
-import { Locate, Plus, Upload, Loader2} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Locate, Loader2} from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/comunidades/')({
@@ -84,26 +84,16 @@ function ComunidadesComponent() {
         />
       </div>
 
-      <div className="flex justify-end gap-3 mb-4">
-        <Button
-          onClick={() => {
-            sessionStorage.removeItem('draftCommunity');
-            sessionStorage.removeItem('draftSelectedServices');
-            navigate({ to: '/comunidades/agregar-comunidad' });
-          }}
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Agregar
-        </Button>
-
-        <Button
-          size="sm"
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
-          onClick={() => setShowUploadDialog(true)}
-        >
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
+      <ViewToolbar
+        onAddClick={() => {
+          sessionStorage.removeItem('draftCommunity');
+          sessionStorage.removeItem('draftSelectedServices');
+          navigate({ to: '/comunidades/agregar-comunidad' });
+        }}
+        onBulkUploadClick={() => setShowUploadDialog(true)}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoading ? (
         <div className="flex justify-center items-center py-10">

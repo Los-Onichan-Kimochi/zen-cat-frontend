@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Upload, Calendar, Clock, Users, Activity } from 'lucide-react';
+import { Loader2, Calendar, Clock, Users, Activity } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { sessionsApi } from '@/api/sessions/sessions';
 import { Session, SessionState } from '@/types/session';
@@ -19,6 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SessionsTable } from '@/components/sessions/table';
+import { ReservationsModal } from '@/components/sessions/reservations-modal';
 
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
@@ -39,6 +41,8 @@ function SesionesComponent() {
   
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
+  const [isReservationsModalOpen, setIsReservationsModalOpen] = useState(false);
+  const [selectedSessionForReservations, setSelectedSessionForReservations] = useState<Session | null>(null);
 
   const { 
     data: sessionsData,
@@ -47,6 +51,34 @@ function SesionesComponent() {
   } = useQuery<Session[], Error>({
     queryKey: ['sessions'],
     queryFn: () => sessionsApi.getSessions(),
+  });
+
+  // Mock data for reservations - you should replace this with actual API call
+  const { 
+    data: reservationsData,
+    isLoading: isLoadingReservations
+  } = useQuery({
+    queryKey: ['reservations', selectedSessionForReservations?.id],
+    queryFn: () => {
+      // Replace this with actual API call to get reservations for a session
+      return Promise.resolve([
+        {
+          id: '1',
+          user_name: 'María García',
+          user_email: 'maria@email.com',
+          user_phone: '+57 300 123 4567',
+          created_at: '2024-01-15T10:30:00Z'
+        },
+        {
+          id: '2',
+          user_name: 'Carlos López',
+          user_email: 'carlos@email.com',
+          user_phone: '+57 301 987 6543',
+          created_at: '2024-01-16T14:20:00Z'
+        }
+      ]);
+    },
+    enabled: !!selectedSessionForReservations && isReservationsModalOpen,
   });
 
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<void, Error, string>({
@@ -106,6 +138,11 @@ function SesionesComponent() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleViewReservations = (session: Session) => {
+    setSelectedSessionForReservations(session);
+    setIsReservationsModalOpen(true);
+  };
+
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
   };
@@ -113,7 +150,7 @@ function SesionesComponent() {
   if (errorSessions) return <p>Error cargando sesiones: {errorSessions.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="SESIONES" subtitle="LISTADO DE SESIONES" />
 
       <div className="flex items-center justify-center space-x-4 mt-2 font-montserrat min-h-[120px] flex-wrap">
@@ -149,22 +186,12 @@ function SesionesComponent() {
         )}
       </div>
 
-      <div className="flex justify-end space-x-2 py-4">
-        <Button
-          onClick={() => navigate({ to: '/sesiones/agregar' })}
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Agregar
-        </Button>
-
-        <Button
-          size="sm"
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800"
-          onClick={() => console.log('Carga Masiva clickeada')}
-        >
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
+      <ViewToolbar
+        onAddClick={() => navigate({ to: '/sesiones/agregar' })}
+        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoadingSessions ? (
         <div className="flex justify-center items-center h-64">
@@ -176,6 +203,7 @@ function SesionesComponent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
+          onViewReservations={handleViewReservations}
           onBulkDelete={handleBulkDelete}
           isBulkDeleting={isBulkDeleting}
         />
@@ -207,6 +235,16 @@ function SesionesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ReservationsModal
+        isOpen={isReservationsModalOpen}
+        onClose={() => {
+          setIsReservationsModalOpen(false);
+          setSelectedSessionForReservations(null);
+        }}
+        session={selectedSessionForReservations}
+        reservations={reservationsData || []}
+      />
     </div>
   );
 } 

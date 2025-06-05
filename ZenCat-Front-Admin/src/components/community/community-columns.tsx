@@ -35,11 +35,13 @@ export function getCommunityColumns({
     },
     {
       accessorKey: "id",
-      header: "Código",
+      header: ({ column }) => (
+        <div className="text-center font-bold">Código</div>
+      ),
       cell: ({ row }) => {
         const value = row.getValue("id") as string;
         return (
-          <div className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap" title={value}>
+          <div className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap text-center" title={value}>
             {value}
           </div>
         );
@@ -48,23 +50,40 @@ export function getCommunityColumns({
     },
     {
       accessorKey: "name",
-      header: "Nombre",
+      header: ({ column }) => (
+        <div className="text-center font-bold">Nombre</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("name")}</div>
+      ),
     },
     {
       accessorKey: "purpose",
-      header: "Propósito",
+      header: ({ column }) => (
+        <div className="text-center font-bold">Propósito</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("purpose")}</div>
+      ),
     },
     {
       accessorKey: "number_subscriptions",
-      header: "Cantidad de miembros",
+      header: ({ column }) => (
+        <div className="text-center font-bold">Cantidad de miembros</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("number_subscriptions")}</div>
+      ),
     },
     {
       id: "actions",
-      header: "Acciones",
+      header: ({ column }) => (
+        <div className="text-center font-bold">Acciones</div>
+      ),
       cell: ({ row }) => {
         const com = row.original;
         return (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center justify-center">
             <Link to="/comunidades/ver" search={{ id: com.id }}>
               <Button size="sm" variant="ghost" className="h-8 w-8 p-0 border border-black rounded-full">
                 <MoreHorizontal className="!w-5 !h-5" />

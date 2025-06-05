@@ -2,11 +2,12 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { toast } from 'sonner';
 import { LocalProvider, useLocal } from '@/context/LocalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
-import { Loader2, Plus, Upload, MapPin } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
@@ -22,6 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LocalsTable } from '@/components/locals/table';
+
 export const Route = createFileRoute('/locales/')({
   component: () => (
     <LocalProvider>
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/locales/')({
     </LocalProvider>
   ),
 });
+
 function LocalesComponent(){
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
@@ -91,7 +94,7 @@ function LocalesComponent(){
    if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
       <div className="mb-6 flex items-center gap-4">
         <HomeCard
@@ -107,17 +110,12 @@ function LocalesComponent(){
           description={maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'}
         />
       </div>
-       <div className="flex justify-end space-x-2 py-4">
-        <Button
-          className="bg-black text-white font-bold rounded-lg flex items-center gap-2 px-5 py-2 h-11 shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
-          onClick={() => navigate({ to: '/locales/agregar' })}
-        >
-          Agregar <Plus className="w-5 h-5" />
-        </Button>
-        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("Carga Masiva clickeada")}>
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
+       <ViewToolbar
+         onAddClick={() => navigate({ to: '/locales/agregar' })}
+         onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+         addButtonText="Agregar"
+         bulkUploadButtonText="Carga Masiva"
+       />
 
       {isLoadingLocals ? (
         <div className="flex justify-center items-center h-64">

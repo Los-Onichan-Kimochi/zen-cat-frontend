@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import HeaderDescriptor from '@/components/common/header-descriptor';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { Button } from "@/components/ui/button";
 import { User } from "@/types/user";
 import { Gem } from 'lucide-react';
@@ -67,7 +68,7 @@ function UsuariosComponent() {
   if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="USUARIOS" subtitle="LISTADO DE USUARIOS" />
 
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
@@ -83,32 +84,12 @@ function UsuariosComponent() {
         )}
       </div>
 
-      <div className="flex justify-end space-x-2 py-4">
-        <Link to="/usuarios/agregar">
-          <Button
-            size="sm"
-            className={`bg-black text-white font-bold rounded-lg flex items-center justify-between shadow hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out ${btnSizeClasses}`}
-          >
-            <span>Agregar</span>
-            <Plus className="w-5 h-5" />
-          </Button>
-        </Link>
-
-        <Button
-          size="sm"
-          className={`
-            bg-black text-white font-bold rounded-lg
-            grid grid-rows-2 grid-cols-[1fr_auto] items-center
-            shadow hover:bg-gray-800 hover:scale-105 active:scale-95
-            transition-all duration-200 ease-in-out
-            ${btnSizeClasses}
-          `}
-        >
-          <span className="row-start-1 col-start-1">Carga</span>
-          <span className="row-start-2 col-start-1">Masiva</span>
-          <Plus className="row-span-2 col-start-2 justify-self-center w-5 h-5" />
-        </Button>
-      </div>
+      <ViewToolbar
+        onAddClick={() => navigate({ to: '/usuarios/agregar' })}
+        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoadingUsers ? (
         <div className="flex-1 flex items-center justify-center">

@@ -16,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { getColumnLabel } from '@/utils/column-labels';
 
 interface DataWithId {
   id: string | number;
@@ -36,9 +37,15 @@ interface DataTableToolbarProps<TData> {
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
-  return typeof column.columnDef.header === 'string'
-    ? column.columnDef.header
-    : column.id;
+  const friendlyName = getColumnLabel(column.id);
+  
+  if (friendlyName === column.id) {
+    return typeof column.columnDef.header === 'string'
+      ? column.columnDef.header
+      : column.id;
+  }
+  
+  return friendlyName;
 }
 
 export function DataTableToolbar<TData extends DataWithId>({
@@ -146,7 +153,7 @@ export function DataTableToolbar<TData extends DataWithId>({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" 
-                  className="h-10 zcursor-pointer">
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200">
                   <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />Ordenar por<ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -174,7 +181,7 @@ export function DataTableToolbar<TData extends DataWithId>({
           {showFilterButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10">
+                <Button variant="outline" size="sm" className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200">
                   <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -190,7 +197,7 @@ export function DataTableToolbar<TData extends DataWithId>({
           {showExportButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10">
+                <Button variant="outline" size="sm" className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200">
                   <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -217,7 +224,7 @@ export function DataTableToolbar<TData extends DataWithId>({
             <Button
               variant="destructive"
               size="sm"
-              className="h-10 font-bold"
+              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200"
               onClick={handleDeleteSelected}
               disabled={!rowsSelected || isBulkDeleting}
             >
