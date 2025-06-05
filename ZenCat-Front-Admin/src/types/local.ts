@@ -44,3 +44,4 @@ export interface District {
 }
 */
 export type UpdateLocalPayload = Partial<CreateLocalPayload>;
+export type BulkCreateLocalPayLoad = CreateLocalPayload[];
