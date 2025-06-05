@@ -241,6 +241,8 @@ function ProfesionalesComponent() {
                   navigate({ to: '/servicios/servicio-ver' });
                 }
                  else {
+                  // 1. Guardar los seleccionados en el localStorage
+                  localStorage.setItem('profesionalesSeleccionados', JSON.stringify(selectedProfessionals));
                   navigate({ to: '/servicios/servicio-nuevo' });
                 }
               }}
