@@ -6,18 +6,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import React from 'react';
-import { 
-  ArrowLeft, 
-  Save, 
-  AlertTriangle, 
-  Clock, 
-  Users, 
-  MapPin, 
-  Link as LinkIcon, 
+import {
+  ArrowLeft,
+  Save,
+  AlertTriangle,
+  Clock,
+  Users,
+  MapPin,
+  Link as LinkIcon,
   User,
   Calendar as CalendarIcon,
   Calendar,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -39,51 +39,78 @@ import { sessionsApi } from '@/api/sessions/sessions';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { localsApi } from '@/api/locals/locals';
 import { CreateSessionPayload } from '@/types/session';
-import { useSessionConflicts, useDayAvailability, useMonthlyAvailability } from '@/hooks/use-session-conflicts';
+import {
+  useSessionConflicts,
+  useDayAvailability,
+  useMonthlyAvailability,
+} from '@/hooks/use-session-conflicts';
 import { TimeSlotDisplay } from '@/components/sessions/time-slot-display';
 import { SimpleTimePickerModal } from '@/components/sessions/simple-time-picker-modal';
 
-const sessionSchema = z.object({
-  title: z.string().min(1, 'El título es requerido').max(200, 'El título no puede exceder 200 caracteres'),
-  date: z.date({ required_error: 'La fecha es requerida' }),
-  start_time: z.string().min(1, 'La hora de inicio es requerida'),
-  end_time: z.string().min(1, 'La hora de fin es requerida'),
-  capacity: z.number().min(1, 'La capacidad debe ser al menos 1').max(1000, 'La capacidad no puede exceder 1000'),
-  professional_id: z.string().min(1, 'Debe seleccionar un profesional'),
-  is_virtual: z.boolean(),
-  local_id: z.string().optional(),
-  session_link: z.string().url('Debe ser una URL válida').optional().or(z.literal('')),
-}).refine((data) => {
-  // Validar que si es presencial, debe tener local_id
-  if (!data.is_virtual && !data.local_id) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Para sesiones presenciales debe seleccionar un local',
-  path: ['local_id'],
-}).refine((data) => {
-  // Validar que la hora de fin sea después de la hora de inicio
-  if (data.start_time && data.end_time) {
-    return data.end_time > data.start_time;
-  }
-  return true;
-}, {
-  message: 'La hora de fin debe ser posterior a la hora de inicio',
-  path: ['end_time'],
-}).refine((data) => {
-  // Validar duración mínima de 30 minutos
-  if (data.start_time && data.end_time) {
-    const start = new Date(`2000-01-01T${data.start_time}`);
-    const end = new Date(`2000-01-01T${data.end_time}`);
-    const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-    return diffMinutes >= 30;
-  }
-  return true;
-}, {
-  message: 'La sesión debe durar al menos 30 minutos',
-  path: ['end_time'],
-});
+const sessionSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, 'El título es requerido')
+      .max(200, 'El título no puede exceder 200 caracteres'),
+    date: z.date({ required_error: 'La fecha es requerida' }),
+    start_time: z.string().min(1, 'La hora de inicio es requerida'),
+    end_time: z.string().min(1, 'La hora de fin es requerida'),
+    capacity: z
+      .number()
+      .min(1, 'La capacidad debe ser al menos 1')
+      .max(1000, 'La capacidad no puede exceder 1000'),
+    professional_id: z.string().min(1, 'Debe seleccionar un profesional'),
+    is_virtual: z.boolean(),
+    local_id: z.string().optional(),
+    session_link: z
+      .string()
+      .url('Debe ser una URL válida')
+      .optional()
+      .or(z.literal('')),
+  })
+  .refine(
+    (data) => {
+      // Validar que si es presencial, debe tener local_id
+      if (!data.is_virtual && !data.local_id) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Para sesiones presenciales debe seleccionar un local',
+      path: ['local_id'],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validar que la hora de fin sea después de la hora de inicio
+      if (data.start_time && data.end_time) {
+        return data.end_time > data.start_time;
+      }
+      return true;
+    },
+    {
+      message: 'La hora de fin debe ser posterior a la hora de inicio',
+      path: ['end_time'],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validar duración mínima de 30 minutos
+      if (data.start_time && data.end_time) {
+        const start = new Date(`2000-01-01T${data.start_time}`);
+        const end = new Date(`2000-01-01T${data.end_time}`);
+        const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+        return diffMinutes >= 30;
+      }
+      return true;
+    },
+    {
+      message: 'La sesión debe durar al menos 30 minutos',
+      path: ['end_time'],
+    },
+  );
 
 type SessionFormData = z.infer<typeof sessionSchema>;
 
@@ -131,20 +158,24 @@ function AddSessionComponent() {
     localId: !watchedValues.is_virtual ? watchedValues.local_id : undefined,
   };
 
-  const { hasConflict, conflicts, isLoading: isCheckingConflicts } = useSessionConflicts(conflictCheck);
+  const {
+    hasConflict,
+    conflicts,
+    isLoading: isCheckingConflicts,
+  } = useSessionConflicts(conflictCheck);
 
   // Obtener disponibilidad del día
   const availability = useDayAvailability(
     watchedValues.date ? format(watchedValues.date, 'yyyy-MM-dd') : '',
     watchedValues.professional_id,
-    !watchedValues.is_virtual ? watchedValues.local_id : undefined
+    !watchedValues.is_virtual ? watchedValues.local_id : undefined,
   );
 
   // Obtener días ocupados del mes
   const { occupiedDates } = useMonthlyAvailability(
     currentMonth,
     watchedValues.professional_id,
-    !watchedValues.is_virtual ? watchedValues.local_id : undefined
+    !watchedValues.is_virtual ? watchedValues.local_id : undefined,
   );
 
   // Mutación para crear sesión
@@ -168,11 +199,12 @@ function AddSessionComponent() {
 
   const onSubmit = (data: SessionFormData) => {
     console.log('Form submitted with data:', data);
-    
+
     if (hasConflict) {
       console.log('Blocked due to conflicts:', conflicts);
-      toast.error('No se puede crear la sesión', { 
-        description: 'Existen conflictos de horario que deben resolverse primero' 
+      toast.error('No se puede crear la sesión', {
+        description:
+          'Existen conflictos de horario que deben resolverse primero',
       });
       return;
     }
@@ -185,7 +217,8 @@ function AddSessionComponent() {
       capacity: data.capacity,
       professional_id: data.professional_id,
       local_id: data.is_virtual ? null : data.local_id || null,
-      session_link: data.is_virtual && data.session_link ? data.session_link : null,
+      session_link:
+        data.is_virtual && data.session_link ? data.session_link : null,
     };
 
     console.log('Creating session with payload:', payload);
@@ -195,10 +228,7 @@ function AddSessionComponent() {
   return (
     <div className="p-6 h-full">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate({ to: '/sesiones' })}
-        >
+        <Button variant="outline" onClick={() => navigate({ to: '/sesiones' })}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
@@ -216,7 +246,10 @@ function AddSessionComponent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   {/* Información básica */}
                   <div className="space-y-4">
                     <div>
@@ -264,7 +297,9 @@ function AddSessionComponent() {
                           type="number"
                           min="1"
                           max="1000"
-                          {...form.register('capacity', { valueAsNumber: true })}
+                          {...form.register('capacity', {
+                            valueAsNumber: true,
+                          })}
                         />
                         {form.formState.errors.capacity && (
                           <p className="text-red-500 text-sm mt-1">
@@ -281,7 +316,10 @@ function AddSessionComponent() {
                         <SimpleTimePickerModal
                           selectedRange={
                             watchedValues.start_time && watchedValues.end_time
-                              ? { start: watchedValues.start_time, end: watchedValues.end_time }
+                              ? {
+                                  start: watchedValues.start_time,
+                                  end: watchedValues.end_time,
+                                }
                               : undefined
                           }
                           onRangeSelect={(range) => {
@@ -331,17 +369,24 @@ function AddSessionComponent() {
                     <Label>Profesional *</Label>
                     <Select
                       value={watchedValues.professional_id}
-                      onValueChange={(value) => setValue('professional_id', value)}
+                      onValueChange={(value) =>
+                        setValue('professional_id', value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar profesional" />
                       </SelectTrigger>
                       <SelectContent>
                         {isLoadingProfessionals ? (
-                          <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                          <SelectItem value="loading" disabled>
+                            Cargando...
+                          </SelectItem>
                         ) : (
                           professionals?.map((professional) => (
-                            <SelectItem key={professional.id} value={professional.id}>
+                            <SelectItem
+                              key={professional.id}
+                              value={professional.id}
+                            >
                               {professional.name} {professional.lastNames}
                             </SelectItem>
                           ))
@@ -375,7 +420,9 @@ function AddSessionComponent() {
 
                     {watchedValues.is_virtual ? (
                       <div>
-                        <Label htmlFor="session_link">Enlace de la sesión</Label>
+                        <Label htmlFor="session_link">
+                          Enlace de la sesión
+                        </Label>
                         <Input
                           id="session_link"
                           type="url"
@@ -400,11 +447,14 @@ function AddSessionComponent() {
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingLocals ? (
-                              <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                              <SelectItem value="loading" disabled>
+                                Cargando...
+                              </SelectItem>
                             ) : (
                               locals?.map((local) => (
                                 <SelectItem key={local.id} value={local.id}>
-                                  {local.local_name} - {local.address} {local.street_number}
+                                  {local.local_name} - {local.address}{' '}
+                                  {local.street_number}
                                 </SelectItem>
                               ))
                             )}
@@ -463,9 +513,17 @@ function AddSessionComponent() {
               </CardHeader>
               <CardContent>
                 <TimeSlotDisplay
-                  date={watchedValues.date ? format(watchedValues.date, 'yyyy-MM-dd') : ''}
+                  date={
+                    watchedValues.date
+                      ? format(watchedValues.date, 'yyyy-MM-dd')
+                      : ''
+                  }
                   professionalId={watchedValues.professional_id}
-                  localId={!watchedValues.is_virtual ? watchedValues.local_id : undefined}
+                  localId={
+                    !watchedValues.is_virtual
+                      ? watchedValues.local_id
+                      : undefined
+                  }
                 />
               </CardContent>
             </Card>
@@ -487,21 +545,31 @@ function AddSessionComponent() {
                           Conflicto de profesional:
                         </p>
                         {conflicts.professional.map((session) => (
-                          <div key={session.id} className="text-sm text-red-600 bg-red-100 p-2 rounded">
-                            {session.title} - {format(new Date(session.start_time), 'HH:mm')} a {format(new Date(session.end_time), 'HH:mm')}
+                          <div
+                            key={session.id}
+                            className="text-sm text-red-600 bg-red-100 p-2 rounded"
+                          >
+                            {session.title} -{' '}
+                            {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                            {format(new Date(session.end_time), 'HH:mm')}
                           </div>
                         ))}
                       </div>
                     )}
-                    
+
                     {conflicts.local.length > 0 && (
                       <div>
                         <p className="text-sm font-medium text-red-700 mb-2">
                           Conflicto de local:
                         </p>
                         {conflicts.local.map((session) => (
-                          <div key={session.id} className="text-sm text-red-600 bg-red-100 p-2 rounded">
-                            {session.title} - {format(new Date(session.start_time), 'HH:mm')} a {format(new Date(session.end_time), 'HH:mm')}
+                          <div
+                            key={session.id}
+                            className="text-sm text-red-600 bg-red-100 p-2 rounded"
+                          >
+                            {session.title} -{' '}
+                            {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                            {format(new Date(session.end_time), 'HH:mm')}
                           </div>
                         ))}
                       </div>
@@ -518,7 +586,9 @@ function AddSessionComponent() {
               </CardHeader>
               <CardContent className="text-sm text-gray-600 space-y-2">
                 <p>• La duración mínima de una sesión es 30 minutos</p>
-                <p>• No puede haber sesiones simultáneas del mismo profesional</p>
+                <p>
+                  • No puede haber sesiones simultáneas del mismo profesional
+                </p>
                 <p>• Un local no puede tener sesiones superpuestas</p>
                 <p>• Las fechas pasadas no están disponibles</p>
                 <p>• Para sesiones virtuales, el enlace es opcional</p>
@@ -529,4 +599,4 @@ function AddSessionComponent() {
       </div>
     </div>
   );
-} 
+}

@@ -19,7 +19,11 @@ function EditSessionComponent() {
   const navigate = useNavigate();
   const { id } = Route.useSearch();
 
-  const { data: session, isLoading, error } = useQuery({
+  const {
+    data: session,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['session', id],
     queryFn: () => sessionsApi.getSessionById(id),
   });
@@ -36,8 +40,8 @@ function EditSessionComponent() {
     return (
       <div className="p-6 h-full">
         <div className="flex items-center mb-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate({ to: '/sesiones' })}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -54,10 +58,7 @@ function EditSessionComponent() {
   return (
     <div className="p-6 h-full">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate({ to: '/sesiones' })}
-        >
+        <Button variant="outline" onClick={() => navigate({ to: '/sesiones' })}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
@@ -68,7 +69,7 @@ function EditSessionComponent() {
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
             Editar Sesión: {session.title}
           </h1>
-          
+
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
               Formulario para editar sesiones en desarrollo...
@@ -84,4 +85,4 @@ function EditSessionComponent() {
       </div>
     </div>
   );
-} 
+}

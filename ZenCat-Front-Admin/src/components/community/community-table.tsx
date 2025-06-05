@@ -1,7 +1,13 @@
 'use client';
 
 import { Community } from '@/types/community';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { getCommunityColumns } from './community-columns';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -25,12 +31,18 @@ export function CommunityTable({
   resetRowSelectionTrigger,
 }: CommunityTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getCommunityColumns({ onDelete });
@@ -76,7 +88,7 @@ export function CommunityTable({
         filterPlaceholder="Buscar comunidad..."
         exportFileName="comunidades"
         showFilterButton
-        onFilterClick={() => console.log("Filtrar")}
+        onFilterClick={() => console.log('Filtrar')}
         showSortButton
       />
       <DataTable table={table} columns={columns} />

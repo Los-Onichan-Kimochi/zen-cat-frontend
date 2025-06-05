@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { ViewToolbar } from '@/components/common/view-toolbar';
-import { Button } from "@/components/ui/button";
-import { User } from "@/types/user";
+import { Button } from '@/components/ui/button';
+import { User } from '@/types/user';
 import { Gem } from 'lucide-react';
-import HomeCard from "@/components/common/home-card";
+import HomeCard from '@/components/common/home-card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,10 +16,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import { UsersTable } from '@/components/users/table';
 
 export const Route = createFileRoute('/usuarios/')({
@@ -34,16 +34,26 @@ function UsuariosComponent() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   // Query para obtener usuarios
-  const { data: usersData, isLoading: isLoadingUsers, error: errorUsers } = useQuery<User[], Error>({
+  const {
+    data: usersData,
+    isLoading: isLoadingUsers,
+    error: errorUsers,
+  } = useQuery<User[], Error>({
     queryKey: ['usuarios'],
     queryFn: () => usuariosApi.getUsuarios(),
   });
 
   // Mutation para eliminar usuario
-  const { mutate: deleteUser, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteUser, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => usuariosApi.deleteUsuario(id),
     onSuccess: (_, id) => {
-      toast.success('Usuario eliminado', { description: `Usuario eliminado exitosamente` });
+      toast.success('Usuario eliminado', {
+        description: `Usuario eliminado exitosamente`,
+      });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
     },
     onError: (err) => {
@@ -63,7 +73,7 @@ function UsuariosComponent() {
     navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } });
   };
 
-  const btnSizeClasses = "h-11 w-28 px-4";
+  const btnSizeClasses = 'h-11 w-28 px-4';
 
   if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
 
@@ -110,14 +120,20 @@ function UsuariosComponent() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar este usuario?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas eliminar este usuario?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">Usuario: {userToDelete?.name}</div>
+              <div className="mt-2 font-medium">
+                Usuario: {userToDelete?.name}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button
                 variant="destructive"
@@ -137,4 +153,4 @@ function UsuariosComponent() {
   );
 }
 
-export default UsuariosComponent; 
+export default UsuariosComponent;

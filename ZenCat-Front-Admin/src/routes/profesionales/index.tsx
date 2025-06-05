@@ -47,13 +47,20 @@ function ProfesionalesComponent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
 
-  const { data: professionalsData, isLoading: isLoadingProfessionals, error: errorProfessionals } =
-    useQuery<Professional[], Error>({
-      queryKey: ['professionals'],
-      queryFn: professionalsApi.getProfessionals,
-    });
+  const {
+    data: professionalsData,
+    isLoading: isLoadingProfessionals,
+    error: errorProfessionals,
+  } = useQuery<Professional[], Error>({
+    queryKey: ['professionals'],
+    queryFn: professionalsApi.getProfessionals,
+  });
 
-  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => professionalsApi.deleteProfessional(id),
     onSuccess: (_, id) => {
       toast.success('Profesional eliminado', { description: `ID ${id}` });
@@ -103,20 +110,39 @@ function ProfesionalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
-  const btnSizeClasses = "h-11 w-28 px-4";
+  const btnSizeClasses = 'h-11 w-28 px-4';
 
-  if (errorProfessionals) return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
+  if (errorProfessionals)
+    return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
-      <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
+      <HeaderDescriptor
+        title="PROFESIONALES"
+        subtitle="LISTADO DE PROFESIONALES"
+      />
 
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
         {counts ? (
           <>
-            <HomeCard icon={<Users className="w-8 h-8 text-teal-600" />} iconBgColor="bg-teal-100" title="Yoga" description={counts[ProfessionalSpecialty.YOGA_TEACHER]} />
-            <HomeCard icon={<Users className="w-8 h-8 text-pink-600" />} iconBgColor="bg-pink-100" title="Gimnasio" description={counts[ProfessionalSpecialty.GYM_TEACHER]} />
-            <HomeCard icon={<Users className="w-8 h-8 text-blue-600" />} iconBgColor="bg-blue-100" title="Médicos" description={counts[ProfessionalSpecialty.DOCTOR]} />
+            <HomeCard
+              icon={<Users className="w-8 h-8 text-teal-600" />}
+              iconBgColor="bg-teal-100"
+              title="Yoga"
+              description={counts[ProfessionalSpecialty.YOGA_TEACHER]}
+            />
+            <HomeCard
+              icon={<Users className="w-8 h-8 text-pink-600" />}
+              iconBgColor="bg-pink-100"
+              title="Gimnasio"
+              description={counts[ProfessionalSpecialty.GYM_TEACHER]}
+            />
+            <HomeCard
+              icon={<Users className="w-8 h-8 text-blue-600" />}
+              iconBgColor="bg-blue-100"
+              title="Médicos"
+              description={counts[ProfessionalSpecialty.DOCTOR]}
+            />
           </>
         ) : (
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
@@ -146,14 +172,20 @@ function ProfesionalesComponent() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar este profesional?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas eliminar este profesional?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">Profesional: {profToDelete?.name}</div>
+              <div className="mt-2 font-medium">
+                Profesional: {profToDelete?.name}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button
                 variant="destructive"

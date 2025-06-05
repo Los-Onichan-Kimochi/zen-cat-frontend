@@ -4,11 +4,11 @@ export const getColumnLabel = (columnKey: string): string => {
     // Sessions columns
     title: 'Título',
     date: 'Fecha',
-    time_range: 'Horario', 
+    time_range: 'Horario',
     state: 'Estado',
     capacity_info: 'Capacidad',
     view_reservations: 'Ver reservas',
-    
+
     // Professionals columns
     name: 'Nombres',
     lastNames: 'Apellidos',
@@ -16,11 +16,11 @@ export const getColumnLabel = (columnKey: string): string => {
     email: 'Correo electrónico',
     phone_number: 'Número de celular',
     type: 'Tipo',
-    
+
     // Services columns
     description: 'Descripción',
     is_virtual: 'Tipo',
-    
+
     // Locals columns
     local_name: 'Nombre del Local',
     address: 'Dirección',
@@ -31,14 +31,14 @@ export const getColumnLabel = (columnKey: string): string => {
     capacity: 'Capacidad',
     street_name: 'Calle',
     building_number: 'Número',
-    
+
     // Users columns (if exists)
     first_name: 'Nombres',
     last_name: 'Apellidos',
     username: 'Usuario',
     role: 'Rol',
     status: 'Estado',
-    
+
     // Common columns
     select: 'Seleccionar',
     actions: 'Acciones',
@@ -50,7 +50,9 @@ export const getColumnLabel = (columnKey: string): string => {
 };
 
 // Get all available sortable columns for a specific table
-export const getSortableColumns = (tableType: 'sessions' | 'professionals' | 'services' | 'locals' | 'users'): Array<{ key: string; label: string }> => {
+export const getSortableColumns = (
+  tableType: 'sessions' | 'professionals' | 'services' | 'locals' | 'users',
+): Array<{ key: string; label: string }> => {
   const sessionsColumns = [
     { key: 'title', label: getColumnLabel('title') },
     { key: 'date', label: getColumnLabel('date') },
@@ -106,4 +108,4 @@ export const getSortableColumns = (tableType: 'sessions' | 'professionals' | 'se
     default:
       return [];
   }
-}; 
+};

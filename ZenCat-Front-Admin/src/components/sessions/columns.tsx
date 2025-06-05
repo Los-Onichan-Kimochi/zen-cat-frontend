@@ -2,7 +2,15 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Session, SessionState } from '@/types/session';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MoreHorizontal, Trash, Eye, Edit, Calendar, Clock, Users } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Trash,
+  Eye,
+  Edit,
+  Calendar,
+  Clock,
+  Users,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +18,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -55,11 +63,11 @@ const getStateText = (state: SessionState) => {
   }
 };
 
-export function getSessionColumns({ 
-  onEdit, 
-  onDelete, 
+export function getSessionColumns({
+  onEdit,
+  onDelete,
   onView,
-  onViewReservations
+  onViewReservations,
 }: GetSessionColumnsProps): ColumnDef<Session>[] {
   return [
     {
@@ -67,8 +75,13 @@ export function getSessionColumns({
       header: ({ table }) => (
         <div className="flex justify-center">
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
             aria-label="Select all"
           />
         </div>
@@ -94,8 +107,8 @@ export function getSessionColumns({
         <div className="text-center font-medium">{row.getValue('title')}</div>
       ),
       meta: {
-        displayName: 'Título'
-      }
+        displayName: 'Título',
+      },
     },
     {
       accessorKey: 'date',
@@ -116,8 +129,8 @@ export function getSessionColumns({
         }
       },
       meta: {
-        displayName: 'Fecha'
-      }
+        displayName: 'Fecha',
+      },
     },
     {
       id: 'time_range',
@@ -134,7 +147,9 @@ export function getSessionColumns({
           return (
             <div className="flex items-center justify-center">
               <Clock className="mr-2 h-4 w-4 text-gray-500" />
-              <span className="text-sm">{start} - {end}</span>
+              <span className="text-sm">
+                {start} - {end}
+              </span>
             </div>
           );
         } catch (error) {
@@ -142,8 +157,8 @@ export function getSessionColumns({
         }
       },
       meta: {
-        displayName: 'Horario'
-      }
+        displayName: 'Horario',
+      },
     },
     {
       accessorKey: 'state',
@@ -154,15 +169,17 @@ export function getSessionColumns({
         const state = row.getValue('state') as SessionState;
         return (
           <div className="flex justify-center">
-            <div className={`px-2 py-1 rounded text-xs font-medium ${getStateColor(state)}`}>
+            <div
+              className={`px-2 py-1 rounded text-xs font-medium ${getStateColor(state)}`}
+            >
               {getStateText(state)}
             </div>
           </div>
         );
       },
       meta: {
-        displayName: 'Estado'
-      }
+        displayName: 'Estado',
+      },
     },
     {
       id: 'capacity_info',
@@ -173,8 +190,9 @@ export function getSessionColumns({
       cell: ({ row }) => {
         const registeredCount = row.original.registered_count;
         const capacity = row.original.capacity;
-        const percentage = capacity > 0 ? (registeredCount / capacity) * 100 : 0;
-        
+        const percentage =
+          capacity > 0 ? (registeredCount / capacity) * 100 : 0;
+
         return (
           <div className="flex items-center justify-center space-x-2">
             <Users className="h-4 w-4 text-gray-500" />
@@ -183,11 +201,13 @@ export function getSessionColumns({
                 {registeredCount}/{capacity}
               </span>
               <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                <div 
+                <div
                   className={`h-1.5 rounded-full ${
-                    percentage >= 90 ? 'bg-red-400' :
-                    percentage >= 70 ? 'bg-yellow-400' :
-                    'bg-green-400'
+                    percentage >= 90
+                      ? 'bg-red-400'
+                      : percentage >= 70
+                        ? 'bg-yellow-400'
+                        : 'bg-green-400'
                   }`}
                   style={{ width: `${Math.min(percentage, 100)}%` }}
                 />
@@ -197,8 +217,8 @@ export function getSessionColumns({
         );
       },
       meta: {
-        displayName: 'Capacidad'
-      }
+        displayName: 'Capacidad',
+      },
     },
     {
       id: 'view_reservations',
@@ -225,8 +245,8 @@ export function getSessionColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Ver reservas'
-      }
+        displayName: 'Ver reservas',
+      },
     },
     {
       id: 'actions',
@@ -270,7 +290,7 @@ export function getSessionColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
@@ -286,8 +306,8 @@ export function getSessionColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Acciones'
-      }
+        displayName: 'Acciones',
+      },
     },
   ];
-} 
+}

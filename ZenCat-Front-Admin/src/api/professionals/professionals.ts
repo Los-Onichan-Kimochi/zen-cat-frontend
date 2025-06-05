@@ -1,5 +1,8 @@
-import { Professional, CreateProfessionalPayload, UpdateProfessionalPayload } from '@/types/professional';
-
+import {
+  Professional,
+  CreateProfessionalPayload,
+  UpdateProfessionalPayload,
+} from '@/types/professional';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,8 +18,13 @@ export const professionalsApi = {
     } else if (Array.isArray(data)) {
       return data;
     }
-    console.error('Unexpected data structure from /professional/ endpoint:', data);
-    throw new Error('Unexpected data structure from professionals API for list');
+    console.error(
+      'Unexpected data structure from /professional/ endpoint:',
+      data,
+    );
+    throw new Error(
+      'Unexpected data structure from professionals API for list',
+    );
   },
 
   getProfessionalById: async (id: string): Promise<Professional> => {
@@ -27,7 +35,9 @@ export const professionalsApi = {
     return response.json();
   },
 
-  createProfessional: async (payload: CreateProfessionalPayload): Promise<Professional> => {
+  createProfessional: async (
+    payload: CreateProfessionalPayload,
+  ): Promise<Professional> => {
     const response = await fetch(`${API_BASE_URL}/professional/`, {
       method: 'POST',
       headers: {
@@ -41,7 +51,10 @@ export const professionalsApi = {
     return response.json();
   },
 
-  updateProfessional: async (id: string, payload: UpdateProfessionalPayload): Promise<Professional> => {
+  updateProfessional: async (
+    id: string,
+    payload: UpdateProfessionalPayload,
+  ): Promise<Professional> => {
     const response = await fetch(`${API_BASE_URL}/professional/${id}/`, {
       method: 'PATCH',
       headers: {
@@ -75,6 +88,5 @@ export const professionalsApi = {
     if (!response.ok) {
       throw new Error('Error bulk deleting professionals');
     }
-  }
+  },
 };
-

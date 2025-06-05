@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { Service, ServiceType } from '@/types/service';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { ServicesTable } from '@/components/services/table';
 import {
   AlertDialog,
@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
-
 export const Route = createFileRoute('/servicios/')({
   component: ServiciosComponent,
 });
@@ -36,20 +35,24 @@ interface CalculatedCounts {
 function ServiciosComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
-  const { 
+  const {
     data: servicesData,
     isLoading: isLoadingServices,
-    error: errorServices
+    error: errorServices,
   } = useQuery<Service[], Error>({
     queryKey: ['services'],
     queryFn: servicesApi.getServices,
   });
 
-  const { mutate: deleteService, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteService, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => servicesApi.deleteService(id),
     onSuccess: (_, id) => {
       toast.success('Servicio eliminado', { description: `ID ${id}` });
@@ -68,7 +71,7 @@ function ServiciosComponent() {
       [ServiceType.VIRTUAL_SERVICE]: 0,
     };
 
-    servicesData.forEach(serv => {
+    servicesData.forEach((serv) => {
       if (serv.is_virtual === true) {
         calculatedCounts[ServiceType.VIRTUAL_SERVICE]++;
       } else if (serv.is_virtual === false) {
@@ -96,7 +99,8 @@ function ServiciosComponent() {
 
   const isLoading = isLoadingServices;
 
-  if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
+  if (errorServices)
+    return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
@@ -107,13 +111,13 @@ function ServiciosComponent() {
         ) : counts ? (
           <>
             <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600"/>}
+              icon={<Users className="w-8 h-8 text-teal-600" />}
               iconBgColor="bg-teal-100"
               title="Servicios virtuales"
               description={counts[ServiceType.VIRTUAL_SERVICE]}
             />
             <HomeCard
-              icon={<Users className="w-8 h-8 text-pink-600"/>}
+              icon={<Users className="w-8 h-8 text-pink-600" />}
               iconBgColor="bg-pink-100"
               title="servicios presenciales"
               description={counts[ServiceType.PRESENCIAL_SERVICE]}
@@ -146,14 +150,20 @@ function ServiciosComponent() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar este servicio?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas eliminar este servicio?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">Servicio: {serviceToDelete?.name}</div>
+              <div className="mt-2 font-medium">
+                Servicio: {serviceToDelete?.name}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button
                 variant="destructive"
@@ -171,4 +181,4 @@ function ServiciosComponent() {
       </AlertDialog>
     </div>
   );
-} 
+}

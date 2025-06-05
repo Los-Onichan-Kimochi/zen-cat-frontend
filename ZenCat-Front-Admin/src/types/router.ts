@@ -4,4 +4,4 @@ export interface RouterContext {
   auth: {
     getCurrentUser: () => Promise<User | null>;
   };
-} 
+}

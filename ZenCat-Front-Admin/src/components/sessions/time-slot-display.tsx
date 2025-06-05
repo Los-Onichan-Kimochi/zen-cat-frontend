@@ -7,8 +7,16 @@ interface TimeSlotDisplayProps {
   localId?: string;
 }
 
-export function TimeSlotDisplay({ date, professionalId, localId }: TimeSlotDisplayProps) {
-  const { isAvailable, busySlots } = useDayAvailability(date, professionalId, localId);
+export function TimeSlotDisplay({
+  date,
+  professionalId,
+  localId,
+}: TimeSlotDisplayProps) {
+  const { isAvailable, busySlots } = useDayAvailability(
+    date,
+    professionalId,
+    localId,
+  );
 
   if (!date) {
     return (
@@ -33,14 +41,14 @@ export function TimeSlotDisplay({ date, professionalId, localId }: TimeSlotDispl
         <AlertTriangle className="mr-2 h-4 w-4 text-amber-500" />
         Horarios ocupados
       </div>
-      
+
       <div className="space-y-2 max-h-40 overflow-y-auto">
         {busySlots.map((slot, index) => (
           <div
             key={index}
             className={`p-3 rounded-lg border-l-4 ${
-              slot.type === 'professional' 
-                ? 'bg-red-50 border-red-400' 
+              slot.type === 'professional'
+                ? 'bg-red-50 border-red-400'
                 : 'bg-blue-50 border-blue-400'
             }`}
           >
@@ -55,11 +63,13 @@ export function TimeSlotDisplay({ date, professionalId, localId }: TimeSlotDispl
                   {slot.start} - {slot.end}
                 </span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${
-                slot.type === 'professional' 
-                  ? 'bg-red-100 text-red-700' 
-                  : 'bg-blue-100 text-blue-700'
-              }`}>
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  slot.type === 'professional'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}
+              >
                 {slot.type === 'professional' ? 'Profesional' : 'Local'}
               </span>
             </div>
@@ -69,10 +79,10 @@ export function TimeSlotDisplay({ date, professionalId, localId }: TimeSlotDispl
           </div>
         ))}
       </div>
-      
+
       <div className="text-xs text-gray-500 mt-2">
         * Evita programar sesiones en estos horarios para prevenir conflictos
       </div>
     </div>
   );
-} 
+}

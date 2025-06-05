@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface GetLocalColumnsProps {
   onEdit: (local: Local) => void;
@@ -17,10 +17,10 @@ interface GetLocalColumnsProps {
   onView: (local: Local) => void;
 }
 
-export function getLocalColumns({ 
-  onEdit, 
-  onDelete, 
-  onView 
+export function getLocalColumns({
+  onEdit,
+  onDelete,
+  onView,
 }: GetLocalColumnsProps): ColumnDef<Local>[] {
   return [
     {
@@ -28,7 +28,10 @@ export function getLocalColumns({
       header: ({ table }) => (
         <div className="flex justify-center">
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
             onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
             aria-label="Select all"
           />
@@ -52,11 +55,13 @@ export function getLocalColumns({
         <div className="text-center font-bold">Nombre del Local</div>
       ),
       cell: ({ row }) => (
-        <div className="text-center font-medium">{row.getValue('local_name')}</div>
+        <div className="text-center font-medium">
+          {row.getValue('local_name')}
+        </div>
       ),
       meta: {
-        displayName: 'Nombre del Local'
-      }
+        displayName: 'Nombre del Local',
+      },
     },
     {
       id: 'address',
@@ -64,12 +69,10 @@ export function getLocalColumns({
         <div className="text-center font-bold">Dirección</div>
       ),
       accessorFn: (row) => `${row.street_name} ${row.building_number}`,
-      cell: ({ getValue }) => (
-        <div className="text-center">{getValue()}</div>
-      ),
+      cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
       meta: {
-        displayName: 'Dirección'
-      }
+        displayName: 'Dirección',
+      },
     },
     {
       accessorKey: 'reference',
@@ -80,8 +83,8 @@ export function getLocalColumns({
         <div className="text-center">{row.getValue('reference') || '-'}</div>
       ),
       meta: {
-        displayName: 'Referencia'
-      }
+        displayName: 'Referencia',
+      },
     },
     {
       accessorKey: 'district',
@@ -92,8 +95,8 @@ export function getLocalColumns({
         <div className="text-center">{row.getValue('district')}</div>
       ),
       meta: {
-        displayName: 'Distrito'
-      }
+        displayName: 'Distrito',
+      },
     },
     {
       accessorKey: 'province',
@@ -104,8 +107,8 @@ export function getLocalColumns({
         <div className="text-center">{row.getValue('province')}</div>
       ),
       meta: {
-        displayName: 'Provincia'
-      }
+        displayName: 'Provincia',
+      },
     },
     {
       accessorKey: 'region',
@@ -116,8 +119,8 @@ export function getLocalColumns({
         <div className="text-center">{row.getValue('region')}</div>
       ),
       meta: {
-        displayName: 'Región'
-      }
+        displayName: 'Región',
+      },
     },
     {
       accessorKey: 'capacity',
@@ -126,13 +129,11 @@ export function getLocalColumns({
       ),
       cell: ({ row }) => {
         const capacity = row.getValue('capacity') as number;
-        return (
-          <div className="text-center">{capacity} personas</div>
-        );
+        return <div className="text-center">{capacity} personas</div>;
       },
       meta: {
-        displayName: 'Capacidad'
-      }
+        displayName: 'Capacidad',
+      },
     },
     {
       id: 'actions',
@@ -176,7 +177,7 @@ export function getLocalColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
@@ -192,8 +193,8 @@ export function getLocalColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Acciones'
-      }
+        displayName: 'Acciones',
+      },
     },
   ];
-} 
+}

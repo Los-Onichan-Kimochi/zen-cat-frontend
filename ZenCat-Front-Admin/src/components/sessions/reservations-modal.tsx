@@ -1,4 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, User, Phone, Mail, Calendar } from 'lucide-react';
 import { Session } from '@/types/session';
@@ -10,11 +15,11 @@ interface ReservationsModalProps {
   reservations: any[]; // You might want to define a proper Reservation type
 }
 
-export function ReservationsModal({ 
-  isOpen, 
-  onClose, 
-  session, 
-  reservations = [] 
+export function ReservationsModal({
+  isOpen,
+  onClose,
+  session,
+  reservations = [],
 }: ReservationsModalProps) {
   if (!session) return null;
 
@@ -34,7 +39,7 @@ export function ReservationsModal({
             <X className="h-4 w-4" />
           </Button>
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-y-auto">
           <div className="mb-4 p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between">
@@ -70,14 +75,14 @@ export function ReservationsModal({
                           {reservation.user_name || 'Usuario desconocido'}
                         </span>
                       </div>
-                      
+
                       {reservation.user_email && (
                         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
                           <Mail className="h-3 w-3" />
                           <span>{reservation.user_email}</span>
                         </div>
                       )}
-                      
+
                       {reservation.user_phone && (
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <Phone className="h-3 w-3" />
@@ -85,11 +90,14 @@ export function ReservationsModal({
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="text-xs text-gray-500">
                       {reservation.created_at && (
                         <div>
-                          Reservado: {new Date(reservation.created_at).toLocaleDateString('es-ES')}
+                          Reservado:{' '}
+                          {new Date(reservation.created_at).toLocaleDateString(
+                            'es-ES',
+                          )}
                         </div>
                       )}
                     </div>
@@ -99,7 +107,7 @@ export function ReservationsModal({
             </div>
           )}
         </div>
-        
+
         <div className="pt-4 border-t">
           <Button onClick={onClose} className="w-full">
             Cerrar
@@ -108,4 +116,4 @@ export function ReservationsModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

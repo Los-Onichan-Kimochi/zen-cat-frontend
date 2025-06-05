@@ -8,7 +8,10 @@ export const Route = createFileRoute('/planes-membresia')({
 function PlanesMembresiaComponent() {
   return (
     <div className="p-6 h-full">
-      <HeaderDescriptor title="PLANES DE MEMBRESÍA" subtitle="LISTADO DE PLANES DE MEMBRESÍA" />
+      <HeaderDescriptor
+        title="PLANES DE MEMBRESÍA"
+        subtitle="LISTADO DE PLANES DE MEMBRESÍA"
+      />
     </div>
   );
-} 
+}

@@ -7,8 +7,8 @@ import { useEffect, useState } from 'react';
 import { handleImageFile } from '@/utils/handleImageFile';
 
 export const communityFormSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
-  purpose: z.string().min(1, { message: "El propósito es requerido." }),
+  name: z.string().min(1, { message: 'El nombre es requerido.' }),
+  purpose: z.string().min(1, { message: 'El propósito es requerido.' }),
   profileImageFile: z.any().optional(),
 });
 
@@ -36,7 +36,7 @@ export function useCommunityForm() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleImageFile(event, setImagePreview, setImageFile);
   };
-  
+
   useEffect(() => {
     const draftCommunity = sessionStorage.getItem('draftCommunity');
     if (draftCommunity) {

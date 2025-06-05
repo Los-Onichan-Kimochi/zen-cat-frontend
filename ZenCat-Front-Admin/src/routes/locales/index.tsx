@@ -11,7 +11,7 @@ import { Loader2, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,22 +32,26 @@ export const Route = createFileRoute('/locales/')({
   ),
 });
 
-function LocalesComponent(){
+function LocalesComponent() {
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
-  
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
-  const { 
+  const {
     data: localsData,
     isLoading: isLoadingLocals,
-    error: errorLocals
+    error: errorLocals,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
   });
-  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => localsApi.deleteLocal(id),
     onSuccess: (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
@@ -58,11 +62,14 @@ function LocalesComponent(){
       toast.error('Error al eliminar', { description: err.message });
     },
   });
-  const regionCounts = localsData?.reduce((acc, local) => {
+  const regionCounts = localsData?.reduce(
+    (acc, local) => {
       const region = local.region; // Asegúrate de que `region` es el nombre correcto
       acc[region] = (acc[region] || 0) + 1;
       return acc;
-  }, {} as Record<string, number>);
+    },
+    {} as Record<string, number>,
+  );
   let maxRegion = '';
   let maxCount = 0;
 
@@ -89,9 +96,9 @@ function LocalesComponent(){
     setIsDeleteModalOpen(true);
   };
 
-   const isLoading = isLoadingLocals;
+  const isLoading = isLoadingLocals;
 
-   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
+  if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
@@ -101,21 +108,23 @@ function LocalesComponent(){
           icon={<MapPin className="w-8 h-8 text-teal-600" />}
           iconBgColor="bg-teal-100"
           title="Locales totales"
-          description={localsData?.length || 0} 
+          description={localsData?.length || 0}
         />
         <HomeCard
           icon={<MapPin className="w-8 h-8 text-blue-600" />}
           iconBgColor="bg-blue-100"
           title="Region con mayor cantidad de locales: "
-          description={maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'}
+          description={
+            maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'
+          }
         />
       </div>
-       <ViewToolbar
-         onAddClick={() => navigate({ to: '/locales/agregar' })}
-         onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
-         addButtonText="Agregar"
-         bulkUploadButtonText="Carga Masiva"
-       />
+      <ViewToolbar
+        onAddClick={() => navigate({ to: '/locales/agregar' })}
+        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoadingLocals ? (
         <div className="flex justify-center items-center h-64">
@@ -129,35 +138,39 @@ function LocalesComponent(){
           onView={handleView}
         />
       )}
-    <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro que deseas eliminar este local?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer.
-                  <div className="mt-2 font-medium">Local: {localToDelete?.local_name}</div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="space-x-2">
-                <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction asChild>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      if (localToDelete) deleteLocal(localToDelete.id);
-                      setIsDeleteModalOpen(false);
-                    }}
-                  >
-                    Eliminar
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas eliminar este local?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">
+                Local: {localToDelete?.local_name}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (localToDelete) deleteLocal(localToDelete.id);
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-
   );
-  
 }
 
 export default LocalesComponent;

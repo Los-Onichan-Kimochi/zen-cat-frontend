@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface GetServiceColumnsProps {
   onEdit: (service: Service) => void;
@@ -17,10 +17,10 @@ interface GetServiceColumnsProps {
   onView: (service: Service) => void;
 }
 
-export function getServiceColumns({ 
-  onEdit, 
-  onDelete, 
-  onView 
+export function getServiceColumns({
+  onEdit,
+  onDelete,
+  onView,
 }: GetServiceColumnsProps): ColumnDef<Service>[] {
   return [
     {
@@ -28,7 +28,10 @@ export function getServiceColumns({
       header: ({ table }) => (
         <div className="flex justify-center">
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
             onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
             aria-label="Select all"
           />
@@ -55,8 +58,8 @@ export function getServiceColumns({
         <div className="text-center font-medium">{row.getValue('name')}</div>
       ),
       meta: {
-        displayName: 'Nombre'
-      }
+        displayName: 'Nombre',
+      },
     },
     {
       accessorKey: 'description',
@@ -65,9 +68,10 @@ export function getServiceColumns({
       ),
       cell: ({ row }) => {
         const description = row.getValue('description') as string;
-        const truncated = description && description.length > 50 
-          ? `${description.substring(0, 50)}...` 
-          : description || '-';
+        const truncated =
+          description && description.length > 50
+            ? `${description.substring(0, 50)}...`
+            : description || '-';
         return (
           <div className="text-center" title={description}>
             {truncated}
@@ -75,31 +79,31 @@ export function getServiceColumns({
         );
       },
       meta: {
-        displayName: 'Descripción'
-      }
+        displayName: 'Descripción',
+      },
     },
     {
       accessorKey: 'is_virtual',
-      header: ({ column }) => (
-        <div className="text-center font-bold">Tipo</div>
-      ),
+      header: ({ column }) => <div className="text-center font-bold">Tipo</div>,
       cell: ({ row }) => {
         const isVirtual = row.getValue('is_virtual') as boolean;
         return (
           <div className="flex justify-center">
-            <div className={`px-2 py-1 rounded text-xs font-medium ${
-              isVirtual 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-green-100 text-green-800'
-            }`}>
+            <div
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                isVirtual
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+              }`}
+            >
               {isVirtual ? 'Virtual' : 'Presencial'}
             </div>
           </div>
         );
       },
       meta: {
-        displayName: 'Tipo'
-      }
+        displayName: 'Tipo',
+      },
     },
     {
       id: 'actions',
@@ -143,7 +147,7 @@ export function getServiceColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
@@ -159,8 +163,8 @@ export function getServiceColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Acciones'
-      }
+        displayName: 'Acciones',
+      },
     },
   ];
-} 
+}

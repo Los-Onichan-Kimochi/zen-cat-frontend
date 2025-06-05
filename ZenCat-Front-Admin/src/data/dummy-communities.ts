@@ -1,6 +1,5 @@
 import { Community } from '@/types/community';
 
-
 export const dummyCommunities: Community[] = [
   {
     id: '001',
@@ -44,4 +43,4 @@ export const dummyCommunities: Community[] = [
     purpose: 'Propósito 1',
     logo: '',
   },
-]; 
+];

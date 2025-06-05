@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface GetProfessionalColumnsProps {
   onEdit: (professional: Professional) => void;
@@ -17,10 +17,10 @@ interface GetProfessionalColumnsProps {
   onView: (professional: Professional) => void;
 }
 
-export function getProfessionalColumns({ 
-  onEdit, 
-  onDelete, 
-  onView 
+export function getProfessionalColumns({
+  onEdit,
+  onDelete,
+  onView,
 }: GetProfessionalColumnsProps): ColumnDef<Professional>[] {
   return [
     {
@@ -28,7 +28,10 @@ export function getProfessionalColumns({
       header: ({ table }) => (
         <div className="flex justify-center">
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
             onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
             aria-label="Select all"
           />
@@ -55,21 +58,20 @@ export function getProfessionalColumns({
         <div className="text-center font-medium">{row.getValue('name')}</div>
       ),
       meta: {
-        displayName: 'Nombres'
-      }
+        displayName: 'Nombres',
+      },
     },
     {
       id: 'lastNames',
       header: ({ column }) => (
         <div className="text-center font-bold">Apellidos</div>
       ),
-      accessorFn: (row) => `${row.first_last_name} ${row.second_last_name || ''}`.trim(),
-      cell: ({ getValue }) => (
-        <div className="text-center">{getValue()}</div>
-      ),
+      accessorFn: (row) =>
+        `${row.first_last_name} ${row.second_last_name || ''}`.trim(),
+      cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
       meta: {
-        displayName: 'Apellidos'
-      }
+        displayName: 'Apellidos',
+      },
     },
     {
       accessorKey: 'specialty',
@@ -80,8 +82,8 @@ export function getProfessionalColumns({
         <div className="text-center">{row.getValue('specialty') || '-'}</div>
       ),
       meta: {
-        displayName: 'Especialidad'
-      }
+        displayName: 'Especialidad',
+      },
     },
     {
       accessorKey: 'email',
@@ -92,8 +94,8 @@ export function getProfessionalColumns({
         <div className="text-center">{row.getValue('email')}</div>
       ),
       meta: {
-        displayName: 'Correo electrónico'
-      }
+        displayName: 'Correo electrónico',
+      },
     },
     {
       accessorKey: 'phone_number',
@@ -104,20 +106,18 @@ export function getProfessionalColumns({
         <div className="text-center">{row.getValue('phone_number') || '-'}</div>
       ),
       meta: {
-        displayName: 'Número de celular'
-      }
+        displayName: 'Número de celular',
+      },
     },
     {
       accessorKey: 'type',
-      header: ({ column }) => (
-        <div className="text-center font-bold">Tipo</div>
-      ),
+      header: ({ column }) => <div className="text-center font-bold">Tipo</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('type') || '-'}</div>
       ),
       meta: {
-        displayName: 'Tipo'
-      }
+        displayName: 'Tipo',
+      },
     },
     {
       id: 'actions',
@@ -161,7 +161,7 @@ export function getProfessionalColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
@@ -177,8 +177,8 @@ export function getProfessionalColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Acciones'
-      }
+        displayName: 'Acciones',
+      },
     },
   ];
-} 
+}

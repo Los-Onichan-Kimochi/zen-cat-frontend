@@ -12,9 +12,9 @@ interface ViewToolbarProps {
 export function ViewToolbar({
   onAddClick,
   onBulkUploadClick,
-  addButtonText = "Agregar",
-  bulkUploadButtonText = "Carga Masiva",
-  showBulkUpload = true
+  addButtonText = 'Agregar',
+  bulkUploadButtonText = 'Carga Masiva',
+  showBulkUpload = true,
 }: ViewToolbarProps) {
   return (
     <div className="flex justify-end gap-3 mb-4 font-montserrat">
@@ -29,11 +29,13 @@ export function ViewToolbar({
         <Button
           size="sm"
           className="h-10 bg-black text-white font-bold hover:bg-gray-800 transition-all duration-200 cursor-pointer"
-          onClick={onBulkUploadClick || (() => console.log('Carga Masiva clickeada'))}
+          onClick={
+            onBulkUploadClick || (() => console.log('Carga Masiva clickeada'))
+          }
         >
           <Upload className="mr-2 h-4 w-4" /> {bulkUploadButtonText}
         </Button>
       )}
     </div>
   );
-} 
+}

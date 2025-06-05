@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface GetUserColumnsProps {
   onEdit: (user: User) => void;
@@ -18,11 +18,11 @@ interface GetUserColumnsProps {
   onView?: (user: User) => void;
 }
 
-export function getUserColumns({ 
-  onEdit, 
-  onDelete, 
+export function getUserColumns({
+  onEdit,
+  onDelete,
   onViewMemberships,
-  onView 
+  onView,
 }: GetUserColumnsProps): ColumnDef<User>[] {
   return [
     {
@@ -30,7 +30,10 @@ export function getUserColumns({
       header: ({ table }) => (
         <div className="flex justify-center">
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
             onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
             aria-label="Select all"
           />
@@ -57,8 +60,8 @@ export function getUserColumns({
         <div className="text-center font-medium">{row.getValue('name')}</div>
       ),
       meta: {
-        displayName: 'Nombres'
-      }
+        displayName: 'Nombres',
+      },
     },
     {
       accessorKey: 'address',
@@ -69,8 +72,8 @@ export function getUserColumns({
         <div className="text-center">{row.getValue('address') || '-'}</div>
       ),
       meta: {
-        displayName: 'Dirección'
-      }
+        displayName: 'Dirección',
+      },
     },
     {
       accessorKey: 'district',
@@ -81,8 +84,8 @@ export function getUserColumns({
         <div className="text-center">{row.getValue('district') || '-'}</div>
       ),
       meta: {
-        displayName: 'Distrito'
-      }
+        displayName: 'Distrito',
+      },
     },
     {
       accessorKey: 'phone',
@@ -93,8 +96,8 @@ export function getUserColumns({
         <div className="text-center">{row.getValue('phone') || '-'}</div>
       ),
       meta: {
-        displayName: 'Teléfono'
-      }
+        displayName: 'Teléfono',
+      },
     },
     {
       accessorKey: 'email',
@@ -105,33 +108,33 @@ export function getUserColumns({
         <div className="text-center">{row.getValue('email')}</div>
       ),
       meta: {
-        displayName: 'Correo electrónico'
-      }
+        displayName: 'Correo electrónico',
+      },
     },
     {
       accessorKey: 'role',
-      header: ({ column }) => (
-        <div className="text-center font-bold">Rol</div>
-      ),
+      header: ({ column }) => <div className="text-center font-bold">Rol</div>,
       cell: ({ row }) => {
         const role = row.getValue('role') as string;
         return (
           <div className="flex justify-center">
-            <div className={`px-2 py-1 rounded text-xs font-medium ${
-              role === 'admin' 
-                ? 'bg-red-100 text-red-800' 
-                : role === 'user'
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-gray-100 text-gray-800'
-            }`}>
+            <div
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                role === 'admin'
+                  ? 'bg-red-100 text-red-800'
+                  : role === 'user'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-gray-100 text-gray-800'
+              }`}
+            >
               {role}
             </div>
           </div>
         );
       },
       meta: {
-        displayName: 'Rol'
-      }
+        displayName: 'Rol',
+      },
     },
     {
       id: 'memberships',
@@ -155,8 +158,8 @@ export function getUserColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Membresías'
-      }
+        displayName: 'Membresías',
+      },
     },
     {
       id: 'actions',
@@ -202,7 +205,7 @@ export function getUserColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
@@ -218,8 +221,8 @@ export function getUserColumns({
       },
       enableSorting: false,
       meta: {
-        displayName: 'Acciones'
-      }
+        displayName: 'Acciones',
+      },
     },
   ];
 }

@@ -17,7 +17,7 @@ interface LoginFormProps {
 // TODO: Add a remember me checkbox
 // TODO: Add a forgot password modal
 // TODO: Add a register modal
- 
+
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +25,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  
   const [loading2, setLoading2] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [error2, setError2] = useState<string | null>(null);
-  const [pingSuccess, setPingSuccess] = useState(false); 
+  const [pingSuccess, setPingSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +39,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       const user = await authApi.login(email, password);
       onLoginSuccess(user);
     } catch (err: any) {
-      const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
+      const errorMessage =
+        err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -59,24 +59,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
-      }); 
-      
+      });
+
       if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error HTTP: ${response.status} ${response.statusText}`,
+        );
       }
-      
+
       // If response is ok, parse, stringify, and show in modal
-      const data = await response.json(); 
+      const data = await response.json();
       // Stringify the data with indentation for readability
-      const responseString = JSON.stringify(data, null, 2); 
+      const responseString = JSON.stringify(data, null, 2);
       setError2(responseString); // Use the error state to hold the success message
       setPingSuccess(true); // Indicate success for modal title
       setIsModalOpen2(true); // Open the modal
-      
     } catch (err: any) {
-      console.error("Error en Ping:", err); 
+      console.error('Error en Ping:', err);
       setError2(err.message || 'Error al conectar con el servidor de ping.');
       setPingSuccess(false); // Indicate error
       setIsModalOpen2(true);
@@ -101,7 +102,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />
           </div>
           <h2 className="text-2xl font-bold">Bienvenido :)</h2>
-          <p className="text-gray-500 text-sm">Inicia sesión en tu cuenta para continuar</p>
+          <p className="text-gray-500 text-sm">
+            Inicia sesión en tu cuenta para continuar
+          </p>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -109,7 +112,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               type="email"
               placeholder="nena@maldicion.com"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
               disabled={loading}
@@ -118,41 +121,54 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               type="password"
               placeholder="contraseña nena :V"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
             />
-            <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={loading}
+            >
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
 
           <form onSubmit={handlePing}>
-          <Button type="submit" className="w-full mt-4 bg-blue-800 hover:bg-blue-700 cursor-pointer" disabled={loading2}>
+            <Button
+              type="submit"
+              className="w-full mt-4 bg-blue-800 hover:bg-blue-700 cursor-pointer"
+              disabled={loading2}
+            >
               {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center text-sm text-gray-500">
-            ¿No tienes una cuenta? <a href="#" className="underline">Comunícate con tu jefe</a>
+            ¿No tienes una cuenta?{' '}
+            <a href="#" className="underline">
+              Comunícate con tu jefe
+            </a>
           </div>
           {/* TODO: Add remember me, forgot password links here */}
         </CardContent>
       </Card>
 
-      <ErrorModal 
+      <ErrorModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
       />
 
-      <ErrorModal 
+      <ErrorModal
         isOpen={isModalOpen2}
         onClose={handleCloseModal2}
-        title={pingSuccess ? "Ping Exitoso! Respuesta:" : "Error en Ping de Datos"} 
+        title={
+          pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'
+        }
         description={error2 || 'Ha ocurrido un error.'}
       />
     </>
   );
-} 
+}
