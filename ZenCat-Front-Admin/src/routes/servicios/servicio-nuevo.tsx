@@ -56,12 +56,11 @@ export const serviceFormSchema = z.object({
 type ServiceFormData = z.infer<typeof serviceFormSchema>;
 
 function AddServicePageComponent() {
+  
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-
-
 
   const { register, handleSubmit, control, formState: { errors }, watch, reset } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceFormSchema),
@@ -168,8 +167,6 @@ function AddServicePageComponent() {
     } catch (error: any) {
       toast.error("Error al crear servicio o asociar profesionales", { description: error.message });
     }
-
-
 
   };
 

@@ -2,7 +2,6 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import HomeCard from '@/components/common/home-card';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -33,16 +32,6 @@ import {
 } from '@tanstack/react-table';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-
 
 export const Route = createFileRoute('/servicios/agregar-profesionales')({
   component: ProfesionalesComponent,
@@ -90,8 +79,9 @@ function ProfesionalesComponent() {
 
       setRowSelection(newRowSelection);
     }
+    
 
-  }, [professionalsData,]);
+}, [professionalsData]);
 
   const columns = useMemo<ColumnDef<Professional>[]>(() => [
     {

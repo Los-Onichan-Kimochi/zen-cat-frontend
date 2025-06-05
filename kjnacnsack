@@ -1,0 +1,261 @@
+[33mcommit 3b3c917536cc2536e55de37dd9a3e8df61b29beb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/add-bulk-create-communities[m[33m, [m[1;31morigin/feat/add-bulk-create-communities[m[33m)[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Wed May 28 19:24:29 2025 -0500
+
+    aaaaaaaaa
+
+[33mcommit c473f54edaf662bb23d52733d210b339ee8c76b5[m
+Merge: 16b54bd b434082
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Wed May 28 19:22:59 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit 16b54bdb2b6d551329b7d5c9215486e8ad2e9926[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Wed May 28 18:20:39 2025 -0500
+
+    Solo quiero lo del main
+
+[33mcommit b434082e34535e87af77741284149d8302bfb543[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feat/add-professional-view[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: 15e9521 b9bc73c
+Author: krowslyare <70769242+krowslyare@users.noreply.github.com>
+Date:   Tue May 27 23:13:35 2025 -0500
+
+    Merge pull request #13 from Los-Onichan-Kimochi/feat/add-user-crud
+    
+    Feat/add user crud
+
+[33mcommit b9bc73c66adc89ca82383ccb70b3478e5e57d6ea[m[33m ([m[1;31morigin/feat/add-user-crud[m[33m)[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Tue May 27 23:07:55 2025 -0500
+
+    falta logica de filtro en vermemb
+
+[33mcommit fd4ffe1adc17e3e8b7abd40896bf063c2db93a30[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Tue May 27 22:00:59 2025 -0500
+
+    usuarios front funcional
+
+[33mcommit 80e1d13e542c919dbc3beeebe82fa0caa4869508[m
+Merge: 55a5d7a 15e9521
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Tue May 27 21:42:59 2025 -0500
+
+    Merge branch 'main' of https://github.com/Los-Onichan-Kimochi/zen-cat-frontend into feat/add-user-crud
+
+[33mcommit 95af41cabc3855f4caf3beaa2b7f67357573a0a4[m
+Merge: 8023d38 15e9521
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 20:03:18 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit 8023d386a3d95e838723b6ef1cdf3bf744bee723[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 19:58:18 2025 -0500
+
+    aaaaaaaaaa
+
+[33mcommit 15e9521edc913de4408e0b66a362648a3ed9e1b8[m
+Merge: 037606a ec7553d
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 19:43:54 2025 -0500
+
+    Merge branch 'main' of github.com:Los-Onichan-Kimochi/zen-cat-frontend
+
+[33mcommit 037606aa15a58b7109e65d2c5db382ee6108a1a8[m[33m ([m[1;31morigin/loginUser[m[33m)[m
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 19:41:14 2025 -0500
+
+    con redireccion el login user
+
+[33mcommit 55a5d7a690669f94d9aefa731cf4b01b346e6503[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 19:38:43 2025 -0500
+
+    falta implementar back v2
+
+[33mcommit ec7553dcb1c80922ecc3b149d0c57e1f0c7ee6e7[m
+Merge: 143ebea bdcc117
+Author: Fabian Prado <fabian.prado@pucp.edu.pe>
+Date:   Fri May 16 19:15:09 2025 -0500
+
+    Merge pull request #10 from Los-Onichan-Kimochi/feat/add-professional-view
+    
+    Crud completo funcionalmente del profesional
+
+[33mcommit bdcc1177892e64016f53db83f8b856faab44c9e5[m
+Author: fapi19 <fabipra19@gmail.com>
+Date:   Fri May 16 19:12:10 2025 -0500
+
+    Crud completo funcionalmente del profesional
+
+[33mcommit 143ebea511f3170217818ac03fea6960060fa2c8[m
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 19:08:30 2025 -0500
+
+    landing mergeado
+
+[33mcommit 5be013c942df1a2df8456638489dddf70efc0eee[m
+Merge: 7f91b25 279ae22
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 19:04:29 2025 -0500
+
+    Merge branch 'main' into loginUser
+
+[33mcommit 7f91b25bca415d56da084d1c659ba917ec4cc4c8[m
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 18:46:17 2025 -0500
+
+    login usuario
+
+[33mcommit f16125d1dc8943848246808c59d52242cab2d05e[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 18:44:18 2025 -0500
+
+    falta implementar back
+
+[33mcommit 279ae221eb254f058d0e1011e1b2ef406aa5792a[m
+Merge: ae61162 4c10fe2
+Author: Litus <109820050+Litusuwu@users.noreply.github.com>
+Date:   Fri May 16 18:34:06 2025 -0500
+
+    Merge pull request #9 from Los-Onichan-Kimochi/feat/update-main-landing
+    
+    Feat/update main landing
+
+[33mcommit c65808a1e5ea6814ff6614c42cce79ed2892efa5[m
+Merge: 297c2cc ae61162
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 18:32:39 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit 4c10fe2be25d703fb0a9609a79ba3c56a9d99764[m[33m ([m[1;31morigin/feat/update-main-landing[m[33m)[m
+Author: Litus <zegarraward@gmail.com>
+Date:   Fri May 16 18:32:33 2025 -0500
+
+    Push landing
+
+[33mcommit 297c2cc7196fda2c7cd7db1c58539e4efda27f88[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 18:23:31 2025 -0500
+
+    aaaaaaaa
+
+[33mcommit c56798a2a0f0e270748998a11d89256827cc722f[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 18:11:23 2025 -0500
+
+    falta tocar y revisar cada view
+
+[33mcommit 90cbcc0faf71bb51671101f7f22c43b165ee966f[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 17:57:55 2025 -0500
+
+    falta editar
+
+[33mcommit ae61162fd62425f007858b27385fc0818cc790ec[m
+Merge: 30771ca 190beb7
+Author: Fabian Prado <fabian.prado@pucp.edu.pe>
+Date:   Fri May 16 17:22:50 2025 -0500
+
+    Merge pull request #8 from Los-Onichan-Kimochi/feat/add-professional-view
+    
+    Se agrega la capacidad de eliminar en profesionales
+
+[33mcommit 190beb7a8d9dadebd4a5e37613a4ad887d10b8ee[m
+Author: fapi19 <fabipra19@gmail.com>
+Date:   Fri May 16 17:20:07 2025 -0500
+
+    Se agrega la capacidad de eliminar en profesionales
+
+[33mcommit 73c3404a3b4717f7294b401d2f2e937ecbb13270[m
+Author: Litus <zegarraward@gmail.com>
+Date:   Fri May 16 17:00:41 2025 -0500
+
+    minor changes
+
+[33mcommit bd357eb9bd4f41e1b55f8d70b60918762285b3f6[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 14:50:10 2025 -0500
+
+    agregar user
+
+[33mcommit 2bdbb4555619beceb02002aec377959f565ccfef[m
+Merge: 333f487 30771ca
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 13:34:16 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit 333f487e1f5b5f8af65f4345c6b56c601559fe11[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 13:32:03 2025 -0500
+
+    oaa
+
+[33mcommit 2f2f0e0362c98f66897470aded755cacc23729d6[m
+Merge: 6085e10 30771ca
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 13:20:17 2025 -0500
+
+    Merge remote-tracking branch 'origin' into feat/add-user-crud
+
+[33mcommit 6085e108de753cb7a4272c510c87078986473a61[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Fri May 16 13:17:40 2025 -0500
+
+    zzz
+
+[33mcommit 30771ca1fceb663a9a05085305d5cef92bb59b60[m
+Merge: 082e6c7 0d70e36
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 12:13:55 2025 -0500
+
+    Merge branch 'main' of github.com:Los-Onichan-Kimochi/zen-cat-frontend into Sererama
+    Actualizacion de rama con main
+
+[33mcommit 082e6c7e3a853ef47fbb5f0f604daebea5f8cecf[m
+Author: SereSoyer <dromo1705@outlook.com>
+Date:   Fri May 16 12:06:45 2025 -0500
+
+    User home y Topbar
+
+[33mcommit 7d78ccf1a024779733471e8e51526b44030a41f3[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 09:22:40 2025 -0500
+
+    Prueba de piboncios
+
+[33mcommit 73aa9d124520601ccd48fd16aa6ec724962a1f76[m
+Merge: 8233e97 0d70e36
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Fri May 16 08:03:28 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit 8233e9707aa635ea11263f78cc99e4e634c5960c[m
+Merge: b64a6ba 1a0c194
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Thu May 15 23:21:18 2025 -0500
+
+    Merge branch 'main' into feat/add-bulk-create-communities
+
+[33mcommit b64a6ba92283296925f5b749004ed0a7709cae9b[m
+Author: bry4nV <bryan31vj@gmail.com>
+Date:   Thu May 15 23:18:53 2025 -0500
+
+    Prueba de papurris
+
+[33mcommit 880c5ac571f71f5f1d7ac8a8c1240ded4e0f6255[m
+Author: Hideki <a20181577@pucp.edu.pe>
+Date:   Thu May 15 21:23:02 2025 -0500
+
+    pantalla de users
+
+[33mcommit 0d70e36d3db8f08733e8bdc752f7cb4716642b71[m[33m ([m[1;31morigin/feat/template/add-page-add[m[33m)[m
+Author: Litus <zegarraward@gmail.com>
+Date:   Thu May 15 21:06:47 20

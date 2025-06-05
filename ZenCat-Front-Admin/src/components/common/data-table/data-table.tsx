@@ -18,9 +18,8 @@ import {
 
 interface DataTableProps<TData> {
   table: TanStackTable<TData> 
-   columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData, any>[]
 }
-
 
 export function DataTable<TData>({ 
   table, 
@@ -28,14 +27,14 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="overflow-x-auto rounded-md border">
+      <Table className="table-fixed w-full">
         <TableHeader className="bg-gray-200">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className={`${(header.column.columnDef.meta as any)?.className ?? ""} break-words whitespace-normal`}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -56,7 +55,7 @@ export function DataTable<TData>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className={`${(cell.column.columnDef.meta as any)?.className ?? ""} break-words whitespace-normal`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
