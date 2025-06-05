@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import {
   SortingState,
@@ -6,7 +8,7 @@ import {
   PaginationState,
 } from '@tanstack/react-table';
 
-export function useCommunityTable() {
+export function useTableState() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

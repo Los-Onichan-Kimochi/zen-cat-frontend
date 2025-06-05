@@ -1,6 +1,5 @@
 'use client';
 
-
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
@@ -11,7 +10,7 @@ import { Community } from '@/types/community';
 import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
-import { CommunityTable } from '@/components/community/table';
+import { CommunityTable } from '@/components/community/community-table';
 
 import { Locate, Plus, Upload, Loader2} from 'lucide-react';
 import { Button } from '@/components/ui/button';
