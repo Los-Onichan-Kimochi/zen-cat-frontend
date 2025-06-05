@@ -3,7 +3,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
+import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
@@ -12,6 +12,8 @@ import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { useNavigate } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   ColumnDef, 
   Row, 
@@ -27,6 +29,16 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +71,9 @@ function ServiciosComponent() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const queryClient = useQueryClient();
 
   const { 
     data: servicesData,
@@ -88,6 +103,19 @@ function ServiciosComponent() {
   }, [servicesData]);
 
   const isLoadingCounts = isLoadingServices;
+
+
+  const { mutate: deleteService, isPending: isDeleting } = useMutation<void, Error, string>({
+    mutationFn: (id) => servicesApi.deleteService(id),
+    onSuccess: (_, id) => {
+      toast.success('Servicio eliminado', { description: `ID ${id}` });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      setRowSelection({});
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar', { description: err.message });
+    },
+  });
 
   const columns = useMemo<ColumnDef<Service>[]>(() => [
     {
@@ -139,37 +167,32 @@ function ServiciosComponent() {
       accessorFn: (row: Service) => row.description,
     },
     {
-      id: "actions",
-      cell: ({ row }: { row: Row<Service> }) => {
-        const professional = row.original;
+      id: 'actions',
+      cell: ({ row }) => {
+        const serv = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(professional.id)}
-              >
-                Copiar ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  localStorage.setItem('currentService', professional .id);
-                  navigate({ to: `/servicios/servicio-ver` });
-                }}
-              >
-                Ver detalles
-              </DropdownMenuItem>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-2">
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                localStorage.setItem('currentService', serv.id);
+                navigate({ to: `/servicios/servicio-ver` });
+              }}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setServiceToDelete(serv);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },
@@ -265,6 +288,33 @@ function ServiciosComponent() {
           <DataTablePagination table={table} />
         </div>
       )}
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro que deseas eliminar este servicio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">Servicio: {serviceToDelete?.name}</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (serviceToDelete) {
+                    if (serviceToDelete) deleteService(serviceToDelete.id);
+                  }
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

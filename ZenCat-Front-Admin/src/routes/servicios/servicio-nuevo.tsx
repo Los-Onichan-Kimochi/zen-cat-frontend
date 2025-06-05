@@ -334,6 +334,7 @@ function AddServicePageComponent() {
                   const data = watch(); // obtiene valores actuales del form
                   localStorage.setItem('draftService', JSON.stringify(data));
                   localStorage.setItem('profesionalesSeleccionados', JSON.stringify(profesionalesSeleccionados));
+                  
                   navigate({ to: '/servicios/agregar-profesionales' });
                 }}
               >
