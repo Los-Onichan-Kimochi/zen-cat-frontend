@@ -8,7 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 
-export function LoginForm({ onLoginSuccess }: LoginFormProps) { 
+export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

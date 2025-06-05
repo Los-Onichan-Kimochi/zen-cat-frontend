@@ -63,7 +63,8 @@ export function SignupForm() {
       console.log('Usuario creado:', user);
       //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
       navigate({ to: '/login' });
-    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
       const errorMessage =
         err.message || 'Error desconocido al intentar registrarte.';
       setError(errorMessage);
