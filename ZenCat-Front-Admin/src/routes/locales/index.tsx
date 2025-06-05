@@ -1,34 +1,15 @@
 'use client';
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { toast } from 'sonner';
 import { LocalProvider, useLocal } from '@/context/LocalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Loader2, Plus, Upload, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { DataTable } from '@/components/common/data-table/data-table';
-import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
-import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  PaginationState,
-} from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -40,14 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { LocalsTable } from '@/components/locals/table';
 export const Route = createFileRoute('/locales/')({
   component: () => (
     <LocalProvider>
@@ -59,15 +33,7 @@ function LocalesComponent(){
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
   const { 
@@ -105,160 +71,20 @@ function LocalesComponent(){
       }
     }
   }
-  const columns = useMemo<ColumnDef<Local>[]>(() => [
-      {
-        id: "select",
-        header: ({ table }: { table: Table<Local> }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }: { row: Row<Local> }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value: boolean | 'indeterminate') => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
-      {
-        accessorKey: "local_name",
-        header: ({ column }: { column: Column<Local, unknown> }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-              Nombre del local
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          );
-        },
-        cell: ({ row }: { row: Row<Local> }) => <div>{row.getValue("local_name")}</div>
-      },
-      //{
-      //  id: "lastNames",
-      //  header: "Apellidos",
-      //  accessorFn: (row: Local) => `${row.first_last_name} ${row.second_last_name || ''}`,
-      //},
-      {
-        accessorKey: "street_name",
-        header: "Dirección",
-      },
-      {
-        accessorKey: "building_number",
-        header: "Número",
-      },
-      {
-        accessorKey: "reference",
-        header: "Referencia",
-      },
-      {
-        accessorKey: "district",
-        header: ({ column }: { column: Column<Local, unknown> }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-              Distrito
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          );
-        },
-      },
-      {
-        accessorKey: "province",
-        header: ({ column }: { column: Column<Local, unknown> }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-              Provincia
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          );
-        },
-      },
-      {
-        accessorKey: "region",
-        header: ({ column }: { column: Column<Local, unknown> }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-              Región
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          );
-        },
-      },
-      {
-        id: 'actions',
-        cell: ({ row }) => {
-          const local = row.original;
-          return (
-            <div className="flex items-center space-x-2">
-              <Button
-                className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  localStorage.setItem('currentLocal', local.id);
-                  navigate({ to: `/locales/ver` });
-                }}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-              <Button
-                className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLocalToDelete(local);
-                  setIsDeleteModalOpen(true);
-                }}
-                >
-                    <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-          );
-        },
-      },
-    ], [deleteLocal, navigate, setCurrent]);
+  const handleEdit = (local: Local) => {
+    setCurrent(local);
+    navigate({ to: '/locales/editar' });
+  };
 
-  const table = useReactTable({
-    data: localsData || [],
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      globalFilter,
-      pagination,
-    },
-      onSortingChange: setSorting,
-      onColumnFiltersChange: setColumnFilters,
-      onGlobalFilterChange: setGlobalFilter,
-      onPaginationChange: setPagination,
-      onColumnVisibilityChange: setColumnVisibility,
-      onRowSelectionChange: setRowSelection,
-      getCoreRowModel: getCoreRowModel(),
-      getFilteredRowModel: getFilteredRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
-      getSortedRowModel: getSortedRowModel(),
-      manualPagination: false,
-      enableRowSelection: true,
-      debugTable: true,
-   });
+  const handleView = (local: Local) => {
+    localStorage.setItem('currentLocal', local.id);
+    navigate({ to: `/locales/ver` });
+  };
+
+  const handleDelete = (local: Local) => {
+    setLocalToDelete(local);
+    setIsDeleteModalOpen(true);
+  };
 
    const isLoading = isLoadingLocals;
 
@@ -298,21 +124,12 @@ function LocalesComponent(){
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
         </div>
       ) : (
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
-          <DataTableToolbar
-            table={table}
-            filterPlaceholder="Buscar locales..."
-            showSortButton={true}
-            showExportButton={true}
-            onExportClick={() => console.log("Exportar clickeado")}
-            showFilterButton={true}
-            onFilterClick={() => console.log("Filtrar por clickeado")}
-          />
-          <div className="flex-1 overflow-hidden rounded-md border">
-            <DataTable table={table} columns={columns} />
-          </div>
-          <DataTablePagination table={table} />
-        </div>
+        <LocalsTable
+          data={localsData || []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+        />
       )}
     <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
             <AlertDialogContent>
