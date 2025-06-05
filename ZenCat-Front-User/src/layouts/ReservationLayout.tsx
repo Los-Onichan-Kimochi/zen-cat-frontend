@@ -23,21 +23,27 @@ const ReservationLayout: React.FC = () => {
   const currentStep = stepRoutes.indexOf(currentPath);
 
   return (
-    <div className="flex flex-col gap-6 px-6 md:px-12 py-8">
+    <div className="max-w-2xl mx-auto flex flex-col gap-6 px-6 md:px-16 py-12">
       <div className="text-center">
-        <h2 className="text-lg">Realizar una reserva</h2>
+        <h2 className="text-2xl font-bold">Realizar una reserva</h2>
         <h1 className="text-2xl font-bold">Servicio</h1>
         <span className="text-muted">-</span>
-        {/* TODO: Add dynamic service name*/}
+        {/* TODO: Add dynamic service name */}
       </div>
 
-      <ProgressBar currentStep={currentStep} steps={steps} />
-
-      <div className="border p-4 rounded-md min-h-[200px]">
-        <Outlet />
+      <div className="w-full flex justify-center">
+        <div className="w-full max-w-md">
+          <ProgressBar currentStep={currentStep} steps={steps} />
+        </div>
       </div>
 
-      <div className="self-end">
+      <div className="border p-4 rounded-md min-h-[200px] w-full">
+        <div className="max-w-md mx-auto">
+          <Outlet />
+        </div>
+      </div>
+
+      <div className="self-center">
         <ContinueButton
           label={currentStep < steps.length - 1 ? 'Continuar' : 'Finalizar'}
           nextRoute={stepRoutes[currentStep + 1]}
