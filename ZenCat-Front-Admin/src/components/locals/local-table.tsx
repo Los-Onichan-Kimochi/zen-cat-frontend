@@ -5,7 +5,7 @@ import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Local } from '@/types/local';
-import { getLocalColumns } from './columns';
+import { getLocalColumns } from './local-columns';
 
 interface LocalsTableProps {
   data: Local[];

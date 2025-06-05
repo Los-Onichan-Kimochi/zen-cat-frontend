@@ -1,47 +1,26 @@
 'use client';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import HeaderDescriptor from '@/components/common/header-descriptor';
-import { toast } from 'sonner';
-import { LocalProvider, useLocal } from '@/context/LocalesContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
+import HeaderDescriptor from '@/components/common/header-descriptor';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+//import { LocalProvider, useLocal } from '@/context/LocalesContext';
 import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog} from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
+
+import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
+
+import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
+import { Dialog, DialogContent} from "@/components/ui/dialog";
+
 
 export const Route = createFileRoute('/locales/')({
-  component: () => (
-    <LocalProvider>
-      <LocalesComponent />
-    </LocalProvider>
-  ),
+  component: LocalesComponent,
 });
 function LocalesComponent(){
   //bulk Create variables
