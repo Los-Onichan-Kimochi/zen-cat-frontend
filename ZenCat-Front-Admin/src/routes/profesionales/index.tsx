@@ -6,21 +6,8 @@ import { ProfessionalProvider } from '@/context/ProfesionalesContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { Users, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash } from 'lucide-react';
+import { Users, Loader2, Plus, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import {
-  ColumnDef,
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  PaginationState,
-} from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -32,20 +19,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { DataTable } from '@/components/common/data-table/data-table';
-import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
-import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { useProfessional } from '@/context/ProfesionalesContext';
+import { ProfessionalsTable } from '@/components/professionals/table';
 export const Route = createFileRoute('/profesionales/')({
   component: () => (
     <ProfessionalProvider>
@@ -64,12 +41,6 @@ function ProfesionalesComponent() {
   const navigate = useNavigate();
   const { setCurrent } = useProfessional();
   const queryClient = useQueryClient();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
@@ -115,99 +86,20 @@ function ProfesionalesComponent() {
     return c;
   }, [professionalsData]);
 
-  const columns = useMemo<ColumnDef<Professional>[]>(() => [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: 'name',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Nombres <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div>{row.getValue('name')}</div>,
-    },
-    {
-      id: 'lastNames',
-      header: 'Apellidos',
-      accessorFn: (row) => `${row.first_last_name} ${row.second_last_name || ''}`,
-    },
-    { accessorKey: 'specialty', header: 'Especialidad' },
-    {
-      accessorKey: 'email',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
-    { accessorKey: 'phone_number', header: 'Número de celular' },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const prof = row.original;
-        return (
-          <div className="flex items-center space-x-2">
-            <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                localStorage.setItem('currentProfessional', prof.id);
-                navigate({ to: `/profesionales/ver` });
-              }}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-            <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                setProfToDelete(prof);
-                setIsDeleteModalOpen(true);
-              }}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ], [deleteProfessional, navigate, setCurrent]);
+  const handleEdit = (professional: Professional) => {
+    setCurrent(professional);
+    navigate({ to: '/profesionales/editar' });
+  };
 
-  const table = useReactTable({
-    data: professionalsData || [],
-    columns,
-    state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter, pagination },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: setPagination,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    manualPagination: false,
-    enableRowSelection: true,
-  });
+  const handleView = (professional: Professional) => {
+    localStorage.setItem('currentProfessional', professional.id);
+    navigate({ to: `/profesionales/ver` });
+  };
+
+  const handleDelete = (professional: Professional) => {
+    setProfToDelete(professional);
+    setIsDeleteModalOpen(true);
+  };
 
   const btnSizeClasses = "h-11 w-28 px-4";
 
@@ -261,21 +153,12 @@ function ProfesionalesComponent() {
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
         </div>
       ) : (
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
-          <DataTableToolbar
-            table={table}
-            filterPlaceholder="Buscar profesionales..."
-            showSortButton
-            showFilterButton
-            showExportButton
-            onFilterClick={() => console.log('Filtrar')}
-            onExportClick={() => console.log('Exportar')}
-          />
-          <div className="flex-1 overflow-hidden rounded-md border">
-            <DataTable table={table} columns={columns} />
-          </div>
-          <DataTablePagination table={table} />
-        </div>
+        <ProfessionalsTable
+          data={professionalsData || []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+        />
       )}
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

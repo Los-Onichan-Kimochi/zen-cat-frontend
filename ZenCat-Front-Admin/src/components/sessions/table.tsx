@@ -1,29 +1,29 @@
 'use client';
-
-import { Community } from '@/types/community';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { getCommunityColumns } from './columns';
-import { useCommunityTable } from '@/hooks/use-community-table';
+import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { useEffect } from 'react';
+import { Session } from '@/types/session';
+import { getSessionColumns } from './columns';
 
-interface CommunityTableProps {
-  data: Community[];
-  onBulkDelete: (ids: string[]) => void;
-  isBulkDeleting: boolean;
-  onDeleteClick: (community: Community) => void;
-  resetRowSelectionTrigger?: number;
+interface SessionsTableProps {
+  data: Session[];
+  onEdit: (session: Session) => void;
+  onDelete: (session: Session) => void;
+  onView: (session: Session) => void;
+  onBulkDelete?: (sessions: Session[]) => void;
+  isBulkDeleting?: boolean;
 }
 
-export function CommunityTable({
-  data,
+export function SessionsTable({ 
+  data, 
+  onEdit, 
+  onDelete, 
+  onView, 
   onBulkDelete,
-  isBulkDeleting,
-  onDeleteClick,
-  resetRowSelectionTrigger,
-}: CommunityTableProps) {
+  isBulkDeleting = false
+}: SessionsTableProps) {
   const {
     sorting, setSorting,
     columnFilters, setColumnFilters,
@@ -31,9 +31,9 @@ export function CommunityTable({
     rowSelection, setRowSelection,
     globalFilter, setGlobalFilter,
     pagination, setPagination,
-  } = useCommunityTable();
+  } = useDataTable();
 
-  const columns = getCommunityColumns({ onDeleteClick });
+  const columns = getSessionColumns({ onEdit, onDelete, onView });
 
   const table = useReactTable({
     data,
@@ -57,30 +57,32 @@ export function CommunityTable({
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
-    debugTable: true,
   });
 
-  useEffect(() => {
-    table.resetRowSelection();
-    setRowSelection({});
-  }, [resetRowSelectionTrigger]);
+  const selectedSessions = table.getFilteredSelectedRowModel().rows.map(row => row.original);
 
   return (
-    <>
+    <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
       <DataTableToolbar
         table={table}
-        onBulkDelete={onBulkDelete}
-        isBulkDeleting={isBulkDeleting}
-        showBulkDeleteButton
-        showExportButton
-        filterPlaceholder="Buscar comunidad..."
-        exportFileName="comunidades"
-        showFilterButton
-        onFilterClick={() => console.log("Filtrar")}
+        filterPlaceholder="Buscar sesiones..."
         showSortButton
+        showFilterButton
+        showExportButton
+        onFilterClick={() => console.log('Filtrar')}
+        exportFileName="sesiones"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={onBulkDelete ? (ids: string[]) => {
+          const sessionsToDelete = data.filter(session => ids.includes(session.id));
+          onBulkDelete(sessionsToDelete);
+        } : undefined}
+        isBulkDeleting={isBulkDeleting}
       />
-      <DataTable table={table} columns={columns} />
+      <div className="flex-1 overflow-hidden rounded-md border">
+        <DataTable table={table} columns={columns} />
+      </div>
       <DataTablePagination table={table} />
-    </>
+    </div>
   );
-}
+} 
