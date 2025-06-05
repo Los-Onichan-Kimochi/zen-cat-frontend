@@ -1,14 +1,14 @@
 'use client';
 
-import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate, useMatch, useRouterState } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { communitiesApi } from '@/api/communities/communities';
-import { communityServicesApi } from '@/api/community-services/community-services';
+import { communityServicesApi } from '@/api/communities/community-services';
 import { CreateCommunityPayload } from '@/types/community';
-import { CommunityService, CommunityServiceSelected } from '@/types/community-service';
+import { Service } from '@/types/service';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,7 +36,7 @@ import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 
-export const Route = createFileRoute('/comunidades/agregar')({
+export const Route = createFileRoute('/comunidades/agregar-comunidad')({
   component: AddCommunityPageComponent,
 })
 
@@ -49,13 +49,15 @@ const communityFormSchema = z.object({
 type CommunityFormData = z.infer<typeof communityFormSchema>;
 
 function AddCommunityPageComponent() {
+  
+  console.log("MONTANDO AddCommunityPageComponent");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isServicesExpanded, setIsServicesExpanded] = useState(false);
   const [isMembershipPlansExpanded, setIsMembershipPlansExpanded] = useState(false);
-  const [communityServiceToDelete, setCommunityServiceToDelete] = useState<CommunityServiceSelected | null>(null);
+  const [communityServiceToDelete, setCommunityServiceToDelete] = useState<Service | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -66,33 +68,12 @@ function AddCommunityPageComponent() {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [selectedCommunityServices, setSelectedCommunityServices] = useState<CommunityServiceSelected[]>([]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("selectedServices");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setSelectedCommunityServices(parsed);
-    }
-  }, []);
-
-  const { register, handleSubmit, formState: { errors } } = useForm<CommunityFormData>({
+  const { register, handleSubmit, control, formState: { errors }, watch, reset } = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
     defaultValues: {
       name: '',
       purpose: '',
-    },
-  });
-
-  const createCommunityMutation = useMutation({
-    mutationFn: async (data: CreateCommunityPayload) => communitiesApi.createCommunity(data),
-    onSuccess: () => {
-      toast.success("Comunidad Creada", { description: "La comunidad ha sido agregado exitosamente." });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-      navigate({ to: '/comunidades' });
-    },
-    onError: (error) => {
-      toast.error("Error al crear comunidad", { description: error.message || "No se pudo crear la comunidad." });
     },
   });
 
@@ -107,10 +88,39 @@ function AddCommunityPageComponent() {
       reader.readAsDataURL(file);
     }
   };
-
+  
   useEffect(() => {
     // Esto limpia el contexto cada vez que se entra a la pantalla
     //setDraft(defaultDraft);
+  }, []);
+
+  const locationState = useRouterState({ select: (s) => s.location.state }) as {
+    draftSelectedServices?: any[];
+  } | null;
+
+  const initialSelectedServices = locationState?.draftSelectedServices ?? [];
+
+  const [selectedServices, setSelectedServices] = useState(initialSelectedServices);
+
+   useEffect(() => {
+    
+    console.log("Effect executed");
+    const draftCommunity = sessionStorage.getItem('draftCommunity');
+    
+    if (draftCommunity) {
+      const values = JSON.parse(draftCommunity);
+      reset(values); 
+    }
+
+    const storedServices = sessionStorage.getItem('draftSelectedServices');
+    if (storedServices) {
+      try {
+        console.log('Cargado desde localStorage:', JSON.parse(storedServices));
+        setSelectedServices(JSON.parse(storedServices));
+      } catch (error) {
+        console.error('Failed to parse saved services', error);
+      }
+    }
   }, []);
 
   const onSubmit = async (data: CommunityFormData) => {
@@ -125,9 +135,37 @@ function AddCommunityPageComponent() {
       purpose: data.purpose,
       image_url: imageUrl,
     };
-    createCommunityMutation.mutate(payload);
+
+    try {
+      const newCommunity = await createCommunityMutation.mutateAsync(payload);
+
+      // 2. Bulk create de CommunityService
+      if (selectedServices.length > 0) {
+        const bulkPayload = selectedServices.map((serv) => ({
+          community_id: newCommunity.id,
+          service_id: serv.id,
+        }));
+
+        await communityServicesApi.bulkCreateCommunityServices(bulkPayload);
+      }
+
+      toast.success("Community and services was correctly asociated.");
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      navigate({ to: '/comunidades' });
+    } catch (error: any) {
+      toast.error("Error creating a community or asociated services", { description: error.message });
+    }
+
   };
 
+  const createCommunityMutation = useMutation({
+    mutationFn: async (data: CreateCommunityPayload) => communitiesApi.createCommunity(data),
+    onError: (error) => {
+      toast.error("Error al crear comunidad", { description: error.message || "No se pudo crear la comunidad." });
+    },
+  });
+  
+  // Pendiente de adaptar
   const { mutate: deleteCommunityService, isPending: isDeleting } = useMutation<void, Error, string>({
     mutationFn: (id) => communitiesApi.deleteCommunity(id),
     onSuccess: (_, id) => {
@@ -145,7 +183,7 @@ function AddCommunityPageComponent() {
     onSuccess: (_, ids) => {
       toast.success('Comunidades eliminadas', { description: `${ids.length} registros` });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
-      table.resetRowSelection();
+      serviceTable.resetRowSelection();
     },
     onError: (err) => {
       toast.error('Error al eliminar múltiples comunidades', { description: err.message });
@@ -153,7 +191,7 @@ function AddCommunityPageComponent() {
   });
 
   //Define the columns of the table  
-  const columns = useMemo<ColumnDef<CommunityServiceSelected>[]>(() => [
+  const serviceColumns = useMemo<ColumnDef<Service>[]>(() => [
     {
       id: "select",
       header: ({ table }) => (
@@ -178,14 +216,13 @@ function AddCommunityPageComponent() {
       meta: {className: "w-[32px] px-2"},
     },
     {
-      accessorKey: "service.name",
+      accessorKey: "name",
       header: "Nombre",
     },
     {
-      accessorKey: "service.is_virtual",
+      accessorKey: "is_virtual",
       header: "¿Es virtual?",
-      cell: ({ row }) =>
-        row.original.service.is_virtual ? "Sí" : "No",
+      cell: ({ row }) => row.original.is_virtual ? "Sí" : "No",
     },
     {
       id: "actions",
@@ -213,9 +250,35 @@ function AddCommunityPageComponent() {
     },
   ], [deleteCommunityService, bulkDeleteCommunityServices]);
 
-  const table = useReactTable({
-    data: selectedCommunityServices || [],
-    columns,
+  const serviceTable = useReactTable({
+    data: selectedServices,
+    columns: serviceColumns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+      pagination,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: false,
+    enableRowSelection: true,
+    debugTable: true,
+  });
+
+  const membershTable = useReactTable({
+    data: selectedServices,
+    columns: serviceColumns,
     state: {
       sorting,
       columnFilters,
@@ -240,16 +303,16 @@ function AddCommunityPageComponent() {
   });
 
   return (
-    <div className="p-2 md:p-6 flex flex-col font-montserrat space-y-6">
-      <HeaderDescriptor title="COMUNIDADES" subtitle="AGREGAR COMUNIDAD" />
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos de la comunidad</CardTitle>
-          <CardDescription>Complete la información para agregar una nueva comunidad.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="p-2 md:p-6 flex flex-col font-montserrat space-y-6">
+        <HeaderDescriptor title="COMUNIDADES" subtitle="AGREGAR COMUNIDAD" />
+        {/* Datos de la comunidad */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Datos de la comunidad</CardTitle>
+            <CardDescription>Complete la información para agregar una nueva comunidad.</CardDescription>
+          </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Columna Izquierda para campos */}
+            {/* Columna Izquierda */}
             <div className="grid grid-cols-1 gap-y-6">
               <div>
                 <Label htmlFor="name" className="mb-2">Nombres</Label>
@@ -267,43 +330,37 @@ function AddCommunityPageComponent() {
               </div>
             </div>
 
-            {/* Columna Derecha para el logo y los botones */}
+            {/* Columna Derecha - Logo */}
             <div className="flex flex-col space-y-6">
               <div className="flex flex-col">
-                <Label htmlFor="logoImageFile" className="mb-2 self-start">Logo</Label>
-                <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Vista previa" className="object-contain h-full w-full rounded-md" />
-                  ) : (
-                    <div className="text-center text-gray-400">
-                      <UploadCloud size={48} className="mx-auto"/>
-                      <p>Arrastra o selecciona un archivo</p>
-                      <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
-                    </div>
-                  )}
-                   <Input 
-                    id="profileImageFile" 
-                    type="file" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                    accept="image/png, image/jpeg, image/gif"
-                    {...register("profileImageFile")} 
-                    onChange={handleImageChange} 
-                  />
-                </div>
-                {errors.profileImageFile && typeof errors.profileImageFile.message === 'string' && (
-                  <p className="text-red-500 text-sm mt-1">{errors.profileImageFile.message}</p>
+              <Label htmlFor="logoImageFile" className="mb-2 self-start">Logo</Label>
+              <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Vista previa" className="object-contain h-full w-full rounded-md" />
+                ) : (
+                  <div className="text-center text-gray-400">
+                    <UploadCloud size={48} className="mx-auto" />
+                    <p>Arrastra o selecciona un archivo</p>
+                    <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
+                  </div>
                 )}
+                <Input
+                  id="profileImageFile"
+                  type="file"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  accept="image/png, image/jpeg, image/gif"
+                  {...register("profileImageFile")}
+                  onChange={handleImageChange}
+                />
               </div>
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-                <Button variant="outline" type="button" onClick={() => navigate({ to: '/comunidades' })} className="w-full sm:w-auto">Cancelar</Button>
-                <Button type="submit" disabled={createCommunityMutation.isPending} className="w-full sm:w-auto">
-                  {createCommunityMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
-                </Button>
-              </div>
+              {errors.profileImageFile && typeof errors.profileImageFile.message === 'string' && (
+                <p className="text-red-500 text-sm mt-1">{errors.profileImageFile.message}</p>
+              )}
             </div>
-          </CardContent>
-        </form>
+          </div>
+        </CardContent>
       </Card>
+      {/*Services*/}
       <Card className="gap-0">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1.5">
@@ -311,21 +368,25 @@ function AddCommunityPageComponent() {
             <CardDescription>Seleccione los servicios que brindará la comunidad</CardDescription>
           </div>
           <div>
-            <Link to="/comunidades/agregar-servicios" className="h-10">
-              <Button 
-                size="sm" 
-                className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
-              >
-                <Plus className="mr-2 h-4 w-4"/> Agregar
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
+              onClick={() => {  
+                const data = watch();
+                sessionStorage.setItem('draftCommunity', JSON.stringify(data));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                navigate({ to: '/comunidades/agregar-servicios' });
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="mt-0 flex-grow flex flex-col">
             <div className="flex-grow flex flex-col">
               <DataTableToolbar
-                table={table}
+                table={serviceTable}
                 onBulkDelete={bulkDeleteCommunityServices}
                 showBulkDeleteButton={true}
                 isBulkDeleting={isBulkDeleting}
@@ -336,34 +397,45 @@ function AddCommunityPageComponent() {
                 showSortButton={true}
               />
               <div className="flex-grow">
-                <DataTable 
-                  table={table} 
-                  columns={columns}
-                />
+                <DataTable table={serviceTable} columns={serviceColumns} />
               </div>
-              <DataTablePagination table={table} />
+              <DataTablePagination table={serviceTable} />
             </div>
           </div>
         </CardContent>
       </Card>
-      <Card>
+      {/*Membership Plans*/}
+      <Card className="gap-0">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1.5">
             <CardTitle>Planes de Membresía</CardTitle>
-            <CardDescription>Seleccione los planes de membresía que tendrá la comunidad</CardDescription>
+            <CardDescription>Seleccione los planes de membresía que brindará la comunidad</CardDescription>
           </div>
           <div>
-            <Button className="w-12 h-12" variant="ghost" onClick={() => setIsMembershipPlansExpanded(!isMembershipPlansExpanded)}>
-              {isMembershipPlansExpanded ? <ChevronUp className="!w-8 !h-8"/> : <ChevronDown className="!w-8 !h-8"/>}
+            <Button
+              size="sm"
+              className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
+              onClick={() => {  
+                
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
             </Button>
           </div>
         </CardHeader>
-        {isMembershipPlansExpanded && (
-          <CardContent>
-            <p>Contenido de los planes de membresía</p>
-          </CardContent>
-        )}
+        <CardContent>
+          <p>Contenido</p>
+        </CardContent>
       </Card>
-    </div>
+      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+        <Button variant="outline" type="button" onClick={() => navigate({ to: '/comunidades' })} className="w-full sm:w-auto">
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={createCommunityMutation.isPending} className="w-full sm:w-auto">
+          {createCommunityMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
+        </Button>
+      </div>
+    </form>
   );
+
 } 

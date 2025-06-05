@@ -1,5 +1,3 @@
-import { Service } from '@/types/service';
-
 export interface CommunityService {
   id: string;
   community_id: string;
@@ -10,12 +8,6 @@ export interface CommunityService {
 export interface CreateCommunityServicePayload {
   community_id: string;
   service_id: string;
-}
-
-export interface CommunityServiceSelected {
-  id?: string;
-  service: Service;
-  community_id?: string;
 }
 
 export type BulkCreateCommunityServicePayload = CreateCommunityServicePayload[];
