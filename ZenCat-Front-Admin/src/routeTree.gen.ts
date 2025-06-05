@@ -35,8 +35,12 @@ import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agreg
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
+import { Route as ComunidadesTestImport } from './routes/comunidades/test'
+import { Route as ComunidadesAsaasImport } from './routes/comunidades/asaas'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
-import { Route as ComunidadesAgregarImport } from './routes/comunidades/agregar'
+import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía'
+import { Route as ComunidadesAgregarDeprecated2Import } from './routes/comunidades/agregar-deprecated2'
+import { Route as ComunidadesAgregarComunidadImport } from './routes/comunidades/agregar-comunidad'
 
 // Create/Update Routes
 
@@ -185,6 +189,18 @@ const ComunidadesVerRoute = ComunidadesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ComunidadesTestRoute = ComunidadesTestImport.update({
+  id: '/comunidades/test',
+  path: '/comunidades/test',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComunidadesAsaasRoute = ComunidadesAsaasImport.update({
+  id: '/comunidades/asaas',
+  path: '/comunidades/asaas',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ComunidadesAgregarServiciosRoute =
   ComunidadesAgregarServiciosImport.update({
     id: '/comunidades/agregar-servicios',
@@ -192,11 +208,26 @@ const ComunidadesAgregarServiciosRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
-const ComunidadesAgregarRoute = ComunidadesAgregarImport.update({
-  id: '/comunidades/agregar',
-  path: '/comunidades/agregar',
-  getParentRoute: () => rootRoute,
-} as any)
+const ComunidadesAgregarPlanesMembresaRoute =
+  ComunidadesAgregarPlanesMembresaImport.update({
+    id: '/comunidades/agregar-planes-membresía',
+    path: '/comunidades/agregar-planes-membresía',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const ComunidadesAgregarDeprecated2Route =
+  ComunidadesAgregarDeprecated2Import.update({
+    id: '/comunidades/agregar-deprecated2',
+    path: '/comunidades/agregar-deprecated2',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const ComunidadesAgregarComunidadRoute =
+  ComunidadesAgregarComunidadImport.update({
+    id: '/comunidades/agregar-comunidad',
+    path: '/comunidades/agregar-comunidad',
+    getParentRoute: () => rootRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -272,11 +303,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/comunidades/agregar': {
-      id: '/comunidades/agregar'
-      path: '/comunidades/agregar'
-      fullPath: '/comunidades/agregar'
-      preLoaderRoute: typeof ComunidadesAgregarImport
+    '/comunidades/agregar-comunidad': {
+      id: '/comunidades/agregar-comunidad'
+      path: '/comunidades/agregar-comunidad'
+      fullPath: '/comunidades/agregar-comunidad'
+      preLoaderRoute: typeof ComunidadesAgregarComunidadImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/agregar-deprecated2': {
+      id: '/comunidades/agregar-deprecated2'
+      path: '/comunidades/agregar-deprecated2'
+      fullPath: '/comunidades/agregar-deprecated2'
+      preLoaderRoute: typeof ComunidadesAgregarDeprecated2Import
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/agregar-planes-membresía': {
+      id: '/comunidades/agregar-planes-membresía'
+      path: '/comunidades/agregar-planes-membresía'
+      fullPath: '/comunidades/agregar-planes-membresía'
+      preLoaderRoute: typeof ComunidadesAgregarPlanesMembresaImport
       parentRoute: typeof rootRoute
     }
     '/comunidades/agregar-servicios': {
@@ -284,6 +329,20 @@ declare module '@tanstack/react-router' {
       path: '/comunidades/agregar-servicios'
       fullPath: '/comunidades/agregar-servicios'
       preLoaderRoute: typeof ComunidadesAgregarServiciosImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/asaas': {
+      id: '/comunidades/asaas'
+      path: '/comunidades/asaas'
+      fullPath: '/comunidades/asaas'
+      preLoaderRoute: typeof ComunidadesAsaasImport
+      parentRoute: typeof rootRoute
+    }
+    '/comunidades/test': {
+      id: '/comunidades/test'
+      path: '/comunidades/test'
+      fullPath: '/comunidades/test'
+      preLoaderRoute: typeof ComunidadesTestImport
       parentRoute: typeof rootRoute
     }
     '/comunidades/ver': {
@@ -400,8 +459,12 @@ export interface FileRoutesByFullPath {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
+  '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
+  '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
+  '/comunidades/asaas': typeof ComunidadesAsaasRoute
+  '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -429,8 +492,12 @@ export interface FileRoutesByTo {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
+  '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
+  '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
+  '/comunidades/asaas': typeof ComunidadesAsaasRoute
+  '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -459,8 +526,12 @@ export interface FileRoutesById {
   '/sesiones': typeof SesionesRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
-  '/comunidades/agregar': typeof ComunidadesAgregarRoute
+  '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
+  '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
+  '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
+  '/comunidades/asaas': typeof ComunidadesAsaasRoute
+  '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -490,8 +561,12 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/agregar'
+    | '/comunidades/agregar-comunidad'
+    | '/comunidades/agregar-deprecated2'
+    | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
+    | '/comunidades/asaas'
+    | '/comunidades/test'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -518,8 +593,12 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/agregar'
+    | '/comunidades/agregar-comunidad'
+    | '/comunidades/agregar-deprecated2'
+    | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
+    | '/comunidades/asaas'
+    | '/comunidades/test'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -546,8 +625,12 @@ export interface FileRouteTypes {
     | '/sesiones'
     | '/NotFoundPage'
     | '/login'
-    | '/comunidades/agregar'
+    | '/comunidades/agregar-comunidad'
+    | '/comunidades/agregar-deprecated2'
+    | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
+    | '/comunidades/asaas'
+    | '/comunidades/test'
     | '/comunidades/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -576,8 +659,12 @@ export interface RootRouteChildren {
   SesionesRouteRoute: typeof SesionesRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
-  ComunidadesAgregarRoute: typeof ComunidadesAgregarRoute
+  ComunidadesAgregarComunidadRoute: typeof ComunidadesAgregarComunidadRoute
+  ComunidadesAgregarDeprecated2Route: typeof ComunidadesAgregarDeprecated2Route
+  ComunidadesAgregarPlanesMembresaRoute: typeof ComunidadesAgregarPlanesMembresaRoute
   ComunidadesAgregarServiciosRoute: typeof ComunidadesAgregarServiciosRoute
+  ComunidadesAsaasRoute: typeof ComunidadesAsaasRoute
+  ComunidadesTestRoute: typeof ComunidadesTestRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
@@ -605,8 +692,12 @@ const rootRouteChildren: RootRouteChildren = {
   SesionesRouteRoute: SesionesRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
-  ComunidadesAgregarRoute: ComunidadesAgregarRoute,
+  ComunidadesAgregarComunidadRoute: ComunidadesAgregarComunidadRoute,
+  ComunidadesAgregarDeprecated2Route: ComunidadesAgregarDeprecated2Route,
+  ComunidadesAgregarPlanesMembresaRoute: ComunidadesAgregarPlanesMembresaRoute,
   ComunidadesAgregarServiciosRoute: ComunidadesAgregarServiciosRoute,
+  ComunidadesAsaasRoute: ComunidadesAsaasRoute,
+  ComunidadesTestRoute: ComunidadesTestRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
@@ -643,8 +734,12 @@ export const routeTree = rootRoute
         "/sesiones",
         "/NotFoundPage",
         "/login",
-        "/comunidades/agregar",
+        "/comunidades/agregar-comunidad",
+        "/comunidades/agregar-deprecated2",
+        "/comunidades/agregar-planes-membresía",
         "/comunidades/agregar-servicios",
+        "/comunidades/asaas",
+        "/comunidades/test",
         "/comunidades/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
@@ -691,11 +786,23 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
-    "/comunidades/agregar": {
-      "filePath": "comunidades/agregar.tsx"
+    "/comunidades/agregar-comunidad": {
+      "filePath": "comunidades/agregar-comunidad.tsx"
+    },
+    "/comunidades/agregar-deprecated2": {
+      "filePath": "comunidades/agregar-deprecated2.tsx"
+    },
+    "/comunidades/agregar-planes-membresía": {
+      "filePath": "comunidades/agregar-planes-membresía.tsx"
     },
     "/comunidades/agregar-servicios": {
       "filePath": "comunidades/agregar-servicios.tsx"
+    },
+    "/comunidades/asaas": {
+      "filePath": "comunidades/asaas.tsx"
+    },
+    "/comunidades/test": {
+      "filePath": "comunidades/test.tsx"
     },
     "/comunidades/ver": {
       "filePath": "comunidades/ver.tsx"

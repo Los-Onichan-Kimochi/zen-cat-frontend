@@ -25,7 +25,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute('/comunidades/agregar-servicios')({
+export const Route = createFileRoute('/comunidades/agregar-planes-membresía')({
   component: AddCommunityServicePageComponent,
 });
 
