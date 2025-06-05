@@ -7,7 +7,7 @@ export const TopBar = () => {
   return (
     <nav className="bg-black text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50">
       {/* Logo */}
-      <Link to="/" className="flex items-center hover:opacity-80">
+      <Link to="/" hash="top" className="flex items-center hover:opacity-80">
         <img
           src="/ico-astrozen.svg"
           alt="Astrocat logo"
@@ -18,28 +18,16 @@ export const TopBar = () => {
 
       {/* Menú principal */}
       <div className="hidden md:flex space-x-8">
-        <Link
-          to="/como-funciona"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        <Link to="/" hash="como-funciona" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           ¿Cómo funciona?
         </Link>
-        <Link
-          to="/comunidades"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        <Link to="/" hash="comunidades" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Comunidades
         </Link>
-        <Link
-          to="/precios"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        {/*<Link to="/" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Precios
-        </Link>
-        <Link
-          to="/membresia"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        </Link>*/}
+        <Link to="/" hash="membresia" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Membresía
         </Link>
         <Link

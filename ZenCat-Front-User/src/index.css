@@ -41,6 +41,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -114,6 +116,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

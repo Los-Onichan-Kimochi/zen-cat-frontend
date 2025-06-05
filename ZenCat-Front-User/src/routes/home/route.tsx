@@ -16,14 +16,23 @@ export const Route = createFileRoute('/home')({
 export function HomeComponent() {
   return (
     <>
-      <Hero />
-      <ExploraSpan />
+      <div id="top" className="scroll-mt-16">
+        <Hero />
+      </div>
+      <div id="comunidades" className="scroll-mt-16">
+        <ExploraSpan />
+      </div>
       <CardGrid />
+
       <BottomSpan />
       <ActivitiesSection />
       <VirtualServicesSection />
-      <HowItWorks />
-      <PlansSection />
+      <div id="como-funciona" className="scroll-mt-16">
+        <HowItWorks />
+      </div>
+      <div id="membresia" className="scroll-mt-16">
+        <PlansSection />
+      </div>
       <BenefitSection />
       <CallToActionSection />
     </>
