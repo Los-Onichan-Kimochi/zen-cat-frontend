@@ -71,6 +71,7 @@ export const localsApi = {
         }
     },
     bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {
+        console.log("Datos de bulk locals", locals);
         const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
             method: 'POST',
             headers: {
