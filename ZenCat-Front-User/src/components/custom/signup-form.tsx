@@ -41,7 +41,7 @@ export function SignupForm(){
 
 
         try {
-            const response = await fetch("http://localhost:8098/user/", {
+            const response = await fetch("http://localhost:8098/register/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
