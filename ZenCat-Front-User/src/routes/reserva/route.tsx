@@ -1,14 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import ReservationLayout from '@/layouts/ReservationLayout';
 
 export const Route = createFileRoute('/reserva')({
-  component: ReservaPage,
+  component: ReservationLayout,
 });
-
-function ReservaPage() {
-  return (
-    <div className="p-2">
-      <h2 className="text-2xl font-bold">Reserva</h2>
-      <p>Contenido de la página Reserva</p>
-    </div>
-  );
-}
