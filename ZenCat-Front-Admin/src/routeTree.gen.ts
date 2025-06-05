@@ -38,7 +38,6 @@ import { Route as LocalesVerImport } from './routes/locales/ver'
 import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesTestImport } from './routes/comunidades/test'
-import { Route as ComunidadesAsaasImport } from './routes/comunidades/asaas'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
 import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía'
 import { Route as ComunidadesAgregarDeprecated2Import } from './routes/comunidades/agregar-deprecated2'
@@ -209,12 +208,6 @@ const ComunidadesTestRoute = ComunidadesTestImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ComunidadesAsaasRoute = ComunidadesAsaasImport.update({
-  id: '/comunidades/asaas',
-  path: '/comunidades/asaas',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const ComunidadesAgregarServiciosRoute =
   ComunidadesAgregarServiciosImport.update({
     id: '/comunidades/agregar-servicios',
@@ -336,13 +329,6 @@ declare module '@tanstack/react-router' {
       path: '/comunidades/agregar-servicios'
       fullPath: '/comunidades/agregar-servicios'
       preLoaderRoute: typeof ComunidadesAgregarServiciosImport
-      parentRoute: typeof rootRoute
-    }
-    '/comunidades/asaas': {
-      id: '/comunidades/asaas'
-      path: '/comunidades/asaas'
-      fullPath: '/comunidades/asaas'
-      preLoaderRoute: typeof ComunidadesAsaasImport
       parentRoute: typeof rootRoute
     }
     '/comunidades/test': {
@@ -490,7 +476,6 @@ export interface FileRoutesByFullPath {
   '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
-  '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
@@ -525,7 +510,6 @@ export interface FileRoutesByTo {
   '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
-  '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
@@ -561,7 +545,6 @@ export interface FileRoutesById {
   '/comunidades/agregar-deprecated2': typeof ComunidadesAgregarDeprecated2Route
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
-  '/comunidades/asaas': typeof ComunidadesAsaasRoute
   '/comunidades/test': typeof ComunidadesTestRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
@@ -598,7 +581,6 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-deprecated2'
     | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
-    | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
     | '/locales/agregar'
@@ -632,7 +614,6 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-deprecated2'
     | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
-    | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
     | '/locales/agregar'
@@ -666,7 +647,6 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-deprecated2'
     | '/comunidades/agregar-planes-membresía'
     | '/comunidades/agregar-servicios'
-    | '/comunidades/asaas'
     | '/comunidades/test'
     | '/comunidades/ver'
     | '/locales/agregar'
@@ -702,7 +682,6 @@ export interface RootRouteChildren {
   ComunidadesAgregarDeprecated2Route: typeof ComunidadesAgregarDeprecated2Route
   ComunidadesAgregarPlanesMembresaRoute: typeof ComunidadesAgregarPlanesMembresaRoute
   ComunidadesAgregarServiciosRoute: typeof ComunidadesAgregarServiciosRoute
-  ComunidadesAsaasRoute: typeof ComunidadesAsaasRoute
   ComunidadesTestRoute: typeof ComunidadesTestRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   LocalesAgregarRoute: typeof LocalesAgregarRoute
@@ -737,7 +716,6 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesAgregarDeprecated2Route: ComunidadesAgregarDeprecated2Route,
   ComunidadesAgregarPlanesMembresaRoute: ComunidadesAgregarPlanesMembresaRoute,
   ComunidadesAgregarServiciosRoute: ComunidadesAgregarServiciosRoute,
-  ComunidadesAsaasRoute: ComunidadesAsaasRoute,
   ComunidadesTestRoute: ComunidadesTestRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
   LocalesAgregarRoute: LocalesAgregarRoute,
@@ -781,7 +759,6 @@ export const routeTree = rootRoute
         "/comunidades/agregar-deprecated2",
         "/comunidades/agregar-planes-membresía",
         "/comunidades/agregar-servicios",
-        "/comunidades/asaas",
         "/comunidades/test",
         "/comunidades/ver",
         "/locales/agregar",
@@ -840,9 +817,6 @@ export const routeTree = rootRoute
     },
     "/comunidades/agregar-servicios": {
       "filePath": "comunidades/agregar-servicios.tsx"
-    },
-    "/comunidades/asaas": {
-      "filePath": "comunidades/asaas.tsx"
     },
     "/comunidades/test": {
       "filePath": "comunidades/test.tsx"
