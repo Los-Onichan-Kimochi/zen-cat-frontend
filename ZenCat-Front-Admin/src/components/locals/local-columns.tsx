@@ -163,7 +163,7 @@ export function getLocalColumns({
                   className="cursor-pointer"
                 >
                   <Eye className="mr-2 h-4 w-4" />
-                  Ver sesión
+                  Ver local
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -173,7 +173,7 @@ export function getLocalColumns({
                   className="cursor-pointer"
                 >
                   <Edit className="mr-2 h-4 w-4" />
-                  Editar sesión
+                  Editar local
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

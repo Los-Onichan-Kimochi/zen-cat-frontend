@@ -133,7 +133,7 @@ function LocalesComponent() {
 
   const handleView = (local: Local) => {
     localStorage.setItem('currentLocal', local.id);
-    navigate({ to: `/locales/ver` });
+    navigate({ to: `/locales/ver` , search: { id: local.id } });
   };
 
   const handleDelete = (local: Local) => {
