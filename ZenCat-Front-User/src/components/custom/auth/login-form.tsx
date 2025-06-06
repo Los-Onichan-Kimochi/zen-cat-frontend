@@ -107,9 +107,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const { login } = useAuth();
 
   const handleGoogleSuccess = (credentialResponse: any) => {
-    console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
-    console.log(decodedToken)
     
     // Extraer solo nombre y primer apellido
     const fullName = decodedToken.name || '';
@@ -177,7 +175,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <div className="relative flex justify-center">
             <GoogleLogin
             onSuccess={handleGoogleSuccess}
-            onError={() => console.log("Login failed")}
+            onError={() => {}}
             theme="outline"
             size="large"
             width="2000"

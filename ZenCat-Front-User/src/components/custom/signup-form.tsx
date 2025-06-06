@@ -63,7 +63,7 @@ export function SignupForm(){
           }
 
           const user = await response.json();
-          console.log("Usuario creado:", user);
+    
           //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
           navigate({ to: "/login" });
         } catch (err: any) {

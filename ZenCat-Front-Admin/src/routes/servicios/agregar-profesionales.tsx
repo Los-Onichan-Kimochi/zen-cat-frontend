@@ -197,7 +197,7 @@ function ProfesionalesComponent() {
             filterPlaceholder="Buscar servicios..."
             showSortButton={true}
             showFilterButton={true}
-            onFilterClick={() => console.log('Filtrar por clickeado')}
+            onFilterClick={() => {}}
             enableDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">

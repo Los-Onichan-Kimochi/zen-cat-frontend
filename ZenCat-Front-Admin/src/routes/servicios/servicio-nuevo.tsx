@@ -143,10 +143,7 @@ function AddServicePageComponent() {
     );
     if (storedProfesionales) {
       try {
-        console.log(
-          'Cargado desde localStorage:',
-          JSON.parse(storedProfesionales),
-        );
+
         setProfesionalesSeleccionados(JSON.parse(storedProfesionales));
         localStorage.removeItem('profesionalesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
       } catch (error) {
