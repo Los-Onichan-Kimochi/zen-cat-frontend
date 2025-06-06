@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation } from '@tanstack/react-router';
-import { ProgressBar } from '@/components/ui/ProgressBar';
-import { ContinueButton } from '@/components/ui/ContinueButton';
+import { ProgressBar } from '@/components/ui/progress-bar';
 
 const steps = [
   'Seleccionar servicio',
@@ -36,8 +35,8 @@ const ReservationLayout: React.FC = () => {
       <div className="w-full max-w-6xl flex flex-col gap-12">
         {/* Título centrado */}
         <div className="text-center">
-          <h1 className="text-lg md:text-xl mb-2">Realiza una nueva reserva</h1>
-          <h1 className="text-2xl md:text-3xl font-bold mb-6">Servicio</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Comunidad X</h1>
+          <h2 className="text-xl md:text-2xl font-bold mb-6">Servicio</h2>
           {/* Nombre de servicio dinámico */}
           <span className="text-lg font-bold">-</span>
         </div>
@@ -49,20 +48,8 @@ const ReservationLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Contenido dinámico centrado */}
-        <div className="border p-6 rounded-md min-h-[430px] w-full">
-          <div className="max-w-4xl mx-auto">
-            <Outlet />
-          </div>
-        </div>
-
-        {/* Botón centrado */}
-        <div className="flex justify-center">
-          <ContinueButton
-            label={currentStep < steps.length - 1 ? 'Continuar' : 'Finalizar'}
-            nextRoute={stepRoutes[currentStep + 1]}
-          />
-        </div>
+        {/* Contenido dinámico */}
+        <Outlet />
       </div>
     </div>
   );
