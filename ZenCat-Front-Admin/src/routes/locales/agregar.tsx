@@ -107,6 +107,7 @@ function AddLocalPageComponent() {
           <LocalForm
             register={register}
             errors={errors}
+            control={control}
             imagePreview={imagePreview}
             handleImageChange={handleImageChange}
           />
