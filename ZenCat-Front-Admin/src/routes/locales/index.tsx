@@ -24,13 +24,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { LocalsTable } from '@/components/locals/table';
-import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 
 import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Dialog, DialogContent} from "@/components/ui/dialog";
 
@@ -52,7 +49,7 @@ function LocalesComponent() {
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   //bulk Create variables
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  //const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const expectedExcelColumns = ["Nombre", "Calle", "Numero", "Distrito", "Provincia", "Region", "Referencia", "Capacidad", "ImagenUrl"];
   const dbFieldNames = ["local_name", "street_name", "building_number","district","province","region","reference","capacity","image_url"];
@@ -142,10 +139,6 @@ function LocalesComponent() {
   const handleDelete = (local: Local) => {
     setLocalToDelete(local);
     setIsDeleteModalOpen(true);
-  };
-
-  const handleBulkDelete = (ids: string[]) => {
-    
   };
 
   return (
