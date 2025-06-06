@@ -107,7 +107,7 @@ function AddLocalPageComponent() {
         <Button
           variant="outline"
           type="button"
-          onClick={() => navigate({ to: '/comunidades' })}
+          onClick={() => navigate({ to: '/locales' })}
         >
           <ChevronLeft className="w-5 h-5" />
           Volver
@@ -125,7 +125,7 @@ function AddLocalPageComponent() {
             <Button
               variant="outline"
               type="button"
-              onClick={() => navigate({ to: '/comunidades' })}
+              onClick={() => navigate({ to: '/locales' })}
               className="h-10 w-30 text-base"
             >
               Cancelar
