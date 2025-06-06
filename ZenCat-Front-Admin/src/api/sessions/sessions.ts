@@ -45,7 +45,7 @@ export interface AvailabilityResult {
 export const sessionsApi = {
   getSessions: async (filters?: SessionFilters): Promise<Session[]> => {
     const searchParams = new URLSearchParams();
-    
+
     if (filters?.professionalIds?.length) {
       searchParams.append('professionalIds', filters.professionalIds.join(','));
     }
@@ -58,12 +58,12 @@ export const sessionsApi = {
 
     const queryString = searchParams.toString();
     const url = `${API_BASE_URL}/session/${queryString ? `?${queryString}` : ''}`;
-    
+
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Error fetching sessions');
     }
-    
+
     const data = await response.json();
     if (data && Array.isArray(data.sessions)) {
       return data.sessions;
@@ -91,16 +91,21 @@ export const sessionsApi = {
       },
       body: JSON.stringify(payload),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Backend error response:', response.status, errorData);
-      throw new Error(`Error creating session: ${response.status} - ${errorData}`);
+      throw new Error(
+        `Error creating session: ${response.status} - ${errorData}`,
+      );
     }
     return response.json();
   },
 
-  updateSession: async (id: string, payload: UpdateSessionPayload): Promise<Session> => {
+  updateSession: async (
+    id: string,
+    payload: UpdateSessionPayload,
+  ): Promise<Session> => {
     const response = await fetch(`${API_BASE_URL}/session/${id}/`, {
       method: 'PATCH',
       headers: {
@@ -123,7 +128,9 @@ export const sessionsApi = {
     }
   },
 
-  bulkCreateSessions: async (payload: BatchCreateSessionPayload): Promise<Session[]> => {
+  bulkCreateSessions: async (
+    payload: BatchCreateSessionPayload,
+  ): Promise<Session[]> => {
     const response = await fetch(`${API_BASE_URL}/session/bulk/`, {
       method: 'POST',
       headers: {
@@ -138,7 +145,9 @@ export const sessionsApi = {
     return data.sessions || data;
   },
 
-  bulkDeleteSessions: async (payload: BulkDeleteSessionPayload): Promise<void> => {
+  bulkDeleteSessions: async (
+    payload: BulkDeleteSessionPayload,
+  ): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/session/bulk-delete/`, {
       method: 'DELETE',
       headers: {
@@ -151,7 +160,9 @@ export const sessionsApi = {
     }
   },
 
-  checkConflicts: async (data: CheckConflictRequest): Promise<ConflictResult> => {
+  checkConflicts: async (
+    data: CheckConflictRequest,
+  ): Promise<ConflictResult> => {
     // Convertir al formato correcto para el backend
     const payload = {
       date: `${data.date}T00:00:00Z`,
@@ -161,9 +172,9 @@ export const sessionsApi = {
       local_id: data.localId || null,
       exclude_id: data.excludeId || null,
     };
-    
+
     console.log('⚡ Checking conflicts with:', payload);
-    
+
     const response = await fetch(`${API_BASE_URL}/session/check-conflicts/`, {
       method: 'POST',
       headers: {
@@ -185,16 +196,18 @@ export const sessionsApi = {
     };
   },
 
-  getAvailability: async (data: AvailabilityRequest): Promise<AvailabilityResult> => {
+  getAvailability: async (
+    data: AvailabilityRequest,
+  ): Promise<AvailabilityResult> => {
     // Convertir fecha a formato ISO correcto para el backend
     const payload = {
       date: `${data.date}T00:00:00Z`,
       professional_id: data.professionalId || null,
       local_id: data.localId || null,
     };
-    
+
     console.log('🚀 Sending availability request:', payload);
-    
+
     const response = await fetch(`${API_BASE_URL}/session/availability/`, {
       method: 'POST',
       headers: {
@@ -214,4 +227,4 @@ export const sessionsApi = {
       busySlots: result.busy_slots || [],
     };
   },
-}; 
+};

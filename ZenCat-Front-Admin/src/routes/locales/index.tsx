@@ -3,6 +3,7 @@
 import HomeCard from '@/components/common/home-card';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
@@ -14,15 +15,17 @@ import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 
 import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Dialog, DialogContent} from "@/components/ui/dialog";
+
 
 
 export const Route = createFileRoute('/locales/')({
   component: LocalesComponent,
 });
-function LocalesComponent(){
+
+function LocalesComponent() {
   const navigate = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
@@ -36,18 +39,22 @@ function LocalesComponent(){
   
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
-  
+
 
   //const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
-  const { 
+  const {
     data: localsData,
     isLoading: isLoadingLocals,
-    error: errorLocals
+    error: errorLocals,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
   });
-  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => localsApi.deleteLocal(id),
     onSuccess: (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
@@ -70,11 +77,14 @@ function LocalesComponent(){
     },
   })
   const { maxRegion, maxCount } = useMemo(() => {
-    const regionCounts = localsData?.reduce((acc, local) => {
+    const regionCounts = localsData?.reduce(
+    (acc, local) => {
         const region = local.region; // Asegúrate de que `region` es el nombre correcto
         acc[region] = (acc[region] || 0) + 1;
         return acc;
-    }, {} as Record<string, number>);
+      },
+    {} as Record<string, number>,
+  );
     let maxRegion = '';
     let maxCount = 0;
   
@@ -243,25 +253,27 @@ function LocalesComponent(){
       debugTable: true,
    });
 
-   const isLoading = isLoadingLocals;
+  const isLoading = isLoadingLocals;
 
-   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
+  if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
       <div className="mb-6 flex items-center gap-4">
         <HomeCard
           icon={<MapPin className="w-8 h-8 text-teal-600" />}
           iconBgColor="bg-teal-100"
           title="Locales totales"
-          description={localsData?.length || 0} 
+          description={localsData?.length || 0}
         />
         <HomeCard
           icon={<MapPin className="w-8 h-8 text-blue-600" />}
           iconBgColor="bg-blue-100"
           title="Region con mayor cantidad de locales: "
-          description={maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'}
+          description={
+            maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'
+          }
         />
       </div>
        <div className="flex justify-end space-x-2 py-4">
@@ -359,9 +371,7 @@ function LocalesComponent(){
         //isLoading={isBulkDeleting}
       />
     </div>
-
   );
-  
 }
 
 export default LocalesComponent;

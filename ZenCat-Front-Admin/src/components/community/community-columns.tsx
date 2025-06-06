@@ -14,10 +14,13 @@ export function getCommunityColumns({
 }: GetCommunityColumnsProps): ColumnDef<Community>[] {
   return [
     {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -31,42 +34,70 @@ export function getCommunityColumns({
       ),
       enableSorting: false,
       enableHiding: false,
-      meta: { className: "w-[36px] px-3" },
+      meta: { className: 'w-[36px] px-3' },
     },
     {
-      accessorKey: "id",
-      header: "Código",
+      accessorKey: 'id',
+      header: ({ column }) => (
+        <div className="text-center font-bold">Código</div>
+      ),
       cell: ({ row }) => {
-        const value = row.getValue("id") as string;
+        const value = row.getValue('id') as string;
         return (
-          <div className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap" title={value}>
+          <div
+            className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap text-center"
+            title={value}
+          >
             {value}
           </div>
         );
       },
-      meta: { className: "w-[150px]" },
+      meta: { className: 'w-[150px]' },
     },
     {
-      accessorKey: "name",
-      header: "Nombre",
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <div className="text-center font-bold">Nombre</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue('name')}</div>
+      ),
     },
     {
-      accessorKey: "purpose",
-      header: "Propósito",
+      accessorKey: 'purpose',
+      header: ({ column }) => (
+        <div className="text-center font-bold">Propósito</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue('purpose')}</div>
+      ),
     },
     {
-      accessorKey: "number_subscriptions",
-      header: "Cantidad de miembros",
+      accessorKey: 'number_subscriptions',
+      header: ({ column }) => (
+        <div className="text-center font-bold">Cantidad de miembros</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue('number_subscriptions')}
+        </div>
+      ),
     },
     {
-      id: "actions",
-      header: "Acciones",
+      id: 'actions',
+      header: ({ column }) => (
+        <div className="text-center font-bold">Acciones</div>
+      ),
       cell: ({ row }) => {
         const com = row.original;
         return (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center justify-center">
             <Link to="/comunidades/ver" search={{ id: com.id }}>
-              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 border border-black rounded-full">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 border border-black rounded-full"
+              >
                 <MoreHorizontal className="!w-5 !h-5" />
               </Button>
             </Link>
@@ -81,7 +112,7 @@ export function getCommunityColumns({
           </div>
         );
       },
-      meta: { className: "w-[100px]" },
+      meta: { className: 'w-[100px]' },
     },
   ];
 }

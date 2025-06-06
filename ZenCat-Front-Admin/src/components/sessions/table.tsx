@@ -1,5 +1,11 @@
 'use client';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -12,28 +18,41 @@ interface SessionsTableProps {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
+  onViewReservations?: (session: Session) => void;
   onBulkDelete?: (sessions: Session[]) => void;
   isBulkDeleting?: boolean;
 }
 
-export function SessionsTable({ 
-  data, 
-  onEdit, 
-  onDelete, 
-  onView, 
+export function SessionsTable({
+  data,
+  onEdit,
+  onDelete,
+  onView,
+  onViewReservations,
   onBulkDelete,
-  isBulkDeleting = false
+  isBulkDeleting = false,
 }: SessionsTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
-  const columns = getSessionColumns({ onEdit, onDelete, onView });
+  const columns = getSessionColumns({
+    onEdit,
+    onDelete,
+    onView,
+    onViewReservations,
+  });
 
   const table = useReactTable({
     data,
@@ -59,7 +78,9 @@ export function SessionsTable({
     enableRowSelection: true,
   });
 
-  const selectedSessions = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+  const selectedSessions = table
+    .getFilteredSelectedRowModel()
+    .rows.map((row) => row.original);
 
   return (
     <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
@@ -73,10 +94,16 @@ export function SessionsTable({
         exportFileName="sesiones"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
-        onBulkDelete={onBulkDelete ? (ids: string[]) => {
-          const sessionsToDelete = data.filter(session => ids.includes(session.id));
-          onBulkDelete(sessionsToDelete);
-        } : undefined}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const sessionsToDelete = data.filter((session) =>
+                  ids.includes(session.id),
+                );
+                onBulkDelete(sessionsToDelete);
+              }
+            : undefined
+        }
         isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
@@ -85,4 +112,4 @@ export function SessionsTable({
       <DataTablePagination table={table} />
     </div>
   );
-} 
+}

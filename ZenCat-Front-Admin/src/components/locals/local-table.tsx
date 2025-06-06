@@ -1,5 +1,11 @@
 'use client';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -16,14 +22,25 @@ interface LocalsTableProps {
   isBulkDeleting?: boolean;
 }
 
-export function LocalsTable({ data, onEdit, onDelete, onView }: LocalsTableProps) {
+export function LocalsTable({
+  data,
+  onEdit,
+  onDelete,
+  onView,
+}: LocalsTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getLocalColumns({ onEdit, onDelete, onView });
@@ -69,4 +86,4 @@ export function LocalsTable({ data, onEdit, onDelete, onView }: LocalsTableProps
       <DataTablePagination table={table} />
     </div>
   );
-} 
+}

@@ -11,4 +11,4 @@ function AuditoriaComponent() {
       <HeaderDescriptor title="AUDITORÍA" subtitle="LISTADO DE AUDITORÍA" />
     </div>
   );
-} 
+}
