@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ConfirmStep } from '@/components/ui/Reservation/ConfirmStep';
-import { ReservaConfirmacionRoute } from '@/layouts/ReservationLayout';
+import { ConfirmStep } from '@/components/ui/reservation/confirm-step';
+import { ReservaConfirmacionRoute } from '@/layouts/reservation-layout';
 
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
   component: ConfirmStep,
