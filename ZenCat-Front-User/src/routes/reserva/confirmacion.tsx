@@ -1,7 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ConfirmStep } from '@/components/ui/reservation/confirm-step';
 import { ReservaConfirmacionRoute } from '@/layouts/reservation-layout';
+import { z } from 'zod';
 
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
-  component: ConfirmStep,
+  component: ConfirmationStepComponent,
+  validateSearch: z.object({
+    servicio: z.string().optional(), // Permite pasar un query param `servicio`
+  }),
 });
+
+function ConfirmationStepComponent() {
+  return (
+    <div>
+      <h1>Confirmación</h1>
+    </div>
+  );
+}

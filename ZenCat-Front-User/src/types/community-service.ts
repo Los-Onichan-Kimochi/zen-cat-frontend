@@ -1,3 +1,7 @@
+export interface CommunityServices {
+  services: CommunityService[];
+}
+
 export interface CommunityService {
   id: string;
   community_id: string;

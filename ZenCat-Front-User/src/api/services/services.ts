@@ -6,9 +6,11 @@ export const servicesApi = {
   getServices: async (): Promise<Service[]> => {
     const response = await fetch(`${API_BASE_URL}/service/`);
     if (!response.ok) {
+      console.log(response);
       throw new Error('Error fetching services');
     }
     const data = await response.json();
+    console.log(data);
     if (data && Array.isArray(data.services)) {
       return data.services;
     } else if (Array.isArray(data)) {
