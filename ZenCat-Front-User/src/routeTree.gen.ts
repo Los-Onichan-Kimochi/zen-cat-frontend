@@ -22,6 +22,7 @@ import { Route as LoginRouteImport } from './routes/login/route';
 import { Route as HomeRouteImport } from './routes/home/route';
 import { Route as ForgotRouteImport } from './routes/forgot/route';
 import { Route as IndexImport } from './routes/index';
+import { Route as ReservaIndexImport } from './routes/reserva/index';
 import { Route as ReservaServiciosImport } from './routes/reserva/servicios';
 import { Route as ReservaLugarImport } from './routes/reserva/lugar';
 import { Route as ReservaHorarioImport } from './routes/reserva/horario';
@@ -93,6 +94,12 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any);
+
+const ReservaIndexRoute = ReservaIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReservaRouteRoute,
 } as any);
 
 const ReservaServiciosRoute = ReservaServiciosImport.update({
@@ -228,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReservaServiciosImport;
       parentRoute: typeof ReservaRouteImport;
     };
+    '/reserva/': {
+      id: '/reserva/';
+      path: '/';
+      fullPath: '/reserva/';
+      preLoaderRoute: typeof ReservaIndexImport;
+      parentRoute: typeof ReservaRouteImport;
+    };
   }
 }
 
@@ -238,6 +252,7 @@ interface ReservaRouteRouteChildren {
   ReservaHorarioRoute: typeof ReservaHorarioRoute;
   ReservaLugarRoute: typeof ReservaLugarRoute;
   ReservaServiciosRoute: typeof ReservaServiciosRoute;
+  ReservaIndexRoute: typeof ReservaIndexRoute;
 }
 
 const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
@@ -245,6 +260,7 @@ const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
   ReservaHorarioRoute: ReservaHorarioRoute,
   ReservaLugarRoute: ReservaLugarRoute,
   ReservaServiciosRoute: ReservaServiciosRoute,
+  ReservaIndexRoute: ReservaIndexRoute,
 };
 
 const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
@@ -267,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/reserva/horario': typeof ReservaHorarioRoute;
   '/reserva/lugar': typeof ReservaLugarRoute;
   '/reserva/servicios': typeof ReservaServiciosRoute;
+  '/reserva/': typeof ReservaIndexRoute;
 }
 
 export interface FileRoutesByTo {
@@ -274,7 +291,6 @@ export interface FileRoutesByTo {
   '/forgot': typeof ForgotRouteRoute;
   '/home': typeof HomeRouteRoute;
   '/login': typeof LoginRouteRoute;
-  '/reserva': typeof ReservaRouteRouteWithChildren;
   '/signup': typeof SignupRouteRoute;
   '/como-funciona': typeof ComoFuncionaRoute;
   '/comunidades': typeof ComunidadesRoute;
@@ -285,6 +301,7 @@ export interface FileRoutesByTo {
   '/reserva/horario': typeof ReservaHorarioRoute;
   '/reserva/lugar': typeof ReservaLugarRoute;
   '/reserva/servicios': typeof ReservaServiciosRoute;
+  '/reserva': typeof ReservaIndexRoute;
 }
 
 export interface FileRoutesById {
@@ -304,6 +321,7 @@ export interface FileRoutesById {
   '/reserva/horario': typeof ReservaHorarioRoute;
   '/reserva/lugar': typeof ReservaLugarRoute;
   '/reserva/servicios': typeof ReservaServiciosRoute;
+  '/reserva/': typeof ReservaIndexRoute;
 }
 
 export interface FileRouteTypes {
@@ -323,14 +341,14 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios';
+    | '/reserva/servicios'
+    | '/reserva/';
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/forgot'
     | '/home'
     | '/login'
-    | '/reserva'
     | '/signup'
     | '/como-funciona'
     | '/comunidades'
@@ -340,7 +358,8 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios';
+    | '/reserva/servicios'
+    | '/reserva';
   id:
     | '__root__'
     | '/'
@@ -357,7 +376,8 @@ export interface FileRouteTypes {
     | '/reserva/confirmacion'
     | '/reserva/horario'
     | '/reserva/lugar'
-    | '/reserva/servicios';
+    | '/reserva/servicios'
+    | '/reserva/';
   fileRoutesById: FileRoutesById;
 }
 
@@ -430,7 +450,8 @@ export const routeTree = rootRoute
         "/reserva/confirmacion",
         "/reserva/horario",
         "/reserva/lugar",
-        "/reserva/servicios"
+        "/reserva/servicios",
+        "/reserva/"
       ]
     },
     "/signup": {
@@ -465,6 +486,10 @@ export const routeTree = rootRoute
     },
     "/reserva/servicios": {
       "filePath": "reserva/servicios.tsx",
+      "parent": "/reserva"
+    },
+    "/reserva/": {
+      "filePath": "reserva/index.tsx",
       "parent": "/reserva"
     }
   }

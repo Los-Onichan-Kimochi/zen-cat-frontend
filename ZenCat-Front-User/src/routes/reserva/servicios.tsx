@@ -16,6 +16,8 @@ import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
 import { CommunityService } from '@/types/community-service';
+import { useReservation } from '@/context/reservation-context';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute(ReservaServiciosRoute)({
   component: ServiceStepComponent,
@@ -25,6 +27,7 @@ export const Route = createFileRoute(ReservaServiciosRoute)({
 });
 
 interface ServiceInfo {
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -33,14 +36,17 @@ interface ServiceInfo {
 function ServiceStepComponent() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/reserva/servicios' });
+  const { reservationData, updateReservation } = useReservation();
+
   const selected = search.servicio ?? null;
-  const communityId = 'c730f30e-f6ed-40e6-a210-48ec017c9234';
+  const communityId =
+    reservationData.communityId || 'c730f30e-f6ed-40e6-a210-48ec017c9234';
 
   // Función para manejar la selección de un servicio
-  const handleSelect = (servicio: string) => {
+  const handleSelect = (serviceName: string) => {
     navigate({
       to: ReservaServiciosRoute,
-      search: { servicio }, // actualiza el query param `?servicio=...`
+      search: { servicio: serviceName }, // actualiza el query param `?servicio=...`
       replace: true, // evitar que se agregue a la historia del navegador
     });
   };
@@ -72,12 +78,30 @@ function ServiceStepComponent() {
       );
       if (!match) return null;
       return {
+        id: service.id,
         title: service.name,
         description: service.description,
         imageUrl: service.image_url,
       };
     })
     .filter((s): s is ServiceInfo => s !== null);
+
+  // Actualizar el contexto cuando se selecciona un servicio
+  useEffect(() => {
+    if (selected) {
+      const selectedService = services.find((s) => s.title === selected);
+      if (selectedService) {
+        updateReservation({
+          service: {
+            id: selectedService.id,
+            name: selectedService.title,
+            description: selectedService.description,
+            image_url: selectedService.imageUrl,
+          },
+        });
+      }
+    }
+  }, [selected, services, updateReservation]);
 
   if (isLoadingCommunityServices || isLoadingServices || !communityId) {
     return (
@@ -95,6 +119,15 @@ function ServiceStepComponent() {
       </div>
     );
   }
+
+  const handleContinue = () => {
+    if (selected && reservationData.service) {
+      navigate({
+        to: '/reserva/lugar',
+        search: { servicio: selected },
+      });
+    }
+  };
 
   return (
     <div>
@@ -124,9 +157,17 @@ function ServiceStepComponent() {
               </select>
             </div>
 
+            <div className="text-center text-sm text-gray-600">
+              Resultados: {services.length} servicios
+            </div>
+
             {/* Carousel */}
             <ServiceCarousel
-              services={services}
+              services={services.map((s) => ({
+                title: s.title,
+                description: s.description,
+                imageUrl: s.imageUrl,
+              }))}
               selected={selected}
               onSelect={handleSelect}
             />
@@ -136,17 +177,7 @@ function ServiceStepComponent() {
 
       {/* Botón siguiente */}
       <div className="flex justify-center pt-6">
-        <Button
-          onClick={() => {
-            if (selected) {
-              navigate({
-                to: '/reserva/lugar',
-                search: { servicio: selected },
-              });
-            }
-          }}
-          disabled={!selected}
-        >
+        <Button onClick={handleContinue} disabled={!selected}>
           Continuar
         </Button>
       </div>
