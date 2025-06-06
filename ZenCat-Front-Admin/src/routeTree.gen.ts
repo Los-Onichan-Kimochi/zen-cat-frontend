@@ -40,8 +40,8 @@ import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as PlanesMembresiaVerImport } from './routes/planes-membresia/ver'
 import { Route as PlanesMembresiaAgregarImport } from './routes/planes-membresia/agregar'
 import { Route as LocalesVerImport } from './routes/locales/ver'
+import { Route as LocalesEditarImport } from './routes/locales/editar'
 import { Route as LocalesAgregarImport } from './routes/locales/agregar'
-import { Route as LocalesEditarImport } from './routes/locales/editar';
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
 import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía'
@@ -224,17 +224,17 @@ const LocalesVerRoute = LocalesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LocalesEditarRoute = LocalesEditarImport.update({
+  id: '/locales/editar',
+  path: '/locales/editar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const LocalesAgregarRoute = LocalesAgregarImport.update({
   id: '/locales/agregar',
   path: '/locales/agregar',
   getParentRoute: () => rootRoute,
 } as any)
-
-const LocalesEditarRoute = LocalesEditarImport.update({
-  id: '/locales/editar',
-  path: '/locales/editar',
-  getParentRoute: () => rootRoute,
-} as any);
 
 const ComunidadesVerRoute = ComunidadesVerImport.update({
   id: '/comunidades/ver',
@@ -351,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocalesAgregarImport
       parentRoute: typeof rootRoute
     }
+    '/locales/editar': {
+      id: '/locales/editar'
+      path: '/locales/editar'
+      fullPath: '/locales/editar'
+      preLoaderRoute: typeof LocalesEditarImport
+      parentRoute: typeof rootRoute
+    }
     '/locales/ver': {
       id: '/locales/ver'
       path: '/locales/ver'
@@ -358,13 +365,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocalesVerImport
       parentRoute: typeof rootRoute
     }
-    '/locales/editar': {
-      id: '/locales/editar';
-      path: '/locales/editar';
-      fullPath: '/locales/editar';
-      preLoaderRoute: typeof LocalesEditarImport;
-      parentRoute: typeof rootRoute;
-    };
     '/planes-membresia/agregar': {
       id: '/planes-membresia/agregar'
       path: '/planes-membresia/agregar'
@@ -530,8 +530,8 @@ export interface FileRoutesByFullPath {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
-  '/locales/editar': typeof LocalesEditarRoute;
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
@@ -568,8 +568,8 @@ export interface FileRoutesByTo {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
-  '/locales/editar': typeof LocalesEditarRoute;
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
@@ -607,8 +607,8 @@ export interface FileRoutesById {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
-  '/locales/editar': typeof LocalesEditarRoute;
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
@@ -647,8 +647,8 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
-    | '/locales/ver'
     | '/locales/editar'
+    | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
@@ -684,8 +684,8 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
-    | '/locales/ver'
     | '/locales/editar'
+    | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
@@ -721,8 +721,8 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
-    | '/locales/ver'
     | '/locales/editar'
+    | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
@@ -760,6 +760,7 @@ export interface RootRouteChildren {
   ComunidadesAgregarServiciosRoute: typeof ComunidadesAgregarServiciosRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   LocalesAgregarRoute: typeof LocalesAgregarRoute
+  LocalesEditarRoute: typeof LocalesEditarRoute
   LocalesVerRoute: typeof LocalesVerRoute
   PlanesMembresiaAgregarRoute: typeof PlanesMembresiaAgregarRoute
   PlanesMembresiaVerRoute: typeof PlanesMembresiaVerRoute
@@ -797,6 +798,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesAgregarServiciosRoute: ComunidadesAgregarServiciosRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
   LocalesAgregarRoute: LocalesAgregarRoute,
+  LocalesEditarRoute: LocalesEditarRoute,
   LocalesVerRoute: LocalesVerRoute,
   PlanesMembresiaAgregarRoute: PlanesMembresiaAgregarRoute,
   PlanesMembresiaVerRoute: PlanesMembresiaVerRoute,
@@ -843,8 +845,8 @@ export const routeTree = rootRoute
         "/comunidades/agregar-servicios",
         "/comunidades/ver",
         "/locales/agregar",
-        "/locales/ver",
         "/locales/editar",
+        "/locales/ver",
         "/planes-membresia/agregar",
         "/planes-membresia/ver",
         "/profesionales/nuevo",
@@ -904,11 +906,11 @@ export const routeTree = rootRoute
     "/locales/agregar": {
       "filePath": "locales/agregar.tsx"
     },
-    "/locales/ver": {
-      "filePath": "locales/ver.tsx"
-    },
     "/locales/editar": {
       "filePath": "locales/editar.tsx"
+    },
+    "/locales/ver": {
+      "filePath": "locales/ver.tsx"
     },
     "/planes-membresia/agregar": {
       "filePath": "planes-membresia/agregar.tsx"

@@ -112,7 +112,7 @@ function LocalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = (ids: string[]) => {
     
   };
 
@@ -150,11 +150,10 @@ function LocalesComponent() {
         <LocalsTable
           data={localsData || []}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteLocalMutation.isPending}
+          isBulkDeleting={false}//bulkDeleteLocalMutation.isPending
           onEdit={handleEdit}
           onDelete={handleDelete}
           resetRowSelectionTrigger={resetSelectionTrigger}
-          onBulkDelete={handleBulkDelete}
         />
       )}
       <BulkCreateDialog
