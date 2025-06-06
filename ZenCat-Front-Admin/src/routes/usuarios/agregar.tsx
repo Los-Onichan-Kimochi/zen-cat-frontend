@@ -52,18 +52,19 @@ function AgregarUsuario() {
     celular: '',
     tipoDoc: '',
     numDoc: '',
-    region: '',
-    provincia: '',
+    fechaNacimiento: '',
+    genero: '',
+    ciudad: '',
+    codigoPostal: '',
     distrito: '',
     calle: '',
-    edificio: '',
-    referencia: '',
   });
 
   const [errors, setErrors] = useState({
     correo: '',
     celular: '',
     tipoDoc: '',
+    numDoc: '',
     nombres: '',
     primerApellido: '',
   });
@@ -99,6 +100,7 @@ function AgregarUsuario() {
       correo: '',
       celular: '',
       tipoDoc: '',
+      numDoc: '',
       nombres: '',
       primerApellido: '',
     };
@@ -121,7 +123,7 @@ function AgregarUsuario() {
       valid = false;
     }
 
-    // Solo validar celular y tipo de documento si el onboarding está habilitado
+    // Solo validar onboarding fields si el onboarding está habilitado
     if (onboardingEnabled) {
       // Celular (solo números y longitud 9-15)
       if (form.celular && !form.celular.match(/^\d{9,15}$/)) {
@@ -130,8 +132,14 @@ function AgregarUsuario() {
       }
 
       // Tipo de documento
-      if (form.tipoDoc && !form.tipoDoc) {
+      if (!form.tipoDoc) {
         newErrors.tipoDoc = 'Seleccione un tipo de documento';
+        valid = false;
+      }
+
+      // Número de documento
+      if (!form.numDoc.trim()) {
+        newErrors.numDoc = 'El número de documento es requerido';
         valid = false;
       }
     }
@@ -158,9 +166,18 @@ function AgregarUsuario() {
     };
 
     if (onboardingEnabled) {
-      payload.address = form.calle;
-      payload.district = form.distrito;
-      payload.phone = form.celular;
+      // Solo agregar datos en el objeto onboarding, no duplicarlos en el nivel raíz
+      payload.onboarding = {
+        documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
+        documentNumber: form.numDoc,
+        phoneNumber: form.celular,
+        birthDate: form.fechaNacimiento,
+        gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
+        city: form.ciudad,
+        postalCode: form.codigoPostal,
+        district: form.distrito,
+        address: form.calle,
+      };
     }
 
     createUserMutation.mutate(payload);
@@ -324,7 +341,8 @@ function AgregarUsuario() {
                   >
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
-                    <option value="Foreign Card">Foreign Card</option>
+                    <option value="FOREIGNER_CARD">Carnet de Extranjería</option>
+                    <option value="PASSPORT">Pasaporte</option>
                   </select>
                   {errors.tipoDoc && (
                     <span className="text-red-500 text-sm">
@@ -343,32 +361,66 @@ function AgregarUsuario() {
                     onChange={handleChange}
                     placeholder="Ingrese el número del documento"
                   />
+                  {errors.numDoc && (
+                    <span className="text-red-500 text-sm">
+                      {errors.numDoc}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="fecha-nacimiento" className="block font-medium mb-1">
+                    Fecha de nacimiento
+                  </label>
+                  <Input
+                    id="fecha-nacimiento"
+                    name="fechaNacimiento"
+                    type="date"
+                    value={form.fechaNacimiento}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="genero" className="block font-medium mb-1">
+                    Género
+                  </label>
+                  <select
+                    id="genero"
+                    name="genero"
+                    value={form.genero}
+                    onChange={handleChange}
+                    className="w-full h-10 px-3 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Seleccione un género</option>
+                    <option value="MALE">Masculino</option>
+                    <option value="FEMALE">Femenino</option>
+                    <option value="OTHER">Otro</option>
+                  </select>
                 </div>
               </div>
               <div className="mb-4 font-semibold">Dirección</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="region" className="block font-medium mb-1">
-                    Región
+                  <label htmlFor="ciudad" className="block font-medium mb-1">
+                    Ciudad
                   </label>
                   <Input
-                    id="region"
-                    name="region"
-                    value={form.region}
+                    id="ciudad"
+                    name="ciudad"
+                    value={form.ciudad}
                     onChange={handleChange}
-                    placeholder="Seleccione una región"
+                    placeholder="Ingrese la ciudad"
                   />
                 </div>
                 <div>
-                  <label htmlFor="provincia" className="block font-medium mb-1">
-                    Provincia
+                  <label htmlFor="codigo-postal" className="block font-medium mb-1">
+                    Código postal
                   </label>
                   <Input
-                    id="provincia"
-                    name="provincia"
-                    value={form.provincia}
+                    id="codigo-postal"
+                    name="codigoPostal"
+                    value={form.codigoPostal}
                     onChange={handleChange}
-                    placeholder="Seleccione una provincia"
+                    placeholder="Ingrese el código postal"
                   />
                 </div>
                 <div>
@@ -391,33 +443,6 @@ function AgregarUsuario() {
                     id="calle"
                     name="calle"
                     value={form.calle}
-                    onChange={handleChange}
-                    placeholder="Núm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edificio" className="block font-medium mb-1">
-                    Nro. de edificio
-                  </label>
-                  <Input
-                    id="edificio"
-                    name="edificio"
-                    value={form.edificio}
-                    onChange={handleChange}
-                    placeholder="Núm"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="referencia"
-                    className="block font-medium mb-1"
-                  >
-                    Referencia
-                  </label>
-                  <Input
-                    id="referencia"
-                    name="referencia"
-                    value={form.referencia}
                     onChange={handleChange}
                     placeholder="Núm"
                   />
