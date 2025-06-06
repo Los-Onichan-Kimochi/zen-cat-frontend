@@ -1,15 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import {
-  ReservaLugarRoute,
-  ReservaServiciosRoute,
-} from '@/layouts/reservation-layout';
-
-// Import images from Carrousel
+import { ReservaServiciosRoute } from '@/layouts/reservation-layout';
+import { ServiceCarousel } from '@/components/ui/reservation/service-carousel';
+import { Button } from '@/components/ui/button';
 import gimnasioImage from '../../images/Carrousel/image 148(1).png';
 import yogaImage from '../../images/Carrousel/image 150(1).png';
 import funcionalImage from '../../images/Carrousel/image 151(2).png';
-import { ContinueButton } from '@/components/ui/continue-button';
-import { ServiceCarousel } from '@/components/ui/reservation/service-carousel';
 
 export const Route = createFileRoute(ReservaServiciosRoute)({
   component: AddServiceStepComponent,
@@ -63,9 +58,13 @@ function AddServiceStepComponent() {
               <input
                 type="text"
                 placeholder="Buscar servicio ..."
-                className="w-full md:w-1/2 border border-gray-300 rounded-md px-4 py-2"
+                className="w-full md:w-1/2 border
+                 border-gray-300 rounded-md px-4 py-2"
               />
-              <select className="w-full md:w-1/4 border border-gray-300 rounded-md px-4 py-2">
+              <select
+                className="w-full md:w-1/4 border
+                 border-gray-300 rounded-md px-4 py-2"
+              >
                 <option>Ordenar por</option>
                 <option value="a-z">A-Z</option>
                 <option value="z-a">Z-A</option>
@@ -80,7 +79,7 @@ function AddServiceStepComponent() {
 
       {/* Botón centrado */}
       <div className="flex justify-center pt-6">
-        <ContinueButton label="Continuar" nextRoute={ReservaLugarRoute} />
+        <Button> Continuar </Button>
       </div>
     </div>
   );
