@@ -44,7 +44,8 @@ function ConfirmationStepComponent() {
   // Fetch community data
   const { data: communityData } = useQuery({
     queryKey: ['community', reservationData.communityId],
-    queryFn: () => communitiesApi.getCommunityById(reservationData.communityId!),
+    queryFn: () =>
+      communitiesApi.getCommunityById(reservationData.communityId!),
     enabled: !!reservationData.communityId,
   });
 
@@ -110,7 +111,7 @@ function ConfirmationStepComponent() {
       ];
       return `${sessionDate.getDate()} de ${months[sessionDate.getMonth()]} del ${sessionDate.getFullYear()}`;
     }
-    
+
     if (!dateStr) return '';
     const [day, month] = dateStr.split('/');
     const months = [
@@ -239,9 +240,7 @@ function ConfirmationStepComponent() {
               </div>
               <div>
                 <div className="text-sm text-gray-600 mb-1">Fecha</div>
-                <div className="font-semibold">
-                  {formatDate()}
-                </div>
+                <div className="font-semibold">{formatDate()}</div>
               </div>
             </div>
 

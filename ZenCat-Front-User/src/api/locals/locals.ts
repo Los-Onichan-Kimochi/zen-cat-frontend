@@ -43,4 +43,3 @@ export const localsApi = {
     return response.json();
   },
 };
- 

@@ -18,6 +18,8 @@ interface ProfessionalsTableProps {
   onEdit: (professional: Professional) => void;
   onDelete: (professional: Professional) => void;
   onView: (professional: Professional) => void;
+  onBulkDelete?: (professionals: Professional[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export function ProfessionalsTable({
@@ -25,6 +27,8 @@ export function ProfessionalsTable({
   onEdit,
   onDelete,
   onView,
+  onBulkDelete,
+  isBulkDeleting = false,
 }: ProfessionalsTableProps) {
   const {
     sorting,
@@ -75,8 +79,21 @@ export function ProfessionalsTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
-        onExportClick={() => console.log('Exportar')}
+        onFilterClick={() => {}}
+        exportFileName="profesionales"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const professionalsToDelete = data.filter((professional) =>
+                  ids.includes(professional.id),
+                );
+                onBulkDelete(professionalsToDelete);
+              }
+            : undefined
+        }
+        isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

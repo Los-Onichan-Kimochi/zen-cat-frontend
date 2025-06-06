@@ -19,7 +19,6 @@ export function ForgotForm() {
     setIsModalOpen(false);
     try {
       //POST
-      console.log('Usuario registrado');
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido al intentar registrarte.';

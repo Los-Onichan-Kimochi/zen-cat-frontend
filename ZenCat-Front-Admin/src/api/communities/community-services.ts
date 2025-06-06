@@ -9,7 +9,7 @@ export const communityServicesApi = {
   bulkCreateCommunityServices: async (
     communityServices: CreateCommunityServicePayload[],
   ): Promise<CommunityService[]> => {
-    console.log('Creating community services:', communityServices);
+
     const response = await fetch(
       `${API_BASE_URL}/community-service/bulk-create/`,
       {

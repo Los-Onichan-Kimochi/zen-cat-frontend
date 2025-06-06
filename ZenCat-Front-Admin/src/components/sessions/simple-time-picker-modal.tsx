@@ -36,7 +36,7 @@ export function SimpleTimePickerModal({
   const handleOpenModal = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Opening modal...'); // Debug
+
     setIsOpen(true);
   };
 
@@ -53,10 +53,21 @@ export function SimpleTimePickerModal({
         size="sm"
         disabled={disabled}
         onClick={handleOpenModal}
-        className="px-3 py-2 border-dashed hover:bg-gray-50"
+        className={`px-3 py-2 transition-all duration-200 ${
+          disabled
+            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+            : selectedRange
+              ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100'
+              : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 border-dashed'
+        }`}
       >
         <Calendar className="h-4 w-4 mr-2" />
-        Selector Visual
+        {disabled 
+          ? 'Selector Deshabilitado' 
+          : selectedRange 
+            ? `${selectedRange.start} - ${selectedRange.end}` 
+            : 'Selector Visual de Horario'
+        }
       </Button>
 
       {/* Modal Overlay */}

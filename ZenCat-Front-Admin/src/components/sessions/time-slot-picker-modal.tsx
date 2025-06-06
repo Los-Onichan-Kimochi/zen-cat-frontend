@@ -41,14 +41,14 @@ export function TimeSlotPickerModal({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    console.log('Modal open change:', newOpen); // Debug
+
     setOpen(newOpen);
   };
 
   const handleButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Button clicked!'); // Debug
+
     setOpen(true);
   };
 

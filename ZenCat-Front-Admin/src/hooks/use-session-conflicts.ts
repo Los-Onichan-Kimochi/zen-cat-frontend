@@ -107,11 +107,7 @@ export function useDayAvailability(
   const { data, isLoading } = useQuery<AvailabilityResult>({
     queryKey: ['day-availability', date, professionalId, localId],
     queryFn: () => {
-      console.log('🔍 Fetching availability for:', {
-        date,
-        professionalId,
-        localId,
-      });
+
       if (!date) {
         return Promise.resolve({ isAvailable: true, busySlots: [] });
       }
@@ -132,7 +128,7 @@ export function useDayAvailability(
       return { isAvailable: true, busySlots: [] };
     }
 
-    console.log('📅 Availability result:', data);
+
     return {
       isAvailable: data.isAvailable,
       busySlots: data.busySlots,
