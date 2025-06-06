@@ -19,7 +19,7 @@ interface LocalFormProps {
   errors: FieldErrors<LocalFormData>;
   imagePreview: string | null;
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  //handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
 export function LocalForm({
@@ -27,7 +27,7 @@ export function LocalForm({
     errors,
     imagePreview,
     handleImageChange,
-    handleSubmit,
+    //handleSubmit,
 }: LocalFormProps){
     return (
         <Card>
