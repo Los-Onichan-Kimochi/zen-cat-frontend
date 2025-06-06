@@ -11,12 +11,23 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { UploadCloud } from 'lucide-react';
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { UseFormRegister, FieldErrors,  Controller,Control } from 'react-hook-form';
 import { LocalFormData } from '@/hooks/use-local-basic-form';
+import { useEffect, useState } from 'react';
+import { Region, Provincia, Distrito} from '@/types/local';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
+import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
+import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
+
+const regiones: Region[] = rawRegiones;
+const provincias: Provincia[] = rawProvincias;
+const distritos: Distrito[] = rawDistritos;
 
 interface LocalFormProps {
   register: UseFormRegister<LocalFormData>;
   errors: FieldErrors<LocalFormData>;
+  control: Control<LocalFormData>;
   imagePreview: string | null;
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   //handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
@@ -25,10 +36,20 @@ interface LocalFormProps {
 export function LocalForm({
     register,
     errors,
+    control,
     imagePreview,
     handleImageChange,
     //handleSubmit,
 }: LocalFormProps){
+    const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+    const [selectedProvincia, setSelectedProvincia] = useState<string | null>(null);
+    const [selectedDistrito, setSelectedDistrito] = useState<string | null>(null);
+    const provinciasFiltradas = provincias.filter(
+        (prov) => prov.department_id === selectedRegion
+    )
+    const distritosFiltrados = distritos.filter(
+        (dist) => dist.department_id === selectedRegion && dist.province_id === selectedProvincia
+    );
     return (
         <Card>
           <CardHeader>
@@ -89,10 +110,34 @@ export function LocalForm({
                     <Label htmlFor="region" className="mb-2">
                       Región
                     </Label>
-                    <Input
-                      id="region"
-                      {...register('region')}
-                      placeholder="Ingrese la región"
+                    <Controller
+                        name="region"
+                        control={control}
+                        render={({ field }) => (
+                        <Select
+                            onValueChange={(value) => {
+                            const selected = regiones.find((r) => r.id === value);
+                            field.onChange(selected?.name);
+                            setSelectedRegion(value);
+                            setSelectedProvincia('');
+                            setSelectedDistrito('');
+                          }}
+                          value={
+                            regiones.find((r) => r.name === field.value)?.id ?? ''
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione una región" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {regiones.map((region) => (
+                              <SelectItem key={region.id} value={region.id}>
+                                {region.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
                     {errors.region && (
                       <p className="text-red-500 text-sm mt-1">
@@ -104,29 +149,81 @@ export function LocalForm({
                     <Label htmlFor="province" className="mb-2">
                         Provincia
                     </Label>
-                    <Input
-                      id="province"
-                      {...register('province')}
-                      placeholder="Ingrese la provincia"
-                    />
-                     {errors.province && (
-                       <p className="text-red-500 text-sm mt-1">
-                         {errors.province.message}
-                       </p>
-                     )}
+                    <Select
+                      onValueChange={(value) => {
+                        setSelectedProvincia(value);
+                        setSelectedDistrito(null);
+                      }}
+                      disabled={!selectedRegion}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una provincia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {provinciasFiltradas.map((prov) => (
+                          <SelectItem key={prov.id} value={prov.id}>
+                            {prov.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input type="hidden" {...register('province')} value={selectedProvincia || ''} />
+                    {errors.province && (
+                      <p className="text-red-500 text-sm mt-1">{errors.province.message}</p>
+                    )}
                 </div>
                 <div>
                     <Label htmlFor="district" className="mb-2">    
                          Distrito
                     </Label>
-                    <Input
-                       id="district"
-                       {...register('district')}
-                       placeholder="Ingrese el distrito"
-                    />
+                    <Select
+                      onValueChange={(value) => setSelectedDistrito(value)}
+                      disabled={!selectedProvincia}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un distrito" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {distritosFiltrados.map((dist) => (
+                          <SelectItem key={dist.id} value={dist.id}>
+                            {dist.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input type="hidden" {...register('district')} value={selectedDistrito || ''} />
                     {errors.district && (
+                      <p className="text-red-500 text-sm mt-1">{errors.district.message}</p>
+                    )}
+                </div>
+                <div>
+                    <Label htmlFor='reference' className="mb-2">
+                        Referencia
+                    </Label>
+                    <Input
+                       id="reference"
+                       {...register('reference')}
+                       placeholder="Ingrese la referencia"
+                    />
+                    {errors.reference && (
                         <p className="text-red-500 text-sm mt-1">
-                         {errors.district.message}
+                         {errors.reference.message}
+                        </p>
+                    )}
+                </div>
+                <div>
+                    <Label htmlFor='capacity' className='mb-2'>
+                        Capacidad
+                    </Label>
+                    <Input
+                       id="capacity"
+                       type='number'
+                       {...register('capacity', { valueAsNumber: true })}
+                       placeholder="Ingrese la capacidad"
+                    />
+                    {errors.capacity && (
+                        <p className="text-red-500 text-sm mt-1">
+                         {errors.capacity.message}
                         </p>
                     )}
                 </div>

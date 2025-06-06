@@ -23,11 +23,9 @@ import {
 
 import { Local, CreateLocalPayload } from '@/types/local';
 
-import { useEffect, useState } from 'react';
+
 import { Plus, ChevronLeft } from 'lucide-react';
-import regions from '@/types/ubigeo_peru_2016_departamentos.json';
-import provinces from '@/types/ubigeo_peru_2016_provincias.json';
-import districts from '@/types/ubigeo_peru_2016_distritos.json';
+
 import '../../index.css';
 
 export const Route = createFileRoute('/locales/agregar')({
@@ -65,15 +63,6 @@ function AddLocalPageComponent() {
     },
   });
 
-  const [selectedRegion, setSelectedRegion] = useState('');
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const filteredProvinces = provinces.filter(
-    (province) => province.department_id === selectedRegion,
-  ).sort((a, b) => a.name.localeCompare(b.name));
-  const filteredDistricts = districts.filter(
-    (district) => district.province_id === selectedProvince,
-  ).sort((a, b) => a.name.localeCompare(b.name));
   const onSubmit = async (data: any) => {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
