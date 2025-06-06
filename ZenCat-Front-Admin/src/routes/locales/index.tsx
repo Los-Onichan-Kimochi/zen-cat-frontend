@@ -180,7 +180,7 @@ function LocalesComponent() {
         entity="Local"
         itemName={localToDelete?.local_name ?? ''}
         onConfirm={() => {
-          if (localToDelete) deleteLocal(localToDelete.id);
+          if (localToDelete) localsApi.deleteLocal(localToDelete.id);
           setIsDeleteModalOpen(false);
         }}
       />
