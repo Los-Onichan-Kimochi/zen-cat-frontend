@@ -41,6 +41,21 @@ export const communityMembershipPlansApi = {
     if (!response.ok) {
       throw new Error('Error bulk deleting community-membership-plans');
     }
+  },
+
+  getCommunityMembershipPlans: async (communityId?: string, planId?: string): Promise<CommunityMembershipPlan[]> => {
+    const queryParams = new URLSearchParams();
+
+    if (communityId) queryParams.append("communityId", communityId);
+    if (planId) queryParams.append("planId", planId);
+
+    const response = await fetch(`${API_BASE_URL}/community-plan/?${queryParams.toString()}`);
+
+    if (!response.ok) {
+      throw new Error("Error fetching community plans");
+    }
+
+    return response.json();
   }
 
 }; 

@@ -26,20 +26,6 @@ export const communityServicesApi = {
     return response.json();
   },
 
-  getCommunityServicesByCommunityId: async (
-    communityId: string,
-  ): Promise<CommunityService> => {
-    const response = await fetch(
-      `${API_BASE_URL}/community-service/${communityId}/`,
-    );
-    if (!response.ok) {
-      throw new Error(
-        `Error fetching services for community with id: ${communityId}`,
-      );
-    }
-    return response.json();
-  },
-
   deleteCommunityService: async (id: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/community-service/${id}/`, {
       method: 'DELETE',
@@ -64,4 +50,19 @@ export const communityServicesApi = {
       throw new Error('Error bulk deleting community-services');
     }
   },
+
+  getCommunityServices: async (communityId?: string, serviceId?: string): Promise<CommunityService[]> => {
+    const queryParams = new URLSearchParams();
+
+    if (communityId) queryParams.append("communityId", communityId);
+    if (serviceId) queryParams.append("serviceId", serviceId);
+
+    const response = await fetch(`${API_BASE_URL}/community-service/?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error("Error fetching community services");
+    }
+
+    return response.json();
+  }
+
 };
