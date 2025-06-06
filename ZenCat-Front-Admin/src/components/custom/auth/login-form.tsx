@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { User } from '@/types/user';
-import { authApi } from '@/api/auth/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
+import { useNavigate } from '@tanstack/react-router'
+import { useAuth } from '@/context/AuthContext';
+
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
@@ -37,8 +39,25 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setError(null);
     setIsModalOpen(false);
     try {
-      const user = await authApi.login(email, password);
-      onLoginSuccess(user);
+      const response = await fetch('http://localhost:8098/login/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+        "email": email,
+        "password": password
+      }),
+      });
+      if (!response.ok) {
+        const errBody = await response.json();
+        throw new Error(errBody?.message || "Error al loguear usuario");
+      }
+      const json = await response.json();
+      const user= json.user;
+      console.log(user)
+      login(user)
+      navigate({ to: "/" }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
       setError(errorMessage);
@@ -48,6 +67,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     }
   };
 
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+
   const handlePing = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading2(true);
@@ -55,26 +78,26 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen2(false);
     setPingSuccess(false); // Reset success state
     try {
-      const response = await fetch('http://localhost:8098/health-check/', {
-        method: 'GET',
+      const response = await fetch('http://localhost:8098/login/', {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
         },
-      }); 
-      
+        body: JSON.stringify({
+        "email": email,
+        "password": password
+      }),
+      });
       if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+        const errBody = await response.json();
+        throw new Error(errBody?.message || "Error al loguear usuario");
       }
-      
-      // If response is ok, parse, stringify, and show in modal
-      const data = await response.json(); 
-      // Stringify the data with indentation for readability
-      const responseString = JSON.stringify(data, null, 2); 
-      setError2(responseString); // Use the error state to hold the success message
-      setPingSuccess(true); // Indicate success for modal title
-      setIsModalOpen2(true); // Open the modal
-      
+      const json = await response.json();
+      const user= json.user;
+      console.log(user)
+      onLoginSuccess(user);
+      login(user)
+      navigate({ to: "/" }); // Redirige si todo va bien
     } catch (err: any) {
       console.error("Error en Ping:", err); 
       setError2(err.message || 'Error al conectar con el servidor de ping.');
