@@ -1,13 +1,21 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from '@tanstack/react-router';
 import { ReservaServiciosRoute } from '@/layouts/reservation-layout';
 import { ServiceCarousel } from '@/components/ui/reservation/service-carousel';
 import { Button } from '@/components/ui/button';
 import gimnasioImage from '../../images/Carrousel/image 148(1).png';
 import yogaImage from '../../images/Carrousel/image 150(1).png';
 import funcionalImage from '../../images/Carrousel/image 151(2).png';
+import { z } from 'zod';
 
 export const Route = createFileRoute(ReservaServiciosRoute)({
   component: AddServiceStepComponent,
+  validateSearch: z.object({
+    servicio: z.string().optional(),
+  }),
 });
 
 const services = [
@@ -35,11 +43,14 @@ const services = [
 
 function AddServiceStepComponent() {
   const navigate = useNavigate();
+  const search = useSearch({ from: '/reserva/servicios' });
+  const selected = search.servicio ?? null;
 
   const handleSelect = (servicio: string) => {
     navigate({
-      to: '/reserva/lugar',
-      search: { servicio }, // lo guardamos en la URL como query param
+      to: ReservaServiciosRoute,
+      search: { servicio },
+      replace: true,
     });
   };
 
@@ -72,7 +83,11 @@ function AddServiceStepComponent() {
             </div>
 
             {/* Carousel */}
-            <ServiceCarousel services={services} onSelect={handleSelect} />
+            <ServiceCarousel
+              services={services}
+              selected={selected}
+              onSelect={handleSelect}
+            />
           </div>
         </div>
       </div>
