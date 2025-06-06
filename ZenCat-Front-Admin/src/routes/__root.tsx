@@ -1,6 +1,9 @@
 import MainLayout from '@/layouts/MainLayout';
 import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
+
 
 export const Route = createRootRoute({
   beforeLoad: ({ location }) => {
@@ -26,6 +29,13 @@ export const Route = createRootRoute({
 function RootComponent() {
   const routerState = useRouterState();
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user && routerState.location.pathname !== '/login') {
+      navigate({ to: '/login', replace: true });
+    }
+  }, [user, routerState.location.pathname, navigate]);
 
   const showLayout = !!user && routerState.location.pathname !== '/login';
 
