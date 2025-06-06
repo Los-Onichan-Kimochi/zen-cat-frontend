@@ -4,9 +4,8 @@ export interface Community {
   purpose: string;
   image_url: string;
   number_subscriptions: number;
-} 
+}
 
-// Tipos para los payloads de creación y actualización
 export interface CreateCommunityPayload {
   name: string;
   purpose: string;
@@ -15,4 +14,10 @@ export interface CreateCommunityPayload {
 
 export type UpdateCommunityPayload = Partial<CreateCommunityPayload>;
 
-export type BulkCreateCommunityPayload = CreateCommunityPayload[];
+export interface BulkCreateCommunityPayload {
+  communities: CreateCommunityPayload[];
+}
+
+export interface BulkDeleteCommunityPayload {
+  communities: string[]; // array of communities IDs
+}

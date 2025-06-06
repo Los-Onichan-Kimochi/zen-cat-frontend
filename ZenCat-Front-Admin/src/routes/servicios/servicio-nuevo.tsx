@@ -6,25 +6,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DataTable } from '@/components/common/data-table/data-table';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from '@/components/ui/card';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import { useState } from 'react';
-import { Loader2, UploadCloud,  Plus, Upload} from 'lucide-react';
+import { Loader2, UploadCloud, Plus, Upload } from 'lucide-react';
 import '../../index.css';
 import { Professional } from '@/types/professional';
 import { CreateServicePayload } from '@/types/service';
 import { servicesApi } from '@/api/services/services';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
 
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
+import {
+  ColumnDef,
+  Row,
+  Column,
+  Table,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -42,27 +49,33 @@ import { useRouterState } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/servicios/servicio-nuevo')({
   component: AddServicePageComponent,
-  
 });
 
-
 export const serviceFormSchema = z.object({
-  name: z.string().min(1, { message: "El nombre del servicio es requerido." }),
-  is_virtual: z.string({ required_error: "Debe seleccionar si el servicio es virtual o no." }),
-  description: z.string().min(1, { message: "La descripción es requerida." }),
+  name: z.string().min(1, { message: 'El nombre del servicio es requerido.' }),
+  is_virtual: z.string({
+    required_error: 'Debe seleccionar si el servicio es virtual o no.',
+  }),
+  description: z.string().min(1, { message: 'La descripción es requerida.' }),
   image_url: z.any().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceFormSchema>;
 
 function AddServicePageComponent() {
-  
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const { register, handleSubmit, control, formState: { errors }, watch, reset } = useForm<ServiceFormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceFormSchema),
     defaultValues: {
       name: '',
@@ -71,14 +84,19 @@ function AddServicePageComponent() {
     },
   });
   const createServiceMutation = useMutation({
-    mutationFn: async (data: CreateServicePayload) => servicesApi.createService(data),
+    mutationFn: async (data: CreateServicePayload) =>
+      servicesApi.createService(data),
     onSuccess: () => {
-      toast.success("Servicio Creado", { description: "El servicio ha sido agregado exitosamente." });
+      toast.success('Servicio Creado', {
+        description: 'El servicio ha sido agregado exitosamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/servicios' });
     },
     onError: (error) => {
-      toast.error("Error al crear servicio", { description: error.message || "No se pudo crear el servicio." });
+      toast.error('Error al crear servicio', {
+        description: error.message || 'No se pudo crear el servicio.',
+      });
     },
   });
 
@@ -92,11 +110,9 @@ function AddServicePageComponent() {
       };
       reader.readAsDataURL(file);
     }
-
-    
   };
 
-  const isVirtual = watch("is_virtual");
+  const isVirtual = watch('is_virtual');
   const match = useMatch({ from: '/servicios/servicio-nuevo' });
 
   const locationState = useRouterState({ select: (s) => s.location.state }) as {
@@ -105,52 +121,60 @@ function AddServicePageComponent() {
   } | null;
 
   const lugaresIniciales = locationState?.lugaresSeleccionados ?? [];
-  const profesionalesIniciales = locationState?.profesionalesSeleccionados ?? [];
+  const profesionalesIniciales =
+    locationState?.profesionalesSeleccionados ?? [];
 
-  const [lugaresSeleccionados, setLugaresSeleccionados] = useState(lugaresIniciales);
-  const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState(profesionalesIniciales);
+  const [lugaresSeleccionados, setLugaresSeleccionados] =
+    useState(lugaresIniciales);
+  const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState(
+    profesionalesIniciales,
+  );
 
   useEffect(() => {
     const draft = localStorage.getItem('draftService');
-      if (draft) {
-        const values = JSON.parse(draft);
-        reset(values); 
-        localStorage.removeItem('draftService');
-      }
+    if (draft) {
+      const values = JSON.parse(draft);
+      reset(values);
+      localStorage.removeItem('draftService');
+    }
 
-    const storedProfesionales = localStorage.getItem('profesionalesSeleccionados');
-      if (storedProfesionales) {
-        try {
-          console.log('Cargado desde localStorage:', JSON.parse(storedProfesionales));
-          setProfesionalesSeleccionados(JSON.parse(storedProfesionales));
-          localStorage.removeItem('profesionalesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
-        } catch (error) {
-          console.error('Error al parsear profesionales guardados', error);
-        }
+    const storedProfesionales = localStorage.getItem(
+      'profesionalesSeleccionados',
+    );
+    if (storedProfesionales) {
+      try {
+        console.log(
+          'Cargado desde localStorage:',
+          JSON.parse(storedProfesionales),
+        );
+        setProfesionalesSeleccionados(JSON.parse(storedProfesionales));
+        localStorage.removeItem('profesionalesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
+      } catch (error) {
+        console.error('Error al parsear profesionales guardados', error);
       }
+    }
   }, []);
-
-  
 
   const onSubmit = async (data: ServiceFormData) => {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
-      toast.info("Imagen (simulada)", { description: "Subida de imagen simulada completada." });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.info('Imagen (simulada)', {
+        description: 'Subida de imagen simulada completada.',
+      });
     }
 
     const payload: CreateServicePayload = {
       name: data.name,
       is_virtual: data.is_virtual === 'true',
       description: data.description,
-      image_url: imageUrl, 
+      image_url: imageUrl,
     };
 
-
     try {
-    const newService = await servicesApi.createService(payload);
+      const newService = await servicesApi.createService(payload);
 
-    // 2. Bulk create de ServiceProfessional
+      // 2. Bulk create de ServiceProfessional
       if (profesionalesSeleccionados.length > 0) {
         const bulkPayload = {
           service_professionals: profesionalesSeleccionados.map((prof) => ({
@@ -158,18 +182,22 @@ function AddServicePageComponent() {
             professional_id: prof.id,
           })),
         };
-        await serviceProfessionalApi.bulkCreateServiceProfessionals(bulkPayload);
+        await serviceProfessionalApi.bulkCreateServiceProfessionals(
+          bulkPayload,
+        );
       }
 
-      toast.success("Servicio y profesionales asociados creados correctamente.");
+      toast.success(
+        'Servicio y profesionales asociados creados correctamente.',
+      );
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/servicios' });
     } catch (error: any) {
-      toast.error("Error al crear servicio o asociar profesionales", { description: error.message });
+      toast.error('Error al crear servicio o asociar profesionales', {
+        description: error.message,
+      });
     }
-
   };
-
 
   const columnsProfesionales = [
     {
@@ -199,7 +227,7 @@ function AddServicePageComponent() {
   ];
 
   const columnsLocales = [
-  {
+    {
       accessorKey: 'name',
       header: 'Nombre',
     },
@@ -211,8 +239,6 @@ function AddServicePageComponent() {
       accessorKey: 'number',
       header: 'Número',
     },
-
-    
   ];
 
   const profesionalesTable = useReactTable({
@@ -220,13 +246,12 @@ function AddServicePageComponent() {
     columns: columnsProfesionales,
     getCoreRowModel: getCoreRowModel(),
   });
-  
+
   const localesTable = useReactTable({
     data: lugaresSeleccionados,
     columns: columnsLocales,
     getCoreRowModel: getCoreRowModel(),
   });
-
 
   return (
     <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
@@ -234,16 +259,28 @@ function AddServicePageComponent() {
       <Card className="mt-6 flex-grow">
         <CardHeader>
           <CardTitle>Datos del Servicio</CardTitle>
-          <CardDescription>Complete la información para agregar un nuevo servicio.</CardDescription>
+          <CardDescription>
+            Complete la información para agregar un nuevo servicio.
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             {/* Columna Izquierda para campos */}
             <div className="grid grid-cols-1 gap-y-6">
               <div>
-                <Label htmlFor="name" className="mb-2">Nombre</Label>
-                <Input id="name" {...register("name")} placeholder="Ingrese el nombre del servicio" />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+                <Label htmlFor="name" className="mb-2">
+                  Nombre
+                </Label>
+                <Input
+                  id="name"
+                  {...register('name')}
+                  placeholder="Ingrese el nombre del servicio"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
               <div>
                 <div>
@@ -253,7 +290,9 @@ function AddServicePageComponent() {
                       <input
                         type="radio"
                         value="true"
-                        {...register("is_virtual", { required: "Debe seleccionar una opción." })}
+                        {...register('is_virtual', {
+                          required: 'Debe seleccionar una opción.',
+                        })}
                       />
                       Sí
                     </label>
@@ -261,77 +300,110 @@ function AddServicePageComponent() {
                       <input
                         type="radio"
                         value="false"
-                        {...register("is_virtual", { required: "Debe seleccionar una opción." })}
+                        {...register('is_virtual', {
+                          required: 'Debe seleccionar una opción.',
+                        })}
                       />
                       No
                     </label>
                   </div>
                   {errors.is_virtual && (
-                    <p className="text-red-500 text-sm mt-1">{errors.is_virtual.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.is_virtual.message}
+                    </p>
                   )}
                 </div>
               </div>
               <div>
-                <Label htmlFor="description" className="mb-2">Descripción</Label>
-                <Input id="second_last_name" {...register("description")} placeholder="Ingrese el segundo apellido" />
+                <Label htmlFor="description" className="mb-2">
+                  Descripción
+                </Label>
+                <Input
+                  id="second_last_name"
+                  {...register('description')}
+                  placeholder="Ingrese el segundo apellido"
+                />
               </div>
-              
-              
             </div>
 
             {/* Columna Derecha para foto de perfil y botones */}
             <div className="flex flex-col space-y-6">
               <div className="flex flex-col">
-                <Label htmlFor="profileImageFile" className="mb-2 self-start">Foto de perfil</Label>
+                <Label htmlFor="profileImageFile" className="mb-2 self-start">
+                  Foto de perfil
+                </Label>
                 <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Vista previa" className="object-contain h-full w-full rounded-md" />
+                    <img
+                      src={imagePreview}
+                      alt="Vista previa"
+                      className="object-contain h-full w-full rounded-md"
+                    />
                   ) : (
                     <div className="text-center text-gray-400">
-                      <UploadCloud size={48} className="mx-auto"/>
+                      <UploadCloud size={48} className="mx-auto" />
                       <p>Arrastra o selecciona un archivo</p>
                       <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
                     </div>
                   )}
-                   <Input 
-                    id="profileImageFile" 
-                    type="file" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  <Input
+                    id="profileImageFile"
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     accept="image/png, image/jpeg, image/gif"
-                    {...register("image_url")} 
-                    onChange={handleImageChange} 
+                    {...register('image_url')}
+                    onChange={handleImageChange}
                   />
                 </div>
-                {errors.image_url && typeof errors.image_url.message === 'string' && (
-                  <p className="text-red-500 text-sm mt-1">{errors.image_url.message}</p>
-                )}
+                {errors.image_url &&
+                  typeof errors.image_url.message === 'string' && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.image_url.message}
+                    </p>
+                  )}
               </div>
-              
+
               <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-                <Button variant="outline" type="button" onClick={() => navigate({ to: '/servicios' })} className="w-full sm:w-auto">Cancelar</Button>
-                <Button type="submit" disabled={createServiceMutation.isPending} className="w-full sm:w-auto">
-                  {createServiceMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => navigate({ to: '/servicios' })}
+                  className="w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createServiceMutation.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  {createServiceMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}{' '}
+                  Guardar
                 </Button>
               </div>
             </div>
           </CardContent>
         </form>
       </Card>
-      {isVirtual === "true" && (
+      {isVirtual === 'true' && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Profesionales Asociados</CardTitle>
-            <CardDescription>Listado de profesionales disponibles para este servicio virtual.</CardDescription>
+            <CardDescription>
+              Listado de profesionales disponibles para este servicio virtual.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex justify-end space-x-2 py-4">
               <Button
                 onClick={() => {
-                  
                   const data = watch(); // obtiene valores actuales del form
                   localStorage.setItem('draftService', JSON.stringify(data));
-                  localStorage.setItem('profesionalesSeleccionados', JSON.stringify(profesionalesSeleccionados));
-                  
+                  localStorage.setItem(
+                    'profesionalesSeleccionados', 
+                    JSON.stringify(profesionalesSeleccionados));
                   navigate({ to: '/servicios/agregar-profesionales' });
                 }}
               >
@@ -346,11 +418,13 @@ function AddServicePageComponent() {
         </Card>
       )}
 
-      {isVirtual === "false" && (
+      {isVirtual === 'false' && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Locales Disponibles</CardTitle>
-            <CardDescription>Selecciona los locales donde se brindará este servicio presencial.</CardDescription>
+            <CardDescription>
+              Selecciona los locales donde se brindará este servicio presencial.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex justify-end space-x-2 py-4">
@@ -358,20 +432,17 @@ function AddServicePageComponent() {
                 onClick={() =>
                   navigate({
                     to: '/servicios/agregar-locales',
-                    state: { lugaresSeleccionados } as any
+                    state: { lugaresSeleccionados } as any,
                   })
                 }
               >
                 <Plus className="mr-2 h-4 w-4" /> Agregar Lugar
               </Button>
             </div>
-            <DataTable
-              table={localesTable}
-              columns={columnsLocales}
-            />
+            <DataTable table={localesTable} columns={columnsLocales} />
           </CardContent>
         </Card>
       )}
     </div>
   );
-} 
+}

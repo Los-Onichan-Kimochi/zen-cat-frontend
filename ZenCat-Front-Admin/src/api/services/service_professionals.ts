@@ -1,4 +1,8 @@
-import { ServiceProfessional, CreateServiceProfessionalRequest, DeleteServiceProfessionalRequest } from '@/types/service_professional';
+import {
+  ServiceProfessional,
+  CreateServiceProfessionalRequest,
+  DeleteServiceProfessionalRequest,
+} from '@/types/service_professional';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,14 +29,21 @@ export const serviceProfessionalApi = {
   },
 
   // Get a specific association
-  getServiceProfessional: async (serviceId: string, professionalId: string): Promise<ServiceProfessional> => {
-    const response = await fetch(`${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`);
+  getServiceProfessional: async (
+    serviceId: string,
+    professionalId: string,
+  ): Promise<ServiceProfessional> => {
+    const response = await fetch(
+      `${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`,
+    );
     if (!response.ok) throw new Error('Error fetching service-professional');
     return response.json();
   },
 
   // Create a new association
-  createServiceProfessional: async (payload: CreateServiceProfessionalRequest): Promise<ServiceProfessional> => {
+  createServiceProfessional: async (
+    payload: CreateServiceProfessionalRequest,
+  ): Promise<ServiceProfessional> => {
     const response = await fetch(`${API_BASE_URL}/service-professional/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -43,32 +54,44 @@ export const serviceProfessionalApi = {
   },
 
   // Bulk create
-  bulkCreateServiceProfessionals: async (payload: { service_professionals: CreateServiceProfessionalRequest[] }): Promise<ServiceProfessional[]> => {
+  bulkCreateServiceProfessionals: async (payload: {
+    service_professionals: CreateServiceProfessionalRequest[];
+  }): Promise<ServiceProfessional[]> => {
     const response = await fetch(`${API_BASE_URL}/service-professional/bulk/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!response.ok) throw new Error('Error bulk creating service-professionals');
+    if (!response.ok)
+      throw new Error('Error bulk creating service-professionals');
     const data = await response.json();
     return data.service_professionals;
   },
 
   // Delete one
-  deleteServiceProfessional: async (serviceId: string, professionalId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`, {
-      method: 'DELETE',
-    });
+  deleteServiceProfessional: async (
+    serviceId: string,
+    professionalId: string,
+  ): Promise<void> => {
+    const response = await fetch(
+      `${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`,
+      {
+        method: 'DELETE',
+      },
+    );
     if (!response.ok) throw new Error('Error deleting service-professional');
   },
 
   // Bulk delete
-  bulkDeleteServiceProfessionals: async (payload: { service_professionals: DeleteServiceProfessionalRequest[] }): Promise<void> => {
+  bulkDeleteServiceProfessionals: async (payload: {
+    service_professionals: DeleteServiceProfessionalRequest[];
+  }): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/service-professional/bulk/`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!response.ok) throw new Error('Error bulk deleting service-professionals');
+    if (!response.ok)
+      throw new Error('Error bulk deleting service-professionals');
   },
 };

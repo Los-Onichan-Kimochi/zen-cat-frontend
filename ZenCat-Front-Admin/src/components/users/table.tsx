@@ -1,5 +1,11 @@
 'use client';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -14,14 +20,25 @@ interface UsersTableProps {
   onViewMemberships: (user: User) => void;
 }
 
-export function UsersTable({ data, onEdit, onDelete, onViewMemberships }: UsersTableProps) {
+export function UsersTable({
+  data,
+  onEdit,
+  onDelete,
+  onViewMemberships,
+}: UsersTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getUserColumns({ onEdit, onDelete, onViewMemberships });

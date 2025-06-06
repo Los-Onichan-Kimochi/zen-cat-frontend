@@ -1,6 +1,6 @@
 'use client';
 
-import { createFileRoute , useNavigate} from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
@@ -10,8 +10,8 @@ import { Service } from '@/types/service';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { 
-  ColumnDef, 
+import {
+  ColumnDef,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -22,15 +22,14 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/comunidades/agregar-servicios')({
   component: AddCommunityServicePageComponent,
 });
 
 function AddCommunityServicePageComponent() {
-  
   const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -57,9 +56,11 @@ function AddCommunityServicePageComponent() {
   };
 
   const handleGuardar = () => {
-    const selected = table.getSelectedRowModel().rows.map(row => row.original);
+    const selected = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original);
 
-    sessionStorage.setItem("draftSelectedServices", JSON.stringify(selected));
+    sessionStorage.setItem('draftSelectedServices', JSON.stringify(selected));
 
     navigate({ to: '/comunidades/agregar-comunidad' });
   };
@@ -68,58 +69,59 @@ function AddCommunityServicePageComponent() {
     const stored = sessionStorage.getItem('draftSelectedServices');
     if (stored && servicesData) {
       const restored = JSON.parse(stored) as Service[];
-
       const newRowSelection: Record<string, boolean> = {};
       restored.forEach((serv) => {
         newRowSelection[serv.id.toString()] = true;
       });
-
       setRowSelection(newRowSelection);
     }
-
   }, [servicesData]);
 
-  //Define the columns of the table  
-  const columns = useMemo<ColumnDef<Service>[]>(() => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      meta: {className: "w-[36px] px-3"},
-    },
-    {
-      accessorKey: "name",
-      header: "Nombre",
-    },
-    {
-      accessorKey: "is_virtual",
-      header: "¿Es virtual?",
-      cell: ({ row }) =>
-        row.original.is_virtual ? "Sí" : "No",
-    },
-  ], []);
+  //Define the columns of the table
+  const columns = useMemo<ColumnDef<Service>[]>(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        meta: { className: 'w-[36px] px-3' },
+      },
+      {
+        accessorKey: 'name',
+        header: 'Nombre',
+      },
+      {
+        accessorKey: 'is_virtual',
+        header: '¿Es virtual?',
+        cell: ({ row }) => (row.original.is_virtual ? 'Sí' : 'No'),
+      },
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: servicesData || [],
     columns,
-    getRowId: (row) => row.id.toString(), 
+    getRowId: (row) => row.id.toString(),
     state: {
       sorting,
       columnFilters,
@@ -143,7 +145,8 @@ function AddCommunityServicePageComponent() {
     debugTable: true,
   });
 
-  if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
+  if (errorServices)
+    return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
     <div className="p-6 h-full font-montserrat">
@@ -151,7 +154,8 @@ function AddCommunityServicePageComponent() {
 
       <div className="mb-4">
         <Button
-          variant="outline" size="default" 
+          variant="outline"
+          size="default"
           onClick={() => navigate({ to: '/comunidades/agregar-comunidad' })}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -173,25 +177,32 @@ function AddCommunityServicePageComponent() {
               showExportButton={false}
               exportFileName="comunidades"
               showFilterButton={true}
-              onFilterClick={() => console.log("No hay chance de filtrar XD")}
+              onFilterClick={() => console.log('No hay chance de filtrar XD')}
               showSortButton={true}
             />
             <div className="flex-grow">
-              <DataTable 
-                table={table} 
-                columns={columns}
-              />
+              <DataTable table={table} columns={columns} />
             </div>
             <DataTablePagination table={table} />
           </div>
         )}
       </div>
       <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-        <Button variant="outline" type="button" onClick={handleCancel}>Cancelar</Button>
-        <Button onClick={handleGuardar} className="w-full sm:w-auto">
+        <Button
+          variant="outline"
+          type="button"
+          className="h-10 w-30 text-base"
+          onClick={handleCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleGuardar}
+          className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+        >
           Guardar
         </Button>
       </div>
     </div>
   );
-} 
+}

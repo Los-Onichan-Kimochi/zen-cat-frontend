@@ -1,8 +1,8 @@
 'use client';
 
-
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
+import { ViewToolbar } from '@/components/common/view-toolbar';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,10 +11,9 @@ import { Community } from '@/types/community';
 import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
-import { CommunityTable } from '@/components/community/table';
+import { CommunityTable } from '@/components/community/community-table';
 
-import { Locate, Plus, Upload, Loader2} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Locate, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/comunidades/')({
@@ -27,7 +26,9 @@ function ComunidadesComponent() {
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null);
+  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(
+    null,
+  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
 
@@ -50,22 +51,27 @@ function ComunidadesComponent() {
       toast.error('Error al eliminar comunidad', { description: err.message });
     },
   });
-
-  const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: string[]) => communitiesApi.bulkDeleteCommunities(ids),
+  
+  const bulkDeleteCommunityMutation = useMutation({
+    mutationFn: (ids: string[]) => 
+      communitiesApi.bulkDeleteCommunities({ communities: ids }),
     onSuccess: (_, ids) => {
-      toast.success('Comunidades eliminadas', { description: `${ids.length} registros` });
+      toast.success('Comunidades eliminadas', {
+        description: `${ids.length} registros`,
+      });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples comunidades', { description: err.message });
+      toast.error('Error al eliminar múltiples comunidades', {
+        description: err.message,
+      });
     },
   });
 
   const handleBulkDelete = (ids: string[]) => {
-    bulkDeleteMutation.mutate(ids, {
+    bulkDeleteCommunityMutation.mutate(ids, {
       onSuccess: () => {
-        setResetSelectionTrigger(prev => prev + 1);
+        setResetSelectionTrigger((prev) => prev + 1);
       },
     });
   };
@@ -85,26 +91,17 @@ function ComunidadesComponent() {
         />
       </div>
 
-      <div className="flex justify-end gap-3 mb-4">
-        <Button
-          onClick={() => {
-            sessionStorage.removeItem('draftCommunity');
-            sessionStorage.removeItem('draftSelectedServices');
-            navigate({ to: '/comunidades/agregar-comunidad' });
-          }}
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Agregar
-        </Button>
-
-        <Button
-          size="sm"
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
-          onClick={() => setShowUploadDialog(true)}
-        >
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
+      <ViewToolbar
+        onAddClick={() => {
+          sessionStorage.removeItem('draftCommunity');
+          sessionStorage.removeItem('draftSelectedServices');
+          sessionStorage.removeItem('draftSelectedMembershipPlans');
+          navigate({ to: '/comunidades/agregar-comunidad' });
+        }}
+        onBulkUploadClick={() => setShowUploadDialog(true)}
+        addButtonText="Agregar"
+        bulkUploadButtonText="Carga Masiva"
+      />
 
       {isLoading ? (
         <div className="flex justify-center items-center py-10">
@@ -114,12 +111,12 @@ function ComunidadesComponent() {
         <CommunityTable
           data={communitiesData}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteMutation.isPending}
-          onDeleteClick={(com) => {
+          isBulkDeleting={bulkDeleteCommunityMutation.isPending}
+          onDelete={(com) => {
             setCommunityToDelete(com);
             setIsDeleteModalOpen(true);
           }}
-          resetRowSelectionTrigger={resetSelectionTrigger} // 👈 ahora es un number
+          resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
 
@@ -127,17 +124,17 @@ function ComunidadesComponent() {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Comunidades"
-        expectedExcelColumns={["Nombre", "Propósito", "Logo"]}
-        dbFieldNames={["name", "purpose", "image_url"]}
+        expectedExcelColumns={['Nombre', 'Propósito', 'Logo']}
+        dbFieldNames={['name', 'purpose', 'image_url']}
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities(data);
+            await communitiesApi.bulkCreateCommunities({communities: data});
             setShowUploadDialog(false);
             setShowSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['communities'] });
           } catch (error) {
             console.error(error);
-            toast.error("Error durante la carga masiva");
+            toast.error('Error durante la carga masiva');
           }
         }}
       />
@@ -149,7 +146,8 @@ function ComunidadesComponent() {
         entity="Comunidad"
         itemName={communityToDelete?.name ?? ''}
         onConfirm={() => {
-          if (communityToDelete) deleteCommunityMutation.mutate(communityToDelete.id);
+          if (communityToDelete)
+            deleteCommunityMutation.mutate(communityToDelete.id);
         }}
       />
 

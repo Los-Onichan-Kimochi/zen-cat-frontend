@@ -1,15 +1,17 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Community } from '@/types/community';
+import { MembershipPlan } from '@/types/membership-plan';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Trash, MoreHorizontal } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
-export function getCommunityColumns({
-  onDeleteClick,
-}: {
-  onDeleteClick: (community: Community) => void;
-}): ColumnDef<Community>[] {
+interface GetMembershipPlanColumnsProps {
+  onDelete: (membershipPlan: MembershipPlan) => void;
+}
+
+export function getMembershipPlanColumns({
+  onDelete,
+}: GetMembershipPlanColumnsProps): ColumnDef<MembershipPlan>[] {
   return [
     {
       id: "select",
@@ -45,25 +47,27 @@ export function getCommunityColumns({
       meta: { className: "w-[150px]" },
     },
     {
-      accessorKey: "name",
-      header: "Nombre",
+      accessorKey: "type",
+      header: "Tipo de Plan",
     },
     {
-      accessorKey: "purpose",
-      header: "Propósito",
+      accessorKey: "fee",
+      header: "Precio",
     },
     {
-      accessorKey: "number_subscriptions",
-      header: "Cantidad de miembros",
+      accessorKey: "reservation_limit",
+      header: "Límite",
+      accessorFn: (row) =>
+        row.reservation_limit == null ? "Sin límite" : row.reservation_limit,
     },
     {
       id: "actions",
       header: "Acciones",
       cell: ({ row }) => {
-        const com = row.original;
+        const membershipPlan = row.original;
         return (
           <div className="flex gap-2 items-center">
-            <Link to="/comunidades/ver" search={{ id: com.id }}>
+            <Link to="/planes-membresia/ver" search={{ id: membershipPlan.id }}>
               <Button size="sm" variant="ghost" className="h-8 w-8 p-0 border border-black rounded-full">
                 <MoreHorizontal className="!w-5 !h-5" />
               </Button>
@@ -72,7 +76,7 @@ export function getCommunityColumns({
               size="sm"
               variant="ghost"
               className="h-8 w-8 p-0 border border-black rounded-full hover:bg-red-200"
-              onClick={() => onDeleteClick(com)}
+              onClick={() => onDelete(membershipPlan)}
             >
               <Trash className="!w-5 !h-5" />
             </Button>

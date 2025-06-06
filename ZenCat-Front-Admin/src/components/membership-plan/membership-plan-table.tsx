@@ -1,29 +1,29 @@
 'use client';
 
-import { Community } from '@/types/community';
+import { MembershipPlan } from '@/types/membership-plan';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { getCommunityColumns } from './columns';
-import { useCommunityTable } from '@/hooks/use-community-table';
+import { getMembershipPlanColumns } from './membership-plan-columns';
+import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { useEffect } from 'react';
 
-interface CommunityTableProps {
-  data: Community[];
+interface MembershipPlanTableProps {
+  data: MembershipPlan[];
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
-  onDeleteClick: (community: Community) => void;
+  onDelete: (membershipPlan: MembershipPlan) => void;
   resetRowSelectionTrigger?: number;
 }
 
-export function CommunityTable({
+export function MembershipPlanTable({
   data,
   onBulkDelete,
   isBulkDeleting,
-  onDeleteClick,
+  onDelete,
   resetRowSelectionTrigger,
-}: CommunityTableProps) {
+}: MembershipPlanTableProps) {
   const {
     sorting, setSorting,
     columnFilters, setColumnFilters,
@@ -31,9 +31,9 @@ export function CommunityTable({
     rowSelection, setRowSelection,
     globalFilter, setGlobalFilter,
     pagination, setPagination,
-  } = useCommunityTable();
+  } = useDataTable();
 
-  const columns = getCommunityColumns({ onDeleteClick });
+  const columns = getMembershipPlanColumns({ onDelete });
 
   const table = useReactTable({
     data,
@@ -73,8 +73,8 @@ export function CommunityTable({
         isBulkDeleting={isBulkDeleting}
         showBulkDeleteButton
         showExportButton
-        filterPlaceholder="Buscar comunidad..."
-        exportFileName="comunidades"
+        filterPlaceholder="Buscar plan de membresía..."
+        exportFileName="planes de membresía"
         showFilterButton
         onFilterClick={() => console.log("Filtrar")}
         showSortButton

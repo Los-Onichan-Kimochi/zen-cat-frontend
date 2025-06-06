@@ -1,6 +1,5 @@
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 
-
 export const dummyProfessionals: Professional[] = [
   {
     id: 'prof-001',
@@ -46,7 +45,7 @@ export const dummyProfessionals: Professional[] = [
     address: '101 Zen Way, Cusco',
     profilePicture: '',
   },
-   {
+  {
     id: 'prof-005',
     name: 'Luis',
     firstLastName: 'Gonzalez',
@@ -167,4 +166,4 @@ export const dummyProfessionals: Professional[] = [
     address: '202 Muscle Ln, Piura',
     profilePicture: '',
   },
-]; 
+];

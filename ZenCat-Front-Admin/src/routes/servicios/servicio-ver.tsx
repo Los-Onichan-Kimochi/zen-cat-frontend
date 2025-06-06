@@ -6,7 +6,13 @@ import { useState, useEffect } from 'react';
 import { servicesApi } from '@/api/services/services';
 import { professionalsApi } from '@/api/professionals/professionals';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -45,7 +51,7 @@ import {
 
 
 export const Route = createFileRoute('/servicios/servicio-ver')({
-    component: SeeServicePageComponent,
+  component: SeeServicePageComponent,
 });
 
 export function SeeServicePageComponent() {
@@ -72,16 +78,21 @@ export function SeeServicePageComponent() {
             image: '',
         });
 
-    const id = typeof window !== 'undefined'
+    const id = 
+    typeof window !== 'undefined'
         ? localStorage.getItem('currentService')
         : null;
-    
+
     if (!id) {
         navigate({ to: '/servicios' });
         return null;
     }
 
-    const { data: ser, isLoading, error } = useQuery({
+    const { 
+      data: ser, 
+      isLoading, 
+      error 
+    } = useQuery({
         queryKey: ['service', id],
         queryFn: () => servicesApi.getServiceById(id!),
     });
@@ -223,21 +234,25 @@ export function SeeServicePageComponent() {
       // });
 
     if (isLoading) {
-        return <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin w-12 h-12" /></div>;
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="animate-spin w-12 h-12" />
+        </div>
+      );
     }
     if (error || !ser) {
         navigate({ to: '/servicios' });
         return null;
     }
 
-    const hasChanges =
+     const hasChanges =
         name !== initialValues.name ||
         description !== initialValues.description ||
         isVirtual !== initialValues.isVirtual ||
         (imageFile && imageFile.name !== initialValues.image);
-    
+
     return (
-    <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
+        <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="SERVICIOS" subtitle="VER SERVICIO" />
       <Card className="mt-6 flex-grow">
         <CardHeader>

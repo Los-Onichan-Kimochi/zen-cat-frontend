@@ -2,7 +2,14 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload } from 'lucide-react';
+import {
+  Users,
+  Loader2,
+  MoreHorizontal,
+  ArrowUpDown,
+  Plus,
+  Upload,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
@@ -15,11 +22,11 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { useNavigate } from '@tanstack/react-router';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { useEffect } from 'react';
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
+import {
+  ColumnDef,
+  Row,
+  Column,
+  Table,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -30,13 +37,12 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/servicios/agregar-profesionales')({
   component: ProfesionalesComponent,
 });
-
 
 function ProfesionalesComponent() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -49,10 +55,10 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
-  const { 
+  const {
     data: professionalsData,
     isLoading: isLoadingProfessionals,
-    error: errorProfessionals
+    error: errorProfessionals,
   } = useQuery<Professional[], Error>({
     queryKey: ['professionals'],
     queryFn: professionalsApi.getProfessionals,
@@ -79,9 +85,7 @@ function ProfesionalesComponent() {
 
       setRowSelection(newRowSelection);
     }
-    
-
-}, [professionalsData]);
+  }, [professionalsData]);
 
   const columns = useMemo<ColumnDef<Professional>[]>(() => [
     {
@@ -98,14 +102,14 @@ function ProfesionalesComponent() {
         
         const yaAsociado = profesionalesAsociados.includes(profesionalId.toString());
         return (
-          <Checkbox
-            checked={row.getIsSelected() || yaAsociado}
-            disabled={yaAsociado && modo === 'editar'}
-            onCheckedChange={(v) => {
+        <Checkbox
+          checked={row.getIsSelected()|| yaAsociado}
+          disabled={yaAsociado && modo === 'editar'}
+          onCheckedChange={(v) => {
               if (!yaAsociado) row.toggleSelected(!!v);
             }}
             aria-label="Select row"
-          />
+        />
         );
       },
       enableSorting: false,
@@ -129,7 +133,9 @@ function ProfesionalesComponent() {
     {
       accessorKey: 'email',
       header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        <Button 
+            variant="ghost" 
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
           Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -140,7 +146,7 @@ function ProfesionalesComponent() {
   const table = useReactTable({
     data: professionalsData || [],
     columns,
-    getRowId: (row) => row.id.toString(), 
+    getRowId: (row) => row.id.toString(),
     state: {
       sorting,
       columnFilters,
@@ -166,14 +172,19 @@ function ProfesionalesComponent() {
 
   const isLoading = isLoadingProfessionals;
 
-  const selectedProfessionals = table.getSelectedRowModel().rows.map(row => row.original);
+  const selectedProfessionals = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
 
-  if (errorProfessionals) return <p>Error cargando servicios: {errorProfessionals.message}</p>;
-  
+  if (errorProfessionals)
+    return <p>Error cargando servicios: {errorProfessionals.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col">
-      <HeaderDescriptor title="PROFESIONALES" subtitle="LISTADO DE PROFESIONALES" />
+      <HeaderDescriptor
+        title="PROFESIONALES"
+        subtitle="LISTADO DE PROFESIONALES"
+      />
 
       {isLoadingProfessionals ? (
         <div className="flex justify-center items-center h-64">
@@ -186,7 +197,7 @@ function ProfesionalesComponent() {
             filterPlaceholder="Buscar servicios..."
             showSortButton={true}
             showFilterButton={true}
-            onFilterClick={() => console.log("Filtrar por clickeado")}
+            onFilterClick={() => console.log('Filtrar por clickeado')}
             enableDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
@@ -194,10 +205,10 @@ function ProfesionalesComponent() {
           </div>
           <DataTablePagination table={table} />
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => {
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() =>{
                 localStorage.removeItem('modoAgregarProfesional');
                 localStorage.removeItem('profesionalesAsociados');
                 if (modo === 'editar') {
@@ -205,15 +216,15 @@ function ProfesionalesComponent() {
                 } else {
                   navigate({ to: '/servicios/servicio-nuevo' });
                 }
-              }}
-              className="w-full sm:w-auto"
-            >
-              Cancelar
-            </Button>
+              }} className="w-full sm:w-auto"
+              >
+                Cancelar
+                </Button>
             <Button
               type="button"
-              disabled={isLoadingProfessionals || selectedProfessionals.length === 0}
-              onClick={async () => {
+              disabled={
+                isLoadingProfessionals || selectedProfessionals.length === 0}
+              onClick={async() => {
                 localStorage.removeItem('modoAgregarProfesional');
                 localStorage.removeItem('profesionalesAsociados');
                 if(modo === 'editar') {
@@ -248,12 +259,14 @@ function ProfesionalesComponent() {
               }}
               className="w-full sm:w-auto"
             >
-              {isLoadingProfessionals && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Guardar
+              {isLoadingProfessionals && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}{' '}
+              Guardar
             </Button>
           </div>
         </div>
-        
       )}
     </div>
   );
-} 
+}

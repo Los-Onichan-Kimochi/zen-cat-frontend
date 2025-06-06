@@ -2,134 +2,171 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Local } from '@/types/local';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, MoreHorizontal, Trash, Eye } from 'lucide-react';
+import { MoreHorizontal, Trash, Eye, Edit } from 'lucide-react';
 
 interface GetLocalColumnsProps {
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
-  onView: (local: Local) => void;
 }
 
-export function getLocalColumns({ 
-  onEdit, 
-  onDelete, 
-  onView 
+export function getLocalColumns({
+  onEdit,
+  onDelete,
 }: GetLocalColumnsProps): ColumnDef<Local>[] {
   return [
     {
       id: 'select',
       header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-          aria-label="Select all"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+            aria-label="Select all"
+          />
+        </div>
       ),
       cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
-          aria-label="Select row"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(v) => row.toggleSelected(!!v)}
+            aria-label="Select row"
+          />
+        </div>
       ),
       enableSorting: false,
       enableHiding: false,
+      meta: { className: 'w-[36px] px-3' },
+    },
+    {
+      accessorKey: 'id',
+      header: () => (
+        <div className="text-center font-bold">Código</div>
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue('id') as string;
+        return (
+          <div
+            className="max-w-[100px] overflow-hidden mx-auto text-ellipsis whitespace-nowrap"
+            title={value}
+          >
+            {value}
+          </div>
+        );
+      },
+      meta: { className: 'w-[150px]' },
     },
     {
       accessorKey: 'local_name',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Nombre del Local <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+      header: () => (
+        <div className="text-center font-bold">Nombre del Local</div>
       ),
-      cell: ({ row }) => <div>{row.getValue('local_name')}</div>,
+      cell: ({ row }) => (
+        <div className="text-center font-medium">
+          {row.getValue('local_name')}
+        </div>
+      ),
+      meta: {
+        displayName: 'Nombre del Local',
+      },
     },
     {
       id: 'address',
-      header: 'Dirección',
+      header: () => (
+        <div className="text-center font-bold">Dirección</div>
+      ),
       accessorFn: (row) => `${row.street_name} ${row.building_number}`,
-      cell: ({ getValue }) => <div>{getValue()}</div>,
-    },
-    {
-      accessorKey: 'reference',
-      header: 'Referencia',
-      cell: ({ row }) => <div>{row.getValue('reference') || '-'}</div>,
+      cell: ({ getValue }) => <div className="text-center">{getValue() as string}</div>,
+      meta: {
+        displayName: 'Dirección',
+      },
     },
     {
       accessorKey: 'district',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Distrito <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+      header: () => (
+        <div className="text-center font-bold">Distrito</div>
       ),
-      cell: ({ row }) => <div>{row.getValue('district')}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue('district')}</div>
+      ),
+      meta: {
+        displayName: 'Distrito',
+      },
     },
     {
       accessorKey: 'province',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Provincia <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+      header: () => (
+        <div className="text-center font-bold">Provincia</div>
       ),
-      cell: ({ row }) => <div>{row.getValue('province')}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue('province')}</div>
+      ),
+      meta: {
+        displayName: 'Provincia',
+      },
     },
     {
       accessorKey: 'region',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Región <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+      header: () => (
+        <div className="text-center font-bold">Región</div>
       ),
-      cell: ({ row }) => <div>{row.getValue('region')}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue('region')}</div>
+      ),
+      meta: {
+        displayName: 'Región',
+      },
     },
     {
       accessorKey: 'capacity',
-      header: 'Capacidad',
+      header: () => (
+        <div className="text-center font-bold">Capacidad</div>
+      ),
       cell: ({ row }) => {
         const capacity = row.getValue('capacity') as number;
-        return <div>{capacity} personas</div>;
+        return <div className="text-center">{capacity} personas</div>;
+      },
+      meta: {
+        displayName: 'Capacidad',
       },
     },
     {
       id: 'actions',
-      header: 'Acciones',
+      header: () => (
+        <div className="text-center font-bold">Acciones</div>
+      ),
       cell: ({ row }) => {
         const local = row.original;
         return (
-          <div className="flex items-center space-x-2">
-            <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-blue-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                onView(local);
-              }}
-              title="Ver detalles"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center justify-center space-x-2">
             <Button
               className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(local);
               }}
-              title="Editar"
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="!w-5 !h-5" />
             </Button>
+
             <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(local);
               }}
               title="Eliminar"
             >
-              <Trash className="h-4 w-4" />
+              <Trash className="!w-5 !h-5"/>
             </Button>
           </div>
         );
       },
+      enableSorting: false,
+      meta: { className: 'w-[100px]' },
     },
   ];
-} 
+}
