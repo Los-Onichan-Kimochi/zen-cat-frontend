@@ -33,6 +33,7 @@ interface DataTableToolbarProps<TData> {
   showExportButton?: boolean;
   exportFileName?: string;
   showSortButton?: boolean;
+  disableConfirmBulkDelete?: boolean;
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
@@ -52,6 +53,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   showExportButton = false,
   exportFileName = 'data',
   showSortButton = false,
+  disableConfirmBulkDelete = false,
 }: DataTableToolbarProps<TData>) {
 
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
@@ -74,11 +76,20 @@ export function DataTableToolbar<TData extends DataWithId>({
   }, [table.getState().globalFilter]);
 
   const handleDeleteSelected = () => {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id as string);
-    if (selectedIds.length === 0) return;
-    setIdsToDelete(selectedIds);
-    setIsBulkDeleteModalOpen(true);
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map(
+      row => row.original.id as string
+    );
+
+    if (selectedIds.length === 0) return; // ✅ MANTENER SIEMPRE
+
+    if (disableConfirmBulkDelete) {
+      onBulkDelete?.(selectedIds);
+    } else {
+      setIdsToDelete(selectedIds);
+      setIsBulkDeleteModalOpen(true);
+    }
   };
+
 
   const handleConfirmBulkDelete = () => {
     if (onBulkDelete) {

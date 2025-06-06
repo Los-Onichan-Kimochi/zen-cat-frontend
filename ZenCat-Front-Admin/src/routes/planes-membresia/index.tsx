@@ -5,60 +5,60 @@ import HomeCard from '@/components/common/home-card';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { communitiesApi } from '@/api/communities/communities';
-import { Community } from '@/types/community';
+import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
+import { MembershipPlan } from '@/types/membership-plan';
 import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
-import { CommunityTable } from '@/components/community/community-table';
+import { MembershipPlanTable } from '@/components/membership-plan/membership-plan-table';
 
-import { Locate, Plus, Upload, Loader2} from 'lucide-react';
+import { Locate, Plus, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-export const Route = createFileRoute('/comunidades/')({
-  component: ComunidadesComponent,
+export const Route = createFileRoute('/planes-membresia/')({
+  component: PlanesMembresiaComponent,
 });
 
-function ComunidadesComponent() {
+function PlanesMembresiaComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<MembershipPlan | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
 
   const {
-    data: communitiesData = [],
+    data: membershipPlans = [],
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['communities'],
-    queryFn: communitiesApi.getCommunities,
+    queryKey: ['membershipPlans'],
+    queryFn: membershipPlansApi.getMembershipPlans,
   });
 
-  const deleteCommunityMutation = useMutation({
-    mutationFn: (id: string) => communitiesApi.deleteCommunity(id),
+  const deletePlanMutation = useMutation({
+    mutationFn: (id: string) => membershipPlansApi.deleteMembershipPlan(id),
     onSuccess: (_, id) => {
-      toast.success('Comunidad eliminada', { description: `ID ${id}` });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      toast.success('Plan de membresía eliminado', { description: `ID ${id}` });
+      queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar comunidad', { description: err.message });
+      toast.error('Error al eliminar el plan', { description: err.message });
     },
   });
-  
+
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: string[]) => 
-      communitiesApi.bulkDeleteCommunities({ communities: ids }),
+        membershipPlansApi.bulkDeleteMembershipPlans({ plans: ids }),
     onSuccess: (_, ids) => {
-      toast.success('Comunidades eliminadas', { description: `${ids.length} registros` });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      toast.success('Planes eliminados', { description: `${ids.length} registros` });
+      queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples comunidades', { description: err.message });
+      toast.error('Error al eliminar múltiples planes', { description: err.message });
     },
   });
 
@@ -70,28 +70,26 @@ function ComunidadesComponent() {
     });
   };
 
-  if (error) return <p>Error cargando comunidades: {error.message}</p>;
+  if (error) return <p>Error cargando planes: {error.message}</p>;
 
   return (
     <div className="p-6 h-full font-montserrat">
-      <HeaderDescriptor title="COMUNIDADES" subtitle="LISTADO DE COMUNIDADES" />
+      <HeaderDescriptor title="PLANES DE MEMBRESÍA" subtitle="LISTADO DE PLANES" />
 
       <div className="mb-6 flex items-center">
         <HomeCard
-          icon={<Locate className="w-8 h-8 text-teal-600" />}
-          iconBgColor="bg-teal-100"
-          title="Comunidades totales"
-          description={communitiesData.length}
+          icon={<Locate className="w-8 h-8 text-indigo-600" />}
+          iconBgColor="bg-indigo-100"
+          title="Planes totales"
+          description={membershipPlans.length}
         />
       </div>
 
       <div className="flex justify-end gap-3 mb-4">
         <Button
           onClick={() => {
-            sessionStorage.removeItem('draftCommunity');
-            sessionStorage.removeItem('draftSelectedServices');
-            sessionStorage.removeItem('draftSelectedMembershipPlans');
-            navigate({ to: '/comunidades/agregar-comunidad' });
+            sessionStorage.removeItem('draftMembershipPlan');
+            navigate({ to: '/planes-membresia/agregar' });
           }}
           className="h-10 bg-black text-white font-bold hover:bg-gray-800"
         >
@@ -112,12 +110,12 @@ function ComunidadesComponent() {
           <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
         </div>
       ) : (
-        <CommunityTable
-          data={communitiesData}
+        <MembershipPlanTable
+          data={membershipPlans}
           onBulkDelete={handleBulkDelete}
           isBulkDeleting={bulkDeleteMutation.isPending}
-          onDelete={(com) => {
-            setCommunityToDelete(com);
+          onDelete={(plan) => {
+            setPlanToDelete(plan);
             setIsDeleteModalOpen(true);
           }}
           resetRowSelectionTrigger={resetSelectionTrigger}
@@ -132,7 +130,7 @@ function ComunidadesComponent() {
         dbFieldNames={["name", "purpose", "image_url"]}
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities(data);
+            //await communitiesApi.bulkCreateCommunities(data);
             setShowUploadDialog(false);
             setShowSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['communities'] });
@@ -146,11 +144,11 @@ function ComunidadesComponent() {
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        title="¿Estás seguro que deseas eliminar esta comunidad?"
-        entity="Comunidad"
-        itemName={communityToDelete?.name ?? ''}
+        title="¿Estás seguro que deseas eliminar este plan?"
+        entity="Plan"
+        itemName={planToDelete?.type ?? ''}
         onConfirm={() => {
-          if (communityToDelete) deleteCommunityMutation.mutate(communityToDelete.id);
+          if (planToDelete) deletePlanMutation.mutate(planToDelete.id);
         }}
       />
 
@@ -158,7 +156,7 @@ function ComunidadesComponent() {
         open={showSuccess}
         onOpenChange={setShowSuccess}
         title="La carga se realizó exitosamente"
-        description="Todas las comunidades se registraron correctamente."
+        description="Todos los planes de membresía se registraron correctamente."
         buttonText="Cerrar"
       />
     </div>

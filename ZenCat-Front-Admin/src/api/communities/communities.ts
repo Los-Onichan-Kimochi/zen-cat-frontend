@@ -1,4 +1,4 @@
-import { Community , CreateCommunityPayload, UpdateCommunityPayload } from '@/types/community';
+import { Community , CreateCommunityPayload, UpdateCommunityPayload, BulkCreateCommunityPayload, BulkDeleteCommunityPayload } from '@/types/community';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,13 +18,13 @@ export const communitiesApi = {
     return response.json(); 
   },
 
-  bulkCreateCommunities: async (communities: CreateCommunityPayload[]): Promise<Community[]> => {
+  bulkCreateCommunities: async (payload: BulkCreateCommunityPayload[]): Promise<Community[]> => {
     const response = await fetch(`${API_BASE_URL}/community/bulk-create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ communities }),
+      body: JSON.stringify({communities: payload}),
     });
     if (!response.ok) {
       throw new Error('Error creating community');
@@ -78,13 +78,13 @@ export const communitiesApi = {
     }
   },
 
-  bulkDeleteCommunities: async (ids: string[]): Promise<void> => {
+  bulkDeleteCommunities: async (payload: BulkDeleteCommunityPayload): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/community/bulk-delete/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ communities: ids }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       throw new Error('Error bulk deleting communities');

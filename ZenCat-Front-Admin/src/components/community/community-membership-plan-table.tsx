@@ -1,28 +1,34 @@
 'use client';
 
-import { Service } from '@/types/service';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import { MembershipPlan } from '@/types/membership-plan';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
-import { getCommunityServiceColumns } from './community-service-columns';
+import { getCommunityMembershipPlanColumns } from './community-membership-plan-columns';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 
-interface CommunityServiceTableProps {
-  data: Service[];
-  onDeleteClick: (service: Service) => void;
+interface CommunityMembershipPlanTableProps {
+  data: MembershipPlan[];
+  onDeleteClick: (plan: MembershipPlan) => void;
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
   disableConfirmBulkDelete: boolean;
 }
 
-export function CommunityServiceTable({
+export function CommunityMembershipPlanTable({
   data,
   onDeleteClick,
   onBulkDelete,
   isBulkDeleting,
   disableConfirmBulkDelete = false,
-}: CommunityServiceTableProps) {
+}: CommunityMembershipPlanTableProps) {
   const {
     sorting, setSorting,
     columnFilters, setColumnFilters,
@@ -32,7 +38,7 @@ export function CommunityServiceTable({
     pagination, setPagination,
   } = useDataTable();
 
-  const columns = getCommunityServiceColumns(onDeleteClick);
+  const columns = getCommunityMembershipPlanColumns(onDeleteClick);
 
   const table = useReactTable({
     data,
@@ -68,8 +74,8 @@ export function CommunityServiceTable({
         isBulkDeleting={isBulkDeleting}
         showBulkDeleteButton
         showExportButton={false}
-        filterPlaceholder="Buscar servicio..."
-        exportFileName="servicios"
+        filterPlaceholder="Buscar plan de membresía..."
+        exportFileName="planes-membresía"
         showFilterButton
         onFilterClick={() => console.log('Abrir filtros')}
         showSortButton

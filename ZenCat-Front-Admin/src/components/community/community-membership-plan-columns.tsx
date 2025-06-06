@@ -1,13 +1,13 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Service } from '@/types/service';
+import { MembershipPlan } from '@/types/membership-plan';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
-export function getCommunityServiceColumns(
-  onDelete?: (service: Service) => void
-): ColumnDef<Service>[] {
-  const columns: ColumnDef<Service>[] = [];
+export function getCommunityMembershipPlanColumns(
+  onDelete?: (membershipPlan: MembershipPlan) => void
+): ColumnDef<MembershipPlan>[] {
+  const columns: ColumnDef<MembershipPlan>[] = [];
 
   columns.push({
     id: 'select',
@@ -34,13 +34,19 @@ export function getCommunityServiceColumns(
 
   columns.push(
     {
-      accessorKey: 'name',
-      header: 'Nombre',
+      accessorKey: "type",
+      header: "Tipo de Plan",
     },
     {
-      accessorKey: 'is_virtual',
-      header: '¿Es virtual?',
-      cell: ({ row }) => (row.original.is_virtual ? 'Sí' : 'No'),
+      accessorKey: "fee",
+      header: "Precio",
+      cell: ({ row }) => `S/ ${row.original.fee.toFixed(2)}`,
+    },
+    {
+      accessorKey: "reservation_limit",
+      header: "Límite",
+      accessorFn: (row) =>
+        row.reservation_limit == null ? "Sin límite" : row.reservation_limit,
     }
   );
 
