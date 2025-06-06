@@ -11,6 +11,7 @@ import { servicesApi } from '@/api/services/services';
 import { Service, ServiceType } from '@/types/service';
 import { Button } from '@/components/ui/button';
 import { ServicesTable } from '@/components/services/table';
+import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +62,14 @@ function ServiciosComponent() {
     onError: (err) => {
       toast.error('Error al eliminar', { description: err.message });
     },
+  });
+
+  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Service>({
+    queryKey: ['services'],
+    deleteFn: (ids: string[]) => servicesApi.bulkDeleteServices(ids),
+    entityName: 'servicio',
+    entityNamePlural: 'servicios',
+    getId: (service) => service.id,
   });
 
   const counts = useMemo<CalculatedCounts | null>(() => {
@@ -144,6 +153,8 @@ function ServiciosComponent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
         />
       )}
 

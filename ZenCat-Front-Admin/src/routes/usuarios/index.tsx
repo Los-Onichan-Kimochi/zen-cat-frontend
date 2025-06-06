@@ -21,6 +21,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
 import { toast } from 'sonner';
 import { UsersTable } from '@/components/users/table';
+import { useBulkDelete } from '@/hooks/use-bulk-delete';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -59,6 +60,14 @@ function UsuariosComponent() {
     onError: (err) => {
       toast.error('Error al eliminar', { description: err.message });
     },
+  });
+
+  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<User>({
+    queryKey: ['usuarios'],
+    deleteFn: usuariosApi.bulkDeleteUsuarios,
+    entityName: 'usuario',
+    entityNamePlural: 'usuarios',
+    getId: (user) => user.id,
   });
 
   const handleEdit = (user: User) => {
@@ -114,6 +123,8 @@ function UsuariosComponent() {
             setIsDeleteModalOpen(true);
           }}
           onViewMemberships={handleViewMemberships}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
         />
       )}
 

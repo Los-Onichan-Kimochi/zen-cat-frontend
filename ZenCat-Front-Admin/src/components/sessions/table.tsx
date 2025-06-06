@@ -18,7 +18,6 @@ interface SessionsTableProps {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
-  onViewReservations?: (session: Session) => void;
   onBulkDelete?: (sessions: Session[]) => void;
   isBulkDeleting?: boolean;
 }
@@ -28,7 +27,6 @@ export function SessionsTable({
   onEdit,
   onDelete,
   onView,
-  onViewReservations,
   onBulkDelete,
   isBulkDeleting = false,
 }: SessionsTableProps) {
@@ -51,7 +49,6 @@ export function SessionsTable({
     onEdit,
     onDelete,
     onView,
-    onViewReservations,
   });
 
   const table = useReactTable({
@@ -83,7 +80,7 @@ export function SessionsTable({
     .rows.map((row) => row.original);
 
   return (
-    <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+    <div className="space-y-4">
       <DataTableToolbar
         table={table}
         filterPlaceholder="Buscar sesiones..."
@@ -106,7 +103,7 @@ export function SessionsTable({
         }
         isBulkDeleting={isBulkDeleting}
       />
-      <div className="flex-1 overflow-hidden rounded-md border">
+      <div className="rounded-md border bg-white">
         <DataTable table={table} columns={columns} />
       </div>
       <DataTablePagination table={table} />

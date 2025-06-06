@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
 import { Button } from '@/components/ui/button';
+import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,11 +57,18 @@ function LocalesComponent() {
     onSuccess: (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
-      setRowSelection({});
     },
     onError: (err) => {
       toast.error('Error al eliminar', { description: err.message });
     },
+  });
+
+  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Local>({
+    queryKey: ['locals'],
+    deleteFn: localsApi.bulkDeleteLocals,
+    entityName: 'local',
+    entityNamePlural: 'locales',
+    getId: (local) => local.id,
   });
   const regionCounts = localsData?.reduce(
     (acc, local) => {
@@ -136,6 +144,8 @@ function LocalesComponent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
         />
       )}
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

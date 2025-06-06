@@ -20,7 +20,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SessionsTable } from '@/components/sessions/table';
-import { ReservationsModal } from '@/components/sessions/reservations-modal';
+import { getSessionCurrentState } from '@/utils/session-status';
+
 
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
@@ -41,9 +42,6 @@ function SesionesComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
-  const [isReservationsModalOpen, setIsReservationsModalOpen] = useState(false);
-  const [selectedSessionForReservations, setSelectedSessionForReservations] =
-    useState<Session | null>(null);
 
   const {
     data: sessionsData,
@@ -55,31 +53,7 @@ function SesionesComponent() {
   });
 
   // Mock data for reservations - you should replace this with actual API call
-  const { data: reservationsData, isLoading: isLoadingReservations } = useQuery(
-    {
-      queryKey: ['reservations', selectedSessionForReservations?.id],
-      queryFn: () => {
-        // Replace this with actual API call to get reservations for a session
-        return Promise.resolve([
-          {
-            id: '1',
-            user_name: 'María García',
-            user_email: 'maria@email.com',
-            user_phone: '+57 300 123 4567',
-            created_at: '2024-01-15T10:30:00Z',
-          },
-          {
-            id: '2',
-            user_name: 'Carlos López',
-            user_email: 'carlos@email.com',
-            user_phone: '+57 301 987 6543',
-            created_at: '2024-01-16T14:20:00Z',
-          },
-        ]);
-      },
-      enabled: !!selectedSessionForReservations && isReservationsModalOpen,
-    },
-  );
+
 
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<
     void,
@@ -125,8 +99,14 @@ function SesionesComponent() {
     };
 
     sessionsData.forEach((session) => {
-      if (session.state in calculatedCounts) {
-        calculatedCounts[session.state as SessionState]++;
+      const currentState = getSessionCurrentState({
+        start_time: session.start_time,
+        end_time: session.end_time,
+        state: session.state,
+      });
+      
+      if (currentState in calculatedCounts) {
+        calculatedCounts[currentState]++;
       }
     });
 
@@ -146,10 +126,7 @@ function SesionesComponent() {
     setIsDeleteModalOpen(true);
   };
 
-  const handleViewReservations = (session: Session) => {
-    setSelectedSessionForReservations(session);
-    setIsReservationsModalOpen(true);
-  };
+
 
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
@@ -212,7 +189,6 @@ function SesionesComponent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
-          onViewReservations={handleViewReservations}
           onBulkDelete={handleBulkDelete}
           isBulkDeleting={isBulkDeleting}
         />
@@ -251,15 +227,7 @@ function SesionesComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ReservationsModal
-        isOpen={isReservationsModalOpen}
-        onClose={() => {
-          setIsReservationsModalOpen(false);
-          setSelectedSessionForReservations(null);
-        }}
-        session={selectedSessionForReservations}
-        reservations={reservationsData || []}
-      />
+
     </div>
   );
 }

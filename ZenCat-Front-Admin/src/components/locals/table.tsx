@@ -18,6 +18,8 @@ interface LocalsTableProps {
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
   onView: (local: Local) => void;
+  onBulkDelete?: (locals: Local[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export function LocalsTable({
@@ -25,6 +27,8 @@ export function LocalsTable({
   onEdit,
   onDelete,
   onView,
+  onBulkDelete,
+  isBulkDeleting = false,
 }: LocalsTableProps) {
   const {
     sorting,
@@ -76,7 +80,20 @@ export function LocalsTable({
         showFilterButton
         showExportButton
         onFilterClick={() => console.log('Filtrar')}
-        onExportClick={() => console.log('Exportar')}
+        exportFileName="locales"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const localsToDelete = data.filter((local) =>
+                  ids.includes(local.id),
+                );
+                onBulkDelete(localsToDelete);
+              }
+            : undefined
+        }
+        isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

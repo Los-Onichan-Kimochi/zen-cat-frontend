@@ -18,6 +18,8 @@ interface ServicesTableProps {
   onEdit: (service: Service) => void;
   onDelete: (service: Service) => void;
   onView: (service: Service) => void;
+  onBulkDelete?: (services: Service[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export function ServicesTable({
@@ -25,6 +27,8 @@ export function ServicesTable({
   onEdit,
   onDelete,
   onView,
+  onBulkDelete,
+  isBulkDeleting = false,
 }: ServicesTableProps) {
   const {
     sorting,
@@ -76,7 +80,20 @@ export function ServicesTable({
         showFilterButton
         showExportButton
         onFilterClick={() => console.log('Filtrar')}
-        onExportClick={() => console.log('Exportar')}
+        exportFileName="servicios"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const servicesToDelete = data.filter((service) =>
+                  ids.includes(service.id),
+                );
+                onBulkDelete(servicesToDelete);
+              }
+            : undefined
+        }
+        isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />
