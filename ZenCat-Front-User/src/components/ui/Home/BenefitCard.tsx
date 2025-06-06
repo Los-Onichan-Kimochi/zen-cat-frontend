@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 export interface BenefitCardProps {
   /** URL de la imagen de fondo (ej: `/cards/comunidades.jpg`) */

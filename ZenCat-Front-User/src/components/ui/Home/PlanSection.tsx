@@ -1,57 +1,56 @@
-import * as React from "react";
-import PlanCard, { PlanCardProps } from "./PlanCard";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
+import * as React from 'react';
+import PlanCard, { PlanCardProps } from './PlanCard';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // 1. Define los 4 planes y sepáralos en mensuales y anuales
 const allPlans: PlanCardProps[] = [
   {
-    title: "Plan Mensual/Básico",
-    subtitle: "Ideal para quienes recién comienzan",
+    title: 'Plan Mensual/Básico',
+    subtitle: 'Ideal para quienes recién comienzan',
     features: [
-      "Acceso a una comunidad",
-      "Realiza un número limitado de reservas al mes",
-      "Recibe notificaciones de confirmación y cancelación",
-      "Consulta tu historial de reservas desde el perfil",
-      "Puedes desactivar tu membresía desde el perfil",
+      'Acceso a una comunidad',
+      'Realiza un número limitado de reservas al mes',
+      'Recibe notificaciones de confirmación y cancelación',
+      'Consulta tu historial de reservas desde el perfil',
+      'Puedes desactivar tu membresía desde el perfil',
     ],
-    buttonLabel: "Empezar con este",
+    buttonLabel: 'Empezar con este',
   },
   {
-    title: "Plan Mensual/Ilimitado",
-    subtitle: "Tu acceso sin restricciones",
+    title: 'Plan Mensual/Ilimitado',
+    subtitle: 'Tu acceso sin restricciones',
     features: [
-      "Accede a varias comunidades activas",
-      "Realiza reservas ilimitadas",
-      "Recibe notificaciones completas y recordatorios",
-      "Consulta tu historial completo desde el perfil",
-      "Cambia o cancela tu plan en cualquier momento",
+      'Accede a varias comunidades activas',
+      'Realiza reservas ilimitadas',
+      'Recibe notificaciones completas y recordatorios',
+      'Consulta tu historial completo desde el perfil',
+      'Cambia o cancela tu plan en cualquier momento',
     ],
-    buttonLabel: "Activar acceso libre",
+    buttonLabel: 'Activar acceso libre',
   },
   {
-    title: "Plan Anual/Básico",
-    subtitle: "Organización + largo plazo",
+    title: 'Plan Anual/Básico',
+    subtitle: 'Organización + largo plazo',
     features: [
-      "Accede a hasta 2 comunidades",
-      "Realiza un número limitado de reservas al mes",
-      "Recibe alertas de confirmación y cancelación",
-      "Consulta tu historial de actividad",
-      "Puedes cambiar o pausar tu plan sin penalización",
+      'Accede a hasta 2 comunidades',
+      'Realiza un número limitado de reservas al mes',
+      'Recibe alertas de confirmación y cancelación',
+      'Consulta tu historial de actividad',
+      'Puedes cambiar o pausar tu plan sin penalización',
     ],
-    buttonLabel: "Elegir este plan",
+    buttonLabel: 'Elegir este plan',
   },
   {
-    title: "Plan Anual/Ilimitado",
-    subtitle: "Acceso completo para líderes",
+    title: 'Plan Anual/Ilimitado',
+    subtitle: 'Acceso completo para líderes',
     features: [
-      "Accede a todas las comunidades habilitadas",
-      "Realiza reservas ilimitadas sin restricciones",
-      "Activa herramientas adicionales y métricas personales",
-      "Consulta detallada del historial de actividad",
-      "Tu cuenta se mantiene activa mientras esté vigente",
+      'Accede a todas las comunidades habilitadas',
+      'Realiza reservas ilimitadas sin restricciones',
+      'Activa herramientas adicionales y métricas personales',
+      'Consulta detallada del historial de actividad',
+      'Tu cuenta se mantiene activa mientras esté vigente',
     ],
-    buttonLabel: "Activar acceso completo",
+    buttonLabel: 'Activar acceso completo',
     highlight: true,
   },
 ];

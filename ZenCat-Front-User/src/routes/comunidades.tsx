@@ -11,4 +11,4 @@ function ComunidadesComponent() {
       <p>Contenido de la página Comunidades</p>
     </div>
   );
-} 
+}
