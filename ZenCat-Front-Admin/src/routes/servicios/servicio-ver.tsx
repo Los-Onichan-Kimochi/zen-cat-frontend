@@ -12,6 +12,7 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
+  CardDescription,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -443,6 +444,44 @@ export function SeeServicePageComponent() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <AlertDialog open={isEditConfirmOpen} onOpenChange={setIsEditConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar modificaciones</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro que deseas guardar los cambios realizados?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => setIsEditConfirmOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  servicesApi.updateService(id!, {
+                    name,
+                    description: description,
+                    is_virtual: isVirtual === 'Sí',
+                    image_url: imageFile ? URL.createObjectURL(imageFile) : initialValues.image,
+                  });
+                  setInitialValues({
+                    description: description,
+                    isVirtual: isVirtual === 'Sí',
+                    image_url: imageFile ? URL.createObjectURL(imageFile) : initialValues.image,
+                  });
+                  setIsEditing(false);
+                  setIsEditConfirmOpen(false);
+                }}
+              >
+                Confirmar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
