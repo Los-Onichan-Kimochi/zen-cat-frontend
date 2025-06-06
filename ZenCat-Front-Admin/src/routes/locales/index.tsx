@@ -98,7 +98,7 @@ function LocalesComponent() {
     return { maxRegion, maxCount };
   }, [localsData]);
   const handleEdit = (local: Local) => {
-    //setCurrent(local);
+    setCurrent(local);
     navigate({ to: '/locales/editar', search: { id: local.id }  });
   };
 
