@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { User } from '@/types/user';
-import { authApi } from '@/api/auth/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -48,6 +46,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       }
       const json = await response.json();
       const user= json.user;
+      console.log(user)
       onLoginSuccess(user);
       login(user)
       navigate({ to: "/" }); // Redirige si todo va bien
@@ -107,9 +106,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const { login } = useAuth();
 
   const handleGoogleSuccess = (credentialResponse: any) => {
-    console.log(credentialResponse);
     const decodedToken: any = jwtDecode(credentialResponse.credential);
-    console.log(decodedToken)
     
     // Extraer solo nombre y primer apellido
     const fullName = decodedToken.name || '';
@@ -177,7 +174,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <div className="relative flex justify-center">
             <GoogleLogin
             onSuccess={handleGoogleSuccess}
-            onError={() => console.log("Login failed")}
+            onError={() => {}}
             theme="outline"
             size="large"
             width="2000"

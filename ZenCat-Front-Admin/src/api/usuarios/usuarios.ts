@@ -167,7 +167,7 @@ const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
 export const usuariosApi = {
   getUsuarios: async (): Promise<User[]> => {
     try {
-      console.log('Fetching usuarios from:', `${API_BASE_URL}/user/`);
+  
       const response = await fetch(`${API_BASE_URL}/user/`, {
         headers: getHeaders(),
       });

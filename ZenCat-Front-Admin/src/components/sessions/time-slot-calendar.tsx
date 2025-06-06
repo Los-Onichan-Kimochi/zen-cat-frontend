@@ -41,6 +41,7 @@ export function TimeSlotCalendar({
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<string | null>(null);
   const [previewEnd, setPreviewEnd] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Generar slots de tiempo
   const timeSlots = useMemo(() => {
@@ -97,67 +98,96 @@ export function TimeSlotCalendar({
     [selectionStart, previewEnd],
   );
 
-  // Manejar inicio de selección
-  const handleSlotMouseDown = useCallback(
-    (time: string, slot: TimeSlot) => {
-      if (disabled || slot.isOccupied) return;
+  // Manejar click simple en slot
+  const handleSlotClick = useCallback(
+    (e: React.MouseEvent, time: string, slot: TimeSlot) => {
+      if (disabled || slot.isOccupied || isDragging) return;
+      
+  
+      
+      // Click simple - seleccionar 1 slot (30 minutos por defecto)
+      const startIndex = timeSlots.findIndex((s) => s.time === time);
+      const endIndex = Math.min(startIndex + 1, timeSlots.length - 1);
+      const endTime = timeSlots[endIndex]?.time || time;
+      
+      onRangeSelect({ start: time, end: endTime });
+      
+      // Reset estados después del click
+      setIsSelecting(false);
+      setSelectionStart(null);
+      setPreviewEnd(null);
+      setIsDragging(false);
+    },
+    [disabled, timeSlots, onRangeSelect, isDragging],
+  );
 
+  // Drag handlers - versión simplificada
+  const handleSlotMouseDown = useCallback(
+    (e: React.MouseEvent, time: string, slot: TimeSlot) => {
+      if (disabled || slot.isOccupied) return;
+      
+      e.preventDefault();
       setIsSelecting(true);
       setSelectionStart(time);
       setPreviewEnd(time);
+      setIsDragging(false);
     },
     [disabled],
   );
 
-  // Manejar movimiento durante selección
   const handleSlotMouseEnter = useCallback(
     (time: string) => {
-      if (!isSelecting || !selectionStart) return;
-      setPreviewEnd(time);
+      if (isSelecting && selectionStart) {
+        setIsDragging(true);
+        setPreviewEnd(time);
+      }
     },
     [isSelecting, selectionStart],
   );
 
-  // Manejar fin de selección
   const handleSlotMouseUp = useCallback(() => {
-    if (!isSelecting || !selectionStart || !previewEnd) return;
+    if (isSelecting && selectionStart && previewEnd && isDragging) {
+      const start = selectionStart <= previewEnd ? selectionStart : previewEnd;
+      const end = selectionStart <= previewEnd ? previewEnd : selectionStart;
+      
+      const startIndex = timeSlots.findIndex((s) => s.time === start);
+      const endIndex = timeSlots.findIndex((s) => s.time === end);
+      const finalEndIndex = Math.max(startIndex + 1, endIndex + 1);
+      const finalEnd = timeSlots[finalEndIndex]?.time || end;
 
-    const start = selectionStart <= previewEnd ? selectionStart : previewEnd;
-    const end = selectionStart <= previewEnd ? previewEnd : selectionStart;
-
-    // Calcular el tiempo de fin (siguiente slot)
-    const startIndex = timeSlots.findIndex((slot) => slot.time === start);
-    const endIndex = timeSlots.findIndex((slot) => slot.time === end);
-    const finalEndIndex = Math.max(startIndex + 1, endIndex + 1);
-    const finalEnd = timeSlots[finalEndIndex]?.time || end;
-
-    onRangeSelect({ start, end: finalEnd });
-
+      onRangeSelect({ start, end: finalEnd });
+    }
+    
     setIsSelecting(false);
     setSelectionStart(null);
     setPreviewEnd(null);
-  }, [isSelecting, selectionStart, previewEnd, timeSlots, onRangeSelect]);
+    setIsDragging(false);
+  }, [isSelecting, selectionStart, previewEnd, isDragging, timeSlots, onRangeSelect]);
 
-  // Limpiar selección al hacer clic fuera
+  // Limpiar selección
   const handleCalendarMouseLeave = useCallback(() => {
-    if (isSelecting) {
-      setIsSelecting(false);
-      setSelectionStart(null);
-      setPreviewEnd(null);
-    }
-  }, [isSelecting]);
+    setIsSelecting(false);
+    setSelectionStart(null);
+    setPreviewEnd(null);
+    setIsDragging(false);
+  }, []);
 
   return (
-    <div className="border rounded-lg bg-white">
+    <div className="border rounded-lg bg-white" style={{ userSelect: 'none' }}>
       {/* Header */}
       <div className="p-4 border-b bg-gray-50">
         <h3 className="font-medium text-gray-900">Selecciona horario</h3>
         <p className="text-sm text-gray-500 mt-1">
-          Haz clic y arrastra para seleccionar el rango de tiempo
+          Haz clic para seleccionar o arrastra para un rango
         </p>
         {selectedRange && (
-          <div className="mt-2 text-sm font-medium text-blue-600">
+          <div className="mt-2 text-sm font-medium text-green-600">
             Seleccionado: {selectedRange.start} - {selectedRange.end}
+          </div>
+        )}
+        {isSelecting && selectionStart && previewEnd && (
+          <div className="mt-2 text-sm font-medium text-blue-600">
+            Seleccionando: {selectionStart} - {previewEnd} {isDragging ? '(arrastrando)' : ''}
           </div>
         )}
       </div>
@@ -167,6 +197,7 @@ export function TimeSlotCalendar({
         className="p-4 select-none"
         onMouseLeave={handleCalendarMouseLeave}
         onMouseUp={handleSlotMouseUp}
+        style={{ userSelect: 'none' }}
       >
         <div className="grid grid-cols-1 gap-1 max-h-96 overflow-y-auto">
           {timeSlots.map((slot) => {
@@ -178,10 +209,10 @@ export function TimeSlotCalendar({
               <div
                 key={slot.time}
                 className={cn(
-                  'p-2 text-sm border rounded cursor-pointer transition-all duration-150',
+                  'p-2 text-sm border rounded transition-all duration-100',
                   {
                     // Estado base
-                    'bg-white border-gray-200 hover:bg-gray-50':
+                    'bg-white border-gray-200 hover:bg-gray-50 cursor-pointer':
                       isSelectable && !isSelected && !isPreview,
 
                     // Ocupado
@@ -200,8 +231,9 @@ export function TimeSlotCalendar({
                     'bg-gray-100 border-gray-200 cursor-not-allowed': disabled,
                   },
                 )}
-                onMouseDown={() => handleSlotMouseDown(slot.time, slot)}
+                onMouseDown={(e) => handleSlotMouseDown(e, slot.time, slot)}
                 onMouseEnter={() => handleSlotMouseEnter(slot.time)}
+                onClick={(e) => handleSlotClick(e, slot.time, slot)}
                 title={
                   slot.isOccupied ? `Ocupado: ${slot.occupiedBy}` : slot.time
                 }

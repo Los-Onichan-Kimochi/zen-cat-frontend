@@ -30,7 +30,7 @@ export function ViewToolbar({
           size="sm"
           className="h-10 bg-black text-white font-bold hover:bg-gray-800 transition-all duration-200 cursor-pointer"
           onClick={
-            onBulkUploadClick || (() => console.log('Carga Masiva clickeada'))
+            onBulkUploadClick || (() => {})
           }
         >
           <Upload className="mr-2 h-4 w-4" /> {bulkUploadButtonText}

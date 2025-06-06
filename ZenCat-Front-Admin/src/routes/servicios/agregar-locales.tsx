@@ -230,7 +230,7 @@ function ServiciosComponent() {
         <Button
           size="sm"
           className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
-          onClick={() => console.log('Carga Masiva clickeada')}
+                      onClick={() => {}}
         >
           <Upload className="mr-2 h-4 w-4" /> Carga Masiva
         </Button>
@@ -247,9 +247,9 @@ function ServiciosComponent() {
             filterPlaceholder="Buscar servicios..."
             showSortButton={true}
             showExportButton={true}
-            onExportClick={() => console.log('Exportar clickeado')}
+            onExportClick={() => {}}
             showFilterButton={true}
-            onFilterClick={() => console.log('Filtrar por clickeado')}
+            onFilterClick={() => {}}
             enableDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
