@@ -39,6 +39,7 @@ import { Route as ProfesionalesVerImport } from './routes/profesionales/ver';
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo';
 import { Route as LocalesVerImport } from './routes/locales/ver';
 import { Route as LocalesAgregarImport } from './routes/locales/agregar';
+import { Route as LocalesEditarImport } from './routes/locales/editar';
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver';
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios';
 import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía';
@@ -215,6 +216,12 @@ const LocalesAgregarRoute = LocalesAgregarImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
+const LocalesEditarRoute = LocalesEditarImport.update({
+  id: '/locales/editar',
+  path: '/locales/editar',
+  getParentRoute: () => rootRoute,
+} as any);
+
 const ComunidadesVerRoute = ComunidadesVerImport.update({
   id: '/comunidades/ver',
   path: '/comunidades/ver',
@@ -342,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/locales/ver';
       fullPath: '/locales/ver';
       preLoaderRoute: typeof LocalesVerImport;
+      parentRoute: typeof rootRoute;
+    };
+    '/locales/editar': {
+      id: '/locales/editar';
+      path: '/locales/editar';
+      fullPath: '/locales/editar';
+      preLoaderRoute: typeof LocalesEditarImport;
       parentRoute: typeof rootRoute;
     };
     '/profesionales/nuevo': {
@@ -490,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/comunidades/ver': typeof ComunidadesVerRoute;
   '/locales/agregar': typeof LocalesAgregarRoute;
   '/locales/ver': typeof LocalesVerRoute;
+  '/locales/editar': typeof LocalesEditarRoute;
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute;
   '/profesionales/ver': typeof ProfesionalesVerRoute;
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute;
@@ -525,6 +540,7 @@ export interface FileRoutesByTo {
   '/comunidades/ver': typeof ComunidadesVerRoute;
   '/locales/agregar': typeof LocalesAgregarRoute;
   '/locales/ver': typeof LocalesVerRoute;
+  '/locales/editar': typeof LocalesEditarRoute;
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute;
   '/profesionales/ver': typeof ProfesionalesVerRoute;
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute;
@@ -561,6 +577,7 @@ export interface FileRoutesById {
   '/comunidades/ver': typeof ComunidadesVerRoute;
   '/locales/agregar': typeof LocalesAgregarRoute;
   '/locales/ver': typeof LocalesVerRoute;
+  '/locales/editar': typeof LocalesEditarRoute;
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute;
   '/profesionales/ver': typeof ProfesionalesVerRoute;
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute;
@@ -598,6 +615,7 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/locales/agregar'
     | '/locales/ver'
+    | '/locales/editar'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -632,6 +650,7 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/locales/agregar'
     | '/locales/ver'
+    | '/locales/editar'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -666,6 +685,7 @@ export interface FileRouteTypes {
     | '/comunidades/ver'
     | '/locales/agregar'
     | '/locales/ver'
+    | '/locales/editar'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
@@ -781,6 +801,7 @@ export const routeTree = rootRoute
         "/comunidades/ver",
         "/locales/agregar",
         "/locales/ver",
+        "/locales/editar",
         "/profesionales/nuevo",
         "/profesionales/ver",
         "/servicios/agregar-locales",
@@ -842,6 +863,9 @@ export const routeTree = rootRoute
     },
     "/locales/ver": {
       "filePath": "locales/ver.tsx"
+    },
+    "/locales/editar": {
+      "filePath": "locales/editar.tsx"
     },
     "/profesionales/nuevo": {
       "filePath": "profesionales/nuevo.tsx"

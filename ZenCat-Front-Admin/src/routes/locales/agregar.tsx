@@ -123,11 +123,10 @@ function AddLocalPageComponent() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const filteredProvinces = provinces.filter(
     (province) => province.department_id === selectedRegion,
-  );
-
+  ).sort((a, b) => a.name.localeCompare(b.name));
   const filteredDistricts = districts.filter(
     (district) => district.province_id === selectedProvince,
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
   const onSubmit = async (data: LocalFormData) => {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
