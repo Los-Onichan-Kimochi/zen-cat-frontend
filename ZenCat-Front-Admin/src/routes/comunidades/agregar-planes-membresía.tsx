@@ -12,8 +12,6 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import {
   ColumnDef,
-import {
-  ColumnDef,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -112,7 +110,6 @@ function AddCommunityMembershipPlanPageComponent() {
   const table = useReactTable({
     data: membershipPlansData || [],
     columns,
-    getRowId: (row) => row.id.toString(),
     getRowId: (row) => row.id.toString(),
     state: {
       sorting,
