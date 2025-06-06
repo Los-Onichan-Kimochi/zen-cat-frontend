@@ -69,4 +69,6 @@ export const servicesApi = {
       throw new Error(`Error deleting service with id ${id}`);
     }
   },
-};
+  
+  // TODO: Delete service
+}; 
