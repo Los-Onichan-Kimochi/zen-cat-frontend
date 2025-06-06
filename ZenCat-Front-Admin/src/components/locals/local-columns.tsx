@@ -3,15 +3,17 @@ import { Local } from '@/types/local';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MoreHorizontal, Trash, Eye, Edit } from 'lucide-react';
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
 interface GetLocalColumnsProps {
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
+  onView: (local: Local) => void;
 }
 
 export function getLocalColumns({
   onEdit,
   onDelete,
+  onView,
 }: GetLocalColumnsProps): ColumnDef<Local>[] {
   return [
     {
@@ -142,15 +144,39 @@ export function getLocalColumns({
         const local = row.original;
         return (
           <div className="flex items-center justify-center space-x-2">
-            <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(local);
-              }}
-            >
-              <MoreHorizontal className="!w-5 !h-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+                  title="Más opciones"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onView(local);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver sesión
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(local);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
