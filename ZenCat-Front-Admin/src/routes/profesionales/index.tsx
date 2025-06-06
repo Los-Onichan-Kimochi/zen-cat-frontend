@@ -161,7 +161,7 @@ function ProfesionalesComponent() {
 
       <ViewToolbar
         onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => {}}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />

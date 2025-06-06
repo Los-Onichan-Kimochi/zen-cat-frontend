@@ -103,7 +103,7 @@ export function TimeSlotCalendar({
     (e: React.MouseEvent, time: string, slot: TimeSlot) => {
       if (disabled || slot.isOccupied || isDragging) return;
       
-      console.log('Click selection at:', time);
+  
       
       // Click simple - seleccionar 1 slot (30 minutos por defecto)
       const startIndex = timeSlots.findIndex((s) => s.time === time);

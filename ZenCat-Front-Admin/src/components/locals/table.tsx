@@ -79,7 +79,7 @@ export function LocalsTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         exportFileName="locales"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}

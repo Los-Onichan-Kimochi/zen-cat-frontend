@@ -79,7 +79,7 @@ export function ServicesTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         exportFileName="servicios"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}

@@ -79,7 +79,7 @@ export function ProfessionalsTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         exportFileName="profesionales"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}

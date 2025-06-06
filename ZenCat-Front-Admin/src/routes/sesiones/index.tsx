@@ -174,7 +174,7 @@ function SesionesComponent() {
 
       <ViewToolbar
         onAddClick={() => navigate({ to: '/sesiones/agregar' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => {}}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />

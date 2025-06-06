@@ -97,7 +97,7 @@ export const sessionsApi = {
   },
 
   createSession: async (payload: CreateSessionPayload): Promise<Session> => {
-    console.log('Sending payload to backend:', payload);
+  
     
     // Convertir fechas de Lima (UTC-5) a UTC para el backend
     const backendPayload = {
@@ -111,7 +111,7 @@ export const sessionsApi = {
       local_id: payload.local_id,
     };
     
-    console.log('Backend formatted payload (Lima -> UTC):', backendPayload);
+
     
     const response = await fetch(`${API_BASE_URL}/session/`, {
       method: 'POST',
@@ -202,7 +202,7 @@ export const sessionsApi = {
       exclude_id: data.excludeId || null,
     };
 
-    console.log('⚡ Checking conflicts with (Lima -> UTC):', payload);
+  
 
     const response = await fetch(`${API_BASE_URL}/session/check-conflicts/`, {
       method: 'POST',
@@ -217,7 +217,7 @@ export const sessionsApi = {
       throw new Error('Error checking conflicts');
     }
     const result = await response.json();
-    console.log('🔍 Conflict result:', result);
+
     return {
       hasConflict: result.has_conflict,
       professionalConflicts: result.professional_conflicts || [],
@@ -235,7 +235,7 @@ export const sessionsApi = {
       local_id: data.localId || null,
     };
 
-    console.log('🚀 Sending availability request (Lima -> UTC):', payload);
+
 
     const response = await fetch(`${API_BASE_URL}/session/availability/`, {
       method: 'POST',
@@ -250,7 +250,7 @@ export const sessionsApi = {
       throw new Error('Error getting availability');
     }
     const result = await response.json();
-    console.log('✅ Availability response:', result);
+
     return {
       isAvailable: result.is_available,
       busySlots: result.busy_slots || [],

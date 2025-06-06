@@ -36,7 +36,7 @@ export function SimpleTimePickerModal({
   const handleOpenModal = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Opening modal...'); // Debug
+
     setIsOpen(true);
   };
 

@@ -221,7 +221,7 @@ export function ReservationsTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+                  onFilterClick={() => {}}
         exportFileName="reservas"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}

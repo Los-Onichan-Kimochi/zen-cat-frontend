@@ -15,15 +15,11 @@ export function getSessionCurrentState(session: SessionWithTime): SessionState {
   const startTime = new Date(session.start_time);
   const endTime = new Date(session.end_time);
 
-  // Debug: log para ver las fechas
-  console.log('Current local time:', now.toISOString(), '|', now.toLocaleString());
-  console.log('Session start:', startTime.toISOString(), '|', startTime.toLocaleString());
-  console.log('Session end:', endTime.toISOString(), '|', endTime.toLocaleString());
-  console.log('Original state:', session.state);
+
 
   // Si la sesión ya fue cancelada o reprogramada, mantener ese estado
   if (session.state === SessionState.CANCELLED || session.state === SessionState.RESCHEDULED) {
-    console.log('Keeping original state (cancelled/rescheduled)');
+
     return session.state;
   }
 
@@ -32,24 +28,24 @@ export function getSessionCurrentState(session: SessionWithTime): SessionState {
 
   // Si la sesión ya terminó (con margen)
   if (now.getTime() > endTime.getTime() + bufferTime) {
-    console.log('Session COMPLETED - current time is after end time');
+
     return SessionState.COMPLETED;
   }
 
   // Si la sesión está en curso (con margen)
   if (now.getTime() >= startTime.getTime() - bufferTime && now.getTime() <= endTime.getTime() + bufferTime) {
-    console.log('Session ONGOING - current time is between start and end');
+
     return SessionState.ONGOING;
   }
 
   // Si la sesión está programada para el futuro
   if (now.getTime() < startTime.getTime() - bufferTime) {
-    console.log('Session SCHEDULED - current time is before start');
+
     return SessionState.SCHEDULED;
   }
 
   // Por defecto, mantener el estado original
-  console.log('Keeping original state by default');
+
   return session.state;
 }
 

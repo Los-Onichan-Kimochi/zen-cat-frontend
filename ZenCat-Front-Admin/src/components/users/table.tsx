@@ -79,7 +79,7 @@ export function UsersTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         exportFileName="usuarios"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}

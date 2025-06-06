@@ -179,7 +179,7 @@ function AddCommunityServicePageComponent() {
               showExportButton={false}
               exportFileName="comunidades"
               showFilterButton={true}
-              onFilterClick={() => console.log('No hay chance de filtrar XD')}
+              onFilterClick={() => {}}
               showSortButton={true}
             />
             <div className="flex-grow">

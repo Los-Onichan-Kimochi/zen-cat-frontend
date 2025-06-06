@@ -181,14 +181,12 @@ function AddSessionComponent() {
   // Mutación para crear sesión
   const { mutate: createSession, isPending: isCreating } = useMutation({
     mutationFn: (data: CreateSessionPayload) => {
-      console.log('API call with data:', data);
+
       return sessionsApi.createSession(data);
     },
     onSuccess: (result) => {
-      console.log('Session created successfully:', result);
       toast.success('Sesión creada exitosamente');
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
-      console.log('Navigating to sessions page...');
       navigate({ to: '/sesiones' });
     },
     onError: (error) => {
@@ -198,10 +196,10 @@ function AddSessionComponent() {
   });
 
   const onSubmit = (data: SessionFormData) => {
-    console.log('Form submitted with data:', data);
+
 
     if (hasConflict) {
-      console.log('Blocked due to conflicts:', conflicts);
+
       toast.error('No se puede crear la sesión', {
         description:
           'Existen conflictos de horario que deben resolverse primero',
@@ -220,13 +218,7 @@ function AddSessionComponent() {
     const localEndTime = `${dateString}T${data.end_time}:00`;
     const localDate = `${dateString}T00:00:00`;
 
-    console.log('Date formatting:', {
-      originalDate: data.date,
-      dateString,
-      localDate,
-      localStartTime, 
-      localEndTime
-    });
+
 
     const payload: CreateSessionPayload = {
       title: data.title,
@@ -240,7 +232,7 @@ function AddSessionComponent() {
         data.is_virtual && data.session_link ? data.session_link : null,
     };
 
-    console.log('Creating session with payload:', payload);
+
     createSession(payload);
   };
 

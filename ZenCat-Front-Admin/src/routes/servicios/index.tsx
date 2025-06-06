@@ -138,7 +138,7 @@ function ServiciosComponent() {
       </div>
       <ViewToolbar
         onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => {}}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />

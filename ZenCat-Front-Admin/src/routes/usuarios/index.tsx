@@ -105,7 +105,7 @@ function UsuariosComponent() {
 
       <ViewToolbar
         onAddClick={() => navigate({ to: '/usuarios/agregar' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => {}}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />

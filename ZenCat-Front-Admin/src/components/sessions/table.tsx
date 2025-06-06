@@ -87,7 +87,7 @@ export function SessionsTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         exportFileName="sesiones"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
