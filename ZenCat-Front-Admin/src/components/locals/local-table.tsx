@@ -12,6 +12,8 @@ interface LocalsTableProps {
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
   onView: (local: Local) => void;
+  onBulkDelete?: (locals: Local[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export function LocalsTable({ data, onEdit, onDelete, onView }: LocalsTableProps) {

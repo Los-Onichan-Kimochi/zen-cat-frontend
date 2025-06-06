@@ -23,19 +23,21 @@ export const Route = createFileRoute('/locales/')({
   component: LocalesComponent,
 });
 function LocalesComponent(){
+  const navigate = useNavigate();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   //bulk Create variables
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const expectedExcelColumns = ["Nombre", "Calle", "Numero", "Distrito", "Provincia", "Region", "Referencia", "Capacidad", "ImagenUrl"];
   const dbFieldNames = ["local_name", "street_name", "building_number","district","province","region","reference","capacity","image_url"];
   //General
-  const navigate = useNavigate();
+  
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
   
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   //const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   const { 
     data: localsData,

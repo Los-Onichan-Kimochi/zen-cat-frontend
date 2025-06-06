@@ -10,10 +10,10 @@ interface GetLocalColumnsProps {
   onView: (local: Local) => void;
 }
 
-export function getLocalColumns({ 
-  onEdit, 
-  onDelete, 
-  onView 
+export function getLocalColumns({
+  onEdit,
+  onDelete,
+  onView,
 }: GetLocalColumnsProps): ColumnDef<Local>[] {
   return [
     {
