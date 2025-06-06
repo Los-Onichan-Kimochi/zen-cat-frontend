@@ -46,13 +46,13 @@ function LocalesComponent() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
 
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  //const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  //const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   //bulk Create variables
   //const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const expectedExcelColumns = ["Nombre", "Calle", "Numero", "Distrito", "Provincia", "Region", "Referencia", "Capacidad", "ImagenUrl"];
-  const dbFieldNames = ["local_name", "street_name", "building_number","district","province","region","reference","capacity","image_url"];
+  //const expectedExcelColumns = ["Nombre", "Calle", "Numero", "Distrito", "Provincia", "Region", "Referencia", "Capacidad", "ImagenUrl"];
+  //const dbFieldNames = ["local_name", "street_name", "building_number","district","province","region","reference","capacity","image_url"];
   //General
   const {
     data: localsData,
@@ -140,6 +140,8 @@ function LocalesComponent() {
     setLocalToDelete(local);
     setIsDeleteModalOpen(true);
   };
+  
+  if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
@@ -186,16 +188,33 @@ function LocalesComponent() {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Locales"
-        expectedExcelColumns={expectedExcelColumns}
-        dbFieldNames={dbFieldNames}
+        expectedExcelColumns={[
+          'Nombre del Local',
+          'Nombre de la Calle',
+          'Número de Edificio',
+          'Distrito',
+          'Provincia',
+          'Región',
+          'Referencia',
+          'Capacidad',
+          'URL de Imagen'
+        ]}
+        dbFieldNames={[
+          'local_name',
+          'street_name',
+          'building_number',
+          'district',
+          'province',
+          'region',
+          'reference',
+          'capacity',
+          'image_url'
+        ]}
         onParsedData={async (data) => {
           try {
-            await localsApi.bulkCreateLocals(data);
-            setShowUploadDialog(false);
-            setShowSuccess(true);
-            queryClient.invalidateQueries({ queryKey: ['locals'] });
+            bulkCreateLocals(data);
           } catch (error) {
-            console.error("Error al cargar los locales:", error);
+            console.error(error);
           }
         }}
       />
@@ -206,7 +225,7 @@ function LocalesComponent() {
         entity="Local"
         itemName={localToDelete?.local_name ?? ''}
         onConfirm={() => {
-          if (localToDelete) localsApi.deleteLocal(localToDelete.id);
+          if (localToDelete) deleteLocalMutation.mutate(localToDelete.id);
           setIsDeleteModalOpen(false);
         }}
       />
