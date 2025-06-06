@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
 import {
   ColumnDef,
   flexRender,
   Table as TanStackTable,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table';
 
 import {
   Table,
@@ -13,19 +13,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-
+} from '@/components/ui/table';
 
 interface DataTableProps<TData> {
-  table: TanStackTable<TData> 
-  columns: ColumnDef<TData, any>[]
+  table: TanStackTable<TData>;
+  columns: ColumnDef<TData, any>[];
 }
 
-export function DataTable<TData>({ 
-  table, 
-  columns
-}: DataTableProps<TData>) {
-
+export function DataTable<TData>({ table, columns }: DataTableProps<TData>) {
   return (
     <div className="overflow-x-auto rounded-md border">
       <Table className="table-fixed w-full">
@@ -34,15 +29,18 @@ export function DataTable<TData>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className={`${(header.column.columnDef.meta as any)?.className ?? ""} break-words whitespace-normal`}>
+                  <TableHead
+                    key={header.id}
+                    className={`${(header.column.columnDef.meta as any)?.className ?? ''} break-words whitespace-normal`}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -52,10 +50,13 @@ export function DataTable<TData>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={row.getIsSelected() && "selected"}
+                data-state={row.getIsSelected() && 'selected'}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={`${(cell.column.columnDef.meta as any)?.className ?? ""} break-words whitespace-normal`}>
+                  <TableCell
+                    key={cell.id}
+                    className={`${(cell.column.columnDef.meta as any)?.className ?? ''} break-words whitespace-normal`}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -63,13 +64,15 @@ export function DataTable<TData>({
             ))
           ) : (
             <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                {table.getState().globalFilter ? "No hay resultados que coincidan con tu búsqueda." : "No hay resultados."}
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                {table.getState().globalFilter
+                  ? 'No hay resultados que coincidan con tu búsqueda.'
+                  : 'No hay resultados.'}
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
     </div>
-  )
-} 
+  );
+}

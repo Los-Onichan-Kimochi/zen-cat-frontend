@@ -1,9 +1,14 @@
 // components/common/ErrorDialog.tsx
 'use client';
 
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { XCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { XCircle } from 'lucide-react';
 
 interface ErrorDialogProps {
   open: boolean;
@@ -15,7 +20,7 @@ interface ErrorDialogProps {
 export default function ErrorDialog({
   open,
   onOpenChange,
-  title = "Error",
+  title = 'Error',
   message,
 }: ErrorDialogProps) {
   return (

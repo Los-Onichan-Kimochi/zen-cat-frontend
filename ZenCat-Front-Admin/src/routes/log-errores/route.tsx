@@ -11,4 +11,4 @@ function LogErroresComponent() {
       <HeaderDescriptor title="LOG DE ERRORES" subtitle="LISTADO DE ERRORES" />
     </div>
   );
-} 
+}

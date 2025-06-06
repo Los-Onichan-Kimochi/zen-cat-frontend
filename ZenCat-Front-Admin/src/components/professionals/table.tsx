@@ -1,5 +1,11 @@
 'use client';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -14,14 +20,25 @@ interface ProfessionalsTableProps {
   onView: (professional: Professional) => void;
 }
 
-export function ProfessionalsTable({ data, onEdit, onDelete, onView }: ProfessionalsTableProps) {
+export function ProfessionalsTable({
+  data,
+  onEdit,
+  onDelete,
+  onView,
+}: ProfessionalsTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getProfessionalColumns({ onEdit, onDelete, onView });
@@ -67,4 +84,4 @@ export function ProfessionalsTable({ data, onEdit, onDelete, onView }: Professio
       <DataTablePagination table={table} />
     </div>
   );
-} 
+}

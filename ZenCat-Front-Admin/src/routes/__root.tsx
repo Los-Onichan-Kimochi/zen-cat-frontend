@@ -1,5 +1,10 @@
 import MainLayout from '@/layouts/MainLayout';
-import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router';
+import {
+  createRootRoute,
+  Outlet,
+  redirect,
+  useRouterState,
+} from '@tanstack/react-router';
 import { User } from '@/types/user';
 import { authApi } from '@/api/auth/auth';
 import { useEffect, useState } from 'react';
@@ -51,25 +56,25 @@ function RootComponent() {
         setLoadingUser(false);
       }
     };
-    if (routerState.location.pathname !== '/login') { 
+    if (routerState.location.pathname !== '/login') {
       fetchUser();
-    }
-    else {
+    } else {
       setLoadingUser(false);
       setUser(null);
     }
-  }, [routerState.location.pathname]); 
+  }, [routerState.location.pathname]);
 
   if (loadingUser) {
-    return <div>Loading Application...</div>; 
+    return <div>Loading Application...</div>;
   }
 
-  const showLayout = user?.isAuthenticated && routerState.location.pathname !== '/login';
+  const showLayout =
+    user?.isAuthenticated && routerState.location.pathname !== '/login';
 
   return (
     <UserProvider value={{ user }}>
       {showLayout ? (
-        <MainLayout user={user!}> 
+        <MainLayout user={user!}>
           <Outlet />
         </MainLayout>
       ) : (

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 export function getCommunityServiceColumns(
-  onDeleteClick: (service: Service) => void
+  onDeleteClick: (service: Service) => void,
 ): ColumnDef<Service>[] {
   return [
     {
@@ -16,9 +16,7 @@ export function getCommunityServiceColumns(
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(!!value)
-          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       ),

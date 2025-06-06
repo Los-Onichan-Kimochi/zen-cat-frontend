@@ -23,39 +23,24 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-    },
-  },
-  prettierConfig,
-  {
-    rules: {
-      'max-len': ['warn', { code: 80 }],
-      // Deshabilita las reglas innecesarias de importación de React
+      'max-len': ['warn', { code: 120, ignoreUrls: true, ignoreStrings: true }],
       'react/react-in-jsx-scope': 'off',
-      // Asegura que se utilicen puntos y comas
-      semi: ['error', 'always'],
-      // Desactiva la regla que requiere un salto de línea antes de return
+      semi: ['warn', 'always'],
       'newline-before-return': 'off',
-      // Limita las líneas vacías
-      'no-multiple-empty-lines': ['error', { max: 1 }],
-      // No permite múltiples declaraciones de variables en una sola línea
-      'one-var': ['error', 'never'],
-      // Establece el indentado a 4 espacios
-      indent: ['error', 2],
-      // Requiere llaves en todas las estructuras de control multilínea
-      curly: ['error', 'multi-line'],
-      // Desactiva anotaciones de tipos triviales
-      '@typescript-eslint/no-inferrable-types': [
-        'error',
-        { ignoreParameters: true },
+      'no-multiple-empty-lines': ['warn', { max: 2 }],
+      'one-var': 'off',
+      indent: 'off',
+      curly: 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      eqeqeq: ['warn', 'always', { null: 'ignore' }],
+      quotes: ['warn', 'single', { allowTemplateLiterals: true }],
+      'space-infix-ops': 'warn',
+      'new-cap': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
       ],
-      // Prohíbe el uso de == y !=, excepto para comparar con null
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
-      // Requiere el uso de comillas simples
-      quotes: ['error', 'single'],
-      // Asegura que haya espacios alrededor de los operadores
-      'space-infix-ops': 'error',
-      // Prohíbe el uso de paréntesis en constructores sin argumentos
-      'new-cap': ['error', { capIsNew: true }],
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 );

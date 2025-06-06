@@ -7,7 +7,15 @@ import { ConfirmDeleteBulkDialog } from '@/components/common/confirm-delete-dial
 import { Table, Column } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash, Filter, ChevronDown, Download, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import {
+  Trash,
+  Filter,
+  ChevronDown,
+  Download,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { getColumnLabel } from '@/utils/column-labels';
 
 interface DataWithId {
   id: string | number;
@@ -36,9 +45,15 @@ interface DataTableToolbarProps<TData> {
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
-  return typeof column.columnDef.header === 'string'
-    ? column.columnDef.header
-    : column.id;
+  const friendlyName = getColumnLabel(column.id);
+
+  if (friendlyName === column.id) {
+    return typeof column.columnDef.header === 'string'
+      ? column.columnDef.header
+      : column.id;
+  }
+
+  return friendlyName;
 }
 
 export function DataTableToolbar<TData extends DataWithId>({
@@ -53,11 +68,13 @@ export function DataTableToolbar<TData extends DataWithId>({
   exportFileName = 'data',
   showSortButton = false,
 }: DataTableToolbarProps<TData>) {
-
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
-  const [filterValue, setFilterValue] = React.useState((table.getState().globalFilter as string) ?? '');
+  const [filterValue, setFilterValue] = React.useState(
+    (table.getState().globalFilter as string) ?? '',
+  );
 
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = React.useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] =
+    React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<string[]>([]);
 
   React.useEffect(() => {
@@ -74,7 +91,9 @@ export function DataTableToolbar<TData extends DataWithId>({
   }, [table.getState().globalFilter]);
 
   const handleDeleteSelected = () => {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id as string);
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.id as string);
     if (selectedIds.length === 0) return;
     setIdsToDelete(selectedIds);
     setIsBulkDeleteModalOpen(true);
@@ -92,17 +111,26 @@ export function DataTableToolbar<TData extends DataWithId>({
 
     const visibleColumns = table
       .getAllColumns()
-      .filter((col) => col.getIsVisible() && col.id !== 'select' && col.id !== 'actions');
+      .filter(
+        (col) =>
+          col.getIsVisible() && col.id !== 'select' && col.id !== 'actions',
+      );
 
     const header = visibleColumns.map((col) => col.id);
     const data = rows.map((row) =>
-      visibleColumns.reduce((acc, col) => {
-        acc[col.id] = row.getValue(col.id);
-        return acc;
-      }, {} as Record<string, any>)
+      visibleColumns.reduce(
+        (acc, col) => {
+          acc[col.id] = row.getValue(col.id);
+          return acc;
+        },
+        {} as Record<string, any>,
+      ),
     );
 
-    const csvRows = [header, ...data.map((row) => header.map((key) => JSON.stringify(row[key] ?? '')))];
+    const csvRows = [
+      header,
+      ...data.map((row) => header.map((key) => JSON.stringify(row[key] ?? ''))),
+    ];
     const csvContent = csvRows.map((e) => e.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, `${fileName}.csv`);
@@ -113,20 +141,29 @@ export function DataTableToolbar<TData extends DataWithId>({
 
     const visibleColumns = table
       .getAllColumns()
-      .filter((col) => col.getIsVisible() && col.id !== 'select' && col.id !== 'actions');
+      .filter(
+        (col) =>
+          col.getIsVisible() && col.id !== 'select' && col.id !== 'actions',
+      );
 
     const data = rows.map((row) =>
-      visibleColumns.reduce((acc, col) => {
-        acc[col.id] = row.getValue(col.id);
-        return acc;
-      }, {} as Record<string, any>)
+      visibleColumns.reduce(
+        (acc, col) => {
+          acc[col.id] = row.getValue(col.id);
+          return acc;
+        },
+        {} as Record<string, any>,
+      ),
     );
 
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Hoja 1");
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Hoja 1');
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(blob, `${fileName}.xlsx`);
   }
 
@@ -145,15 +182,25 @@ export function DataTableToolbar<TData extends DataWithId>({
           {showSortButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" 
-                  className="h-10 zcursor-pointer">
-                  <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />Ordenar por<ChevronDown className="ml-2 h-4 w-4" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />
+                  Ordenar por
+                  <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {table
                   .getAllColumns()
-                  .filter((col) => col.getCanSort() && col.id !== 'select' && col.id !== 'actions')
+                  .filter(
+                    (col) =>
+                      col.getCanSort() &&
+                      col.id !== 'select' &&
+                      col.id !== 'actions',
+                  )
                   .map((col) => {
                     const dir = col.getIsSorted();
                     return (
@@ -161,7 +208,9 @@ export function DataTableToolbar<TData extends DataWithId>({
                         key={col.id}
                         onClick={() => col.toggleSorting(dir === 'asc', false)}
                       >
-                        <span className="flex-1 pr-2">{getColumnDisplayName(col)}</span>
+                        <span className="flex-1 pr-2">
+                          {getColumnDisplayName(col)}
+                        </span>
                         {dir === 'asc' && <ArrowUp className="h-4 w-4" />}
                         {dir === 'desc' && <ArrowDown className="h-4 w-4" />}
                         {!dir && <ArrowUpDown className="h-4 w-4 opacity-50" />}
@@ -174,7 +223,11 @@ export function DataTableToolbar<TData extends DataWithId>({
           {showFilterButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
                   <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -182,15 +235,23 @@ export function DataTableToolbar<TData extends DataWithId>({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onFilterClick}>Opción A</DropdownMenuItem>
-                <DropdownMenuItem onClick={onFilterClick}>Opción B</DropdownMenuItem>
+                <DropdownMenuItem onClick={onFilterClick}>
+                  Opción A
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onFilterClick}>
+                  Opción B
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
           {showExportButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
                   <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -217,11 +278,11 @@ export function DataTableToolbar<TData extends DataWithId>({
             <Button
               variant="destructive"
               size="sm"
-              className="h-10 font-bold"
+              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200"
               onClick={handleDeleteSelected}
               disabled={!rowsSelected || isBulkDeleting}
             >
-              <Trash className="mr-2 h-4 w-4"/> Eliminar
+              <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>
           )}
         </div>

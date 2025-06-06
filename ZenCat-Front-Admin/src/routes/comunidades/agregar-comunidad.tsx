@@ -13,7 +13,13 @@ import { communitiesApi } from '@/api/communities/communities';
 
 import { Button } from '@/components/ui/button';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 
 import { Service } from '@/types/service';
 import { CreateCommunityPayload } from '@/types/community';
@@ -50,8 +56,10 @@ function AddCommunityPage() {
   }, [reset]);
 
   const createCommunityMutation = useMutation({
-    mutationFn: (data: CreateCommunityPayload) => communitiesApi.createCommunity(data),
-    onError: (error) => toast.error('Error al crear comunidad', { description: error.message }),
+    mutationFn: (data: CreateCommunityPayload) =>
+      communitiesApi.createCommunity(data),
+    onError: (error) =>
+      toast.error('Error al crear comunidad', { description: error.message }),
   });
 
   const onSubmit = async (data: any) => {
@@ -109,14 +117,22 @@ function AddCommunityPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex flex-col gap-1.5">
               <CardTitle>Servicios</CardTitle>
-              <CardDescription>Seleccione los servicios que brindará la comunidad</CardDescription>
+              <CardDescription>
+                Seleccione los servicios que brindará la comunidad
+              </CardDescription>
             </div>
             <Button
               size="sm"
               className="h-10 bg-black text-white font-bold hover:bg-gray-800"
               onClick={() => {
-                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem(
+                  'draftCommunity',
+                  JSON.stringify(watch()),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedServices',
+                  JSON.stringify(selectedServices),
+                );
                 navigate({ to: '/comunidades/agregar-servicios' });
               }}
               type="button" // importante dentro del form
@@ -128,10 +144,14 @@ function AddCommunityPage() {
             <CommunityServiceTable
               data={selectedServices}
               onDeleteClick={(service) =>
-                setSelectedServices((prev) => prev.filter((s) => s.id !== service.id))
+                setSelectedServices((prev) =>
+                  prev.filter((s) => s.id !== service.id),
+                )
               }
               onBulkDelete={(ids) =>
-                setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)))
+                setSelectedServices((prev) =>
+                  prev.filter((s) => !ids.includes(s.id)),
+                )
               }
               isBulkDeleting={false}
             />
@@ -147,8 +167,11 @@ function AddCommunityPage() {
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={createCommunityMutation.isPending} 
-            className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800">
+          <Button
+            type="submit"
+            disabled={createCommunityMutation.isPending}
+            className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+          >
             Guardar
           </Button>
         </div>
