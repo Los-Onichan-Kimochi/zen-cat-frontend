@@ -5,4 +5,3 @@ import { ReservaHorarioRoute } from '@/layouts/reservation-layout';
 export const Route = createFileRoute(ReservaHorarioRoute)({
   component: ScheduleStep,
 });
-

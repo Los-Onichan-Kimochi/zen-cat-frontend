@@ -39,9 +39,7 @@ const ReservationLayout: React.FC = () => {
           <h1 className="text-lg md:text-xl mb-2">Realiza una nueva reserva</h1>
           <h1 className="text-2xl md:text-3xl font-bold mb-6">Servicio</h1>
           {/* Nombre de servicio dinámico */}
-          <span className="text-lg font-bold">
-            -
-          </span>
+          <span className="text-lg font-bold">-</span>
         </div>
 
         {/* Progress bar centrada con ancho limitado */}
