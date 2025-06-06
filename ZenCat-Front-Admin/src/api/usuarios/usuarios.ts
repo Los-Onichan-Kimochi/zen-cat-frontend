@@ -1,4 +1,4 @@
-import { User, CreateUserPayload, UpdateUserPayload } from "@/types/user";
+import { User, CreateUserPayload, UpdateUserPayload } from '@/types/user';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,7 +7,7 @@ const getHeaders = () => {
   const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
@@ -18,11 +18,13 @@ export const usuariosApi = {
       const response = await fetch(`${API_BASE_URL}/user/`, {
         headers: getHeaders(),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error fetching usuarios: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error fetching usuarios: ${response.status} ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -36,7 +38,7 @@ export const usuariosApi = {
       } else if (Array.isArray(data)) {
         return data;
       }
-      
+
       console.error('Unexpected data structure from /user/ endpoint:', data);
       throw new Error('Unexpected data structure from usuarios API for list');
     } catch (error) {
@@ -50,13 +52,15 @@ export const usuariosApi = {
       const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
         headers: getHeaders(),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error fetching usuario with id ${id}: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error fetching usuario with id ${id}: ${response.status} ${response.statusText}`,
+        );
       }
-      
+
       return response.json();
     } catch (error) {
       console.error('Error in getUsuarioById:', error);
@@ -71,13 +75,15 @@ export const usuariosApi = {
         headers: getHeaders(),
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error creating usuario: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error creating usuario: ${response.status} ${response.statusText}`,
+        );
       }
-      
+
       return response.json();
     } catch (error) {
       console.error('Error in createUsuario:', error);
@@ -85,20 +91,25 @@ export const usuariosApi = {
     }
   },
 
-  updateUsuario: async (id: string, payload: UpdateUserPayload): Promise<User> => {
+  updateUsuario: async (
+    id: string,
+    payload: UpdateUserPayload,
+  ): Promise<User> => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
         method: 'PATCH',
         headers: getHeaders(),
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error updating usuario with id ${id}: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error updating usuario with id ${id}: ${response.status} ${response.statusText}`,
+        );
       }
-      
+
       return response.json();
     } catch (error) {
       console.error('Error in updateUsuario:', error);
@@ -112,11 +123,13 @@ export const usuariosApi = {
         method: 'DELETE',
         headers: getHeaders(),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error deleting usuario with id ${id}: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error deleting usuario with id ${id}: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (error) {
       console.error('Error in deleteUsuario:', error);
@@ -131,16 +144,17 @@ export const usuariosApi = {
         headers: getHeaders(),
         body: JSON.stringify({ users: ids }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
-        throw new Error(`Error bulk deleting usuarios: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Error bulk deleting usuarios: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (error) {
       console.error('Error in bulkDeleteUsuarios:', error);
       throw error;
     }
-  }
+  },
 };
-

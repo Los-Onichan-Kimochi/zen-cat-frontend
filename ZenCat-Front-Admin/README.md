@@ -42,16 +42,19 @@ src/
 │
 └── utils/              # Funciones utilitarias específicas
 ```
-*Nota: Algunas carpetas como `assets/`, `data/`, `images/`, `styles/`, `config/`, `services/` pueden variar en su uso exacto o no estar presentes en todos los proyectos basados en esta estructura.*
+
+_Nota: Algunas carpetas como `assets/`, `data/`, `images/`, `styles/`, `config/`, `services/` pueden variar en su uso exacto o no estar presentes en todos los proyectos basados en esta estructura._
 
 ## 🏁 Primeros Pasos tras Clonar el Repositorio
 
 1.  **📋 Requisitos Previos**
-    *   [Bun](https://bun.sh/) (runtime de JavaScript y gestor de paquetes)
+
+    - [Bun](https://bun.sh/) (runtime de JavaScript y gestor de paquetes)
 
 2.  **📦 Instalar dependencias**
 
     Navega a la raíz del proyecto en tu terminal y ejecuta:
+
     ```bash
     bun install
     ```
@@ -60,31 +63,38 @@ src/
 
     Crea un archivo `.env` en la raíz del proyecto copiando el archivo `.env.example` si existe, o creándolo desde cero.
     Este archivo contendrá variables específicas de tu entorno de desarrollo, como URLs de APIs:
+
     ```
     VITE_API_URL=https://tu.api.desarrollo
     ```
+
     Consulta la documentación interna o pregunta al equipo si necesitas más detalles sobre las variables requeridas.
 
 4.  **▶️ Ejecutar la aplicación en modo desarrollo**
+
     ```bash
     bun run dev
     ```
+
     Esto iniciará el servidor de desarrollo de Vite. Por lo general, la aplicación estará disponible en [http://localhost:5173](http://localhost:5173) (o el puerto que indique la terminal). El servidor se recargará automáticamente al detectar cambios en el código.
 
 5.  **🧹 Linting**
 
     Para revisar la calidad del código y aplicar formato, puedes usar:
+
     ```bash
     bun run lint
     ```
+
     Es recomendable configurar tu editor para que aplique las reglas de ESLint y Prettier automáticamente al guardar.
 
 6.  **🔑 Estructura de rutas y autenticación (Ejemplo basado en el código previo)**
-    *   La ruta raíz (`src/routes/__root.tsx`) maneja la lógica inicial, incluyendo la verificación de autenticación.
-    *   Si un usuario no autenticado intenta acceder a una ruta protegida, será redirigido a `/login`.
-    *   Si un usuario autenticado intenta acceder a `/login`, será redirigido a la página principal (ej: `/`).
-    *   `UserContext` (en `src/context/UserContext.tsx`) probablemente provee la información del usuario autenticado al resto de la aplicación.
-    *   La lógica de autenticación (`authApi.getCurrentUser()`) se encuentra en `src/api/auth/`.
+
+    - La ruta raíz (`src/routes/__root.tsx`) maneja la lógica inicial, incluyendo la verificación de autenticación.
+    - Si un usuario no autenticado intenta acceder a una ruta protegida, será redirigido a `/login`.
+    - Si un usuario autenticado intenta acceder a `/login`, será redirigido a la página principal (ej: `/`).
+    - `UserContext` (en `src/context/UserContext.tsx`) probablemente provee la información del usuario autenticado al resto de la aplicación.
+    - La lógica de autenticación (`authApi.getCurrentUser()`) se encuentra en `src/api/auth/`.
 
 7.  **📦 Construir para producción**
     ```bash
@@ -96,7 +106,7 @@ src/
 
 En el archivo `package.json`, encontrarás varios scripts útiles que puedes ejecutar con `bun run <script>`:
 
-*   `bun run dev`: Inicia el servidor de desarrollo.
-*   `bun run build`: Compila la aplicación para producción.
-*   `bun run lint`: Ejecuta ESLint para analizar el código.
-*   `bun run preview`: Inicia un servidor local para previsualizar el build de producción.
+- `bun run dev`: Inicia el servidor de desarrollo.
+- `bun run build`: Compila la aplicación para producción.
+- `bun run lint`: Ejecuta ESLint para analizar el código.
+- `bun run preview`: Inicia un servidor local para previsualizar el build de producción.

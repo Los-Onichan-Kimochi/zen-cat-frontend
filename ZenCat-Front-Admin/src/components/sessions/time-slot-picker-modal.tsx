@@ -67,7 +67,7 @@ export function TimeSlotPickerModal({
           Selector Visual
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function TimeSlotPickerModal({
             Selector de Horarios
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="mt-4">
           <TimeSlotCalendar
             selectedRange={selectedRange}
@@ -87,7 +87,7 @@ export function TimeSlotPickerModal({
             slotDuration={30}
           />
         </div>
-        
+
         <div className="flex justify-between items-center mt-4 pt-4 border-t">
           <p className="text-sm text-gray-600">
             Haz clic y arrastra para seleccionar
@@ -104,4 +104,4 @@ export function TimeSlotPickerModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { sessionsApi, CheckConflictRequest, ConflictResult, AvailabilityRequest, AvailabilityResult } from '@/api/sessions/sessions';
+import {
+  sessionsApi,
+  CheckConflictRequest,
+  ConflictResult,
+  AvailabilityRequest,
+  AvailabilityResult,
+} from '@/api/sessions/sessions';
 import { useMemo } from 'react';
 
 interface ConflictCheck {
@@ -21,18 +27,33 @@ interface OptimizedConflictResult {
   isLoading: boolean;
 }
 
-export function useSessionConflicts(check: ConflictCheck): OptimizedConflictResult {
+export function useSessionConflicts(
+  check: ConflictCheck,
+): OptimizedConflictResult {
   const { data, isLoading } = useQuery<ConflictResult>({
-    queryKey: ['session-conflicts', check.date, check.startTime, check.endTime, check.professionalId, check.localId, check.excludeSessionId],
+    queryKey: [
+      'session-conflicts',
+      check.date,
+      check.startTime,
+      check.endTime,
+      check.professionalId,
+      check.localId,
+      check.excludeSessionId,
+    ],
     queryFn: () => {
-      if (!check.professionalId || !check.date || !check.startTime || !check.endTime) {
+      if (
+        !check.professionalId ||
+        !check.date ||
+        !check.startTime ||
+        !check.endTime
+      ) {
         return Promise.resolve({
           hasConflict: false,
           professionalConflicts: [],
           localConflicts: [],
         });
       }
-      
+
       const request: CheckConflictRequest = {
         date: check.date,
         startTime: check.startTime,
@@ -41,10 +62,15 @@ export function useSessionConflicts(check: ConflictCheck): OptimizedConflictResu
         localId: check.localId,
         excludeId: check.excludeSessionId,
       };
-      
+
       return sessionsApi.checkConflicts(request);
     },
-    enabled: !!(check.date && check.startTime && check.endTime && check.professionalId),
+    enabled: !!(
+      check.date &&
+      check.startTime &&
+      check.endTime &&
+      check.professionalId
+    ),
   });
 
   return useMemo(() => {
@@ -56,8 +82,11 @@ export function useSessionConflicts(check: ConflictCheck): OptimizedConflictResu
       };
     }
 
-    const allConflicts = [...data.professionalConflicts, ...data.localConflicts];
-    
+    const allConflicts = [
+      ...data.professionalConflicts,
+      ...data.localConflicts,
+    ];
+
     return {
       hasConflict: data.hasConflict,
       conflicts: {
@@ -70,21 +99,29 @@ export function useSessionConflicts(check: ConflictCheck): OptimizedConflictResu
   }, [data, isLoading]);
 }
 
-export function useDayAvailability(date: string, professionalId?: string, localId?: string) {
+export function useDayAvailability(
+  date: string,
+  professionalId?: string,
+  localId?: string,
+) {
   const { data, isLoading } = useQuery<AvailabilityResult>({
     queryKey: ['day-availability', date, professionalId, localId],
     queryFn: () => {
-      console.log('🔍 Fetching availability for:', { date, professionalId, localId });
+      console.log('🔍 Fetching availability for:', {
+        date,
+        professionalId,
+        localId,
+      });
       if (!date) {
         return Promise.resolve({ isAvailable: true, busySlots: [] });
       }
-      
+
       const request: AvailabilityRequest = {
         date,
         professionalId,
         localId,
       };
-      
+
       return sessionsApi.getAvailability(request);
     },
     enabled: !!date,
@@ -104,15 +141,25 @@ export function useDayAvailability(date: string, professionalId?: string, localI
 }
 
 // Hook para obtener los días ocupados en un mes
-export function useMonthlyAvailability(month: Date, professionalId?: string, localId?: string) {
+export function useMonthlyAvailability(
+  month: Date,
+  professionalId?: string,
+  localId?: string,
+) {
   const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
   const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-  
+
   const startDate = startOfMonth.toISOString().split('T')[0];
   const endDate = endOfMonth.toISOString().split('T')[0];
 
   const { data, isLoading } = useQuery({
-    queryKey: ['monthly-availability', startDate, endDate, professionalId, localId],
+    queryKey: [
+      'monthly-availability',
+      startDate,
+      endDate,
+      professionalId,
+      localId,
+    ],
     queryFn: async () => {
       if (!professionalId && !localId) {
         return { occupiedDates: [] };
@@ -127,16 +174,18 @@ export function useMonthlyAvailability(month: Date, professionalId?: string, loc
       const sessions = await sessionsApi.getSessions(filters);
 
       // Filtrar sesiones del mes y extraer fechas únicas
-      const occupiedDates = [...new Set(
-        sessions
-          .filter(session => {
-            const sessionDate = new Date(session.date);
-            return sessionDate >= startOfMonth && sessionDate <= endOfMonth;
-          })
-          .map(session => 
-            new Date(session.date).toISOString().split('T')[0]
-          )
-      )];
+      const occupiedDates = [
+        ...new Set(
+          sessions
+            .filter((session) => {
+              const sessionDate = new Date(session.date);
+              return sessionDate >= startOfMonth && sessionDate <= endOfMonth;
+            })
+            .map(
+              (session) => new Date(session.date).toISOString().split('T')[0],
+            ),
+        ),
+      ];
 
       return { occupiedDates };
     },

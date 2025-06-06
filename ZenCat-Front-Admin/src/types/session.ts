@@ -43,7 +43,7 @@ export interface UpdateSessionPayload {
   local_id?: string | null;
 }
 
-export interface BatchCreateSessionPayload {
+export interface BulkCreateSessionPayload {
   sessions: CreateSessionPayload[];
 }
 
@@ -55,4 +55,4 @@ export type SessionFilters = {
   professionalIds?: string[];
   localIds?: string[];
   states?: SessionState[];
-}; 
+};

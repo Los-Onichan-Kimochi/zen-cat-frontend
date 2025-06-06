@@ -1,6 +1,10 @@
 'use client';
 
-import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +14,14 @@ import { UpdateCommunityPayload } from '@/types/community';
 import { communitiesApi } from '@/api/communities/communities';
 import { Community } from '@/types/community';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,8 +31,8 @@ import { toast } from 'sonner';
 
 // Definir esquema de validación con Zod
 const communityUpdateSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
-  purpose: z.string().min(1, "El propósito es requerido."),
+  name: z.string().min(1, 'El nombre es requerido.'),
+  purpose: z.string().min(1, 'El propósito es requerido.'),
   profileImageFile: z.any().optional(),
 });
 
@@ -68,10 +79,10 @@ export function SeeCommunityPageComponent() {
     },
   });
 
-  const { 
+  const {
     data: community,
     isLoading,
-    error 
+    error,
   } = useQuery({
     queryKey: ['community', communityId],
     queryFn: () => communitiesApi.getCommunityById(communityId!),
@@ -79,8 +90,12 @@ export function SeeCommunityPageComponent() {
 
   // Mutación para actualizar comunidad
   const updateMutation = useMutation({
-    mutationFn: async (data: UpdateCommunityPayload & { imageFile?: File | null }) => {
-      let imageUrl = data.imageFile ? URL.createObjectURL(data.imageFile) : community?.image_url || 'https://via.placeholder.com/150';
+    mutationFn: async (
+      data: UpdateCommunityPayload & { imageFile?: File | null },
+    ) => {
+      let imageUrl = data.imageFile
+        ? URL.createObjectURL(data.imageFile)
+        : community?.image_url || 'https://via.placeholder.com/150';
       return communitiesApi.updateCommunity(communityId!, {
         name: data.name,
         purpose: data.purpose,
@@ -89,7 +104,7 @@ export function SeeCommunityPageComponent() {
     },
     onSuccess: () => {
       toast.success('Comunidad actualizada exitosamente');
-      queryClient.invalidateQueries({queryKey: ['community', communityId]});
+      queryClient.invalidateQueries({ queryKey: ['community', communityId] });
       setIsEditing(false);
     },
     onError: (error: any) => {
@@ -146,32 +161,44 @@ export function SeeCommunityPageComponent() {
       <Card className="mt-6 flex-grow">
         <CardHeader>
           <CardTitle>Datos de la comunidad</CardTitle>
-          <CardDescription>Complete la información para editar esta comunidad.</CardDescription>
+          <CardDescription>
+            Complete la información para editar esta comunidad.
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="grid grid-cols-1 gap-y-6">
               <div>
-                <Label htmlFor="name" className="mb-2">Nombre</Label>
-                <Input id="name" disabled={!isEditing} {...register('name')} 
-                  aria-invalid={!!errors.name} aria-describedby="name-error"
+                <Label htmlFor="name" className="mb-2">
+                  Nombre
+                </Label>
+                <Input
+                  id="name"
+                  disabled={!isEditing}
+                  {...register('name')}
+                  aria-invalid={!!errors.name}
+                  aria-describedby="name-error"
                 />
                 {errors.name && (
-                  <p id="name-error" className="text-red-600 text-sm mt-1">{errors.name.message}</p>
+                  <p id="name-error" className="text-red-600 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
               <div>
-                <Label htmlFor="purpose" className="mb-2">Propósito</Label>
+                <Label htmlFor="purpose" className="mb-2">
+                  Propósito
+                </Label>
                 <Textarea
                   id="purpose"
-                  {...register("purpose")}
+                  {...register('purpose')}
                   disabled={!isEditing}
                   aria-invalid={!!errors.purpose}
                   aria-describedby="purpose-error"
                 />
                 {errors.purpose && (
                   <p id="purpose-error" className="text-red-600 text-sm mt-1">
-                {errors.purpose.message}
+                    {errors.purpose.message}
                   </p>
                 )}
               </div>
@@ -181,7 +208,11 @@ export function SeeCommunityPageComponent() {
                 <Label htmlFor="profileImageFile">Logo</Label>
                 <div className="w-full h-80 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 relative overflow-hidden">
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Vista previa del logo" className="object-contain h-full w-full"/>
+                    <img
+                      src={imagePreview}
+                      alt="Vista previa del logo"
+                      className="object-contain h-full w-full"
+                    />
                   ) : (
                     <div className="text-center text-gray-400">
                       <UploadCloud size={48} className="mx-auto mb-1" />
@@ -195,7 +226,7 @@ export function SeeCommunityPageComponent() {
                       type="file"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       accept="image/png, image/jpeg, image/gif"
-                      {...register("profileImageFile")}
+                      {...register('profileImageFile')}
                       onChange={handleImageChange}
                     />
                   )}
@@ -204,7 +235,11 @@ export function SeeCommunityPageComponent() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end space-x-2">
-            <Button variant="secondary" type="button" onClick={() => navigate({ to: '/comunidades' })}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => navigate({ to: '/comunidades' })}
+            >
               Volver
             </Button>
             <Button
@@ -212,9 +247,9 @@ export function SeeCommunityPageComponent() {
               variant={isEditing ? 'destructive' : 'default'}
               onClick={() => {
                 if (isEditing) {
-              handleSubmit(onSubmit)();
+                  handleSubmit(onSubmit)();
                 } else {
-              setIsEditing(true);
+                  setIsEditing(true);
                 }
               }}
               disabled={isSubmitting}

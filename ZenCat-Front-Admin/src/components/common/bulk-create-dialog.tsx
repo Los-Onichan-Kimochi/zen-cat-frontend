@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from "react";
-import * as XLSX from "xlsx";
-import { Upload, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from 'react';
+import * as XLSX from 'xlsx';
+import { Upload, Trash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +11,8 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
-import ErrorDialog from "@/components/common/error-dialog";
+} from '@/components/ui/dialog';
+import ErrorDialog from '@/components/common/error-dialog';
 
 interface BulkCreateDialogProps {
   open: boolean;
@@ -26,7 +26,7 @@ interface BulkCreateDialogProps {
 export function BulkCreateDialog({
   open,
   onOpenChange,
-  title = "Carga Masiva de Datos",
+  title = 'Carga Masiva de Datos',
   onParsedData,
   expectedExcelColumns,
   dbFieldNames,
@@ -35,25 +35,24 @@ export function BulkCreateDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showColumnErrorDialog, setShowColumnErrorDialog] = useState(false);
-  const [columnErrorMessage, setColumnErrorMessage] = useState("");
+  const [columnErrorMessage, setColumnErrorMessage] = useState('');
 
   useEffect(() => {
     if (!open) {
       setSelectedFile(null);
       setError(null);
-      if (inputRef.current) inputRef.current.value = "";
+      if (inputRef.current) inputRef.current.value = '';
     }
   }, [open]);
 
-  const isValidXLSX = (file: File) =>
-    file.name.toLowerCase().endsWith(".xlsx");
+  const isValidXLSX = (file: File) => file.name.toLowerCase().endsWith('.xlsx');
 
   const handleFile = (file: File) => {
     if (isValidXLSX(file)) {
       setSelectedFile(file);
       setError(null);
     } else {
-      setError("Solo se permiten archivos con extensión .xlsx");
+      setError('Solo se permiten archivos con extensión .xlsx');
     }
   };
 
@@ -69,11 +68,11 @@ export function BulkCreateDialog({
   };
 
   const mapDataWithColumns = (data: any[]) => {
-    return data.map(item => {
+    return data.map((item) => {
       const mappedObject: Record<string, any> = {};
       expectedExcelColumns.forEach((excelCol, idx) => {
         const dbCol = dbFieldNames[idx];
-        mappedObject[dbCol] = item[excelCol] ?? "";
+        mappedObject[dbCol] = item[excelCol] ?? '';
       });
       return mappedObject;
     });
@@ -81,7 +80,7 @@ export function BulkCreateDialog({
 
   const handleConfirm = () => {
     if (!selectedFile) {
-      setError("Debe seleccionar un archivo .xlsx antes de continuar");
+      setError('Debe seleccionar un archivo .xlsx antes de continuar');
       return;
     }
 
@@ -89,37 +88,41 @@ export function BulkCreateDialog({
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
-        
+        const headers = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+        })[0] as string[];
+
         function normalizeText(text: string): string {
           return text
             .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
         }
 
         const normalizedHeaders = headers.map(normalizeText);
         const normalizedExpected = expectedExcelColumns.map(normalizeText);
-  
+
         const headersAreValid =
           normalizedHeaders.length === normalizedExpected.length &&
-          normalizedExpected.every(col => normalizedHeaders.includes(col));
+          normalizedExpected.every((col) => normalizedHeaders.includes(col));
 
         if (!headersAreValid) {
-          setColumnErrorMessage(`El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(", ")}`);
+          setColumnErrorMessage(
+            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`,
+          );
           setShowColumnErrorDialog(true);
           return;
         }
 
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
         const finalData = mapDataWithColumns(rawData);
 
         if (!finalData || finalData.length === 0) {
-          setError("El archivo está vacío o mal estructurado.");
+          setError('El archivo está vacío o mal estructurado.');
           return;
         }
 
@@ -128,7 +131,7 @@ export function BulkCreateDialog({
         setError(null);
         onOpenChange(false);
       } catch (err) {
-        setError("Error al procesar el archivo.");
+        setError('Error al procesar el archivo.');
         console.error(err);
       }
     };
@@ -137,7 +140,7 @@ export function BulkCreateDialog({
 
   const handleDelete = () => {
     setSelectedFile(null);
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) inputRef.current.value = '';
   };
 
   return (
@@ -167,7 +170,7 @@ export function BulkCreateDialog({
           >
             <div className="flex items-center gap-2 text-sm text-gray-700">
               <Upload className="h-4 w-4 text-gray-500" />
-              {selectedFile ? selectedFile.name : "Seleccionar archivo .xlsx"}
+              {selectedFile ? selectedFile.name : 'Seleccionar archivo .xlsx'}
             </div>
             {selectedFile && (
               <Trash
