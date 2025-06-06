@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import React, { useState, useRef, useEffect } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Search, ChevronDown, ChevronLeft } from 'lucide-react';
 import { mockMemberships, mockUsers, UserWithExtra } from '@/mocks/users';
 import { useSearch } from '@tanstack/react-router';
@@ -12,16 +12,18 @@ export const Route = createFileRoute('/usuarios/ver_membresia')({
 });
 
 function VerMembresia() {
-  const search = useSearch({ from: '/usuarios/ver_membresia' }) as { id: string };
+  const search = useSearch({ from: '/usuarios/ver_membresia' }) as {
+    id: string;
+  };
   const userId = search.id;
   const navigate = useNavigate();
 
   // Encontrar el usuario por ID
-  const user = mockUsers.find(u => u.id === userId);
+  const user = mockUsers.find((u) => u.id === userId);
 
   // Filtrado simple por comunidad
   const filteredMemberships = mockMemberships.filter((m) =>
-    user?.membershipsIds?.includes(m.id)
+    user?.membershipsIds?.includes(m.id),
   );
 
   // Estado para los dropdowns
@@ -41,8 +43,8 @@ function VerMembresia() {
         setOpenFilter(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -87,14 +89,18 @@ function VerMembresia() {
                   <button
                     type="button"
                     className="block w-full text-left px-4 py-2 hover:bg-gray-300"
-                    onClick={() => { /* falta logica para ordenar */ }}
+                    onClick={() => {
+                      /* falta logica para ordenar */
+                    }}
                   >
                     Nombre
                   </button>
                   <button
                     type="button"
                     className="block w-full text-left px-4 py-2 hover:bg-gray-300"
-                    onClick={() => { /* falta logica para ordenar */ }}
+                    onClick={() => {
+                      /* falta logica para ordenar */
+                    }}
                   >
                     Fecha
                   </button>
@@ -115,16 +121,20 @@ function VerMembresia() {
                   <button
                     type="button"
                     className="block w-full text-left px-4 py-2 hover:bg-gray-300"
-                    onClick={() => { /* falta logica para ordenar */ }}
+                    onClick={() => {
+                      /* falta logica para ordenar */
+                    }}
                   >
-                    <span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-200">
+                    <span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-600">
                       Activo
                     </span>
                   </button>
                   <button
                     type="button"
                     className="block w-full text-left px-4 py-2 hover:bg-gray-300"
-                    onClick={() => { /* falta logica para ordenar */ }}
+                    onClick={() => {
+                      /* falta logica para ordenar */
+                    }}
                   >
                     Inactivos
                   </button>
@@ -162,7 +172,9 @@ function VerMembresia() {
                   <td className="p-2">{membership.fechaInicio}</td>
                   <td className="p-2">{membership.fechaFin}</td>
                   <td className="p-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${membership.estadoColor}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${membership.estadoColor}`}
+                    >
                       {membership.estado}
                     </span>
                   </td>
@@ -177,8 +189,8 @@ function VerMembresia() {
           <div>Registros por página: 10</div>
           <div>1 – 10 de {filteredMemberships.length} registros</div>
           <div className="flex gap-2">
-            <Button>{"<"}</Button>
-            <Button>{">"}</Button>
+            <Button>{'<'}</Button>
+            <Button>{'>'}</Button>
           </div>
         </div>
       </div>

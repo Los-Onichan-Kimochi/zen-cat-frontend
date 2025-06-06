@@ -1,14 +1,17 @@
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Upload } from "lucide-react";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { authApi } from "@/api/auth/auth";
-import { ChevronLeft } from "lucide-react";
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Upload } from 'lucide-react';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { authApi } from '@/api/auth/auth';
+import { ChevronLeft } from 'lucide-react';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { Switch } from "@/components/ui/switch";
-import { addNewUser, UserWithExtra, mockUsers } from '@/mocks/users';
+import { Switch } from '@/components/ui/switch';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { usuariosApi } from '@/api/usuarios/usuarios';
+import { CreateUserPayload } from '@/types/user';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 export const Route = createFileRoute('/usuarios/agregar')({
   beforeLoad: async () => {
@@ -37,6 +40,7 @@ export const Route = createFileRoute('/usuarios/agregar')({
 
 function AgregarUsuario() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Estados para los campos y errores
@@ -53,7 +57,7 @@ function AgregarUsuario() {
     distrito: '',
     calle: '',
     edificio: '',
-    referencia: ''
+    referencia: '',
   });
 
   const [errors, setErrors] = useState({
@@ -65,6 +69,23 @@ function AgregarUsuario() {
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+
+  const createUserMutation = useMutation({
+    mutationFn: async (data: CreateUserPayload) =>
+      usuariosApi.createUsuario(data),
+    onSuccess: () => {
+      toast.success('Usuario Creado', {
+        description: 'El usuario ha sido agregado exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      navigate({ to: '/usuarios' });
+    },
+    onError: (error) => {
+      toast.error('Error al crear usuario', {
+        description: error.message || 'No se pudo crear el usuario.',
+      });
+    },
+  });
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
@@ -81,7 +102,7 @@ function AgregarUsuario() {
       nombres: '',
       primerApellido: '',
     };
-    
+
     // Validar nombres
     if (!form.nombres.trim()) {
       newErrors.nombres = 'Los nombres son requeridos';
@@ -127,34 +148,28 @@ function AgregarUsuario() {
   };
 
   const confirmCreate = () => {
-    // Crear el nuevo usuario
-    const newUser: Omit<UserWithExtra, 'id'> = {
+    const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
-      role: "user",
-      password: "123456", // Contraseña por defecto
-      isAuthenticated: false,
-      permissions: ["read"],
-      avatar: "",
-      address: onboardingEnabled ? form.calle : '',
-      district: onboardingEnabled ? form.distrito : '',
-      phone: onboardingEnabled ? form.celular : '',
+      role: 'user',
+      password: '123456', // Contraseña por defecto
+      permissions: ['read'],
+      avatar: '',
     };
 
-    try {
-      // Agregar el usuario usando la función de mockData
-      addNewUser(newUser);
-      
-      // Redirigir a la lista de usuarios
-      navigate({ to: '/usuarios' });
-    } catch (error) {
-      console.error('Error al crear usuario:', error);
-      alert('Error al crear usuario');
+    if (onboardingEnabled) {
+      payload.address = form.calle;
+      payload.district = form.distrito;
+      payload.phone = form.celular;
     }
+
+    createUserMutation.mutate(payload);
   };
 
   // Handler para cambios en los inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -173,27 +188,80 @@ function AgregarUsuario() {
         </div>
         <form onSubmit={handleSubmit}>
           <Card className="mb-6 p-6">
-            <h3 className="text-xl font-bold mb-4">Datos principales del usuario</h3>
+            <h3 className="text-xl font-bold mb-4">
+              Datos principales del usuario
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-4">
                 <div>
-                  <label htmlFor="nombres" className="block font-medium mb-1">Nombres</label>
-                  <Input id="nombres" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Ingrese los nombres del usuario" />
-                  {errors.nombres && <span className="text-red-500 text-sm">{errors.nombres}</span>}
+                  <label htmlFor="nombres" className="block font-medium mb-1">
+                    Nombres
+                  </label>
+                  <Input
+                    id="nombres"
+                    name="nombres"
+                    value={form.nombres}
+                    onChange={handleChange}
+                    placeholder="Ingrese los nombres del usuario"
+                  />
+                  {errors.nombres && (
+                    <span className="text-red-500 text-sm">
+                      {errors.nombres}
+                    </span>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="primer-apellido" className="block font-medium mb-1">Primer apellido</label>
-                  <Input id="primer-apellido" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Ingrese el primer apellido del usuario" />
-                  {errors.primerApellido && <span className="text-red-500 text-sm">{errors.primerApellido}</span>}
+                  <label
+                    htmlFor="primer-apellido"
+                    className="block font-medium mb-1"
+                  >
+                    Primer apellido
+                  </label>
+                  <Input
+                    id="primer-apellido"
+                    name="primerApellido"
+                    value={form.primerApellido}
+                    onChange={handleChange}
+                    placeholder="Ingrese el primer apellido del usuario"
+                  />
+                  {errors.primerApellido && (
+                    <span className="text-red-500 text-sm">
+                      {errors.primerApellido}
+                    </span>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="segundo-apellido" className="block font-medium mb-1">Segundo apellido</label>
-                  <Input id="segundo-apellido" name="segundoApellido" value={form.segundoApellido} onChange={handleChange} placeholder="Ingrese el segundo apellido del usuario" />
+                  <label
+                    htmlFor="segundo-apellido"
+                    className="block font-medium mb-1"
+                  >
+                    Segundo apellido
+                  </label>
+                  <Input
+                    id="segundo-apellido"
+                    name="segundoApellido"
+                    value={form.segundoApellido}
+                    onChange={handleChange}
+                    placeholder="Ingrese el segundo apellido del usuario"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="correo" className="block font-medium mb-1">Correo electrónico</label>
-                  <Input id="correo" name="correo" value={form.correo} onChange={handleChange} placeholder="Ingrese el correo electrónico del profesional" type="email" />
-                  {errors.correo && <span className="text-red-500 text-sm">{errors.correo}</span>}
+                  <label htmlFor="correo" className="block font-medium mb-1">
+                    Correo electrónico
+                  </label>
+                  <Input
+                    id="correo"
+                    name="correo"
+                    value={form.correo}
+                    onChange={handleChange}
+                    placeholder="Ingrese el correo electrónico del profesional"
+                    type="email"
+                  />
+                  {errors.correo && (
+                    <span className="text-red-500 text-sm">
+                      {errors.correo}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col gap-2">
@@ -202,15 +270,23 @@ function AgregarUsuario() {
                   <Upload className="w-16 h-16 text-neutral-400" />
                 </div>
                 <Input type="file" />
-                <span className="text-sm text-neutral-500">Sin archivos seleccionados</span>
+                <span className="text-sm text-neutral-500">
+                  Sin archivos seleccionados
+                </span>
               </div>
             </div>
           </Card>
 
           {/* Toggle para habilitar/deshabilitar onboarding */}
           <div className="flex items-center gap-3 mb-4">
-            <Switch id="onboarding-toggle" checked={onboardingEnabled} onCheckedChange={setOnboardingEnabled} />
-            <label htmlFor="onboarding-toggle" className="font-semibold">Habilitar datos de onboarding</label>
+            <Switch
+              id="onboarding-toggle"
+              checked={onboardingEnabled}
+              onCheckedChange={setOnboardingEnabled}
+            />
+            <label htmlFor="onboarding-toggle" className="font-semibold">
+              Habilitar datos de onboarding
+            </label>
           </div>
 
           {onboardingEnabled && (
@@ -219,59 +295,141 @@ function AgregarUsuario() {
               <div className="mb-4 font-semibold">Información personal</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label htmlFor="celular" className="block font-medium mb-1">Número de celular</label>
-                  <Input id="celular" name="celular" value={form.celular} onChange={handleChange} placeholder="Ingrese el número de teléfono" />
-                  {errors.celular && <span className="text-red-500 text-sm">{errors.celular}</span>}
+                  <label htmlFor="celular" className="block font-medium mb-1">
+                    Número de celular
+                  </label>
+                  <Input
+                    id="celular"
+                    name="celular"
+                    value={form.celular}
+                    onChange={handleChange}
+                    placeholder="Ingrese el número de teléfono"
+                  />
+                  {errors.celular && (
+                    <span className="text-red-500 text-sm">
+                      {errors.celular}
+                    </span>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="tipo-doc" className="block font-medium mb-1">Tipo de documento</label>
-                  <select id="tipo-doc" name="tipoDoc" value={form.tipoDoc} onChange={handleChange} className="w-full h-10 px-3 border border-gray-300 rounded-md">
+                  <label htmlFor="tipo-doc" className="block font-medium mb-1">
+                    Tipo de documento
+                  </label>
+                  <select
+                    id="tipo-doc"
+                    name="tipoDoc"
+                    value={form.tipoDoc}
+                    onChange={handleChange}
+                    className="w-full h-10 px-3 border border-gray-300 rounded-md"
+                  >
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
                     <option value="Foreign Card">Foreign Card</option>
                   </select>
-                  {errors.tipoDoc && <span className="text-red-500 text-sm">{errors.tipoDoc}</span>}
+                  {errors.tipoDoc && (
+                    <span className="text-red-500 text-sm">
+                      {errors.tipoDoc}
+                    </span>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="num-doc" className="block font-medium mb-1">Número de documento</label>
-                  <Input id="num-doc" name="numDoc" value={form.numDoc} onChange={handleChange} placeholder="Ingrese el número del documento" />
+                  <label htmlFor="num-doc" className="block font-medium mb-1">
+                    Número de documento
+                  </label>
+                  <Input
+                    id="num-doc"
+                    name="numDoc"
+                    value={form.numDoc}
+                    onChange={handleChange}
+                    placeholder="Ingrese el número del documento"
+                  />
                 </div>
               </div>
               <div className="mb-4 font-semibold">Dirección</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="region" className="block font-medium mb-1">Región</label>
-                  <Input id="region" name="region" value={form.region} onChange={handleChange} placeholder="Seleccione una región" />
+                  <label htmlFor="region" className="block font-medium mb-1">
+                    Región
+                  </label>
+                  <Input
+                    id="region"
+                    name="region"
+                    value={form.region}
+                    onChange={handleChange}
+                    placeholder="Seleccione una región"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="provincia" className="block font-medium mb-1">Provincia</label>
-                  <Input id="provincia" name="provincia" value={form.provincia} onChange={handleChange} placeholder="Seleccione una provincia" />
+                  <label htmlFor="provincia" className="block font-medium mb-1">
+                    Provincia
+                  </label>
+                  <Input
+                    id="provincia"
+                    name="provincia"
+                    value={form.provincia}
+                    onChange={handleChange}
+                    placeholder="Seleccione una provincia"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="distrito" className="block font-medium mb-1">Distrito</label>
-                  <Input id="distrito" name="distrito" value={form.distrito} onChange={handleChange} placeholder="Seleccione un distrito" />
+                  <label htmlFor="distrito" className="block font-medium mb-1">
+                    Distrito
+                  </label>
+                  <Input
+                    id="distrito"
+                    name="distrito"
+                    value={form.distrito}
+                    onChange={handleChange}
+                    placeholder="Seleccione un distrito"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="calle" className="block font-medium mb-1">Calle/ Avenida</label>
-                  <Input id="calle" name="calle" value={form.calle} onChange={handleChange} placeholder="Núm" />
+                  <label htmlFor="calle" className="block font-medium mb-1">
+                    Calle/ Avenida
+                  </label>
+                  <Input
+                    id="calle"
+                    name="calle"
+                    value={form.calle}
+                    onChange={handleChange}
+                    placeholder="Núm"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="edificio" className="block font-medium mb-1">Nro. de edificio</label>
-                  <Input id="edificio" name="edificio" value={form.edificio} onChange={handleChange} placeholder="Núm" />
+                  <label htmlFor="edificio" className="block font-medium mb-1">
+                    Nro. de edificio
+                  </label>
+                  <Input
+                    id="edificio"
+                    name="edificio"
+                    value={form.edificio}
+                    onChange={handleChange}
+                    placeholder="Núm"
+                  />
                 </div>
                 <div>
-                  <label htmlFor="referencia" className="block font-medium mb-1">Referencia</label>
-                  <Input id="referencia" name="referencia" value={form.referencia} onChange={handleChange} placeholder="Núm" />
+                  <label
+                    htmlFor="referencia"
+                    className="block font-medium mb-1"
+                  >
+                    Referencia
+                  </label>
+                  <Input
+                    id="referencia"
+                    name="referencia"
+                    value={form.referencia}
+                    onChange={handleChange}
+                    placeholder="Núm"
+                  />
                 </div>
               </div>
             </Card>
           )}
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={handleCancel}>Cancelar</Button>
-            <Button
-              variant="default"
-              type="submit"
-            >
+            <Button variant="outline" type="button" onClick={handleCancel}>
+              Cancelar
+            </Button>
+            <Button variant="default" type="submit">
               Guardar
             </Button>
           </div>
@@ -279,18 +437,27 @@ function AgregarUsuario() {
       </div>
 
       {/* Diálogo de confirmación */}
-      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+      <AlertDialog
+        open={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas crear el usuario?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas crear el usuario?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción creará un nuevo usuario en el sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction asChild>
-              <Button variant="default" onClick={confirmCreate}>Confirmar</Button>
+              <Button variant="default" onClick={confirmCreate}>
+                Confirmar
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

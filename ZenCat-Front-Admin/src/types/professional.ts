@@ -14,22 +14,22 @@ export enum ProfessionalType {
 }
 
 export interface Professional {
-    id: string;
-    name: string;
-    first_last_name: string;
-    second_last_name?: string | null;
-    specialty: string; // Este campo usará ProfessionalSpecialty para la UI, pero se envía como string
-    email: string;
-    phone_number: string;
-    type: string; // Este campo usará ProfessionalType para la UI, pero se envía como string
-    image_url: string;
-} 
+  id: string;
+  name: string;
+  first_last_name: string;
+  second_last_name?: string | null;
+  specialty: string; // Este campo usará ProfessionalSpecialty para la UI, pero se envía como string
+  email: string;
+  phone_number: string;
+  type: string; // Este campo usará ProfessionalType para la UI, pero se envía como string
+  image_url: string;
+}
 
 // Tipos para los payloads de creación y actualización
 export interface CreateProfessionalPayload {
   name: string;
   first_last_name: string;
-  second_last_name: string; 
+  second_last_name: string;
   specialty: string; // Debería ser un valor de ProfessionalSpecialty
   email: string;
   phone_number: string;
