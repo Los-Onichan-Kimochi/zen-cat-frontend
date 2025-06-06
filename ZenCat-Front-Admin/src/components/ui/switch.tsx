@@ -7,7 +7,12 @@ interface SwitchProps {
   className?: string;
 }
 
-const Switch: React.FC<SwitchProps> = ({ id, checked, onCheckedChange, className }) => {
+const Switch: React.FC<SwitchProps> = ({
+  id,
+  checked,
+  onCheckedChange,
+  className,
+}) => {
   return (
     <button
       type="button"
@@ -24,4 +29,4 @@ const Switch: React.FC<SwitchProps> = ({ id, checked, onCheckedChange, className
   );
 };
 
-export { Switch }; 
+export { Switch };

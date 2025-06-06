@@ -4,7 +4,7 @@ export interface Community {
   purpose: string;
   image_url: string;
   number_subscriptions: number;
-} 
+}
 
 export interface CreateCommunityPayload {
   name: string;

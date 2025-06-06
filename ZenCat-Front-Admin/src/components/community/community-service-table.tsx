@@ -1,7 +1,13 @@
 'use client';
 
 import { Service } from '@/types/service';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { getCommunityServiceColumns } from './community-service-columns';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -24,12 +30,18 @@ export function CommunityServiceTable({
   disableConfirmBulkDelete = false,
 }: CommunityServiceTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getCommunityServiceColumns(onDeleteClick);

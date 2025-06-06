@@ -11,4 +11,4 @@ function ReportesComponent() {
       <HeaderDescriptor title="DASHBOARD" subtitle="GENERA TUS REPORTES" />
     </div>
   );
-} 
+}

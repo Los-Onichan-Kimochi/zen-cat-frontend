@@ -1,16 +1,16 @@
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/roles-permisos')({
-  component: RolesPermisosComponent,
+export const Route = createFileRoute('/planes-membresia')({
+  component: PlanesMembresiaComponent,
 });
 
-function RolesPermisosComponent() {
+function PlanesMembresiaComponent() {
   return (
     <div className="p-6 h-full">
       <HeaderDescriptor
-        title="ROLES Y PERMISOS"
-        subtitle="LISTADO DE ROLES Y PERMISOS"
+        title="PLANES DE MEMBRESÍA"
+        subtitle="LISTADO DE PLANES DE MEMBRESÍA"
       />
     </div>
   );

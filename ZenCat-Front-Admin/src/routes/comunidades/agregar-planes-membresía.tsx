@@ -12,6 +12,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import {
   ColumnDef,
+import {
+  ColumnDef,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -22,8 +24,8 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/comunidades/agregar-planes-membresía')({
   component: AddCommunityMembershipPlanPageComponent,
@@ -111,6 +113,7 @@ function AddCommunityMembershipPlanPageComponent() {
     data: membershipPlansData || [],
     columns,
     getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row.id.toString(),
     state: {
       sorting,
       columnFilters,
@@ -166,6 +169,7 @@ function AddCommunityMembershipPlanPageComponent() {
               showSortButton={true}
             />
             <div className="flex-grow">
+              <DataTable table={table} columns={columns} />
               <DataTable table={table} columns={columns} />
             </div>
             <DataTablePagination table={table} />
