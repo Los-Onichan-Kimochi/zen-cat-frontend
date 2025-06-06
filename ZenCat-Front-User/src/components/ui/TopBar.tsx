@@ -31,7 +31,7 @@ export const TopBar = () => {
         <Link to="/" hash="membresia" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Membresía
         </Link>
-        <Link to="/contacto" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+        <Link to="/" hash="contacto" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Contacto
         </Link>
       </div>

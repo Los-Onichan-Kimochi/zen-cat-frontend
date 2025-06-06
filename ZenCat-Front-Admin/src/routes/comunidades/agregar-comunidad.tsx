@@ -7,8 +7,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCommunityForm } from '@/hooks/use-community-basic-form';
 import { CommunityForm } from '@/components/community/community-basic-form';
 import { CommunityServiceTable } from '@/components/community/community-service-table';
+import { CommunityMembershipPlanTable } from '@/components/community/community-membership-plan-table';
 
 import { communityServicesApi } from '@/api/communities/community-services';
+import { communityMembershipPlansApi } from '@/api/communities/community-membership-plans';
 import { communitiesApi } from '@/api/communities/communities';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,7 @@ import {
 } from '@/components/ui/card';
 
 import { Service } from '@/types/service';
+import { MembershipPlan } from '@/types/membership-plan';
 import { CreateCommunityPayload } from '@/types/community';
 
 import { useEffect, useState } from 'react';
@@ -47,12 +50,16 @@ function AddCommunityPage() {
   } = useCommunityForm();
 
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
+  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<MembershipPlan[]>([]);
 
   useEffect(() => {
     const draft = sessionStorage.getItem('draftCommunity');
     const storedServices = sessionStorage.getItem('draftSelectedServices');
+    const storedPlans = sessionStorage.getItem('draftSelectedMembershipPlans');
+    
     if (draft) reset(JSON.parse(draft));
     if (storedServices) setSelectedServices(JSON.parse(storedServices));
+    if (storedPlans) setSelectedMembershipPlans(JSON.parse(storedPlans));
   }, [reset]);
 
   const createCommunityMutation = useMutation({
@@ -84,11 +91,19 @@ function AddCommunityPage() {
         await communityServicesApi.bulkCreateCommunityServices(payload);
       }
 
+      if (selectedMembershipPlans.length > 0) {
+         const payload = selectedMembershipPlans.map((p) => ({
+          community_id: newCommunity.id,
+          plan_id: p.id,
+        }));
+         await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({community_plans : payload});
+      }
+
       toast.success('Comunidad creada correctamente');
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       navigate({ to: '/comunidades' });
     } catch (err: any) {
-      toast.error('Error al asociar servicios', { description: err.message });
+      toast.error('Error al asociar servicios o planes', { description: err.message });
     }
   };
 
@@ -113,7 +128,7 @@ function AddCommunityPage() {
           handleImageChange={handleImageChange}
         />
 
-        <Card className="gap-0">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex flex-col gap-1.5">
               <CardTitle>Servicios</CardTitle>
@@ -125,17 +140,12 @@ function AddCommunityPage() {
               size="sm"
               className="h-10 bg-black text-white font-bold hover:bg-gray-800"
               onClick={() => {
-                sessionStorage.setItem(
-                  'draftCommunity',
-                  JSON.stringify(watch()),
-                );
-                sessionStorage.setItem(
-                  'draftSelectedServices',
-                  JSON.stringify(selectedServices),
-                );
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
                 navigate({ to: '/comunidades/agregar-servicios' });
               }}
-              type="button" // importante dentro del form
+              type="button"
             >
               <Plus className="mr-2 h-4 w-4" /> Agregar
             </Button>
@@ -154,6 +164,42 @@ function AddCommunityPage() {
                 )
               }
               isBulkDeleting={false}
+              disableConfirmBulkDelete={true}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex flex-col gap-1.5">
+              <CardTitle>Planes de Membresía</CardTitle>
+              <CardDescription>Seleccione los planes de membresía disponibles</CardDescription>
+            </div>
+            <Button
+              size="sm"
+              className="h-10 bg-black text-white font-bold hover:bg-gray-800"
+              onClick={() => {
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                navigate({ to: '/comunidades/agregar-planes-membresía' });
+              }}
+              type="button"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <CommunityMembershipPlanTable
+              data={selectedMembershipPlans}
+              onDeleteClick={(plan) =>
+                setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.id))
+              }
+              onBulkDelete={(ids) =>
+                setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)))
+              }
+              isBulkDeleting={false}
+              disableConfirmBulkDelete={true}
             />
           </CardContent>
         </Card>

@@ -14,3 +14,4 @@ export function handleImageFile(
   };
   reader.readAsDataURL(file);
 }
+

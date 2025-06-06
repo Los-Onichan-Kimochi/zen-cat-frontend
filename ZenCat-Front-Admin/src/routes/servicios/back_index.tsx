@@ -1,17 +1,19 @@
 'use client';
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
-import { ViewToolbar } from '@/components/common/view-toolbar';
 import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { Service, ServiceType } from '@/types/service';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
+import { useNavigate } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   ColumnDef, 
   Row, 
@@ -27,10 +29,6 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { ServicesTable } from '@/components/services/table';
-import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,9 +39,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export const Route = createFileRoute('/servicios/')({
+
+export const Route = createFileRoute('/servicios/back_index')({
   component: ServiciosComponent,
 });
 
@@ -67,14 +75,35 @@ function ServiciosComponent() {
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
   const queryClient = useQueryClient();
 
-  const {
+  const { 
     data: servicesData,
     isLoading: isLoadingServices,
-    error: errorServices,
+    error: errorServices
   } = useQuery<Service[], Error>({
     queryKey: ['services'],
     queryFn: servicesApi.getServices,
   });
+
+  const counts = useMemo<CalculatedCounts | null>(() => {
+    if (!servicesData) return null;
+
+    const calculatedCounts: CalculatedCounts = {
+      [ServiceType.PRESENCIAL_SERVICE]: 0,
+      [ServiceType.VIRTUAL_SERVICE]: 0,
+    };
+
+    servicesData.forEach(serv => {
+      if (serv.is_virtual === true) {
+        calculatedCounts[ServiceType.VIRTUAL_SERVICE]++;
+      } else if (serv.is_virtual === false) {
+        calculatedCounts[ServiceType.PRESENCIAL_SERVICE]++;
+      }
+    });
+    return calculatedCounts;
+  }, [servicesData]);
+
+  const isLoadingCounts = isLoadingServices;
+
 
   const { mutate: deleteService, isPending: isDeleting } = useMutation<void, Error, string>({
     mutationFn: (id) => servicesApi.deleteService(id),
@@ -88,48 +117,6 @@ function ServiciosComponent() {
     },
   });
 
-  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Service>({
-    queryKey: ['services'],
-    deleteFn: (ids: string[]) => servicesApi.bulkDeleteServices(ids),
-    entityName: 'servicio',
-    entityNamePlural: 'servicios',
-    getId: (service) => service.id,
-  });
-
-  const counts = useMemo<CalculatedCounts | null>(() => {
-    if (!servicesData) return null;
-
-    const calculatedCounts: CalculatedCounts = {
-      [ServiceType.PRESENCIAL_SERVICE]: 0,
-      [ServiceType.VIRTUAL_SERVICE]: 0,
-    };
-
-    servicesData.forEach((serv) => {
-      if (serv.is_virtual === true) {
-        calculatedCounts[ServiceType.VIRTUAL_SERVICE]++;
-      } else if (serv.is_virtual === false) {
-        calculatedCounts[ServiceType.PRESENCIAL_SERVICE]++;
-      }
-    });
-    return calculatedCounts;
-  }, [servicesData]);
-
-  const isLoadingCounts = isLoadingServices;
-
-  const handleEdit = (service: Service) => {
-    navigate({ to: '/servicios/servicio-editar', search: { id: service.id } });
-  };
-
-  const handleView = (service: Service) => {
-    localStorage.setItem('currentService', service.id);
-    navigate({ to: `/servicios/servicio-ver` });
-  };
-
-  const handleDelete = (service: Service) => {
-    setServiceToDelete(service);
-    setIsDeleteModalOpen(true);
-  };
-  
   const columns = useMemo<ColumnDef<Service>[]>(() => [
     {
       id: "select",
@@ -180,8 +167,8 @@ function ServiciosComponent() {
       accessorFn: (row: Service) => row.description,
     },
     {
-      id: "actions",
-      cell: ({ row }: { row: Row<Service> }) => {
+      id: 'actions',
+      cell: ({ row }) => {
         const serv = row.original;
         return (
           <div className="flex items-center space-x-2">
@@ -239,11 +226,10 @@ function ServiciosComponent() {
 
   const isLoading = isLoadingServices;
 
-  if (errorServices)
-    return <p>Error cargando servicios: {errorServices.message}</p>;
+  if (errorServices) return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-full flex flex-col">
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
       <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
         {isLoadingCounts ? (
@@ -251,13 +237,13 @@ function ServiciosComponent() {
         ) : counts ? (
           <>
             <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600" />}
+              icon={<Users className="w-8 h-8 text-teal-600"/>}
               iconBgColor="bg-teal-100"
               title="Servicios virtuales"
               description={counts[ServiceType.VIRTUAL_SERVICE]}
             />
             <HomeCard
-              icon={<Users className="w-8 h-8 text-pink-600" />}
+              icon={<Users className="w-8 h-8 text-pink-600"/>}
               iconBgColor="bg-pink-100"
               title="servicios presenciales"
               description={counts[ServiceType.PRESENCIAL_SERVICE]}
@@ -267,26 +253,40 @@ function ServiciosComponent() {
           <p>No hay datos de servicios para mostrar conteos.</p>
         )}
       </div>
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-        onBulkUploadClick={() => {}}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
+      <div className="flex justify-end space-x-2 py-4">
+        <Link to="/servicios/servicio-nuevo" className="h-10">
+          <Button 
+            size="sm" 
+            className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer"
+          >
+            <Plus className="mr-2 h-4 w-4 " /> Agregar
+          </Button>
+        </Link>
+        <Button size="sm" className="h-10 bg-gray-800 font-black hover:bg-gray-700 cursor-pointer" onClick={() => console.log("Carga Masiva clickeada")}>
+          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
+        </Button>
+      </div>
 
       {isLoadingServices ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
         </div>
       ) : (
-        <ServicesTable
-          data={servicesData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-        />
+        <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+          <DataTableToolbar
+            table={table}
+            filterPlaceholder="Buscar servicios..."
+            showSortButton={true}
+            showExportButton={true}
+            onExportClick={() => console.log("Exportar clickeado")}
+            showFilterButton={true}
+            onFilterClick={() => console.log("Filtrar por clickeado")}
+          />
+          <div className="flex-1 overflow-hidden rounded-md border">
+            <DataTable table={table} columns={columns} />
+          </div>
+          <DataTablePagination table={table} />
+        </div>
       )}
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
@@ -317,4 +317,4 @@ function ServiciosComponent() {
       </AlertDialog>
     </div>
   );
-}
+} 

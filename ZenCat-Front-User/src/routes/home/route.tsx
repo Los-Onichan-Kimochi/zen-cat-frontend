@@ -9,6 +9,8 @@ import HowItWorks from '../../components/ui/Home/HowItWorks';
 import PlansSection from '../../components/ui/Home/PlanSection';
 import BenefitSection from '../../components/ui/Home/BenefitSection';
 import CallToActionSection from '@/components/ui/Home/CallToActionSection';
+import ContactSection from '@/components/ui/Home/ContactSection';
+
 export const Route = createFileRoute('/home')({
   component: HomeComponent,
 });
@@ -35,6 +37,9 @@ export function HomeComponent() {
       </div>
       <BenefitSection />
       <CallToActionSection />
+      <div id="contacto" className="scroll-mt-16">
+        <ContactSection />
+      </div>
     </>
   );
 }
