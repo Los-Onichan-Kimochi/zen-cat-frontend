@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { User } from '@/types/user';
-import { authApi } from '@/api/auth/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -48,6 +46,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       }
       const json = await response.json();
       const user= json.user;
+      console.log(user)
       onLoginSuccess(user);
       login(user)
       navigate({ to: "/" }); // Redirige si todo va bien

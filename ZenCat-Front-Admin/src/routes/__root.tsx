@@ -1,85 +1,39 @@
 import MainLayout from '@/layouts/MainLayout';
-import {
-  createRootRoute,
-  Outlet,
-  redirect,
-  useRouterState,
-} from '@tanstack/react-router';
-import { User } from '@/types/user';
-import { authApi } from '@/api/auth/auth';
-import { useEffect, useState } from 'react';
-import { UserProvider } from '@/context/UserContext';
+import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router';
+import { useAuth } from '@/context/AuthContext';
 
 export const Route = createRootRoute({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: ({ location }) => {
     try {
-      const user = await authApi.getCurrentUser();
-      if (!user?.isAuthenticated && location.pathname !== '/login') {
-        throw redirect({
-          to: '/login',
-        });
+      const savedUser = localStorage.getItem("user");
+      const user = savedUser ? JSON.parse(savedUser) : null;
+
+      if (!user && location.pathname !== "/login") {
+        throw redirect({ to: "/login" });
       }
-      if (user?.isAuthenticated && location.pathname === '/login') {
-        throw redirect({
-          to: '/',
-        });
+
+      if (user && location.pathname === "/login") {
+        throw redirect({ to: "/" });
       }
     } catch (error) {
-      if (location.pathname !== '/login' && !(error instanceof Function)) {
-        console.error('Error in beforeLoad, redirecting to login:', error);
-        throw redirect({
-          to: '/login',
-        });
-      } else if (error instanceof Function) {
-        throw error;
-      }
+      console.error("Error in beforeLoad, redirecting to login:", error);
+      throw redirect({ to: "/login" });
     }
   },
   component: RootComponent,
 });
 
 function RootComponent() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
   const routerState = useRouterState();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      setLoadingUser(true);
-      try {
-        const currentUser = await authApi.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Error fetching user in RootComponent:', error);
-        setUser(null);
-      } finally {
-        setLoadingUser(false);
-      }
-    };
-    if (routerState.location.pathname !== '/login') {
-      fetchUser();
-    } else {
-      setLoadingUser(false);
-      setUser(null);
-    }
-  }, [routerState.location.pathname]);
+  const showLayout = !!user && routerState.location.pathname !== '/login';
 
-  if (loadingUser) {
-    return <div>Loading Application...</div>;
-  }
-
-  const showLayout =
-    user?.isAuthenticated && routerState.location.pathname !== '/login';
-
-  return (
-    <UserProvider value={{ user }}>
-      {showLayout ? (
-        <MainLayout user={user!}>
-          <Outlet />
-        </MainLayout>
-      ) : (
-        <Outlet />
-      )}
-    </UserProvider>
+  return showLayout ? (
+    <MainLayout user={user}>
+      <Outlet />
+    </MainLayout>
+  ) : (
+    <Outlet />
   );
 }
