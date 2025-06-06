@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LocalsTable } from '@/components/locals/table';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 
 export const Route = createFileRoute('/locales/')({
   component: () => (
@@ -40,6 +42,8 @@ function LocalesComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const {
     data: localsData,
     isLoading: isLoadingLocals,
@@ -69,6 +73,19 @@ function LocalesComponent() {
     entityName: 'local',
     entityNamePlural: 'locales',
     getId: (local) => local.id,
+  });
+
+  const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
+    mutationFn: localsApi.bulkCreateLocals,
+    onSuccess: () => {
+      toast.success('Locales creados exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
+      setShowUploadDialog(false);
+      setShowSuccess(true);
+    },
+    onError: (error: Error) => {
+      toast.error('Error durante la carga masiva', { description: error.message });
+    },
   });
   const regionCounts = localsData?.reduce(
     (acc, local) => {
@@ -129,7 +146,7 @@ function LocalesComponent() {
       </div>
       <ViewToolbar
         onAddClick={() => navigate({ to: '/locales/agregar' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => setShowUploadDialog(true)}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />
@@ -179,6 +196,49 @@ function LocalesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Locales"
+        expectedExcelColumns={[
+          'Nombre del Local',
+          'Nombre de la Calle',
+          'Número de Edificio',
+          'Distrito',
+          'Provincia',
+          'Región',
+          'Referencia',
+          'Capacidad',
+          'URL de Imagen'
+        ]}
+        dbFieldNames={[
+          'local_name',
+          'street_name',
+          'building_number',
+          'district',
+          'province',
+          'region',
+          'reference',
+          'capacity',
+          'image_url'
+        ]}
+        onParsedData={async (data) => {
+          try {
+            bulkCreateLocals(data);
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
+
+      <SuccessDialog
+        open={showSuccess}
+        onOpenChange={setShowSuccess}
+        title="La carga se realizó exitosamente"
+        description="Todos los locales se registraron correctamente."
+        buttonText="Cerrar"
+      />
     </div>
   );
 }
