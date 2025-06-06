@@ -7,6 +7,7 @@ interface UseBulkDeleteOptions<T> {
   entityName: string;
   entityNamePlural: string;
   getId: (item: T) => string;
+  onSuccess?: (items: T[]) => void;
 }
 
 export function useBulkDelete<T>({
@@ -15,6 +16,7 @@ export function useBulkDelete<T>({
   entityName,
   entityNamePlural,
   getId,
+  onSuccess,
 }: UseBulkDeleteOptions<T>) {
   const queryClient = useQueryClient();
 
@@ -25,6 +27,7 @@ export function useBulkDelete<T>({
         description: `${items.length} ${entityNamePlural} eliminados`,
       });
       queryClient.invalidateQueries({ queryKey });
+      onSuccess?.(items);
     },
     onError: (err) => {
       toast.error(`Error al eliminar ${entityNamePlural}`, { 

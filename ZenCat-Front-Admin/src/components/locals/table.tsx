@@ -16,13 +16,12 @@ import { useEffect } from 'react';
 
 interface LocalsTableProps {
   data: Local[];
-  onBulkDelete: (ids: string[]) => void;
+  onBulkDelete: (locals: Local[]) => void;
   isBulkDeleting: boolean;
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
   onView: (local: Local) => void;
-  onBulkDelete?: (locals: Local[]) => void;
-  isBulkDeleting?: boolean;
+  resetRowSelectionTrigger?: number;
 }
 
 export function LocalsTable({
@@ -32,8 +31,7 @@ export function LocalsTable({
   onEdit,
   onDelete,
   onView,
-  onBulkDelete,
-  isBulkDeleting = false,
+  resetRowSelectionTrigger,
 }: LocalsTableProps) {
   const {
     sorting,
@@ -85,12 +83,8 @@ export function LocalsTable({
     <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
       <DataTableToolbar
         table={table}
-        onBulkDelete={onBulkDelete}
-        isBulkDeleting={isBulkDeleting}
-        showBulkDeleteButton
-        showExportButton
         filterPlaceholder="Buscar local..."
-        exportFileName="locales"
+        showSortButton
         showFilterButton
         showExportButton
         onFilterClick={() => {}}

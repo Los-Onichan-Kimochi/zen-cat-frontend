@@ -28,12 +28,16 @@ import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 
 export const Route = createFileRoute('/locales/')({
-  component: () => (
+  component: LocalesPage,
+});
+
+function LocalesPage() {
+  return (
     <LocalProvider>
       <LocalesComponent />
     </LocalProvider>
-  ),
-});
+  );
+}
 
 function LocalesComponent() {
   const navigate = useNavigate();
@@ -44,11 +48,13 @@ function LocalesComponent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
+
   const {
     data: localsData,
     isLoading: isLoadingLocals,
     error: errorLocals,
+    refetch: refetchLocals,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
@@ -56,8 +62,9 @@ function LocalesComponent() {
 
   const deleteLocalMutation = useMutation({
     mutationFn: (id: string) => localsApi.deleteLocal(id),
-    onSuccess: (_, id) => {
+    onSuccess: async (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
+      await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
     },
     onError: (err) => {
@@ -65,18 +72,24 @@ function LocalesComponent() {
     },
   });
 
+  // Hook para bulk delete que maneja automáticamente la actualización
   const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Local>({
     queryKey: ['locals'],
-    deleteFn: localsApi.bulkDeleteLocals,
+    deleteFn: (ids: string[]) => localsApi.bulkDeleteLocals({ locals: ids }),
     entityName: 'local',
     entityNamePlural: 'locales',
     getId: (local) => local.id,
+    onSuccess: () => {
+      // Resetear selecciones después del éxito
+      setResetSelectionTrigger(prev => prev + 1);
+    },
   });
 
   const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
     mutationFn: localsApi.bulkCreateLocals,
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Locales creados exitosamente');
+      await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       setShowUploadDialog(false);
       setShowSuccess(true);
@@ -85,14 +98,16 @@ function LocalesComponent() {
       toast.error('Error durante la carga masiva', { description: error.message });
     },
   });
+
   const regionCounts = localsData?.reduce(
     (acc, local) => {
-      const region = local.region; // Asegúrate de que `region` es el nombre correcto
+      const region = local.region;
       acc[region] = (acc[region] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
   );
+
   let maxRegion = '';
   let maxCount = 0;
 
@@ -115,28 +130,9 @@ function LocalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
-  const bulkDeleteLocalMutation = useMutation({
-    mutationFn: (ids: string[]) => 
-      localsApi.bulkDeleteLocals({ locals: ids }),
-    onSuccess: (_, ids) => {
-      toast.success('Locales eliminadas', {
-        description: `${ids.length} registros`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['locals'] });
-    },
-    onError: (err) => {
-      toast.error('Error al eliminar múltiples locales', {
-        description: err.message,
-      });
-    },
-  });
-
-  const handleBulkDelete = (ids: string[]) => {
-    bulkDeleteLocalMutation.mutate(ids, {
-      onSuccess: () => {
-        setResetSelectionTrigger((prev) => prev + 1);
-      },
-    });
+  const handleView = (local: Local) => {
+    localStorage.setItem('currentLocal', local.id);
+    navigate({ to: `/locales/ver` });
   };
 
   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
@@ -175,14 +171,14 @@ function LocalesComponent() {
         <LocalsTable
           data={localsData || []}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteLocalMutation.isPending}
+          isBulkDeleting={isBulkDeleting}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
+          resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
+
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -204,7 +200,7 @@ function LocalesComponent() {
               <Button
                 variant="destructive"
                 onClick={() => {
-                  if (localToDelete) deleteLocal(localToDelete.id);
+                  if (localToDelete) deleteLocalMutation.mutate(localToDelete.id);
                   setIsDeleteModalOpen(false);
                 }}
               >
