@@ -52,7 +52,7 @@ function ComunidadesComponent() {
     },
   });
   
-  const bulkDeleteMutation = useMutation({
+  const bulkDeleteCommunityMutation = useMutation({
     mutationFn: (ids: string[]) => 
       communitiesApi.bulkDeleteCommunities({ communities: ids }),
     onSuccess: (_, ids) => {
@@ -69,7 +69,7 @@ function ComunidadesComponent() {
   });
 
   const handleBulkDelete = (ids: string[]) => {
-    bulkDeleteMutation.mutate(ids, {
+    bulkDeleteCommunityMutation.mutate(ids, {
       onSuccess: () => {
         setResetSelectionTrigger((prev) => prev + 1);
       },
@@ -111,7 +111,7 @@ function ComunidadesComponent() {
         <CommunityTable
           data={communitiesData}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteMutation.isPending}
+          isBulkDeleting={bulkDeleteCommunityMutation.isPending}
           onDelete={(com) => {
             setCommunityToDelete(com);
             setIsDeleteModalOpen(true);
@@ -128,7 +128,7 @@ function ComunidadesComponent() {
         dbFieldNames={['name', 'purpose', 'image_url']}
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities(data);
+            await communitiesApi.bulkCreateCommunities({communities: data});
             setShowUploadDialog(false);
             setShowSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['communities'] });

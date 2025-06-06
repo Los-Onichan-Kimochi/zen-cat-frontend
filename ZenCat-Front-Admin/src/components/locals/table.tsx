@@ -12,19 +12,24 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Local } from '@/types/local';
 import { getLocalColumns } from './columns';
+import { useEffect } from 'react';
 
 interface LocalsTableProps {
   data: Local[];
+  onBulkDelete: (ids: string[]) => void;
+  isBulkDeleting: boolean;
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
-  onView: (local: Local) => void;
+  resetRowSelectionTrigger?: number;
 }
 
 export function LocalsTable({
   data,
+  onBulkDelete,
+  isBulkDeleting,
   onEdit,
   onDelete,
-  onView,
+  resetRowSelectionTrigger,
 }: LocalsTableProps) {
   const {
     sorting,
@@ -41,7 +46,7 @@ export function LocalsTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getLocalColumns({ onEdit, onDelete, onView });
+  const columns = getLocalColumns({ onEdit, onDelete });
 
   const table = useReactTable({
     data,
@@ -67,16 +72,24 @@ export function LocalsTable({
     enableRowSelection: true,
   });
 
+  useEffect(() => {
+    table.resetRowSelection();
+    setRowSelection({});
+  }, [resetRowSelectionTrigger]);
+
   return (
     <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
       <DataTableToolbar
         table={table}
-        filterPlaceholder="Buscar locales..."
-        showSortButton
-        showFilterButton
+        onBulkDelete={onBulkDelete}
+        isBulkDeleting={isBulkDeleting}
+        showBulkDeleteButton
         showExportButton
+        filterPlaceholder="Buscar local..."
+        exportFileName="locales"
+        showFilterButton
         onFilterClick={() => console.log('Filtrar')}
-        onExportClick={() => console.log('Exportar')}
+        showSortButton
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

@@ -11,17 +11,8 @@ import { Loader2, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
+import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 import { LocalsTable } from '@/components/locals/table';
 
 export const Route = createFileRoute('/locales/')({
@@ -37,8 +28,11 @@ function LocalesComponent() {
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
 
+  const [showSuccess, setShowSuccess] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
+  const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
+
   const {
     data: localsData,
     isLoading: isLoadingLocals,
@@ -47,21 +41,18 @@ function LocalesComponent() {
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
   });
-  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<
-    void,
-    Error,
-    string
-  >({
-    mutationFn: (id) => localsApi.deleteLocal(id),
+
+  const deleteLocalMutation = useMutation({
+    mutationFn: (id: string) => localsApi.deleteLocal(id),
     onSuccess: (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
-      setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al eliminar local', { description: err.message });
     },
   });
+
   const regionCounts = localsData?.reduce(
     (acc, local) => {
       const region = local.region; // Asegúrate de que `region` es el nombre correcto
@@ -81,12 +72,8 @@ function LocalesComponent() {
       }
     }
   }
-  const handleEdit = (local: Local) => {
-    setCurrent(local);
-    navigate({ to: '/locales/editar' });
-  };
 
-  const handleView = (local: Local) => {
+  const handleEdit = (local: Local) => {
     localStorage.setItem('currentLocal', local.id);
     navigate({ to: `/locales/ver` });
   };
@@ -96,7 +83,29 @@ function LocalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
-  const isLoading = isLoadingLocals;
+  const bulkDeleteLocalMutation = useMutation({
+    mutationFn: (ids: string[]) => 
+      localsApi.bulkDeleteLocals({ locals: ids }),
+    onSuccess: (_, ids) => {
+      toast.success('Locales eliminadas', {
+        description: `${ids.length} registros`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar múltiples locales', {
+        description: err.message,
+      });
+    },
+  });
+
+  const handleBulkDelete = (ids: string[]) => {
+    bulkDeleteLocalMutation.mutate(ids, {
+      onSuccess: () => {
+        setResetSelectionTrigger((prev) => prev + 1);
+      },
+    });
+  };
 
   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
@@ -133,42 +142,33 @@ function LocalesComponent() {
       ) : (
         <LocalsTable
           data={localsData || []}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={bulkDeleteLocalMutation.isPending}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onView={handleView}
+          resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Estás seguro que deseas eliminar este local?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">
-                Local: {localToDelete?.local_name}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (localToDelete) deleteLocal(localToDelete.id);
-                  setIsDeleteModalOpen(false);
-                }}
-              >
-                Eliminar
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+      <ConfirmDeleteSingleDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        title="¿Estás seguro que deseas eliminar esta comunidad?"
+        entity="Comunidad"
+        itemName={localToDelete?.local_name ?? ''}
+        onConfirm={() => {
+          if (localToDelete)
+            deleteLocalMutation.mutate(localToDelete.id);
+        }}
+      />
+
+      <SuccessDialog
+        open={showSuccess}
+        onOpenChange={setShowSuccess}
+        title="La carga se realizó exitosamente"
+        description="Todas las comunidades se registraron correctamente."
+        buttonText="Cerrar"
+      />
     </div>
   );
 }

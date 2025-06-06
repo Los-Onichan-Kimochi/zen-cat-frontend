@@ -1,4 +1,6 @@
 import {
+  BulkCreateCommunityPayload,
+  BulkDeleteCommunityPayload,
   Community,
   CreateCommunityPayload,
   UpdateCommunityPayload,
@@ -23,13 +25,14 @@ export const communitiesApi = {
     return response.json();
   },
 
-  bulkCreateCommunities: async (payload: BulkCreateCommunityPayload[]): Promise<Community[]> => {
+  bulkCreateCommunities: async (payload: BulkCreateCommunityPayload): Promise<Community[]> => {
+    console.log('Creating communities:', payload);
     const response = await fetch(`${API_BASE_URL}/community/bulk-create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({communities: payload}),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       throw new Error('Error creating community');
