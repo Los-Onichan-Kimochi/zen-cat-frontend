@@ -47,6 +47,7 @@ import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
 import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía'
 import { Route as ComunidadesAgregarComunidadImport } from './routes/comunidades/agregar-comunidad'
+import { Route as SesionesReservasSessionIdImport } from './routes/sesiones/reservas/$sessionId'
 
 // Create/Update Routes
 
@@ -269,6 +270,12 @@ const ComunidadesAgregarComunidadRoute =
     path: '/comunidades/agregar-comunidad',
     getParentRoute: () => rootRoute,
   } as any)
+
+const SesionesReservasSessionIdRoute = SesionesReservasSessionIdImport.update({
+  id: '/sesiones/reservas/$sessionId',
+  path: '/sesiones/reservas/$sessionId',
+  getParentRoute: () => rootRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -526,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsuariosIndexImport
       parentRoute: typeof rootRoute
     }
+    '/sesiones/reservas/$sessionId': {
+      id: '/sesiones/reservas/$sessionId'
+      path: '/sesiones/reservas/$sessionId'
+      fullPath: '/sesiones/reservas/$sessionId'
+      preLoaderRoute: typeof SesionesReservasSessionIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -568,6 +582,7 @@ export interface FileRoutesByFullPath {
   '/servicios': typeof ServiciosIndexRoute
   '/sesiones': typeof SesionesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -607,6 +622,7 @@ export interface FileRoutesByTo {
   '/servicios': typeof ServiciosIndexRoute
   '/sesiones': typeof SesionesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRoutesById {
@@ -647,6 +663,7 @@ export interface FileRoutesById {
   '/servicios/': typeof ServiciosIndexRoute
   '/sesiones/': typeof SesionesIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRouteTypes {
@@ -688,6 +705,7 @@ export interface FileRouteTypes {
     | '/servicios'
     | '/sesiones'
     | '/usuarios'
+    | '/sesiones/reservas/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -726,6 +744,7 @@ export interface FileRouteTypes {
     | '/servicios'
     | '/sesiones'
     | '/usuarios'
+    | '/sesiones/reservas/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -764,6 +783,7 @@ export interface FileRouteTypes {
     | '/servicios/'
     | '/sesiones/'
     | '/usuarios/'
+    | '/sesiones/reservas/$sessionId'
   fileRoutesById: FileRoutesById
 }
 
@@ -804,6 +824,7 @@ export interface RootRouteChildren {
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   SesionesIndexRoute: typeof SesionesIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
+  SesionesReservasSessionIdRoute: typeof SesionesReservasSessionIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -843,6 +864,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosIndexRoute: ServiciosIndexRoute,
   SesionesIndexRoute: SesionesIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
+  SesionesReservasSessionIdRoute: SesionesReservasSessionIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -890,7 +912,8 @@ export const routeTree = rootRoute
         "/profesionales/",
         "/servicios/",
         "/sesiones/",
-        "/usuarios/"
+        "/usuarios/",
+        "/sesiones/reservas/$sessionId"
       ]
     },
     "/": {
@@ -1000,6 +1023,9 @@ export const routeTree = rootRoute
     },
     "/usuarios/": {
       "filePath": "usuarios/index.tsx"
+    },
+    "/sesiones/reservas/$sessionId": {
+      "filePath": "sesiones/reservas/$sessionId.tsx"
     }
   }
 }

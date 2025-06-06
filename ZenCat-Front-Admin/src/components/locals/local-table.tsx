@@ -16,10 +16,11 @@ import { useEffect } from 'react';
 
 interface LocalsTableProps {
   data: Local[];
-  onBulkDelete: (ids: string[]) => void;
+  onBulkDelete: (locals: Local[]) => void;
   isBulkDeleting: boolean;
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
+  onView: (local: Local) => void;
   resetRowSelectionTrigger?: number;
 }
 
@@ -29,6 +30,7 @@ export function LocalsTable({
   isBulkDeleting,
   onEdit,
   onDelete,
+  onView,
   resetRowSelectionTrigger,
 }: LocalsTableProps) {
   const {
@@ -81,15 +83,25 @@ export function LocalsTable({
     <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
       <DataTableToolbar
         table={table}
-        onBulkDelete={onBulkDelete}
-        isBulkDeleting={isBulkDeleting}
-        showBulkDeleteButton
-        showExportButton
         filterPlaceholder="Buscar local..."
-        exportFileName="locales"
-        showFilterButton
-        onFilterClick={() => console.log('Filtrar')}
         showSortButton
+        showFilterButton
+        showExportButton
+        onFilterClick={() => {}}
+        exportFileName="locales"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const localsToDelete = data.filter((local) =>
+                  ids.includes(local.id),
+                );
+                onBulkDelete(localsToDelete);
+              }
+            : undefined
+        }
+        isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

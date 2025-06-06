@@ -62,7 +62,7 @@ export const localsApi = {
     }
   },
 
-  bulkDeleteLocals: async (payload: BulkDeleteLocalPayload): Promise<Local[]> => {
+  bulkDeleteLocals: async (payload: BulkDeleteLocalPayload): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/local/bulk-delete/`, {
       method: 'DELETE',
       headers: {
@@ -73,7 +73,6 @@ export const localsApi = {
     if (!response.ok) {
       throw new Error('Error bulk deleting locals');
     }
-    return response.json();
   },
   
   bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {

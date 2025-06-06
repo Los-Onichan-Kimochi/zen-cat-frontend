@@ -9,6 +9,20 @@ import {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Función para convertir hora de Lima (UTC-5) a UTC
+const convertLimaToUTC = (limaDateTimeString: string): string => {
+  // Interpretar la fecha como hora de Lima (UTC-5)
+  // Si en Lima son las 08:00, en UTC son las 13:00 (08:00 + 5 horas)
+  const [datePart, timePart] = limaDateTimeString.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute, second = 0] = timePart.split(':').map(Number);
+  
+  // Crear fecha en UTC considerando que la hora original es de Lima (UTC-5)
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour + 5, minute, second));
+  
+  return utcDate.toISOString();
+};
+
 export interface CheckConflictRequest {
   date: string;
   startTime: string;
@@ -83,13 +97,28 @@ export const sessionsApi = {
   },
 
   createSession: async (payload: CreateSessionPayload): Promise<Session> => {
-    console.log('Sending payload to backend:', payload);
+  
+    
+    // Convertir fechas de Lima (UTC-5) a UTC para el backend
+    const backendPayload = {
+      title: payload.title,
+      date: convertLimaToUTC(payload.date),
+      start_time: convertLimaToUTC(payload.start_time),
+      end_time: convertLimaToUTC(payload.end_time),
+      capacity: payload.capacity,
+      session_link: payload.session_link,
+      professional_id: payload.professional_id,
+      local_id: payload.local_id,
+    };
+    
+
+    
     const response = await fetch(`${API_BASE_URL}/session/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(backendPayload),
     });
 
     if (!response.ok) {
@@ -161,17 +190,17 @@ export const sessionsApi = {
   checkConflicts: async (
     data: CheckConflictRequest,
   ): Promise<ConflictResult> => {
-    // Convertir al formato correcto para el backend
+    // Convertir fechas de Lima (UTC-5) a UTC para el backend
     const payload = {
-      date: `${data.date}T00:00:00Z`,
-      start_time: `${data.date}T${data.startTime}:00Z`,
-      end_time: `${data.date}T${data.endTime}:00Z`,
+      date: convertLimaToUTC(`${data.date}T00:00:00`),
+      start_time: convertLimaToUTC(`${data.date}T${data.startTime}:00`),
+      end_time: convertLimaToUTC(`${data.date}T${data.endTime}:00`),
       professional_id: data.professionalId,
       local_id: data.localId || null,
       exclude_id: data.excludeId || null,
     };
 
-    console.log('⚡ Checking conflicts with:', payload);
+  
 
     const response = await fetch(`${API_BASE_URL}/session/check-conflicts/`, {
       method: 'POST',
@@ -186,7 +215,7 @@ export const sessionsApi = {
       throw new Error('Error checking conflicts');
     }
     const result = await response.json();
-    console.log('🔍 Conflict result:', result);
+
     return {
       hasConflict: result.has_conflict,
       professionalConflicts: result.professional_conflicts || [],
@@ -197,14 +226,14 @@ export const sessionsApi = {
   getAvailability: async (
     data: AvailabilityRequest,
   ): Promise<AvailabilityResult> => {
-    // Convertir fecha a formato ISO correcto para el backend
+    // Convertir fecha de Lima (UTC-5) a UTC para el backend
     const payload = {
-      date: `${data.date}T00:00:00Z`,
+      date: convertLimaToUTC(`${data.date}T00:00:00`),
       professional_id: data.professionalId || null,
       local_id: data.localId || null,
     };
 
-    console.log('🚀 Sending availability request:', payload);
+
 
     const response = await fetch(`${API_BASE_URL}/session/availability/`, {
       method: 'POST',
@@ -219,7 +248,7 @@ export const sessionsApi = {
       throw new Error('Error getting availability');
     }
     const result = await response.json();
-    console.log('✅ Availability response:', result);
+
     return {
       isAvailable: result.is_available,
       busySlots: result.busy_slots || [],

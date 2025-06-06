@@ -83,7 +83,7 @@ export function CommunityServiceTable({
         filterPlaceholder="Buscar servicio..."
         exportFileName="servicios"
         showFilterButton
-        onFilterClick={() => console.log('Abrir filtros')}
+        onFilterClick={() => {}}
         showSortButton
         disableConfirmBulkDelete={disableConfirmBulkDelete}
       />
