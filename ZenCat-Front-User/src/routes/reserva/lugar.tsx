@@ -14,6 +14,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { localsApi, Local } from '@/api/locals/locals';
+import { serviceLocalsApi } from '@/api/service-locals/service-locals';
 
 export const Route = createFileRoute(ReservaLugarRoute)({
   component: LocationStepComponent,
@@ -33,30 +34,66 @@ function LocationStepComponent() {
   const [sortBy, setSortBy] = useState('');
   const [districtFilter, setDistrictFilter] = useState('');
 
+  // Fetch service-local associations if a service is selected
+  const {
+    data: serviceLocals = [],
+    isLoading: isLoadingServiceLocals,
+    error: serviceLocalsError,
+  } = useQuery({
+    queryKey: ['service-locals', reservationData.service?.id],
+    queryFn: () =>
+      serviceLocalsApi.getLocalsForService(reservationData.service!.id),
+    enabled: !!reservationData.service?.id,
+  });
+
+  // Extract local IDs from service-local associations
+  const availableLocalIds = serviceLocals.map((sl) => sl.local_id);
+
+  // Debug logging
+  console.log('Selected service:', reservationData.service);
+  console.log('Service-locals data:', serviceLocals);
+  console.log('Available local IDs:', availableLocalIds);
+
   // Fetch locals from API
   const {
     data: localsData = [],
-    isLoading,
-    error,
+    isLoading: isLoadingLocals,
+    error: localsError,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
   });
 
-  // Transform API data to match our interface
-  const locations: ReservationLocation[] = localsData.map((local) => ({
-    id: local.id,
-    name: local.local_name,
-    address: `${local.street_name} ${local.building_number}`,
-    district: local.district,
-    pavilion: local.local_name,
-    capacity: local.capacity,
-    streetName: local.street_name,
-    buildingNumber: local.building_number,
-    province: local.province,
-    region: local.region,
-    reference: local.reference,
-  }));
+  const isLoading = isLoadingServiceLocals || isLoadingLocals;
+  const error = serviceLocalsError || localsError;
+
+  // Transform API data to match our interface and filter by service availability
+  const locations: ReservationLocation[] = localsData
+    .filter((local) => {
+      // If no service is selected, show all locations
+      if (!reservationData.service?.id) return true;
+      // If service is selected, only show locations that have that service available
+      const isIncluded = availableLocalIds.includes(local.id);
+      console.log(
+        `Local ${local.local_name} (${local.id}): ${isIncluded ? 'INCLUDED' : 'EXCLUDED'}`,
+      );
+      return isIncluded;
+    })
+    .map((local) => ({
+      id: local.id,
+      name: local.local_name,
+      address: `${local.street_name} ${local.building_number}`,
+      district: local.district,
+      pavilion: local.local_name,
+      capacity: local.capacity,
+      streetName: local.street_name,
+      buildingNumber: local.building_number,
+      province: local.province,
+      region: local.region,
+      reference: local.reference,
+    }));
+
+  console.log(`Final filtered locations count: ${locations.length}`);
 
   // Get unique districts for filter
   const uniqueDistricts = Array.from(
@@ -135,6 +172,18 @@ function LocationStepComponent() {
             <h3 className="text-xl font-semibold text-center">
               Selecciona el lugar de tu preferencia
             </h3>
+
+            {/* Mensaje informativo si hay servicio seleccionado */}
+            {reservationData.service && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-center">
+                <p className="text-blue-800 text-sm">
+                  Mostrando ubicaciones disponibles para:{' '}
+                  <span className="font-semibold">
+                    {reservationData.service.name}
+                  </span>
+                </p>
+              </div>
+            )}
 
             {/* Barra de búsqueda y filtros */}
             <div className="flex flex-col md:flex-row justify-between gap-4">

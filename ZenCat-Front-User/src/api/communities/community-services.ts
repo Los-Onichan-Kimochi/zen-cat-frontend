@@ -6,17 +6,29 @@ export const communityServicesApi = {
   getCommunityServicesByCommunityId: async (
     communityId: string,
   ): Promise<CommunityService[]> => {
-    const response = await fetch(
-      `${API_BASE_URL}/community-service/?community_id=${communityId}`,
-    );
+    // Temporary workaround: fetch all community services and filter manually
+    // TODO: Fix backend to properly filter by community_id query parameter
+    const response = await fetch(`${API_BASE_URL}/community-service/`);
     if (!response.ok) {
       throw new Error(
         `Error fetching services for community with id: ${communityId}`,
       );
     }
     const data = await response.json();
-    return Array.isArray(data.community_services)
+
+    const allCommunityServices = Array.isArray(data.community_services)
       ? data.community_services
       : [data.community_services];
+
+    // Filter manually by community_id
+    const filteredServices = allCommunityServices.filter(
+      (cs: CommunityService) => cs.community_id === communityId,
+    );
+
+    console.log(
+      `Filtered ${filteredServices.length} services for community ${communityId} from ${allCommunityServices.length} total`,
+    );
+
+    return filteredServices;
   },
 };

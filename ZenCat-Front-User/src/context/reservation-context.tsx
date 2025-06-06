@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react';
 
 export interface ReservationLocation {
   id: string;
@@ -74,20 +80,20 @@ export const ReservationProvider: React.FC<ReservationProviderProps> = ({
   children,
 }) => {
   const [reservationData, setReservationData] = useState<ReservationData>({
-    communityId: 'c730f30e-f6ed-40e6-a210-48ec017c9234', // Valor por defecto de los datos dummy
-    userId: 'test-user-id', // TODO: Obtener del auth context
+    communityId: 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450', // ZenCat Wellness Community (UUID fijo)
+    userId: '11111111-1111-1111-1111-111111111111', // Usuario Demo (UUID fijo)
   });
 
-  const updateReservation = (data: Partial<ReservationData>) => {
+  const updateReservation = useCallback((data: Partial<ReservationData>) => {
     setReservationData((prev) => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const resetReservation = () => {
+  const resetReservation = useCallback(() => {
     setReservationData({
-      communityId: 'c730f30e-f6ed-40e6-a210-48ec017c9234',
-      userId: 'test-user-id',
+      communityId: 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450', // ZenCat Wellness Community (UUID fijo)
+      userId: '11111111-1111-1111-1111-111111111111', // Usuario Demo (UUID fijo)
     });
-  };
+  }, []);
 
   return (
     <ReservationContext.Provider

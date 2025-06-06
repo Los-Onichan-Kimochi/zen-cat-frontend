@@ -9,11 +9,13 @@ import { useReservation } from '@/context/reservation-context';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   reservationsApi,
   CreateReservationRequest,
 } from '@/api/reservations/reservations';
+import { professionalsApi } from '@/api/professionals/professionals';
+import { communitiesApi } from '@/api/communities/communities';
 
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
   component: ConfirmationStepComponent,
@@ -30,6 +32,21 @@ function ConfirmationStepComponent() {
   const [createdReservationId, setCreatedReservationId] = useState<
     string | null
   >(null);
+
+  // Fetch professional data if session exists
+  const { data: professionalData } = useQuery({
+    queryKey: ['professional', reservationData.session?.professionalId],
+    queryFn: () =>
+      professionalsApi.getProfessional(reservationData.session!.professionalId),
+    enabled: !!reservationData.session?.professionalId,
+  });
+
+  // Fetch community data
+  const { data: communityData } = useQuery({
+    queryKey: ['community', reservationData.communityId],
+    queryFn: () => communitiesApi.getCommunityById(reservationData.communityId!),
+    enabled: !!reservationData.communityId,
+  });
 
   // Mutation for creating reservation
   const createReservationMutation = useMutation({
@@ -74,7 +91,26 @@ function ConfirmationStepComponent() {
     navigate({ to: '/comunidades' });
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
+    if (reservationData.session?.date) {
+      const sessionDate = new Date(reservationData.session.date);
+      const months = [
+        'enero',
+        'febrero',
+        'marzo',
+        'abril',
+        'mayo',
+        'junio',
+        'julio',
+        'agosto',
+        'septiembre',
+        'octubre',
+        'noviembre',
+        'diciembre',
+      ];
+      return `${sessionDate.getDate()} de ${months[sessionDate.getMonth()]} del ${sessionDate.getFullYear()}`;
+    }
+    
     if (!dateStr) return '';
     const [day, month] = dateStr.split('/');
     const months = [
@@ -179,7 +215,9 @@ function ConfirmationStepComponent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-gray-600 mb-1">Comunidad</div>
-                <div className="font-semibold">Runners</div>
+                <div className="font-semibold">
+                  {communityData?.name || 'ZenCat Wellness Community'}
+                </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 mb-1">Servicio</div>
@@ -202,7 +240,7 @@ function ConfirmationStepComponent() {
               <div>
                 <div className="text-sm text-gray-600 mb-1">Fecha</div>
                 <div className="font-semibold">
-                  {formatDate(reservationData.date || '')}
+                  {formatDate()}
                 </div>
               </div>
             </div>
@@ -258,7 +296,9 @@ function ConfirmationStepComponent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-gray-600 mb-1">Salón</div>
-                <div className="font-semibold">A201</div>
+                <div className="font-semibold">
+                  {reservationData.session?.title || 'A201'}
+                </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 mb-1">Distrito</div>
@@ -273,7 +313,11 @@ function ConfirmationStepComponent() {
             {/* Información del profesor */}
             <div>
               <div className="text-sm text-gray-600 mb-1">Profesor</div>
-              <div className="font-semibold">Josué Altamirano</div>
+              <div className="font-semibold">
+                {professionalData
+                  ? `${professionalData.name} ${professionalData.first_last_name}`
+                  : 'Instructor asignado'}
+              </div>
             </div>
 
             {/* Mensaje adicional */}

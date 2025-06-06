@@ -17,7 +17,7 @@ import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
 import { CommunityService } from '@/types/community-service';
 import { useReservation } from '@/context/reservation-context';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export const Route = createFileRoute(ReservaServiciosRoute)({
   component: ServiceStepComponent,
@@ -40,7 +40,7 @@ function ServiceStepComponent() {
 
   const selected = search.servicio ?? null;
   const communityId =
-    reservationData.communityId || 'c730f30e-f6ed-40e6-a210-48ec017c9234';
+    reservationData.communityId || 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450';
 
   // Función para manejar la selección de un servicio
   const handleSelect = (serviceName: string) => {
@@ -71,24 +71,35 @@ function ServiceStepComponent() {
     queryFn: servicesApi.getServices,
   });
 
-  const services: ServiceInfo[] = servicesData
-    .map((service) => {
-      const match = communityServicesData.find(
-        (cs) => cs.service_id === service.id,
-      );
-      if (!match) return null;
-      return {
-        id: service.id,
-        title: service.name,
-        description: service.description,
-        imageUrl: service.image_url,
-      };
-    })
-    .filter((s): s is ServiceInfo => s !== null);
+  // Filtrar servicios que pertenecen a la comunidad usando useMemo para optimizar
+  const services: ServiceInfo[] = useMemo(() => {
+    if (!servicesData.length || !communityServicesData.length) return [];
+
+    const filtered = servicesData
+      .map((service) => {
+        const match = communityServicesData.find(
+          (cs) => cs.service_id === service.id,
+        );
+        if (!match) return null;
+        return {
+          id: service.id,
+          title: service.name,
+          description: service.description,
+          imageUrl: service.image_url,
+        };
+      })
+      .filter((s): s is ServiceInfo => s !== null);
+
+    // Debug: Log para verificar los datos (removemos en producción)
+    console.log('Community ID:', communityId);
+    console.log('Filtered Services count:', filtered.length);
+
+    return filtered;
+  }, [servicesData, communityServicesData, communityId]);
 
   // Actualizar el contexto cuando se selecciona un servicio
   useEffect(() => {
-    if (selected) {
+    if (selected && services.length > 0) {
       const selectedService = services.find((s) => s.title === selected);
       if (selectedService) {
         updateReservation({
@@ -101,7 +112,7 @@ function ServiceStepComponent() {
         });
       }
     }
-  }, [selected, services, updateReservation]);
+  }, [selected, services.length, updateReservation]); // updateReservation ahora es stable gracias a useCallback
 
   if (isLoadingCommunityServices || isLoadingServices || !communityId) {
     return (

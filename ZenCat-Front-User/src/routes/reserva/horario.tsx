@@ -11,6 +11,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { sessionsApi, Session } from '@/api/sessions/sessions';
+import { professionalsApi } from '@/api/professionals/professionals';
+import { serviceProfessionalsApi } from '@/api/service-professionals/service-professionals';
 
 export const Route = createFileRoute(ReservaHorarioRoute)({
   component: ScheduleStepComponent,
@@ -25,6 +27,8 @@ interface TimeSlot {
   sessionId?: string;
   capacity?: number;
   registeredCount?: number;
+  professionalName?: string;
+  sessionTitle?: string;
 }
 
 const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
@@ -55,22 +59,63 @@ function ScheduleStepComponent() {
   );
   const [currentMonth, setCurrentMonth] = useState(new Date(2025, 6)); // Julio 2025
 
+  // Fetch service-professional associations if a service is selected
+  const {
+    data: serviceProfessionals = [],
+    isLoading: isLoadingServiceProfessionals,
+  } = useQuery({
+    queryKey: ['service-professionals', reservationData.service?.id],
+    queryFn: () =>
+      serviceProfessionalsApi.getProfessionalsForService(
+        reservationData.service!.id,
+      ),
+    enabled: !!reservationData.service?.id,
+  });
+
+  // Extract professional IDs from service-professional associations
+  const availableProfessionalIds = serviceProfessionals.map(
+    (sp) => sp.professional_id,
+  );
+
+  // Fetch all professionals
+  const { data: professionalsData = [], isLoading: isLoadingProfessionals } =
+    useQuery({
+      queryKey: ['professionals'],
+      queryFn: () => professionalsApi.getProfessionals(),
+    });
+
   // Fetch all sessions
   const {
     data: sessionsData = [],
-    isLoading,
+    isLoading: isLoadingSessions,
     error,
   } = useQuery<Session[], Error>({
     queryKey: ['sessions'],
     queryFn: sessionsApi.getSessions,
   });
 
-  // Filter sessions by location if selected
+  const isLoading =
+    isLoadingServiceProfessionals ||
+    isLoadingProfessionals ||
+    isLoadingSessions;
+
+  // Filter sessions by location and service-professional associations
   const filteredSessions = sessionsData.filter((session) => {
+    // Filter by location if selected
     if (reservationData.location?.id && session.local_id) {
-      return session.local_id === reservationData.location.id;
+      if (session.local_id !== reservationData.location.id) {
+        return false;
+      }
     }
-    return true; // If no location filter, show all sessions
+
+    // Filter by service-professional associations if service is selected
+    if (reservationData.service?.id && session.professional_id) {
+      if (!availableProfessionalIds.includes(session.professional_id)) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   const today = new Date();
@@ -112,6 +157,17 @@ function ScheduleStepComponent() {
         return sessionHour === hour;
       });
 
+      // Get professional name if session exists
+      let professionalName = '';
+      if (sessionAtTime?.professional_id) {
+        const professional = professionalsData.find(
+          (p) => p.id === sessionAtTime.professional_id,
+        );
+        professionalName = professional
+          ? `${professional.name} ${professional.first_last_name}`
+          : '';
+      }
+
       timeSlots.push({
         time: timeStr,
         available:
@@ -120,6 +176,8 @@ function ScheduleStepComponent() {
         sessionId: sessionAtTime?.id,
         capacity: sessionAtTime?.capacity,
         registeredCount: sessionAtTime?.registered_count,
+        professionalName,
+        sessionTitle: sessionAtTime?.title,
       });
     }
 
@@ -267,6 +325,38 @@ function ScheduleStepComponent() {
 
   return (
     <div>
+      {/* Mensaje informativo sobre filtros aplicados */}
+      {(reservationData.service || reservationData.location) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+          <h4 className="font-semibold text-blue-800 mb-2">
+            Filtros aplicados:
+          </h4>
+          <div className="text-blue-700 text-sm space-y-1">
+            {reservationData.service && (
+              <p>
+                • Servicio:{' '}
+                <span className="font-medium">
+                  {reservationData.service.name}
+                </span>
+              </p>
+            )}
+            {reservationData.location && (
+              <p>
+                • Ubicación:{' '}
+                <span className="font-medium">
+                  {reservationData.location.name}
+                </span>{' '}
+                - {reservationData.location.district}
+              </p>
+            )}
+            <p className="text-xs text-blue-600 mt-2">
+              Solo se muestran horarios disponibles para los filtros
+              seleccionados.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Calendario */}
         <div className="border p-6 rounded-md">
@@ -345,22 +435,32 @@ function ScheduleStepComponent() {
                     {slot.available ? (
                       <button
                         onClick={() => handleTimeSelect(slot)}
-                        className={`w-full h-full text-xs rounded text-center flex items-center justify-center
+                        className={`w-full h-full text-xs rounded text-center flex flex-col items-center justify-center p-1
                           ${
                             selectedTime === slot.time &&
                             selectedDate === date.label
                               ? 'bg-black text-white'
-                              : 'bg-gray-200 hover:bg-gray-300'
+                              : 'bg-green-100 hover:bg-green-200 border border-green-300'
                           }`}
-                        title={`Capacidad: ${slot.capacity}, Reservados: ${slot.registeredCount}`}
+                        title={`${slot.sessionTitle || 'Sesión disponible'}
+Profesional: ${slot.professionalName || 'No asignado'}
+Capacidad: ${slot.capacity}, Reservados: ${slot.registeredCount}
+Disponibles: ${slot.capacity && slot.registeredCount ? slot.capacity - slot.registeredCount : 'N/A'}`}
                       >
-                        {slot.capacity && slot.registeredCount
-                          ? `${slot.capacity - slot.registeredCount} disponibles`
-                          : 'Disponible'}
+                        <div className="font-medium">
+                          {slot.capacity && slot.registeredCount
+                            ? `${slot.capacity - slot.registeredCount}`
+                            : '✓'}
+                        </div>
+                        {slot.professionalName && (
+                          <div className="text-[10px] truncate w-full">
+                            {slot.professionalName.split(' ')[0]}
+                          </div>
+                        )}
                       </button>
                     ) : (
                       <div
-                        className="w-full h-full bg-gray-100 rounded"
+                        className="w-full h-full bg-gray-100 rounded border border-gray-200"
                         title="No disponible"
                       ></div>
                     )}
