@@ -32,6 +32,8 @@ function LocalesComponent() {
   const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
+  const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
+
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   //bulk Create variables
@@ -48,19 +50,16 @@ function LocalesComponent() {
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
   });
-  const { mutate: deleteLocal, isPending: isDeleting } = useMutation<
-    void,
-    Error,
-    string
-  >({
-    mutationFn: (id) => localsApi.deleteLocal(id),
+
+  const deleteLocalMutation = useMutation({
+    mutationFn: (id: string) => localsApi.deleteLocal(id),
     onSuccess: (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       //setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al eliminar local', { description: err.message });
     },
   });
   /*
@@ -150,9 +149,11 @@ function LocalesComponent() {
       ) : (
         <LocalsTable
           data={localsData || []}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={bulkDeleteLocalMutation.isPending}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onView={handleView}
+          resetRowSelectionTrigger={resetSelectionTrigger}
           onBulkDelete={handleBulkDelete}
         />
       )}

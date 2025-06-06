@@ -1,4 +1,4 @@
-import { Local, CreateLocalPayload, UpdateLocalPayload } from '@/types/local';
+import { Local, BulkDeleteLocalPayload, CreateLocalPayload, UpdateLocalPayload } from '@/types/local';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -61,18 +61,21 @@ export const localsApi = {
       throw new Error(`Error deleting local with id ${id}`);
     }
   },
-  bulkDeleteLocals: async (ids: string[]): Promise<void> => {
+
+  bulkDeleteLocals: async (payload: BulkDeleteLocalPayload): Promise<Local[]> => {
     const response = await fetch(`${API_BASE_URL}/local/bulk-delete/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ locals: ids }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       throw new Error('Error bulk deleting locals');
     }
+    return response.json();
   },
+  
   bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {
     const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
       method: 'POST',

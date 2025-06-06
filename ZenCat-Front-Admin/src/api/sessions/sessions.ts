@@ -2,7 +2,7 @@ import {
   Session,
   CreateSessionPayload,
   UpdateSessionPayload,
-  BatchCreateSessionPayload,
+  BulkCreateSessionPayload,
   BulkDeleteSessionPayload,
   SessionFilters,
 } from '@/types/session';
@@ -128,9 +128,7 @@ export const sessionsApi = {
     }
   },
 
-  bulkCreateSessions: async (
-    payload: BatchCreateSessionPayload,
-  ): Promise<Session[]> => {
+  bulkCreateSessions: async (payload: BulkCreateSessionPayload): Promise<Session[]> => {
     const response = await fetch(`${API_BASE_URL}/session/bulk/`, {
       method: 'POST',
       headers: {

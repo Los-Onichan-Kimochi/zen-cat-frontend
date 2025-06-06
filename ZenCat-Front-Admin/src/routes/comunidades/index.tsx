@@ -51,9 +51,10 @@ function ComunidadesComponent() {
       toast.error('Error al eliminar comunidad', { description: err.message });
     },
   });
-
-  const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: string[]) => communitiesApi.bulkDeleteCommunities(ids),
+  
+  const bulkDeleteCommunityMutation = useMutation({
+    mutationFn: (ids: string[]) => 
+      communitiesApi.bulkDeleteCommunities({ communities: ids }),
     onSuccess: (_, ids) => {
       toast.success('Comunidades eliminadas', {
         description: `${ids.length} registros`,
@@ -68,7 +69,7 @@ function ComunidadesComponent() {
   });
 
   const handleBulkDelete = (ids: string[]) => {
-    bulkDeleteMutation.mutate(ids, {
+    bulkDeleteCommunityMutation.mutate(ids, {
       onSuccess: () => {
         setResetSelectionTrigger((prev) => prev + 1);
       },
@@ -94,6 +95,7 @@ function ComunidadesComponent() {
         onAddClick={() => {
           sessionStorage.removeItem('draftCommunity');
           sessionStorage.removeItem('draftSelectedServices');
+          sessionStorage.removeItem('draftSelectedMembershipPlans');
           navigate({ to: '/comunidades/agregar-comunidad' });
         }}
         onBulkUploadClick={() => setShowUploadDialog(true)}
@@ -109,12 +111,12 @@ function ComunidadesComponent() {
         <CommunityTable
           data={communitiesData}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteMutation.isPending}
+          isBulkDeleting={bulkDeleteCommunityMutation.isPending}
           onDelete={(com) => {
             setCommunityToDelete(com);
             setIsDeleteModalOpen(true);
           }}
-          resetRowSelectionTrigger={resetSelectionTrigger} // 👈 ahora es un number
+          resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
 
@@ -126,7 +128,7 @@ function ComunidadesComponent() {
         dbFieldNames={['name', 'purpose', 'image_url']}
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities(data);
+            await communitiesApi.bulkCreateCommunities({communities: data});
             setShowUploadDialog(false);
             setShowSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['communities'] });

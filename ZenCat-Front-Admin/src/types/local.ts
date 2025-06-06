@@ -44,4 +44,11 @@ export interface District {
 }
 */
 export type UpdateLocalPayload = Partial<CreateLocalPayload>;
-export type BulkCreateLocalPayLoad = CreateLocalPayload[];
+
+export interface BulkCreateLocalPayload {
+  locals: CreateLocalPayload[];
+}
+
+export interface BulkDeleteLocalPayload {
+  locals: string[]; // array of locals IDs
+}

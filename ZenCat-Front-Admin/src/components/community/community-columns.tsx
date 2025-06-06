@@ -38,14 +38,14 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'id',
-      header: ({ column }) => (
+      header: () => (
         <div className="text-center font-bold">Código</div>
       ),
       cell: ({ row }) => {
         const value = row.getValue('id') as string;
         return (
           <div
-            className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap text-center"
+            className="max-w-[100px] overflow-hidden mx-auto text-ellipsis whitespace-nowrap"
             title={value}
           >
             {value}
@@ -56,7 +56,7 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'name',
-      header: ({ column }) => (
+      header: () => (
         <div className="text-center font-bold">Nombre</div>
       ),
       cell: ({ row }) => (
@@ -65,7 +65,7 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'purpose',
-      header: ({ column }) => (
+      header: () => (
         <div className="text-center font-bold">Propósito</div>
       ),
       cell: ({ row }) => (
@@ -74,7 +74,7 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'number_subscriptions',
-      header: ({ column }) => (
+      header: () => (
         <div className="text-center font-bold">Cantidad de miembros</div>
       ),
       cell: ({ row }) => (
@@ -85,7 +85,7 @@ export function getCommunityColumns({
     },
     {
       id: 'actions',
-      header: ({ column }) => (
+      header: () => (
         <div className="text-center font-bold">Acciones</div>
       ),
       cell: ({ row }) => {

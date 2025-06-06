@@ -69,12 +69,10 @@ function AddCommunityServicePageComponent() {
     const stored = sessionStorage.getItem('draftSelectedServices');
     if (stored && servicesData) {
       const restored = JSON.parse(stored) as Service[];
-
       const newRowSelection: Record<string, boolean> = {};
       restored.forEach((serv) => {
         newRowSelection[serv.id.toString()] = true;
       });
-
       setRowSelection(newRowSelection);
     }
   }, [servicesData]);
