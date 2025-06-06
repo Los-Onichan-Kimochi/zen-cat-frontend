@@ -13,11 +13,11 @@ const CallToActionSection: React.FC = () => {
         </p>
         {/* Título principal */}
         <h2 className="text-6xl font-black text-white mb-4">
-            Unete a <u>Astrocat</u> hoy
+          Unete a <u>Astrocat</u> hoy
         </h2>
         {/* Texto descriptivo */}
         <p className="text-lg text-gray-200 mb-8 leading-relaxed">
-          Da el primer paso para mejorar tu bienestar.  
+          Da el primer paso para mejorar tu bienestar.
         </p>
         {/* Botón CTA */}
         <Link to="/signup">
