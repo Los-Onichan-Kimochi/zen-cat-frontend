@@ -21,6 +21,7 @@ import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as ForgotRouteImport } from './routes/forgot/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as OnboardingMembresiaImport } from './routes/onboarding/membresia'
 
 // Create/Update Routes
 
@@ -81,6 +82,12 @@ const ForgotRouteRoute = ForgotRouteImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OnboardingMembresiaRoute = OnboardingMembresiaImport.update({
+  id: '/onboarding/membresia',
+  path: '/onboarding/membresia',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -158,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreciosImport
       parentRoute: typeof rootRoute
     }
+    '/onboarding/membresia': {
+      id: '/onboarding/membresia'
+      path: '/onboarding/membresia'
+      fullPath: '/onboarding/membresia'
+      preLoaderRoute: typeof OnboardingMembresiaImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -174,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
+  '/onboarding/membresia': typeof OnboardingMembresiaRoute
 }
 
 export interface FileRoutesByTo {
@@ -187,6 +202,7 @@ export interface FileRoutesByTo {
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
+  '/onboarding/membresia': typeof OnboardingMembresiaRoute
 }
 
 export interface FileRoutesById {
@@ -201,6 +217,7 @@ export interface FileRoutesById {
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/precios': typeof PreciosRoute
+  '/onboarding/membresia': typeof OnboardingMembresiaRoute
 }
 
 export interface FileRouteTypes {
@@ -216,6 +233,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/membresia'
     | '/precios'
+    | '/onboarding/membresia'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -228,6 +246,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/membresia'
     | '/precios'
+    | '/onboarding/membresia'
   id:
     | '__root__'
     | '/'
@@ -240,6 +259,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/membresia'
     | '/precios'
+    | '/onboarding/membresia'
   fileRoutesById: FileRoutesById
 }
 
@@ -254,6 +274,7 @@ export interface RootRouteChildren {
   ContactoRoute: typeof ContactoRoute
   MembresiaRoute: typeof MembresiaRoute
   PreciosRoute: typeof PreciosRoute
+  OnboardingMembresiaRoute: typeof OnboardingMembresiaRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -267,6 +288,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
   PreciosRoute: PreciosRoute,
+  OnboardingMembresiaRoute: OnboardingMembresiaRoute,
 }
 
 export const routeTree = rootRoute
@@ -288,7 +310,8 @@ export const routeTree = rootRoute
         "/comunidades",
         "/contacto",
         "/membresia",
-        "/precios"
+        "/precios",
+        "/onboarding/membresia"
       ]
     },
     "/": {
@@ -320,6 +343,9 @@ export const routeTree = rootRoute
     },
     "/precios": {
       "filePath": "precios.tsx"
+    },
+    "/onboarding/membresia": {
+      "filePath": "onboarding/membresia.tsx"
     }
   }
 }
