@@ -17,36 +17,16 @@ export const TopBar = () => {
       </Link>
 
       {/* Menú principal */}
-      <div className="hidden md:flex space-x-8">
-        <Link
-          to="/"
-          hash="como-funciona"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
-          ¿Cómo funciona?
-        </Link>
-        <Link
-          to="/"
-          hash="comunidades"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+     <Link to="/" hash="comunidades" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Comunidades
         </Link>
-        {/*<Link to="/" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
-          Precios
-        </Link>*/}
-        <Link
-          to="/"
-          hash="membresia"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        <Link to="/" hash="como-funciona" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+          ¿Cómo funciona?
+        </Link>
+        <Link to="/" hash="membresia" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Membresía
         </Link>
-        <Link
-          to="/"
-          hash="contacto"
-          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
-        >
+        <Link to="/" hash="contacto" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Contacto
         </Link>
       </div>
