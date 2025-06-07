@@ -1,9 +1,9 @@
 'use client';
 
-import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { CommunityForm } from '@/components/community/community-basic-form';
 import { CommunityServiceTable } from '@/components/community/community-service-table';
@@ -15,6 +15,7 @@ import { servicesApi } from '@/api/services/services';
 import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { communityMembershipPlansApi } from '@/api/communities/community-membership-plans';
+import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Button } from '@/components/ui/button';
@@ -40,11 +41,16 @@ function EditCommunityPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = Route.useSearch();
-
+  
   const [isEditing, setIsEditing] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<MembershipPlan[]>([]);
 
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const [showServiceConfirmDialog, setShowServiceConfirmDialog] = useState(false);
+
+  const [planToDelete, setPlanToDelete] = useState<MembershipPlan | null>(null);
+  const [showPlanConfirmDialog, setShowPlanConfirmDialog] = useState(false);
   const {
     data: community,
     isLoading,
@@ -54,15 +60,15 @@ function EditCommunityPage() {
     queryFn: () => communitiesApi.getCommunityById(id),
   });
 
-  const { data: initialServices } = useQuery<CommunityService[]>({
+  const { data: initialServices } = useQuery({
     queryKey: ['community-services', id],
     queryFn: () => communityServicesApi.getCommunityServices(id),
     enabled: !!id,
   });
 
-  const { data: initialPlans } = useQuery<CommunityMembershipPlan[]>({
+  const { data: initialPlans } = useQuery({
     queryKey: ['community-plans', id],
-    queryFn: () => communityMembershipPlansApi.getCommunityMembershiPlans(id),
+    queryFn: () => communityMembershipPlansApi.getCommunityMembershipPlans(id),
     enabled: !!id,
   });
 
@@ -79,7 +85,9 @@ function EditCommunityPage() {
   } = useCommunityForm();
 
   useEffect(() => {
-    if (community) {
+    if (community && id) {
+      console.log("Id: ",id);
+      console.log("Comunidad: ", community);
       reset({
         name: community.name,
         purpose: community.purpose,
@@ -136,19 +144,65 @@ function EditCommunityPage() {
         image_url: imageUrl,
       });
 
-      await communityServicesApi.updateCommunityServices(id, selectedServices);
-      await communityMembershipPlansApi.updateCommunityMembershipPlans(id, selectedMembershipPlans);
-
     } catch (err: any) {
-      toast.error('Error al actualizar asociaciones', { description: err.message });
+      toast.error('Error al actualizar comunidad', { description: err.message });
     }
   };
+
+  const deleteServiceMutation = useMutation({
+    mutationFn: ({ communityId, serviceId }: { communityId: string; serviceId: string }) =>
+      communityServicesApi.deleteCommunityService(communityId, serviceId),
+    onSuccess: (_, service) => {
+      toast.success('Servicio desvinculado');
+      setSelectedServices((prev) => prev.filter((s) => s.id !== service.serviceId));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar servicio', { description: err.message });
+    },
+  });
+
+
+  const bulkDeleteServiceMutation = useMutation({
+    mutationFn: (ids: string[]) => communityServicesApi.bulkDeleteCommunityServices(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Servicios desvinculados');
+      setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar servicios', { description: err.message });
+    },
+  });
+
+  const deleteMembershipPlanMutation = useMutation({
+    mutationFn: ({ communityId, planId }: { communityId: string; planId: string }) =>
+      communityMembershipPlansApi.deleteCommunityMembershipPlan(communityId, planId),
+    onSuccess: (_, plan) => {
+      toast.success('Plan desvinculado');
+      setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.planId));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar plan', { description: err.message });
+    },
+  });
+
+  const bulkDeleteMembershipPlanMutation = useMutation({
+    mutationFn: (ids: string[]) => communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({community_plans: ids}),
+    onSuccess: (_, ids) => {
+      toast.success('Planes eliminados');
+      setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)));
+      queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar múltiples planes', { description: err.message });
+    },
+  });
+
 
   if (isLoading) {
     return <p className="p-6">Cargando...</p>;
   }
 
-  if (error || !community) {
+  if (error) {
     return <p className="p-6 text-red-500">Error cargando la comunidad</p>;
   }
 
@@ -175,27 +229,33 @@ function EditCommunityPage() {
               <CardTitle>Servicios</CardTitle>
               <CardDescription>Servicios vinculados a esta comunidad</CardDescription>
             </div>
-            {isEditing && (
-              <Button
-                type="button"
-                onClick={() => {
-                  sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                  sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                  sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
-                  navigate({ to: '/comunidades/agregar-servicios' });
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Editar
-              </Button>
-            )}
+            <Button
+              type="button"
+              disabled={!isEditing}
+              className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
+              onClick={() => {
+                if (!isEditing) return;
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddService', 'editar');
+                navigate({ to: '/comunidades/agregar-servicios' }); //
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
+            </Button>
           </CardHeader>
           <CardContent>
             <CommunityServiceTable
               data={selectedServices}
-              onDeleteClick={(service) => setSelectedServices((prev) => prev.filter((s) => s.id !== service.id))}
-              onBulkDelete={(ids) => setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)))}
-              isBulkDeleting={false}
-              disableConfirmBulkDelete={true}
+              onDeleteClick={(service) => {
+                setServiceToDelete(service);
+                setShowServiceConfirmDialog(true);
+              }}
+              onBulkDelete={(ids) => bulkDeleteServiceMutation.mutate(ids)}
+              isBulkDeleting={bulkDeleteServiceMutation.isPending}
+              disableConfirmBulkDelete={false}
+              isEditing={isEditing}
             />
           </CardContent>
         </Card>
@@ -206,35 +266,42 @@ function EditCommunityPage() {
               <CardTitle>Planes de Membresía</CardTitle>
               <CardDescription>Planes asignados a la comunidad</CardDescription>
             </div>
-            {isEditing && (
-              <Button
-                type="button"
-                onClick={() => {
-                  sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                  sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                  sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
-                  navigate({ to: '/comunidades/agregar-planes-membresía' });
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Editar
-              </Button>
-            )}
+            <Button
+              type="button"
+              disabled={!isEditing}
+              className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
+              onClick={() => {
+                if (!isEditing) return;
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddMembershipPlan', 'editar');
+                sessionStorage.setItem('currentCommunity', id);
+                navigate({ to: '/comunidades/agregar-planes-membresía' });
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
+            </Button>
           </CardHeader>
           <CardContent>
             <CommunityMembershipPlanTable
               data={selectedMembershipPlans}
-              onDeleteClick={(plan) => setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.id))}
-              onBulkDelete={(ids) => setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)))}
-              isBulkDeleting={false}
-              disableConfirmBulkDelete={true}
+              onDeleteClick={(plan) => {
+                setPlanToDelete(plan);
+                setShowPlanConfirmDialog(true);
+              }}
+              onBulkDelete={(ids) => bulkDeleteMembershipPlanMutation.mutate(ids)}
+              isBulkDeleting={bulkDeleteMembershipPlanMutation.isPending}
+              disableConfirmBulkDelete={false}
+              isEditing={isEditing}
             />
           </CardContent>
         </Card>
-
         <div className="flex justify-end gap-2 pt-4">
           <Button
             type="button"
             variant="outline"
+            className="h-10 w-30 text-base"
             onClick={() => navigate({ to: '/comunidades' })}
           >
             Cancelar
@@ -248,11 +315,37 @@ function EditCommunityPage() {
                 setIsEditing(true);
               }
             }}
+            className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
           >
             {isEditing ? 'Guardar' : 'Editar'}
           </Button>
         </div>
       </form>
+      <ConfirmDeleteSingleDialog
+        isOpen={showServiceConfirmDialog}
+        onOpenChange={setShowServiceConfirmDialog}
+        title="¿Estás seguro que deseas eliminar este servicio?"
+        entity="Servicio"
+        itemName={serviceToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (serviceToDelete) {
+            deleteServiceMutation.mutate({ communityId: id, serviceId: serviceToDelete.id });
+          }
+        }}
+      />
+
+      <ConfirmDeleteSingleDialog
+        isOpen={showPlanConfirmDialog}
+        onOpenChange={setShowPlanConfirmDialog}
+        title="¿Estás seguro que deseas eliminar este plan?"
+        entity="Plan de Membresía"
+        itemName={planToDelete?.type ?? ''}
+        onConfirm={() => {
+          if (planToDelete) {
+            deleteMembershipPlanMutation.mutate({ communityId: id, planId: planToDelete.id });
+          }
+        }}
+      />
     </div>
   );
 }

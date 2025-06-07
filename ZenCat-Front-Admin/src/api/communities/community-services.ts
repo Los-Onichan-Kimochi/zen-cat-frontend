@@ -26,13 +26,17 @@ export const communityServicesApi = {
     return response.json();
   },
 
-  deleteCommunityService: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/community-service/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting community-service with id: ${id}`);
-    }
+   deleteCommunityService: async (
+    communityId: string,
+    serviceId: string,
+  ): Promise<void> => {
+    const response = await fetch(
+      `${API_BASE_URL}/community-service/${communityId}/${serviceId}/`,
+      {
+        method: 'DELETE',
+      },
+    );
+    if (!response.ok) throw new Error('Error deleting community-service');
   },
 
   bulkDeleteCommunityServices: async (ids: string[]): Promise<void> => {
@@ -58,11 +62,15 @@ export const communityServicesApi = {
     if (serviceId) queryParams.append("serviceId", serviceId);
 
     const response = await fetch(`${API_BASE_URL}/community-service/?${queryParams.toString()}`);
-    if (!response.ok) {
-      throw new Error("Error fetching community services");
+    if (!response.ok) throw new Error('Error fetching community-services');
+    const data = await response.json();
+    
+    if (data && Array.isArray(data.community_services)) {
+      return data.community_services;
+    } else if (Array.isArray(data)) {
+      return data;
     }
-
-    return response.json();
+    throw new Error('Unexpected data structure from community-service API');
   }
 
 };
