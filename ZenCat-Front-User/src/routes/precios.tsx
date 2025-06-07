@@ -11,4 +11,4 @@ function PreciosComponent() {
       <p>Contenido de la página Precios</p>
     </div>
   );
-} 
+}

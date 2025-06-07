@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface ErrorModalProps {
   isOpen: boolean;
@@ -15,25 +15,27 @@ interface ErrorModalProps {
   description: string;
 }
 
-export function ErrorModal({ isOpen, onClose, title, description }: ErrorModalProps) {
-
+export function ErrorModal({
+  isOpen,
+  onClose,
+  title,
+  description,
+}: ErrorModalProps) {
   if (!isOpen) {
     return null;
   }
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}> 
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onClose}>Cerrar</AlertDialogAction> 
+          <AlertDialogAction onClick={onClose}>Cerrar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}

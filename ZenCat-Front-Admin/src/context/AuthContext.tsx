@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User } from '@/types/user';
 
+
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
@@ -15,7 +16,6 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
