@@ -1,42 +1,64 @@
 'use client';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import HeaderDescriptor from '@/components/common/header-descriptor';
-import { ViewToolbar } from '@/components/common/view-toolbar';
-import { toast } from 'sonner';
-import { LocalProvider, useLocal } from '@/context/LocalesContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HomeCard from '@/components/common/home-card';
-import { Loader2, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import HeaderDescriptor from '@/components/common/header-descriptor';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { ViewToolbar } from '@/components/common/view-toolbar';
+import { useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
-import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
+import { LocalProvider, useLocal } from '@/context/LocalesContext';
+import { LocalsTable } from '@/components/locals/local-table';
+import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog} from '@/components/common/confirm-delete-dialogs';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { Button } from '@/components/ui/button';
+import { useBulkDelete } from '@/hooks/use-bulk-delete';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
-import { LocalsTable } from '@/components/locals/table';
+
+import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
+
+import { toast } from 'sonner';
+import { Dialog, DialogContent} from "@/components/ui/dialog";
+
+
 
 export const Route = createFileRoute('/locales/')({
-  component: () => (
-    <LocalProvider>
-      <LocalesComponent />
-    </LocalProvider>
-  ),
+  component: LocalesComponent,
 });
 
 function LocalesComponent() {
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
-
-  const [showSuccess, setShowSuccess] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
 
+  //const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  //const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  //bulk Create variables
+  //const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  //const expectedExcelColumns = ["Nombre", "Calle", "Numero", "Distrito", "Provincia", "Region", "Referencia", "Capacidad", "ImagenUrl"];
+  //const dbFieldNames = ["local_name", "street_name", "building_number","district","province","region","reference","capacity","image_url"];
+  //General
   const {
     data: localsData,
     isLoading: isLoadingLocals,
     error: errorLocals,
+    refetch: refetchLocals,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
@@ -44,69 +66,82 @@ function LocalesComponent() {
 
   const deleteLocalMutation = useMutation({
     mutationFn: (id: string) => localsApi.deleteLocal(id),
-    onSuccess: (_, id) => {
+    onSuccess: async (_, id) => {
       toast.success('Local eliminado', { description: `ID ${id}` });
+      await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
+      //setRowSelection({});
     },
     onError: (err) => {
       toast.error('Error al eliminar local', { description: err.message });
     },
   });
 
-  const regionCounts = localsData?.reduce(
-    (acc, local) => {
-      const region = local.region; // Asegúrate de que `region` es el nombre correcto
-      acc[region] = (acc[region] || 0) + 1;
-      return acc;
+  // Hook para bulk delete que maneja automáticamente la actualización
+  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Local>({
+    queryKey: ['locals'],
+    deleteFn: (ids: string[]) => localsApi.bulkDeleteLocals({ locals: ids }),
+    entityName: 'local',
+    entityNamePlural: 'locales',
+    getId: (local) => local.id,
+    onSuccess: () => {
+      // Resetear selecciones después del éxito
+      setResetSelectionTrigger(prev => prev + 1);
     },
+  });
+
+  const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
+    mutationFn: localsApi.bulkCreateLocals,
+    onSuccess: async () => {
+      toast.success('Locales creados exitosamente');
+      await refetchLocals();
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
+      setShowUploadDialog(false);
+      setShowSuccess(true);
+    },
+    onError: (error: Error) => {
+      toast.error('Error durante la carga masiva', { description: error.message });
+    },
+  });
+
+  const { maxRegion, maxCount } = useMemo(() => {
+    const regionCounts = localsData?.reduce(
+    (acc, local) => {
+        const region = local.region; // Asegúrate de que `region` es el nombre correcto
+        acc[region] = (acc[region] || 0) + 1;
+        return acc;
+      },
     {} as Record<string, number>,
   );
-  let maxRegion = '';
-  let maxCount = 0;
-
-  if (regionCounts) {
-    for (const [region, count] of Object.entries(regionCounts)) {
-      if (count > maxCount) {
-        maxRegion = region;
-        maxCount = count;
+    let maxRegion = '';
+    let maxCount = 0;
+  
+    if (regionCounts) {
+      for (const [region, count] of Object.entries(regionCounts)) {
+        if (count > maxCount) {
+          maxRegion = region;
+          maxCount = count;
+        }
       }
     }
-  }
-
+    return { maxRegion, maxCount };
+  }, [localsData]);
   const handleEdit = (local: Local) => {
+    setCurrent(local);
     localStorage.setItem('currentLocal', local.id);
-    navigate({ to: `/locales/ver` });
+    navigate({ to: '/locales/editar', search: { id: local.id }  });
+  };
+
+  const handleView = (local: Local) => {
+    localStorage.setItem('currentLocal', local.id);
+    navigate({ to: `/locales/ver` , search: { id: local.id } });
   };
 
   const handleDelete = (local: Local) => {
     setLocalToDelete(local);
     setIsDeleteModalOpen(true);
   };
-
-  const bulkDeleteLocalMutation = useMutation({
-    mutationFn: (ids: string[]) => 
-      localsApi.bulkDeleteLocals({ locals: ids }),
-    onSuccess: (_, ids) => {
-      toast.success('Locales eliminadas', {
-        description: `${ids.length} registros`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['locals'] });
-    },
-    onError: (err) => {
-      toast.error('Error al eliminar múltiples locales', {
-        description: err.message,
-      });
-    },
-  });
-
-  const handleBulkDelete = (ids: string[]) => {
-    bulkDeleteLocalMutation.mutate(ids, {
-      onSuccess: () => {
-        setResetSelectionTrigger((prev) => prev + 1);
-      },
-    });
-  };
-
+  
   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
@@ -130,7 +165,7 @@ function LocalesComponent() {
       </div>
       <ViewToolbar
         onAddClick={() => navigate({ to: '/locales/agregar' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => setShowUploadDialog(true)}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />
@@ -143,22 +178,56 @@ function LocalesComponent() {
         <LocalsTable
           data={localsData || []}
           onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteLocalMutation.isPending}
+          isBulkDeleting={isBulkDeleting}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onView={handleView}
           resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
-
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Locales"
+        expectedExcelColumns={[
+          'Nombre del Local',
+          'Nombre de la Calle',
+          'Número de Edificio',
+          'Distrito',
+          'Provincia',
+          'Región',
+          'Referencia',
+          'Capacidad',
+          'URL de Imagen'
+        ]}
+        dbFieldNames={[
+          'local_name',
+          'street_name',
+          'building_number',
+          'district',
+          'province',
+          'region',
+          'reference',
+          'capacity',
+          'image_url'
+        ]}
+        onParsedData={async (data) => {
+          try {
+            bulkCreateLocals(data);
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        title="¿Estás seguro que deseas eliminar esta comunidad?"
-        entity="Comunidad"
+        title="¿Estas seguro que deseas eliminar este local?"
+        entity="Local"
         itemName={localToDelete?.local_name ?? ''}
         onConfirm={() => {
-          if (localToDelete)
-            deleteLocalMutation.mutate(localToDelete.id);
+          if (localToDelete) deleteLocalMutation.mutate(localToDelete.id);
+          setIsDeleteModalOpen(false);
         }}
       />
 
@@ -166,11 +235,38 @@ function LocalesComponent() {
         open={showSuccess}
         onOpenChange={setShowSuccess}
         title="La carga se realizó exitosamente"
-        description="Todas las comunidades se registraron correctamente."
+        description="Todos los locales se registraron correctamente."
         buttonText="Cerrar"
       />
+      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <DialogContent className="max-w-md text-center space-y-4">
+          <div className="flex justify-center items-center">
+            <CheckCircle className="h-20 w-20" strokeWidth={1} />
+          </div>
+          <h2 className="text-lg font-semibold">La carga se realizó exitosamente</h2>
+          <Button
+            className="mx-auto bg-gray-800 hover:bg-gray-700 px-6"
+            onClick={() => setShowSuccess(false)}
+          >
+            Salir
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 export default LocalesComponent;
+/*
+      <ConfirmDeleteBulkDialog
+        isOpen={isBulkDeleteModalOpen} 
+        onOpenChange={setIsBulkDeleteModalOpen} 
+        onConfirm={() => {
+          const selectedIds = Object.keys(rowSelection);
+          setIsBulkDeleteModalOpen(false);
+          bulkDeleteLocals(selectedIds);
+        }}
+        count = {Object.keys(rowSelection).length}
+        //isLoading={isBulkDeleting}
+      />
+*/

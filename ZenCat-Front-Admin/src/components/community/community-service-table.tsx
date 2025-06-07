@@ -20,6 +20,7 @@ interface CommunityServiceTableProps {
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
   disableConfirmBulkDelete: boolean;
+  isEditing?: boolean;
 }
 
 export function CommunityServiceTable({
@@ -28,6 +29,7 @@ export function CommunityServiceTable({
   onBulkDelete,
   isBulkDeleting,
   disableConfirmBulkDelete = false,
+  isEditing=true,
 }: CommunityServiceTableProps) {
   const {
     sorting,
@@ -44,7 +46,7 @@ export function CommunityServiceTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getCommunityServiceColumns(onDeleteClick);
+  const columns = getCommunityServiceColumns(isEditing, onDeleteClick);
 
   const table = useReactTable({
     data,
@@ -78,12 +80,13 @@ export function CommunityServiceTable({
         table={table}
         onBulkDelete={(ids: string[]) => onBulkDelete(ids)}
         isBulkDeleting={isBulkDeleting}
+        isBulkDeleteEnabled={!isEditing}
         showBulkDeleteButton
         showExportButton={false}
         filterPlaceholder="Buscar servicio..."
         exportFileName="servicios"
         showFilterButton
-        onFilterClick={() => console.log('Abrir filtros')}
+        onFilterClick={() => {}}
         showSortButton
         disableConfirmBulkDelete={disableConfirmBulkDelete}
       />

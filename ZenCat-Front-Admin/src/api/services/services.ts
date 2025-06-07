@@ -69,4 +69,17 @@ export const servicesApi = {
       throw new Error(`Error deleting service with id ${id}`);
     }
   },
+
+  bulkDeleteServices: async (ids: string[]): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/service/bulk-delete/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ services: ids }),
+    });
+    if (!response.ok) {
+      throw new Error('Error bulk deleting services');
+    }
+  },
 };

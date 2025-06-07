@@ -14,6 +14,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { professionalsApi } from '@/api/professionals/professionals';
+import { serviceProfessionalApi } from '@/api/services/service_professionals';
 import { Service, ServiceType } from '@/types/service';
 import { Professional } from '@/types/professional';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -66,9 +67,12 @@ function ProfesionalesComponent() {
   const navigate = useNavigate();
 
   const isLoadingCounts = isLoadingProfessionals;
-
+  const modo = localStorage.getItem('modoAgregarProfesional');
+  const profesionalesAsociados: string[] = JSON.parse(localStorage.getItem('profesionalesAsociados') ?? '[]');
+  
   useEffect(() => {
     const stored = localStorage.getItem('profesionalesSeleccionados');
+    
     if (stored && professionalsData) {
       const restored = JSON.parse(stored) as Professional[];
 
@@ -76,69 +80,68 @@ function ProfesionalesComponent() {
       restored.forEach((prof) => {
         newRowSelection[prof.id.toString()] = true;
       });
+      
+      
 
       setRowSelection(newRowSelection);
     }
   }, [professionalsData]);
 
-  const columns = useMemo<ColumnDef<Professional>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && 'indeterminate')
-            }
-            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(v) => row.toggleSelected(!!v)}
+  const columns = useMemo<ColumnDef<Professional>[]>(() => [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => {
+        const profesionalId = row.original.id;
+        
+        const yaAsociado = profesionalesAsociados.includes(profesionalId.toString());
+        return (
+        <Checkbox
+          checked={row.getIsSelected()|| yaAsociado}
+          disabled={yaAsociado && modo === 'editar'}
+          onCheckedChange={(v) => {
+              if (!yaAsociado) row.toggleSelected(!!v);
+            }}
             aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+        />
+        );
       },
-      {
-        accessorKey: 'name',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Nombres <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => <div>{row.getValue('name')}</div>,
-      },
-      {
-        id: 'lastNames',
-        header: 'Apellidos',
-        accessorFn: (row) =>
-          `${row.first_last_name} ${row.second_last_name || ''}`,
-      },
-      { accessorKey: 'specialty', header: 'Especialidad' },
-      {
-        accessorKey: 'email',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-      },
-      { accessorKey: 'phone_number', header: 'Número de celular' },
-    ],
-    [],
-  );
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Nombres <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    },
+    {
+      id: 'lastNames',
+      header: 'Apellidos',
+      accessorFn: (row) => `${row.first_last_name} ${row.second_last_name || ''}`,
+    },
+    { accessorKey: 'specialty', header: 'Especialidad' },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => (
+        <Button 
+            variant="ghost" 
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Correo electrónico <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+    },
+    { accessorKey: 'phone_number', header: 'Número de celular' },
+  ], []);
 
   const table = useReactTable({
     data: professionalsData || [],
@@ -194,7 +197,7 @@ function ProfesionalesComponent() {
             filterPlaceholder="Buscar servicios..."
             showSortButton={true}
             showFilterButton={true}
-            onFilterClick={() => console.log('Filtrar por clickeado')}
+            onFilterClick={() => {}}
             enableDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
@@ -202,25 +205,57 @@ function ProfesionalesComponent() {
           </div>
           <DataTablePagination table={table} />
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-              className="w-full sm:w-auto"
-            >
-              Cancelar
-            </Button>
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() =>{
+                localStorage.removeItem('modoAgregarProfesional');
+                localStorage.removeItem('profesionalesAsociados');
+                if (modo === 'editar') {
+                  navigate({ to: '/servicios/servicio-ver' });
+                } else {
+                  navigate({ to: '/servicios/servicio-nuevo' });
+                }
+              }} className="w-full sm:w-auto"
+              >
+                Cancelar
+                </Button>
             <Button
               type="button"
               disabled={
-                isLoadingProfessionals || selectedProfessionals.length === 0
-              }
-              onClick={() => {
-                localStorage.setItem(
-                  'profesionalesSeleccionados',
-                  JSON.stringify(selectedProfessionals),
-                );
-                navigate({ to: '/servicios/servicio-nuevo' });
+                isLoadingProfessionals || selectedProfessionals.length === 0}
+              onClick={async() => {
+                localStorage.removeItem('modoAgregarProfesional');
+                localStorage.removeItem('profesionalesAsociados');
+                if(modo === 'editar') {
+                  // 1. Obtener IDs ya asociados y los seleccionados
+
+                  const nuevos = selectedProfessionals.filter(
+                    prof => !profesionalesAsociados.includes(prof.id)
+                  );
+
+                  // 2. Llamar a la API solo con los nuevos
+                  if (nuevos.length > 0) {
+                    const serviceId = localStorage.getItem('currentService'); // o como tengas el id del servicio
+                    if (!serviceId) {
+                      // Puedes mostrar un toast de error o retornar
+                      alert('No se encontró el ID del servicio');
+                      return;
+                    }
+                    await serviceProfessionalApi.bulkCreateServiceProfessionals({
+                        service_professionals: nuevos.map(prof => ({
+                        service_id: serviceId,
+                        professional_id: prof.id,
+                      })),
+                    });
+                  }
+                  navigate({ to: '/servicios/servicio-ver' });
+                }
+                 else {
+                  // 1. Guardar los seleccionados en el localStorage
+                  localStorage.setItem('profesionalesSeleccionados', JSON.stringify(selectedProfessionals));
+                  navigate({ to: '/servicios/servicio-nuevo' });
+                }
               }}
               className="w-full sm:w-auto"
             >

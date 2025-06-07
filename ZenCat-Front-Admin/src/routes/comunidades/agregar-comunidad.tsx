@@ -96,7 +96,7 @@ function AddCommunityPage() {
           community_id: newCommunity.id,
           plan_id: p.id,
         }));
-         await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({community_plans : payload});
+        await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({community_plans : payload});
       }
 
       toast.success('Comunidad creada correctamente');
@@ -143,6 +143,7 @@ function AddCommunityPage() {
                 sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
                 sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
                 sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddService', 'crear');
                 navigate({ to: '/comunidades/agregar-servicios' });
               }}
               type="button"
@@ -182,6 +183,7 @@ function AddCommunityPage() {
                 sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
                 sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
                 sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddMembershipPlan', 'crear');
                 navigate({ to: '/comunidades/agregar-planes-membresía' });
               }}
               type="button"

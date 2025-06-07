@@ -14,7 +14,7 @@ const getHeaders = () => {
 export const usuariosApi = {
   getUsuarios: async (): Promise<User[]> => {
     try {
-      console.log('Fetching usuarios from:', `${API_BASE_URL}/user/`);
+  
       const response = await fetch(`${API_BASE_URL}/user/`, {
         headers: getHeaders(),
       });
@@ -28,7 +28,7 @@ export const usuariosApi = {
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
+      
 
       // Intentar diferentes estructuras de respuesta
       if (data && Array.isArray(data.users)) {

@@ -10,7 +10,9 @@ import {
   Calendar,
   Clock,
   Users,
+  ExternalLink,
 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,54 +23,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { 
+  getSessionCurrentState, 
+  getSessionStateColor, 
+  getSessionStateLabel 
+} from '@/utils/session-status';
 
 interface GetSessionColumnsProps {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
-  onViewReservations?: (session: Session) => void;
 }
 
-const getStateColor = (state: SessionState) => {
-  switch (state) {
-    case SessionState.SCHEDULED:
-      return 'bg-blue-100 text-blue-800';
-    case SessionState.ONGOING:
-      return 'bg-green-100 text-green-800';
-    case SessionState.COMPLETED:
-      return 'bg-gray-100 text-gray-800';
-    case SessionState.CANCELLED:
-      return 'bg-red-100 text-red-800';
-    case SessionState.RESCHEDULED:
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
 
-const getStateText = (state: SessionState) => {
-  switch (state) {
-    case SessionState.SCHEDULED:
-      return 'Programada';
-    case SessionState.ONGOING:
-      return 'En curso';
-    case SessionState.COMPLETED:
-      return 'Completada';
-    case SessionState.CANCELLED:
-      return 'Cancelada';
-    case SessionState.RESCHEDULED:
-      return 'Reprogramada';
-    default:
-      return state;
-  }
-};
 
 export function getSessionColumns({
   onEdit,
   onDelete,
   onView,
-  onViewReservations,
 }: GetSessionColumnsProps): ColumnDef<Session>[] {
+  const navigate = useNavigate();
   return [
     {
       id: 'select',
@@ -166,13 +140,19 @@ export function getSessionColumns({
         <div className="text-center font-bold">Estado</div>
       ),
       cell: ({ row }) => {
-        const state = row.getValue('state') as SessionState;
+        const session = row.original;
+        const currentState = getSessionCurrentState({
+          start_time: session.start_time,
+          end_time: session.end_time,
+          state: session.state,
+        });
+        
         return (
           <div className="flex justify-center">
             <div
-              className={`px-2 py-1 rounded text-xs font-medium ${getStateColor(state)}`}
+              className={`px-2 py-1 rounded text-xs font-medium ${getSessionStateColor(currentState)}`}
             >
-              {getStateText(state)}
+              {getSessionStateLabel(currentState)}
             </div>
           </div>
         );
@@ -235,9 +215,13 @@ export function getSessionColumns({
               className="h-8 px-3 bg-black text-white hover:bg-gray-800 font-medium"
               onClick={(e) => {
                 e.stopPropagation();
-                onViewReservations?.(session);
+                navigate({ 
+                  to: '/sesiones/reservas/$sessionId', 
+                  params: { sessionId: session.id } 
+                });
               }}
             >
+              <ExternalLink className="mr-1 h-3 w-3" />
               Ver reservas
             </Button>
           </div>

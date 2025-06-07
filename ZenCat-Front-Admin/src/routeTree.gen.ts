@@ -18,6 +18,7 @@ import { Route as ReportesRouteImport } from './routes/reportes/route'
 import { Route as LogErroresRouteImport } from './routes/log-errores/route'
 import { Route as AuditoriaRouteImport } from './routes/auditoria/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as ServiciosBackindexImport } from './routes/servicios/back_index'
 import { Route as UsuariosIndexImport } from './routes/usuarios/index'
 import { Route as SesionesIndexImport } from './routes/sesiones/index'
 import { Route as ServiciosIndexImport } from './routes/servicios/index'
@@ -40,11 +41,13 @@ import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as PlanesMembresiaVerImport } from './routes/planes-membresia/ver'
 import { Route as PlanesMembresiaAgregarImport } from './routes/planes-membresia/agregar'
 import { Route as LocalesVerImport } from './routes/locales/ver'
+import { Route as LocalesEditarImport } from './routes/locales/editar'
 import { Route as LocalesAgregarImport } from './routes/locales/agregar'
 import { Route as ComunidadesVerImport } from './routes/comunidades/ver'
 import { Route as ComunidadesAgregarServiciosImport } from './routes/comunidades/agregar-servicios'
 import { Route as ComunidadesAgregarPlanesMembresaImport } from './routes/comunidades/agregar-planes-membresía'
 import { Route as ComunidadesAgregarComunidadImport } from './routes/comunidades/agregar-comunidad'
+import { Route as SesionesReservasSessionIdImport } from './routes/sesiones/reservas/$sessionId'
 
 // Create/Update Routes
 
@@ -87,6 +90,12 @@ const AuditoriaRouteRoute = AuditoriaRouteImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ServiciosBackindexRoute = ServiciosBackindexImport.update({
+  id: '/servicios/back_index',
+  path: '/servicios/back_index',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -223,6 +232,12 @@ const LocalesVerRoute = LocalesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LocalesEditarRoute = LocalesEditarImport.update({
+  id: '/locales/editar',
+  path: '/locales/editar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const LocalesAgregarRoute = LocalesAgregarImport.update({
   id: '/locales/agregar',
   path: '/locales/agregar',
@@ -255,6 +270,12 @@ const ComunidadesAgregarComunidadRoute =
     path: '/comunidades/agregar-comunidad',
     getParentRoute: () => rootRoute,
   } as any)
+
+const SesionesReservasSessionIdRoute = SesionesReservasSessionIdImport.update({
+  id: '/sesiones/reservas/$sessionId',
+  path: '/sesiones/reservas/$sessionId',
+  getParentRoute: () => rootRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -344,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocalesAgregarImport
       parentRoute: typeof rootRoute
     }
+    '/locales/editar': {
+      id: '/locales/editar'
+      path: '/locales/editar'
+      fullPath: '/locales/editar'
+      preLoaderRoute: typeof LocalesEditarImport
+      parentRoute: typeof rootRoute
+    }
     '/locales/ver': {
       id: '/locales/ver'
       path: '/locales/ver'
@@ -391,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/servicios/agregar-profesionales'
       fullPath: '/servicios/agregar-profesionales'
       preLoaderRoute: typeof ServiciosAgregarProfesionalesImport
+      parentRoute: typeof rootRoute
+    }
+    '/servicios/back_index': {
+      id: '/servicios/back_index'
+      path: '/servicios/back_index'
+      fullPath: '/servicios/back_index'
+      preLoaderRoute: typeof ServiciosBackindexImport
       parentRoute: typeof rootRoute
     }
     '/servicios/servicio-nuevo': {
@@ -498,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsuariosIndexImport
       parentRoute: typeof rootRoute
     }
+    '/sesiones/reservas/$sessionId': {
+      id: '/sesiones/reservas/$sessionId'
+      path: '/sesiones/reservas/$sessionId'
+      fullPath: '/sesiones/reservas/$sessionId'
+      preLoaderRoute: typeof SesionesReservasSessionIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -516,6 +558,7 @@ export interface FileRoutesByFullPath {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
@@ -523,6 +566,7 @@ export interface FileRoutesByFullPath {
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/back_index': typeof ServiciosBackindexRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
@@ -538,6 +582,7 @@ export interface FileRoutesByFullPath {
   '/servicios': typeof ServiciosIndexRoute
   '/sesiones': typeof SesionesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -553,6 +598,7 @@ export interface FileRoutesByTo {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
@@ -560,6 +606,7 @@ export interface FileRoutesByTo {
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/back_index': typeof ServiciosBackindexRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
@@ -575,6 +622,7 @@ export interface FileRoutesByTo {
   '/servicios': typeof ServiciosIndexRoute
   '/sesiones': typeof SesionesIndexRoute
   '/usuarios': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRoutesById {
@@ -591,6 +639,7 @@ export interface FileRoutesById {
   '/comunidades/agregar-servicios': typeof ComunidadesAgregarServiciosRoute
   '/comunidades/ver': typeof ComunidadesVerRoute
   '/locales/agregar': typeof LocalesAgregarRoute
+  '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
@@ -598,6 +647,7 @@ export interface FileRoutesById {
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
+  '/servicios/back_index': typeof ServiciosBackindexRoute
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
@@ -613,6 +663,7 @@ export interface FileRoutesById {
   '/servicios/': typeof ServiciosIndexRoute
   '/sesiones/': typeof SesionesIndexRoute
   '/usuarios/': typeof UsuariosIndexRoute
+  '/sesiones/reservas/$sessionId': typeof SesionesReservasSessionIdRoute
 }
 
 export interface FileRouteTypes {
@@ -630,6 +681,7 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
+    | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
@@ -637,6 +689,7 @@ export interface FileRouteTypes {
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
+    | '/servicios/back_index'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
@@ -652,6 +705,7 @@ export interface FileRouteTypes {
     | '/servicios'
     | '/sesiones'
     | '/usuarios'
+    | '/sesiones/reservas/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -666,6 +720,7 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
+    | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
@@ -673,6 +728,7 @@ export interface FileRouteTypes {
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
+    | '/servicios/back_index'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
@@ -688,6 +744,7 @@ export interface FileRouteTypes {
     | '/servicios'
     | '/sesiones'
     | '/usuarios'
+    | '/sesiones/reservas/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -702,6 +759,7 @@ export interface FileRouteTypes {
     | '/comunidades/agregar-servicios'
     | '/comunidades/ver'
     | '/locales/agregar'
+    | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
@@ -709,6 +767,7 @@ export interface FileRouteTypes {
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
+    | '/servicios/back_index'
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
@@ -724,6 +783,7 @@ export interface FileRouteTypes {
     | '/servicios/'
     | '/sesiones/'
     | '/usuarios/'
+    | '/sesiones/reservas/$sessionId'
   fileRoutesById: FileRoutesById
 }
 
@@ -740,6 +800,7 @@ export interface RootRouteChildren {
   ComunidadesAgregarServiciosRoute: typeof ComunidadesAgregarServiciosRoute
   ComunidadesVerRoute: typeof ComunidadesVerRoute
   LocalesAgregarRoute: typeof LocalesAgregarRoute
+  LocalesEditarRoute: typeof LocalesEditarRoute
   LocalesVerRoute: typeof LocalesVerRoute
   PlanesMembresiaAgregarRoute: typeof PlanesMembresiaAgregarRoute
   PlanesMembresiaVerRoute: typeof PlanesMembresiaVerRoute
@@ -747,6 +808,7 @@ export interface RootRouteChildren {
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
   ServiciosAgregarProfesionalesRoute: typeof ServiciosAgregarProfesionalesRoute
+  ServiciosBackindexRoute: typeof ServiciosBackindexRoute
   ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
   ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
   SesionesAgregarRoute: typeof SesionesAgregarRoute
@@ -762,6 +824,7 @@ export interface RootRouteChildren {
   ServiciosIndexRoute: typeof ServiciosIndexRoute
   SesionesIndexRoute: typeof SesionesIndexRoute
   UsuariosIndexRoute: typeof UsuariosIndexRoute
+  SesionesReservasSessionIdRoute: typeof SesionesReservasSessionIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -777,6 +840,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesAgregarServiciosRoute: ComunidadesAgregarServiciosRoute,
   ComunidadesVerRoute: ComunidadesVerRoute,
   LocalesAgregarRoute: LocalesAgregarRoute,
+  LocalesEditarRoute: LocalesEditarRoute,
   LocalesVerRoute: LocalesVerRoute,
   PlanesMembresiaAgregarRoute: PlanesMembresiaAgregarRoute,
   PlanesMembresiaVerRoute: PlanesMembresiaVerRoute,
@@ -784,6 +848,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfesionalesVerRoute: ProfesionalesVerRoute,
   ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
   ServiciosAgregarProfesionalesRoute: ServiciosAgregarProfesionalesRoute,
+  ServiciosBackindexRoute: ServiciosBackindexRoute,
   ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
   ServiciosServicioVerRoute: ServiciosServicioVerRoute,
   SesionesAgregarRoute: SesionesAgregarRoute,
@@ -799,6 +864,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosIndexRoute: ServiciosIndexRoute,
   SesionesIndexRoute: SesionesIndexRoute,
   UsuariosIndexRoute: UsuariosIndexRoute,
+  SesionesReservasSessionIdRoute: SesionesReservasSessionIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -823,6 +889,7 @@ export const routeTree = rootRoute
         "/comunidades/agregar-servicios",
         "/comunidades/ver",
         "/locales/agregar",
+        "/locales/editar",
         "/locales/ver",
         "/planes-membresia/agregar",
         "/planes-membresia/ver",
@@ -830,6 +897,7 @@ export const routeTree = rootRoute
         "/profesionales/ver",
         "/servicios/agregar-locales",
         "/servicios/agregar-profesionales",
+        "/servicios/back_index",
         "/servicios/servicio-nuevo",
         "/servicios/servicio-ver",
         "/sesiones/agregar",
@@ -844,7 +912,8 @@ export const routeTree = rootRoute
         "/profesionales/",
         "/servicios/",
         "/sesiones/",
-        "/usuarios/"
+        "/usuarios/",
+        "/sesiones/reservas/$sessionId"
       ]
     },
     "/": {
@@ -883,6 +952,9 @@ export const routeTree = rootRoute
     "/locales/agregar": {
       "filePath": "locales/agregar.tsx"
     },
+    "/locales/editar": {
+      "filePath": "locales/editar.tsx"
+    },
     "/locales/ver": {
       "filePath": "locales/ver.tsx"
     },
@@ -903,6 +975,9 @@ export const routeTree = rootRoute
     },
     "/servicios/agregar-profesionales": {
       "filePath": "servicios/agregar-profesionales.tsx"
+    },
+    "/servicios/back_index": {
+      "filePath": "servicios/back_index.tsx"
     },
     "/servicios/servicio-nuevo": {
       "filePath": "servicios/servicio-nuevo.tsx"
@@ -948,6 +1023,9 @@ export const routeTree = rootRoute
     },
     "/usuarios/": {
       "filePath": "usuarios/index.tsx"
+    },
+    "/sesiones/reservas/$sessionId": {
+      "filePath": "sesiones/reservas/$sessionId.tsx"
     }
   }
 }

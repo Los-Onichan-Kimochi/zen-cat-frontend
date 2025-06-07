@@ -20,6 +20,7 @@ interface CommunityTableProps {
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
   onDelete: (community: Community) => void;
+  onEdit: (community: Community) => void;
   resetRowSelectionTrigger?: number;
 }
 
@@ -28,6 +29,7 @@ export function CommunityTable({
   onBulkDelete,
   isBulkDeleting,
   onDelete,
+  onEdit,
   resetRowSelectionTrigger,
 }: CommunityTableProps) {
   const {
@@ -45,7 +47,7 @@ export function CommunityTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getCommunityColumns({ onDelete });
+  const columns = getCommunityColumns({ onDelete, onEdit });
 
   const table = useReactTable({
     data,
@@ -88,7 +90,7 @@ export function CommunityTable({
         filterPlaceholder="Buscar comunidad..."
         exportFileName="comunidades"
         showFilterButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         showSortButton
       />
       <DataTable table={table} columns={columns} />

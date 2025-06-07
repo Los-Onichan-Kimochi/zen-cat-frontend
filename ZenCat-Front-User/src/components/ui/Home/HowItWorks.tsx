@@ -1,10 +1,10 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   UserPlusIcon,
   UsersIcon,
   CreditCardIcon,
   CalendarIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
 interface Step {
   title: string;
@@ -14,24 +14,24 @@ interface Step {
 
 const steps: Step[] = [
   {
-    title: "Regístrate",
-    description: "Crea tu cuenta en segundos con tu correo o Google",
+    title: 'Regístrate',
+    description: 'Crea tu cuenta en segundos con tu correo o Google',
     Icon: UserPlusIcon,
   },
   {
-    title: "Afíliate a comunidades",
-    description: "Únete a grupos como runners, ciclistas o músicos",
+    title: 'Afíliate a comunidades',
+    description: 'Únete a grupos como runners, ciclistas o músicos',
     Icon: UsersIcon,
   },
   {
-    title: "Activa tu membresía",
-    description: "Elige tu plan mensual o anual y accede a los servicios",
+    title: 'Activa tu membresía',
+    description: 'Elige tu plan mensual o anual y accede a los servicios',
     Icon: CreditCardIcon,
   },
   {
-    title: "Reserva lo que necesitas",
+    title: 'Reserva lo que necesitas',
     description:
-      "Selecciona tu clase, horario y recibe confirmación automática",
+      'Selecciona tu clase, horario y recibe confirmación automática',
     Icon: CalendarIcon,
   },
 ];
@@ -72,8 +72,8 @@ const HowItWorks: React.FC = () => {
         {/* Disclaimer */}
         <p className="text-xs text-gray-500 mt-12">
           Los beneficios dependen del tipo de membresía activa. Puedes
-          afiliarte, modificar o cancelar tu plan en cualquier momento desde
-          “Mi Perfil”.
+          afiliarte, modificar o cancelar tu plan en cualquier momento desde “Mi
+          Perfil”.
         </p>
       </div>
     </section>
