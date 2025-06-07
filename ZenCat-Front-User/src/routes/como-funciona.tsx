@@ -11,4 +11,4 @@ function ComoFuncionaComponent() {
       <p>Contenido de la página ¿Cómo funciona?</p>
     </div>
   );
-} 
+}

@@ -41,6 +41,10 @@ function AddCommunityServicePageComponent() {
     pageSize: 10,
   });
 
+  const mode = sessionStorage.getItem('modeAddService');
+  const servicesAsociated: string[] = 
+    JSON.parse(sessionStorage.getItem('draftSelectedServices') ?? '[]').map((service: Service) => service.id);
+
   const {
     data: servicesData,
     isLoading: isLoadingServices,
@@ -94,13 +98,21 @@ function AddCommunityServicePageComponent() {
             aria-label="Select all"
           />
         ),
-        cell: ({ row }) => (
+        cell: ({ row }) => {
+          const serviceId = row.original.id;
+          
+          const asociated = servicesAsociated.includes(serviceId.toString());
+          return (
           <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
+            checked={row.getIsSelected()|| asociated}
+            disabled={asociated && mode === 'editar'}
+            onCheckedChange={(v) => {
+                if (!asociated) row.toggleSelected(!!v);
+              }}
+              aria-label="Select row"
           />
-        ),
+          );
+        },
         enableSorting: false,
         enableHiding: false,
         meta: { className: 'w-[36px] px-3' },

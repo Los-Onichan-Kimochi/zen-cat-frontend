@@ -25,9 +25,16 @@ export default tseslint.config(
       ],
     },
   },
-  prettierConfig,
   {
+    files: ['**/*.{ts,tsx,js,jsx}'],
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+    },
     rules: {
+      // Desactiva reglas de ESLint que chocan con Prettier
+      'arrow-body-style': 'off',
+      'prefer-arrow-callback': 'off',
+      // Reglas personalizadas (puedes usar prettierConfig si deseas)
       'max-len': ['warn', { code: 80 }],
       // Deshabilita las reglas innecesarias de importación de React
       'react/react-in-jsx-scope': 'off',
@@ -37,7 +44,6 @@ export default tseslint.config(
       'newline-before-return': 'off',
       // Limita las líneas vacías
       'no-multiple-empty-lines': ['error', { max: 1 }],
-      // No permite múltiples declaraciones de variables en una sola línea
       'one-var': ['error', 'never'],
       // Establece el indentado a 2 espacios
       indent: ['error', 2],
@@ -57,5 +63,5 @@ export default tseslint.config(
       // Prohíbe el uso de paréntesis en constructores sin argumentos
       'new-cap': ['error', { capIsNew: true }],
     },
-  }
+  },
 );

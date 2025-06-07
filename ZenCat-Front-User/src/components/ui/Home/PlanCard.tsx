@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   Card,
   CardHeader,
@@ -6,10 +6,10 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { CheckIcon, StarIcon } from "lucide-react";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { CheckIcon, StarIcon } from 'lucide-react';
 
 export interface PlanCardProps {
   title: string;
@@ -32,7 +32,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
     <CardHeader className="px-6 pt-6 space-y-1">
       <CardTitle className="text-lg text-center font-black">{title}</CardTitle>
       <CardDescription className="flex items-center text-sm text-gray-600 text-center">
-        {highlight && <StarIcon className="w-4 h-4 text-yellow-500 mr-1 text-center" />}
+        {highlight && (
+          <StarIcon className="w-4 h-4 text-yellow-500 mr-1 text-center" />
+        )}
         {subtitle}
       </CardDescription>
     </CardHeader>
