@@ -59,7 +59,7 @@ function EditCommunityPage() {
     queryKey: ['community', id],
     queryFn: () => communitiesApi.getCommunityById(id),
   });
-
+  console.log("Comunidad: ", community)
   const { data: initialServices } = useQuery({
     queryKey: ['community-services', id],
     queryFn: () => communityServicesApi.getCommunityServices(id),
@@ -92,7 +92,7 @@ function EditCommunityPage() {
         name: community.name,
         purpose: community.purpose,
       });
-      setImagePreview(community.image_url ?? null);
+      //setImagePreview(community.image_url ?? null);
     }
   }, [community, reset, setImagePreview]);
 
@@ -221,6 +221,7 @@ function EditCommunityPage() {
           errors={errors}
           imagePreview={imagePreview}
           handleImageChange={handleImageChange}
+          isEditing={isEditing}
         />
 
         <Card>
