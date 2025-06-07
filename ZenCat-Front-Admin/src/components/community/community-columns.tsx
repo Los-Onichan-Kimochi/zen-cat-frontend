@@ -3,14 +3,15 @@ import { Community } from '@/types/community';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Trash, MoreHorizontal } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
 
 interface GetCommunityColumnsProps {
   onDelete: (community: Community) => void;
+  onEdit: (community: Community) => void;
 }
 
 export function getCommunityColumns({
   onDelete,
+  onEdit
 }: GetCommunityColumnsProps): ColumnDef<Community>[] {
   return [
     {
@@ -89,25 +90,28 @@ export function getCommunityColumns({
         <div className="text-center font-bold">Acciones</div>
       ),
       cell: ({ row }) => {
-        const com = row.original;
+        const communiy = row.original;
         return (
-          <div className="flex gap-2 items-center justify-center">
-            <Link to="/comunidades/ver" search={{ id: com.id }}>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0 border border-black rounded-full"
-              >
-                <MoreHorizontal className="!w-5 !h-5" />
-              </Button>
-            </Link>
+          <div className="flex items-center justify-center space-x-2">
             <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0 border border-black rounded-full hover:bg-red-200"
-              onClick={() => onDelete(com)}
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(communiy);
+              }}
             >
-              <Trash className="!w-5 !h-5" />
+              <MoreHorizontal className="!w-5 !h-5" />
+            </Button>
+
+            <Button
+              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(communiy);
+              }}
+              title="Eliminar"
+            >
+              <Trash className="!w-5 !h-5"/>
             </Button>
           </div>
         );

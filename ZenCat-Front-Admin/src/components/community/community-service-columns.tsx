@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 export function getCommunityServiceColumns(
+  isEditing: boolean,
   onDelete?: (service: Service) => void
 ): ColumnDef<Service>[] {
   const columns: ColumnDef<Service>[] = [];
@@ -50,13 +51,15 @@ export function getCommunityServiceColumns(
       header: 'Acciones',
       cell: ({ row }) => (
         <Button
+          type="button"
+          disabled={!isEditing}
           className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-200 hover:shadow-md transition-all duration-200"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(row.original);
           }}
         >
-          <Trash className="w-5 h-5" />
+          <Trash className="!w-5 !h-5" />
         </Button>
       ),
       meta: { className: 'w-[100px]' },

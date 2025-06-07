@@ -35,6 +35,7 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting: boolean;
+  isBulkDeleteEnabled?: boolean;
   showBulkDeleteButton?: boolean;
   filterPlaceholder: string;
   showFilterButton?: boolean;
@@ -61,6 +62,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   table,
   onBulkDelete,
   isBulkDeleting,
+  isBulkDeleteEnabled=true,
   showBulkDeleteButton = false,
   filterPlaceholder,
   showFilterButton = false,
@@ -287,9 +289,10 @@ export function DataTableToolbar<TData extends DataWithId>({
             <Button
               variant="destructive"
               size="sm"
+              type="button"
               className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200"
               onClick={handleDeleteSelected}
-              disabled={!rowsSelected || isBulkDeleting}
+              disabled={!rowsSelected || isBulkDeleting || isBulkDeleteEnabled}
             >
               <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>

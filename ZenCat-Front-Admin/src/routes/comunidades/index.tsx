@@ -76,6 +76,10 @@ function ComunidadesComponent() {
     });
   };
 
+  const handleEdit = (community: Community) => {
+      navigate({ to: '/comunidades/ver', search: { id: community.id } });
+  };
+
   if (error) return <p>Error cargando comunidades: {error.message}</p>;
 
   return (
@@ -112,6 +116,7 @@ function ComunidadesComponent() {
           data={communitiesData}
           onBulkDelete={handleBulkDelete}
           isBulkDeleting={bulkDeleteCommunityMutation.isPending}
+          onEdit={handleEdit}
           onDelete={(com) => {
             setCommunityToDelete(com);
             setIsDeleteModalOpen(true);

@@ -52,3 +52,21 @@ export interface BulkCreateLocalPayload {
 export interface BulkDeleteLocalPayload {
   locals: string[]; // array of locals IDs
 }
+
+export type Region = {
+  id: string;
+  name: string;
+};
+
+export type Provincia = {
+  id: string;
+  name: string;
+  department_id: string;
+};
+
+export type Distrito = {
+  id: string;
+  name: string;
+  province_id: string;
+  department_id: string;
+};

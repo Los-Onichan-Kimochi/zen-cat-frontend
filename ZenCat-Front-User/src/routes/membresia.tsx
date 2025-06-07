@@ -11,4 +11,4 @@ function MembresiaComponent() {
       <p>Contenido de la página Membresía</p>
     </div>
   );
-} 
+}

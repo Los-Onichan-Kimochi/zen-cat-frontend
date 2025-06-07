@@ -21,13 +21,17 @@ export const communityMembershipPlansApi = {
     return response.json(); 
   },
 
-  deleteCommunityMembershipPlan: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/community-plan/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting community-membership-plan with id ${id}`);
-    }
+  deleteCommunityMembershipPlan: async (
+    communityId: string,
+    planId: string,
+  ): Promise<void> => {
+    const response = await fetch(
+      `${API_BASE_URL}/community-plan/${communityId}/${planId}/`,
+      {
+        method: 'DELETE',
+      },
+    );
+    if (!response.ok) throw new Error('Error deleting community-plan');
   },
 
   bulkDeleteCommunityMembershipPlans: async (payload: BulkDeleteCommunityMembershipPlanPayload): Promise<void> => {
@@ -41,6 +45,25 @@ export const communityMembershipPlansApi = {
     if (!response.ok) {
       throw new Error('Error bulk deleting community-membership-plans');
     }
+  },
+
+  getCommunityMembershipPlans: async (communityId?: string, planId?: string): Promise<CommunityMembershipPlan[]> => {
+    const queryParams = new URLSearchParams();
+
+    if (communityId) queryParams.append("communityId", communityId);
+    if (planId) queryParams.append("planId", planId);
+
+    const response = await fetch(`${API_BASE_URL}/community-plan/?${queryParams.toString()}`);
+
+    if (!response.ok) throw new Error('Error fetching community-membership-plans');
+    const data = await response.json();
+    
+    if (data && Array.isArray(data.community_plans)) {
+      return data.community_plans;
+    } else if (Array.isArray(data)) {
+      return data;
+    }
+    throw new Error('Unexpected data structure from community-plan API');
   }
 
 }; 

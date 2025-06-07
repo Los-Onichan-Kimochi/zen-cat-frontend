@@ -20,6 +20,7 @@ interface CommunityMembershipPlanTableProps {
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
   disableConfirmBulkDelete: boolean;
+  isEditing?: boolean;
 }
 
 export function CommunityMembershipPlanTable({
@@ -28,6 +29,7 @@ export function CommunityMembershipPlanTable({
   onBulkDelete,
   isBulkDeleting,
   disableConfirmBulkDelete = false,
+  isEditing=true,
 }: CommunityMembershipPlanTableProps) {
   const {
     sorting, setSorting,
@@ -38,7 +40,7 @@ export function CommunityMembershipPlanTable({
     pagination, setPagination,
   } = useDataTable();
 
-  const columns = getCommunityMembershipPlanColumns(onDeleteClick);
+  const columns = getCommunityMembershipPlanColumns(isEditing, onDeleteClick);
 
   const table = useReactTable({
     data,
@@ -72,6 +74,7 @@ export function CommunityMembershipPlanTable({
         table={table}
         onBulkDelete={(ids: string[]) => onBulkDelete(ids)}
         isBulkDeleting={isBulkDeleting}
+        isBulkDeleteEnabled={!isEditing}
         showBulkDeleteButton
         showExportButton={false}
         filterPlaceholder="Buscar plan de membresía..."
