@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { servicesApi } from '@/api/services/services';
 import { professionalsApi } from '@/api/professionals/professionals';
+import { localsApi } from '@/api/locals/locals';
+import { serviceLocalApi } from '@/api/services/service_locals';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import {
   Card,
@@ -21,6 +23,7 @@ import { Loader2, UploadCloud, Upload, Plus, Trash } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
 import { Professional } from '@/types/professional';
+import { Local } from '@/types/local';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { toast } from 'sonner';
 import { 
@@ -68,9 +71,10 @@ export function SeeServicePageComponent() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState<Professional[]>([]);
-
+    const [localesSeleccionados, setLocalesSeleccionados] = useState<Local[]>([]);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [professionalToDelete, setProfessionalToDelete] = useState<Professional | null>(null);
+    const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
 
     const [initialValues, setInitialValues] = useState({
             name: '',
@@ -98,9 +102,15 @@ export function SeeServicePageComponent() {
         queryFn: () => servicesApi.getServiceById(id!),
     });
 
-    const { data: asociaciones, isLoading: loadingAsociaciones } = useQuery({
+    const { data: asociacionesProfesionales, isLoading: loadingAsociacionesProfesionales } = useQuery({
       queryKey: ['service-professionals', id],
       queryFn: () => serviceProfessionalApi.fetchServiceProfessionals({ serviceId: id }),
+      enabled: !!id,
+    });
+
+    const { data: asociacionesLocales, isLoading: loadingAsociacionesLocales } = useQuery({
+      queryKey: ['service-locals', id],
+      queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id }),
       enabled: !!id,
     });
 
@@ -118,6 +128,20 @@ export function SeeServicePageComponent() {
       }
     }
 
+    async function deleteServiceLocal(localId: string) {
+      try {
+        // Llama a tu API para eliminar la asociación
+        await serviceLocalApi.deleteServiceLocal(id!, localId);
+        // Opcional: muestra un toast de éxito
+        toast.success('Local eliminado del servicio');
+        // Refresca la lista de asociaciones (si usas React Query)
+        queryClient.invalidateQueries({ queryKey: ['service-locals', id] });
+        // Si no usas React Query, puedes volver a hacer fetch manualmente aquí
+      } catch (error: any) {
+        toast.error('Error al eliminar local', { description: error.message });
+      }
+    }
+
     // inicializar estados al cargar prof
     useEffect(() => {
         if (ser && initialValues.name === '') {
@@ -132,16 +156,25 @@ export function SeeServicePageComponent() {
                 image: ser.image_url || '',
             });
         }
-        if (asociaciones && asociaciones.length > 0) {
+        if (asociacionesProfesionales && asociacionesProfesionales.length > 0) {
           Promise.all(
-            asociaciones.map(asc =>
+            asociacionesProfesionales.map(asc =>
               professionalsApi.getProfessionalById(asc.professional_id)
             )
           ).then(setProfesionalesSeleccionados);
         } else {
           setProfesionalesSeleccionados([]);
         }
-    }, [ser, initialValues.name, asociaciones]);
+        if (asociacionesLocales && asociacionesLocales.length > 0) {
+          Promise.all(
+            asociacionesLocales.map(asc =>
+              localsApi.getLocalById(asc.local_id)
+            )
+          ).then(setLocalesSeleccionados);
+        } else {
+          setLocalesSeleccionados([]);
+        }
+    }, [ser, initialValues.name, asociacionesProfesionales, asociacionesLocales]);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -206,19 +239,54 @@ export function SeeServicePageComponent() {
       ];
     
       const columnsLocales = [
-      {
-          accessorKey: 'name',
+        {
+          accessorKey: 'local_name',
           header: 'Nombre',
         },
         {
-          accessorKey: 'street',
-          header: 'Calle',
+          accessorKey: 'district',
+          header: 'Distrito',
         },
         {
-          accessorKey: 'number',
-          header: 'Número',
+          id: 'direccion',
+          header: 'Dirección',
+          accessorFn: (row: any) => `${row.street_name ?? ''} ${row.building_number ?? ''}`,
+          cell: ({ row }: { row: any }) => (
+            <span>
+              {row.original.street_name} {row.original.building_number}
+            </span>
+          ),
         },
-    
+        {
+          accessorKey: 'province',
+          header: 'Provincia',
+        },
+        {
+          accessorKey: 'capacity',
+          header: 'Capacidad',
+          cell: ({ row }: { row: any }) => `${row.original.capacity} personas`,
+        },
+        {
+          id: 'actions',
+          cell: ({ row }: { row: Row<Local> }) => {
+            const loc = row.original;
+            return (
+              <div className="flex items-center space-x-2">
+                <Button
+                  className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLocalToDelete(loc);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  disabled={!isEditing}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            );
+          },
+        },
         
       ];
     
@@ -228,11 +296,11 @@ export function SeeServicePageComponent() {
         getCoreRowModel: getCoreRowModel(),
       });
       
-      // const localesTable = useReactTable({
-      //   data: lugaresSeleccionados,
-      //   columns: columnsLocales,
-      //   getCoreRowModel: getCoreRowModel(),
-      // });
+      const localesTable = useReactTable({
+        data: localesSeleccionados,
+        columns: columnsLocales,
+        getCoreRowModel: getCoreRowModel(),
+      });
 
     if (isLoading) {
       return (
@@ -391,23 +459,29 @@ export function SeeServicePageComponent() {
         </Card>
       )}
 
-      {/* {isVirtual === "false" && (
+      {isVirtual === "No" && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Locales Disponibles</CardTitle>
-            <CardDescription>Selecciona los locales donde se brindará este servicio presencial.</CardDescription>
+            <CardTitle>Locales Asociados</CardTitle>
+            <CardDescription>Listado de locales disponibles para este servicio virtual.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex justify-end space-x-2 py-4">
               <Button
-                onClick={() =>
-                  navigate({
-                    to: '/servicios/agregar-locales',
-                    state: { lugaresSeleccionados } as any
-                  })
-                }
+                onClick={() => {
+                  
+                  
+                  localStorage.setItem(
+                    'localesAsociados',
+                    JSON.stringify(localesSeleccionados.map(p => p.id))
+                  );
+                  localStorage.setItem('modoAgregarLocal', 'editar');
+                  
+                  navigate({ to: '/servicios/agregar-locales' });
+                }}
+                disabled={!isEditing}
               >
-                <Plus className="mr-2 h-4 w-4" /> Agregar Lugar
+                <Plus className="mr-2 h-4 w-4" /> Agregar Profesional
               </Button>
             </div>
             <DataTable
@@ -416,34 +490,55 @@ export function SeeServicePageComponent() {
             />
           </CardContent>
         </Card>
-      )} */}
+      )}
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Estás seguro que deseas eliminar este profesional asociado?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer.
-                <div className="mt-2 font-medium">Profesionalk: {professionalToDelete?.name}</div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="space-x-2">
-              <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction asChild>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (professionalToDelete) {
-                      if (professionalToDelete) deleteServiceProfessional(professionalToDelete.id);
-                    }
-                    setIsDeleteModalOpen(false);
-                  }}
-                >
-                  Eliminar
-                </Button>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {professionalToDelete
+                ? '¿Estás seguro que deseas eliminar este profesional asociado?'
+                : '¿Estás seguro que deseas eliminar este local asociado?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+              <div className="mt-2 font-medium">
+                {professionalToDelete
+                  ? `Profesional: ${professionalToDelete.name}`
+                  : localToDelete
+                    ? `Local: ${localToDelete.local_name ?? localToDelete.id}`
+                    : ''}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="space-x-2">
+            <AlertDialogCancel onClick={() => {
+              setIsDeleteModalOpen(false);
+              setProfessionalToDelete(null);
+              setLocalToDelete(null);
+            }}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (professionalToDelete) {
+                    deleteServiceProfessional(professionalToDelete.id);
+                    setProfessionalToDelete(null);
+                  }
+                  if (localToDelete) {
+                    deleteServiceLocal(localToDelete.id);
+                    setLocalToDelete(null);
+                  }
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Eliminar
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
         <AlertDialog open={isEditConfirmOpen} onOpenChange={setIsEditConfirmOpen}>
         <AlertDialogContent>
