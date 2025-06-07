@@ -1,8 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 import { useAuth } from '@/context/AuthContext'; // importa tu hook
-import { HomeComponent } from '@/routes/home/route';
-import HowItWorks from '../../components/ui/Home/HowItWorks';
+
 export const TopBar = () => {
   const { user, logout } = useAuth();
   return (
@@ -19,19 +18,35 @@ export const TopBar = () => {
 
       {/* Menú principal */}
       <div className="hidden md:flex space-x-8">
-        <Link to="/" hash="como-funciona" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+        <Link
+          to="/"
+          hash="como-funciona"
+          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
+        >
           ¿Cómo funciona?
         </Link>
-        <Link to="/" hash="comunidades" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+        <Link
+          to="/"
+          hash="comunidades"
+          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
+        >
           Comunidades
         </Link>
         {/*<Link to="/" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
           Precios
         </Link>*/}
-        <Link to="/" hash="membresia" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+        <Link
+          to="/"
+          hash="membresia"
+          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
+        >
           Membresía
         </Link>
-        <Link to="/" hash="contacto" className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out">
+        <Link
+          to="/"
+          hash="contacto"
+          className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
+        >
           Contacto
         </Link>
       </div>
@@ -87,7 +102,12 @@ export const TopBar = () => {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 8h16M4 16h16"
+          />
         </svg>
       </button>
     </nav>

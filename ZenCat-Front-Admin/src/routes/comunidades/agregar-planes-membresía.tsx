@@ -216,7 +216,7 @@ function AddCommunityMembershipPlanPageComponent() {
               showExportButton={false}
               exportFileName="planes-membresía"
               showFilterButton={true}
-              onFilterClick={() => console.log("Filtro no disponible aún")}
+              onFilterClick={() => {}}
               showSortButton={true}
             />
             <div className="flex-grow">

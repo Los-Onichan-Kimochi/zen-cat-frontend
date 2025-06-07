@@ -90,7 +90,7 @@ export function CommunityTable({
         filterPlaceholder="Buscar comunidad..."
         exportFileName="comunidades"
         showFilterButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={() => {}}
         showSortButton
       />
       <DataTable table={table} columns={columns} />

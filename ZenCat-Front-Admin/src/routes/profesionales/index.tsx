@@ -24,6 +24,7 @@ import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { useProfessional } from '@/context/ProfesionalesContext';
 import { ProfessionalsTable } from '@/components/professionals/table';
+import { useBulkDelete } from '@/hooks/use-bulk-delete';
 
 export const Route = createFileRoute('/profesionales/')({
   component: () => (
@@ -65,11 +66,18 @@ function ProfesionalesComponent() {
     onSuccess: (_, id) => {
       toast.success('Profesional eliminado', { description: `ID ${id}` });
       queryClient.invalidateQueries({ queryKey: ['professionals'] });
-      setRowSelection({});
     },
     onError: (err) => {
       toast.error('Error al eliminar', { description: err.message });
     },
+  });
+
+  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Professional>({
+    queryKey: ['professionals'],
+    deleteFn: professionalsApi.bulkDeleteProfessionals,
+    entityName: 'profesional',
+    entityNamePlural: 'profesionales',
+    getId: (professional) => professional.id,
   });
 
   const counts = useMemo<CalculatedCounts | null>(() => {
@@ -109,6 +117,8 @@ function ProfesionalesComponent() {
     setProfToDelete(professional);
     setIsDeleteModalOpen(true);
   };
+
+  // handleBulkDelete already provided by the useBulkDelete hook
 
   const btnSizeClasses = 'h-11 w-28 px-4';
 
@@ -151,7 +161,7 @@ function ProfesionalesComponent() {
 
       <ViewToolbar
         onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
-        onBulkUploadClick={() => console.log('Carga Masiva clickeada')}
+        onBulkUploadClick={() => {}}
         addButtonText="Agregar"
         bulkUploadButtonText="Carga Masiva"
       />
@@ -166,6 +176,8 @@ function ProfesionalesComponent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
         />
       )}
 

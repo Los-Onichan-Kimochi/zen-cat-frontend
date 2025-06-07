@@ -18,6 +18,8 @@ interface UsersTableProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onViewMemberships: (user: User) => void;
+  onBulkDelete?: (users: User[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export function UsersTable({
@@ -25,6 +27,8 @@ export function UsersTable({
   onEdit,
   onDelete,
   onViewMemberships,
+  onBulkDelete,
+  isBulkDeleting = false,
 }: UsersTableProps) {
   const {
     sorting,
@@ -75,8 +79,21 @@ export function UsersTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => console.log('Filtrar')}
-        onExportClick={() => console.log('Exportar')}
+        onFilterClick={() => {}}
+        exportFileName="usuarios"
+        // Bulk delete functionality
+        showBulkDeleteButton={!!onBulkDelete}
+        onBulkDelete={
+          onBulkDelete
+            ? (ids: string[]) => {
+                const usersToDelete = data.filter((user) =>
+                  ids.includes(user.id),
+                );
+                onBulkDelete(usersToDelete);
+              }
+            : undefined
+        }
+        isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />
