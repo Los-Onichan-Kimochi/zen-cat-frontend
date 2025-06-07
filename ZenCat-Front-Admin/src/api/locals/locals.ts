@@ -18,7 +18,7 @@ export const localsApi = {
     throw new Error('Unexpected data structure from locals API for list');
   },
   getLocalById: async (id: string): Promise<Local> => {
-    console.log(id);
+    //console.log(id);
     const response = await fetch(`${API_BASE_URL}/local/${id}/`);
     if (!response.ok) {
       throw new Error(`Error fetching local with id ${id}`);

@@ -128,6 +128,7 @@ function LocalesComponent() {
   }, [localsData]);
   const handleEdit = (local: Local) => {
     setCurrent(local);
+    localStorage.setItem('currentLocal', local.id);
     navigate({ to: '/locales/editar', search: { id: local.id }  });
   };
 
