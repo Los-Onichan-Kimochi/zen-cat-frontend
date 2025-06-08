@@ -1,209 +1,153 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { OnboardingData } from '@/types/membership';
+// Removed Select import - using native HTML select elements
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
+import { OnboardingData } from '@/types/membership';
 
 export function OnboardingStep() {
   const { state, setOnboardingData, nextStep, prevStep } = useMembershipOnboarding();
   
   const [formData, setFormData] = useState<OnboardingData>(
-    state.onboardingData || {
-      documentType: undefined,
-      documentNumber: '',
-      phoneNumber: '',
-      birthDate: '',
-      gender: undefined,
-      city: '',
-      postalCode: '',
-      district: '',
-      address: ''
-    }
+    state.onboardingData || {}
   );
-
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   const handleInputChange = (field: keyof OnboardingData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Limpiar error al escribir
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-
-    if (!formData.documentType) newErrors.documentType = 'Tipo de documento es requerido';
-    if (!formData.documentNumber) newErrors.documentNumber = 'Número de documento es requerido';
-    if (!formData.phoneNumber) newErrors.phoneNumber = 'Teléfono es requerido';
-    if (!formData.birthDate) newErrors.birthDate = 'Fecha de nacimiento es requerida';
-    if (!formData.gender) newErrors.gender = 'Género es requerido';
-    if (!formData.city) newErrors.city = 'Ciudad es requerida';
-    if (!formData.district) newErrors.district = 'Distrito es requerido';
-    if (!formData.address) newErrors.address = 'Dirección es requerida';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleContinue = () => {
-    if (validateForm()) {
-      setOnboardingData(formData);
-      nextStep();
-    }
+    setOnboardingData(formData);
+    nextStep();
   };
+
+  const isFormValid = formData.documentType && formData.documentNumber && 
+                     formData.phoneNumber && formData.birthDate && 
+                     formData.gender && formData.city;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Información Personal
-          </CardTitle>
-          <p className="text-center text-gray-600">
-            Completa tus datos para continuar con tu membresía
-          </p>
+          <CardTitle className="text-2xl text-center">Información Personal</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Tipo y número de documento */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="documentType">Tipo de documento *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="documentType">Tipo de Documento</Label>
               <select
                 id="documentType"
                 value={formData.documentType || ''}
-                onChange={(e) => handleInputChange('documentType', e.target.value as any)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                onChange={(e) => handleInputChange('documentType', e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Seleccionar tipo</option>
                 <option value="DNI">DNI</option>
-                <option value="FOREIGNER_CARD">Carné de extranjería</option>
+                <option value="FOREIGNER_CARD">Carnet de Extranjería</option>
                 <option value="PASSPORT">Pasaporte</option>
               </select>
-              {errors.documentType && <p className="text-red-500 text-sm mt-1">{errors.documentType}</p>}
             </div>
-            <div>
-              <Label htmlFor="documentNumber">Número de documento *</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="documentNumber">Número de Documento</Label>
               <Input
                 id="documentNumber"
                 value={formData.documentNumber || ''}
                 onChange={(e) => handleInputChange('documentNumber', e.target.value)}
-                placeholder="Ej: 12345678"
-                className="mt-1"
+                placeholder="Ingrese número de documento"
               />
-              {errors.documentNumber && <p className="text-red-500 text-sm mt-1">{errors.documentNumber}</p>}
             </div>
-          </div>
 
-          {/* Teléfono */}
-          <div>
-            <Label htmlFor="phoneNumber">Número de teléfono *</Label>
-            <Input
-              id="phoneNumber"
-              value={formData.phoneNumber || ''}
-              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-              placeholder="Ej: 987654321"
-              className="mt-1"
-            />
-            {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Teléfono</Label>
+              <Input
+                id="phoneNumber"
+                value={formData.phoneNumber || ''}
+                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                placeholder="Ingrese número de teléfono"
+              />
+            </div>
 
-          {/* Fecha de nacimiento y género */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="birthDate">Fecha de nacimiento *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
               <Input
                 id="birthDate"
                 type="date"
                 value={formData.birthDate || ''}
                 onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                className="mt-1"
               />
-              {errors.birthDate && <p className="text-red-500 text-sm mt-1">{errors.birthDate}</p>}
             </div>
-            <div>
-              <Label htmlFor="gender">Género *</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="gender">Género</Label>
               <select
                 id="gender"
                 value={formData.gender || ''}
-                onChange={(e) => handleInputChange('gender', e.target.value as any)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                onChange={(e) => handleInputChange('gender', e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Seleccionar género</option>
                 <option value="MALE">Masculino</option>
                 <option value="FEMALE">Femenino</option>
                 <option value="OTHER">Otro</option>
               </select>
-              {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
             </div>
-          </div>
 
-          {/* Ciudad y código postal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="city">Ciudad *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="city">Ciudad</Label>
               <Input
                 id="city"
                 value={formData.city || ''}
                 onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Ej: Lima"
-                className="mt-1"
+                placeholder="Ingrese ciudad"
               />
-              {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
             </div>
-            <div>
-              <Label htmlFor="postalCode">Código postal</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="postalCode">Código Postal</Label>
               <Input
                 id="postalCode"
                 value={formData.postalCode || ''}
                 onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                placeholder="Ej: 15001"
-                className="mt-1"
+                placeholder="Ingrese código postal"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="district">Distrito</Label>
+              <Input
+                id="district"
+                value={formData.district || ''}
+                onChange={(e) => handleInputChange('district', e.target.value)}
+                placeholder="Ingrese distrito"
               />
             </div>
           </div>
 
-          {/* Distrito */}
-          <div>
-            <Label htmlFor="district">Distrito *</Label>
-            <Input
-              id="district"
-              value={formData.district || ''}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              placeholder="Ej: Miraflores"
-              className="mt-1"
-            />
-            {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
-          </div>
-
-          {/* Dirección */}
-          <div>
-            <Label htmlFor="address">Dirección completa *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="address">Dirección</Label>
             <Input
               id="address"
               value={formData.address || ''}
               onChange={(e) => handleInputChange('address', e.target.value)}
-              placeholder="Ej: Av. Larco 123, Miraflores"
-              className="mt-1"
+              placeholder="Ingrese dirección completa"
             />
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
           </div>
 
-          {/* Botones */}
-          <div className="flex justify-between pt-6">
+          <div className="flex justify-between pt-4">
             <Button
               onClick={prevStep}
               variant="outline"
-              className="px-6 py-2"
+              className="px-8"
             >
-              Retroceder
+              Atrás
             </Button>
             <Button
               onClick={handleContinue}
-              className="px-6 py-2 bg-black text-white hover:bg-gray-800"
+              disabled={!isFormValid}
+              className="px-8 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
             >
               Continuar
             </Button>

@@ -13,11 +13,12 @@ const mockCommunity: Community = {
 };
 
 const mockPlans: MembershipPlan[] = [
+  // Planes Mensuales
   {
     id: '1',
     name: 'Plan básico',
     type: 'Mensual',
-    price: 959.90,
+    price: 159.90,
     duration: '/mes',
     features: [
       'Acceso a una comunidad',
@@ -30,16 +31,50 @@ const mockPlans: MembershipPlan[] = [
   },
   {
     id: '2',
-    name: 'Plan básico',
-    type: 'Anual',
-    price: 1919.90,
+    name: 'Plan premium',
+    type: 'Mensual',
+    price: 199.90,
     duration: '/mes',
     features: [
       'Acceso a una comunidad',
       'Realiza un número ilimitado de reservas al mes',
       'Recibe notificaciones',
       'Consulta tu historial de reservas',
-      'Puedes desactivar tu membresía desde el perfil'
+      'Puedes desactivar tu membresía desde el perfil',
+      'Acceso prioritario a eventos especiales'
+    ]
+  },
+  // Planes Anuales
+  {
+    id: '3',
+    name: 'Plan básico',
+    type: 'Anual',
+    price: 1599.90,
+    duration: '/año',
+    features: [
+      'Acceso a una comunidad',
+      'Realiza 20 reservas al mes',
+      'Recibe notificaciones',
+      'Consulta tu historial de reservas',
+      'Puedes desactivar tu membresía desde el perfil',
+      '2 meses gratis comparado al plan mensual'
+    ],
+    reservationLimit: 20
+  },
+  {
+    id: '4',
+    name: 'Plan premium',
+    type: 'Anual',
+    price: 1999.90,
+    duration: '/año',
+    features: [
+      'Acceso a una comunidad',
+      'Realiza un número ilimitado de reservas al mes',
+      'Recibe notificaciones',
+      'Consulta tu historial de reservas',
+      'Puedes desactivar tu membresía desde el perfil',
+      'Acceso prioritario a eventos especiales',
+      '2 meses gratis comparado al plan mensual'
     ]
   }
 ];

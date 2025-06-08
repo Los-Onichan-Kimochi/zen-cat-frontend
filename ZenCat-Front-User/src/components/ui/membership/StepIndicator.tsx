@@ -6,57 +6,51 @@ interface StepIndicatorProps {
   stepLabels: string[];
 }
 
-export function StepIndicator({ currentStep, totalSteps, stepLabels }: StepIndicatorProps) {
+export function StepIndicator({ currentStep, stepLabels }: StepIndicatorProps) {
   return (
-    <div className="w-full max-w-4xl mx-auto mb-8">
-      <div className="flex items-center justify-between">
+    <div className="flex justify-center items-center mb-8">
+      <div className="flex items-start">
         {stepLabels.map((label, index) => {
           const stepNumber = index + 1;
           const isActive = stepNumber === currentStep;
           const isCompleted = stepNumber < currentStep;
-          const isConnected = index < stepLabels.length - 1;
-
+          const isLast = index === stepLabels.length - 1;
+          
           return (
-            <React.Fragment key={stepNumber}>
+            <div key={stepNumber} className="flex items-start">
+              {/* Step Circle and Label */}
               <div className="flex flex-col items-center">
-                {/* Círculo del paso */}
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
-                    isCompleted
-                      ? 'bg-black text-white'
-                      : isActive
-                      ? 'bg-black text-white'
-                      : 'bg-gray-200 text-gray-500'
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
+                    isActive
+                      ? 'bg-black text-white border-black'
+                      : isCompleted
+                      ? 'bg-black text-white border-black'
+                      : 'bg-gray-100 text-gray-400 border-gray-300'
                   }`}
                 >
-                  {isCompleted ? '✓' : stepNumber}
+                  {stepNumber}
                 </div>
-                
-                {/* Etiqueta del paso */}
                 <span
-                  className={`mt-2 text-xs font-medium text-center ${
-                    isActive || isCompleted
-                      ? 'text-black'
-                      : 'text-gray-500'
+                  className={`mt-2 text-xs font-medium ${
+                    isActive || isCompleted ? 'text-black' : 'text-gray-500'
                   }`}
                 >
                   {label}
                 </span>
               </div>
-
-              {/* Línea conectora */}
-              {isConnected && (
-                <div className="flex-1 mx-4 mt-[-1rem]">
+              
+              {/* Connecting Line */}
+              {!isLast && (
+                <div className="flex items-center h-10 px-6">
                   <div
-                    className={`h-0.5 transition-all duration-300 ${
-                      isCompleted
-                        ? 'bg-black'
-                        : 'bg-gray-200'
+                    className={`h-0.5 w-12 ${
+                      isCompleted ? 'bg-black' : 'bg-gray-300'
                     }`}
                   />
                 </div>
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
