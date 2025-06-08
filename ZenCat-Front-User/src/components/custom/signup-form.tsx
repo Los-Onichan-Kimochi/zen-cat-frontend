@@ -59,41 +59,17 @@ export function SignupForm() {
         throw new Error(errBody?.message || 'Error al crear usuario');
       }
 
-        try {
-            const response = await fetch("http://localhost:8098/register/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name,
-              first_last_name: firstLastName,
-              second_last_name: secondLastName,
-              password: password,
-              email: email,
-              rol: "CLIENT",
-              image_url: "https://preview.redd.it/sleepy-chaewon-v0-mc8zvaqg8ghe1.jpg?width=640&crop=smart&auto=webp&s=7848544793550f6754ba5eb69d3c1e90f56190d9"
-            }),
-          });
-
-          if (!response.ok) {
-            const errBody = await response.json();
-            throw new Error(errBody?.message || "Error al crear usuario");
-          }
-
-          const user = await response.json();
-    
-          //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
-          navigate({ to: "/login" });
-        } catch (err: any) {
-          const errorMessage = err.message || 'Error desconocido al intentar registrarte.';
-          setError(errorMessage);
-          setIsModalOpen(true);
-        } finally {
-          setLoading(false);
-          
-        }
-    };
+      const user = await response.json();
+      //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
+      navigate({ to: "/login" });
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error desconocido al intentar registrarte.';
+      setError(errorMessage);
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
