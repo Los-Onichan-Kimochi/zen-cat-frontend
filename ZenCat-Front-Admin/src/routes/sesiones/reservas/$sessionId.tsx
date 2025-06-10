@@ -2,12 +2,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { ArrowLeft, Plus} from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
-import { Reservation, ReservationState } from '@/types/reservation';
-import { Session } from '@/types/session';
+import { Reservation } from '@/types/reservation';
 
 import { Button } from '@/components/ui/button';
 import HeaderDescriptor from '@/components/common/header-descriptor';

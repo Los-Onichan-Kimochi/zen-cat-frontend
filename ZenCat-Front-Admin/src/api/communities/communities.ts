@@ -5,47 +5,23 @@ import {
   CreateCommunityPayload,
   UpdateCommunityPayload,
 } from '@/types/community';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const communitiesApi = {
   createCommunity: async (
     payload: CreateCommunityPayload,
   ): Promise<Community> => {
-    const response = await fetch(`${API_BASE_URL}/community/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating community');
-    }
-    return response.json();
+    return apiClient.post<Community>(API_ENDPOINTS.COMMUNITIES.BASE, payload);
   },
 
   bulkCreateCommunities: async (payload: BulkCreateCommunityPayload): Promise<Community[]> => {
     console.log('Creating communities:', payload);
-    const response = await fetch(`${API_BASE_URL}/community/bulk-create/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating community');
-    }
-    return response.json();
+    return apiClient.post<Community[]>(API_ENDPOINTS.COMMUNITIES.BULK_CREATE, payload);
   },
 
   getCommunities: async (): Promise<Community[]> => {
-    const response = await fetch(`${API_BASE_URL}/community/`);
-    if (!response.ok) {
-      throw new Error('Error fetching professionals');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<any>(API_ENDPOINTS.COMMUNITIES.BASE);
     if (data && Array.isArray(data.communities)) {
       return data.communities;
     } else if (Array.isArray(data)) {
@@ -56,49 +32,21 @@ export const communitiesApi = {
   },
 
   getCommunityById: async (id: string): Promise<Community> => {
-    const response = await fetch(`${API_BASE_URL}/community/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching community with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(id));
   },
 
   updateCommunity: async (
     id: string,
     payload: UpdateCommunityPayload,
   ): Promise<Community> => {
-    const response = await fetch(`${API_BASE_URL}/community/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating community with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(id), payload);
   },
 
   deleteCommunity: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/community/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting community with id ${id}`);
-    }
+    return apiClient.delete<void>(API_ENDPOINTS.COMMUNITIES.BY_ID(id));
   },
 
   bulkDeleteCommunities: async (payload: BulkDeleteCommunityPayload): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/community/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting communities');
-    }
+    return apiClient.delete<void>(API_ENDPOINTS.COMMUNITIES.BULK_DELETE, payload);
   },
 };

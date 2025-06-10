@@ -6,8 +6,8 @@ import {
   BulkDeleteSessionPayload,
   SessionFilters,
 } from '@/types/session';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 // Función para convertir hora de Lima (UTC-5) a UTC
 const convertLimaToUTC = (limaDateTimeString: string): string => {
@@ -71,14 +71,9 @@ export const sessionsApi = {
     }
 
     const queryString = searchParams.toString();
-    const url = `${API_BASE_URL}/session/${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.SESSIONS.BASE}${queryString ? `?${queryString}` : ''}`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Error fetching sessions');
-    }
-
-    const data = await response.json();
+    const data = await apiClient.get<any>(endpoint);
     if (data && Array.isArray(data.sessions)) {
       return data.sessions;
     } else if (Array.isArray(data)) {
@@ -89,11 +84,7 @@ export const sessionsApi = {
   },
 
   getSessionById: async (id: string): Promise<Session> => {
-    const response = await fetch(`${API_BASE_URL}/session/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching session with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Session>(API_ENDPOINTS.SESSIONS.BY_ID(id));
   },
 
   createSession: async (payload: CreateSessionPayload): Promise<Session> => {
@@ -113,78 +104,29 @@ export const sessionsApi = {
     
 
     
-    const response = await fetch(`${API_BASE_URL}/session/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(backendPayload),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Backend error response:', response.status, errorData);
-      throw new Error(
-        `Error creating session: ${response.status} - ${errorData}`,
-      );
-    }
-    return response.json();
+    return apiClient.post<Session>(API_ENDPOINTS.SESSIONS.BASE, backendPayload);
   },
 
   updateSession: async (
     id: string,
     payload: UpdateSessionPayload,
   ): Promise<Session> => {
-    const response = await fetch(`${API_BASE_URL}/session/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating session with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Session>(API_ENDPOINTS.SESSIONS.BY_ID(id), payload);
   },
 
   deleteSession: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/session/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting session with id ${id}`);
-    }
+    return apiClient.delete(API_ENDPOINTS.SESSIONS.BY_ID(id));
   },
 
   bulkCreateSessions: async (payload: BulkCreateSessionPayload): Promise<Session[]> => {
-    const response = await fetch(`${API_BASE_URL}/session/bulk/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk creating sessions');
-    }
-    const data = await response.json();
+    const data = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}bulk/`, payload);
     return data.sessions || data;
   },
 
   bulkDeleteSessions: async (
     payload: BulkDeleteSessionPayload,
   ): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/session/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting sessions');
-    }
+    return apiClient.delete(API_ENDPOINTS.SESSIONS.BULK_DELETE, payload);
   },
 
   checkConflicts: async (
@@ -200,21 +142,7 @@ export const sessionsApi = {
       exclude_id: data.excludeId || null,
     };
 
-  
-
-    const response = await fetch(`${API_BASE_URL}/session/check-conflicts/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Conflict check error:', response.status, errorText);
-      throw new Error('Error checking conflicts');
-    }
-    const result = await response.json();
+    const result = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}check-conflicts/`, payload);
 
     return {
       hasConflict: result.has_conflict,
@@ -233,21 +161,7 @@ export const sessionsApi = {
       local_id: data.localId || null,
     };
 
-
-
-    const response = await fetch(`${API_BASE_URL}/session/availability/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Availability error:', response.status, errorText);
-      throw new Error('Error getting availability');
-    }
-    const result = await response.json();
+    const result = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}availability/`, payload);
 
     return {
       isAvailable: result.is_available,

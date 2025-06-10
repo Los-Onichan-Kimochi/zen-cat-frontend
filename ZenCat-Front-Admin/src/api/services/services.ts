@@ -3,83 +3,41 @@ import {
   CreateServicePayload,
   UpdateServicePayload,
 } from '@/types/service';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const servicesApi = {
   getServices: async (): Promise<Service[]> => {
-    const response = await fetch(`${API_BASE_URL}/service/`);
-    if (!response.ok) {
-      throw new Error('Error fetching services');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<{ services: Service[] }>(API_ENDPOINTS.SERVICES.BASE);
     if (data && Array.isArray(data.services)) {
       return data.services;
     } else if (Array.isArray(data)) {
-      return data;
+      return data as Service[];
     }
     console.error('Unexpected data structure from /service/ endpoint:', data);
     throw new Error('Unexpected data structure from services API for list');
   },
 
   getServiceById: async (id: string): Promise<Service> => {
-    const response = await fetch(`${API_BASE_URL}/service/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching service with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Service>(API_ENDPOINTS.SERVICES.BY_ID(id));
   },
 
   createService: async (payload: CreateServicePayload): Promise<Service> => {
-    const response = await fetch(`${API_BASE_URL}/service/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating service');
-    }
-    return response.json();
+    return apiClient.post<Service>(API_ENDPOINTS.SERVICES.BASE, payload);
   },
 
   updateService: async (
     id: string,
     payload: UpdateServicePayload,
   ): Promise<Service> => {
-    const response = await fetch(`${API_BASE_URL}/service/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating service with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Service>(API_ENDPOINTS.SERVICES.BY_ID(id), payload);
   },
 
   deleteService: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/service/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting service with id ${id}`);
-    }
+    return apiClient.delete(API_ENDPOINTS.SERVICES.BY_ID(id));
   },
 
   bulkDeleteServices: async (ids: string[]): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/service/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ services: ids }),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting services');
-    }
+    return apiClient.delete(API_ENDPOINTS.SERVICES.BULK_DELETE, { services: ids });
   },
 };

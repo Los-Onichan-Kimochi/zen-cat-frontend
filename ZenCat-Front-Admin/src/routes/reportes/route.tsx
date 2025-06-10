@@ -1,6 +1,5 @@
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { createFileRoute } from '@tanstack/react-router';
-
 export const Route = createFileRoute('/reportes')({
   component: ReportesComponent,
 });

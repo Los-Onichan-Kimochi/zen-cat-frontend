@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Cog, User as UserIcon } from 'lucide-react';
+import { Globe, Cog, User as UserIcon, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -10,6 +10,7 @@ import {
 import { menuItems } from '@/types/navbar-items';
 import { User as UserType } from '@/types/user';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useAuth } from '@/context/AuthContext';
 import '@/styles/custom/no-scrollbar.css';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -20,6 +21,7 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const activePath = routerState.location.pathname;
+  const { logout } = useAuth();
 
   return (
     <Sidebar
@@ -88,6 +90,13 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
           <div className="flex items-center gap-2 transition-opacity duration-300 ">
             <Cog className="h-5 w-5" />
             <Globe className="h-5 w-5" />
+            <button 
+              onClick={() => logout()}
+              className="hover:bg-zinc-800 p-1 rounded transition-colors"
+              title="Cerrar Sesión"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </SidebarFooter>

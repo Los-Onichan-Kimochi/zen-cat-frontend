@@ -1,15 +1,11 @@
 import { Reservation, CreateReservationRequest, UpdateReservationRequest } from '@/types/reservation';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const reservationsApi = {
   // Get a single reservation
   getReservation: async (id: string): Promise<Reservation> => {
-    const response = await fetch(`${API_BASE_URL}/reservation/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching reservation with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Reservation>(API_ENDPOINTS.RESERVATIONS.BY_ID(id));
   },
 
   // Fetch reservations with filters
@@ -30,11 +26,8 @@ export const reservationsApi = {
       params.append('states', filters.states.join(','));
     }
 
-    const response = await fetch(`${API_BASE_URL}/reservation/?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error('Error fetching reservations');
-    }
-    return response.json();
+    const endpoint = `${API_ENDPOINTS.RESERVATIONS.BASE}?${params.toString()}`;
+    return apiClient.get<{ reservations: Reservation[] }>(endpoint);
   },
 
   // Get reservations by session ID
@@ -44,55 +37,21 @@ export const reservationsApi = {
 
   // Create a new reservation
   createReservation: async (reservation: CreateReservationRequest): Promise<Reservation> => {
-    const response = await fetch(`${API_BASE_URL}/reservation/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(reservation),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating reservation');
-    }
-    return response.json();
+    return apiClient.post<Reservation>(API_ENDPOINTS.RESERVATIONS.BASE, reservation);
   },
 
   // Update an existing reservation
   updateReservation: async (id: string, reservation: UpdateReservationRequest): Promise<Reservation> => {
-    const response = await fetch(`${API_BASE_URL}/reservation/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(reservation),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating reservation with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Reservation>(API_ENDPOINTS.RESERVATIONS.BY_ID(id), reservation);
   },
 
   // Delete a reservation
   deleteReservation: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reservation/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting reservation with id ${id}`);
-    }
+    return apiClient.delete(API_ENDPOINTS.RESERVATIONS.BY_ID(id));
   },
 
   // Bulk delete reservations
   bulkDeleteReservations: async (ids: string[]): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reservation/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ reservations: ids }),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting reservations');
-    }
+    return apiClient.delete(API_ENDPOINTS.RESERVATIONS.BULK_DELETE, { reservations: ids });
   },
 }; 

@@ -3,6 +3,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ProfessionalProvider } from '@/context/ProfesionalesContext';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
