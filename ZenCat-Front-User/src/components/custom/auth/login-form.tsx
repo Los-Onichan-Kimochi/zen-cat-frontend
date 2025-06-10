@@ -7,7 +7,11 @@ import {GoogleLogin} from "@react-oauth/google"
 import { jwtDecode } from "jwt-decode"
 import { useNavigate,Link } from '@tanstack/react-router'
 import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/api/auth/auth-service';
 
+interface LoginFormProps {
+  onLoginSuccess?: (user: any) => void;
+}
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -22,36 +26,76 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error2, setError2] = useState<string | null>(null);
   const [pingSuccess, setPingSuccess] = useState(false);
 
-
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos vacíos
+    if (!email.trim() || !password.trim()) {
+      setError('El email y contraseña son obligatorios');
+      setIsModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setIsModalOpen(false);
+
     try {
-      const response = await fetch("http://localhost:8098/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-        "email": email,
-        "password": password
-      }),
+      console.log('LoginForm: Attempting login with:', { email });
+      
+      // Usar el nuevo authService
+      const response = await authService.login({ 
+        email: email.trim(), 
+        password 
       });
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || "Error al loguear usuario");
+      
+      console.log('LoginForm: Login successful, response:', response);
+      
+      // Validar que la respuesta tenga la estructura esperada
+      if (!response.user || !response.tokens?.access_token) {
+        throw new Error('Respuesta del servidor inválida - faltan datos de usuario o tokens');
       }
-      const json = await response.json();
-      const user= json.user;
-      console.log(user)
-      onLoginSuccess(user);
-      login(user)
-      navigate({ to: "/" }); // Redirige si todo va bien
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error desconocido, comunicate con tu jefe.';
+
+      // El authService ya guarda los tokens en cookies
+      // Crear el objeto de usuario para el contexto
+      const userData = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+        imageUrl: response.user.image_url || '',
+        role: response.user.rol.toLowerCase(),
+        isAuthenticated: true
+      };
+
+      console.log('LoginForm: Setting user in context:', userData);
+      login(userData);
+      
+      // Llamar el callback si existe
+      onLoginSuccess?.(userData);
+      
+      // Redirigir al home (landing page principal)
+      navigate({ to: "/" });
+    } catch (error: any) {
+      console.error('LoginForm: Login error:', error);
+      
+      // Manejar diferentes tipos de errores
+      let errorMessage = 'Credenciales incorrectas';
+      
+      if (error.message) {
+        if (error.message.includes('500')) {
+          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'Credenciales incorrectas';
+        } else if (error.message.includes('Network')) {
+          errorMessage = 'Error de conexión - Verifique su internet o que el servidor esté funcionando';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -101,10 +145,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen2(false);
   };
 
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
-
   const handleGoogleSuccess = (credentialResponse: any) => {
     const decodedToken: any = jwtDecode(credentialResponse.credential);
     
@@ -113,12 +153,17 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const nameParts = fullName.split(' ');
     const shortName = nameParts[0] || fullName;
 
-    login({
-        id: decodedToken.sub,
-        name: shortName,
-        email: decodedToken.email,
-        imageUrl: decodedToken.picture,
-      });
+    const googleUser = {
+      id: decodedToken.sub,
+      name: shortName,
+      email: decodedToken.email,
+      imageUrl: decodedToken.picture,
+      role: 'user',
+      isAuthenticated: true
+    };
+
+    login(googleUser);
+    onLoginSuccess?.(googleUser);
     navigate({ to: '/' });
   };
 
@@ -158,7 +203,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
             />
           </div>
           <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-            Iniciar sesión
+            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </Button>
           </form>
 
@@ -210,8 +255,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       <ErrorModal
         isOpen={isModalOpen2}
         onClose={handleCloseModal2}
-        title={pingSuccess ? "Ping Exitoso! Respuesta:" : "Error en Ping de Datos"}
-        description={error2 || 'Ha ocurrido un error.'}
+        title={pingSuccess ? "¡Conexión exitosa!" : "Error de conexión"}
+        description={error2 || 'Ha ocurrido un error durante el ping.'}
       />
     </>
   );

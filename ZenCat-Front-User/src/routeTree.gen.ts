@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as PreciosImport } from './routes/precios'
+import { Route as PerfilImport } from './routes/perfil'
 import { Route as MembresiaImport } from './routes/membresia'
 import { Route as ContactoImport } from './routes/contacto'
 import { Route as ComunidadesImport } from './routes/comunidades'
@@ -21,12 +22,19 @@ import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as ForgotRouteImport } from './routes/forgot/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as ReservasIndexImport } from './routes/reservas/index'
 
 // Create/Update Routes
 
 const PreciosRoute = PreciosImport.update({
   id: '/precios',
   path: '/precios',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PerfilRoute = PerfilImport.update({
+  id: '/perfil',
+  path: '/perfil',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,6 +89,12 @@ const ForgotRouteRoute = ForgotRouteImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ReservasIndexRoute = ReservasIndexImport.update({
+  id: '/reservas/',
+  path: '/reservas/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -151,11 +165,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembresiaImport
       parentRoute: typeof rootRoute
     }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilImport
+      parentRoute: typeof rootRoute
+    }
     '/precios': {
       id: '/precios'
       path: '/precios'
       fullPath: '/precios'
       preLoaderRoute: typeof PreciosImport
+      parentRoute: typeof rootRoute
+    }
+    '/reservas/': {
+      id: '/reservas/'
+      path: '/reservas'
+      fullPath: '/reservas'
+      preLoaderRoute: typeof ReservasIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -173,7 +201,9 @@ export interface FileRoutesByFullPath {
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
+  '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/reservas': typeof ReservasIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -186,7 +216,9 @@ export interface FileRoutesByTo {
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
+  '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/reservas': typeof ReservasIndexRoute
 }
 
 export interface FileRoutesById {
@@ -200,7 +232,9 @@ export interface FileRoutesById {
   '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
+  '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/reservas/': typeof ReservasIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -215,7 +249,9 @@ export interface FileRouteTypes {
     | '/comunidades'
     | '/contacto'
     | '/membresia'
+    | '/perfil'
     | '/precios'
+    | '/reservas'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,7 +263,9 @@ export interface FileRouteTypes {
     | '/comunidades'
     | '/contacto'
     | '/membresia'
+    | '/perfil'
     | '/precios'
+    | '/reservas'
   id:
     | '__root__'
     | '/'
@@ -239,7 +277,9 @@ export interface FileRouteTypes {
     | '/comunidades'
     | '/contacto'
     | '/membresia'
+    | '/perfil'
     | '/precios'
+    | '/reservas/'
   fileRoutesById: FileRoutesById
 }
 
@@ -253,7 +293,9 @@ export interface RootRouteChildren {
   ComunidadesRoute: typeof ComunidadesRoute
   ContactoRoute: typeof ContactoRoute
   MembresiaRoute: typeof MembresiaRoute
+  PerfilRoute: typeof PerfilRoute
   PreciosRoute: typeof PreciosRoute
+  ReservasIndexRoute: typeof ReservasIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -266,7 +308,9 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadesRoute: ComunidadesRoute,
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
+  PerfilRoute: PerfilRoute,
   PreciosRoute: PreciosRoute,
+  ReservasIndexRoute: ReservasIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -288,7 +332,9 @@ export const routeTree = rootRoute
         "/comunidades",
         "/contacto",
         "/membresia",
-        "/precios"
+        "/perfil",
+        "/precios",
+        "/reservas/"
       ]
     },
     "/": {
@@ -318,8 +364,14 @@ export const routeTree = rootRoute
     "/membresia": {
       "filePath": "membresia.tsx"
     },
+    "/perfil": {
+      "filePath": "perfil.tsx"
+    },
     "/precios": {
       "filePath": "precios.tsx"
+    },
+    "/reservas/": {
+      "filePath": "reservas/index.tsx"
     }
   }
 }
