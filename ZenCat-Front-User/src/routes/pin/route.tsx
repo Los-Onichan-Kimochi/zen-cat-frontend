@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ChangePasswordForm } from '@/components/custom/changepassw-form';
+import PINCard from '@/components/custom/PINCard';
 
 export const Route = createFileRoute('/pin')({
   component: PinComponent,
@@ -7,8 +7,8 @@ export const Route = createFileRoute('/pin')({
 
 function PinComponent() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <ChangePasswordForm />
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <PINCard onComplete={(pin) => console.log('PIN correcto:', pin)} />
     </div>
   );
 }
