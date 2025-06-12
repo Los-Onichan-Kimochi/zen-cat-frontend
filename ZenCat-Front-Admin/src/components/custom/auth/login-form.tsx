@@ -182,17 +182,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
-
-          <div className="mt-4 text-center text-sm text-gray-500">
-            ¿No tienes una cuenta?{' '}
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/register' })}
-              className="underline text-blue-600 hover:text-blue-800"
-            >
-              Regístrate aquí
-            </button>
-          </div>
           {/* TODO: Add remember me, forgot password links here */}
         </CardContent>
       </Card>
