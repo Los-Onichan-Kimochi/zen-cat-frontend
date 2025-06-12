@@ -16,7 +16,6 @@ import { useQuery } from '@tanstack/react-query';
 import { localsApi, Local } from '@/api/locals/locals';
 import { serviceLocalsApi } from '@/api/service-locals/service-locals';
 
-
 export const Route = createFileRoute(ReservaLugarRoute)({
   component: LocationStepComponent,
   validateSearch: z.object({
@@ -165,161 +164,159 @@ function LocationStepComponent() {
   }
 
   return (
-      <div>
-        <div className="border p-6 rounded-md min-h-[430px] w-full">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col gap-6">
-              {/* Título */}
-              <h3 className="text-xl font-semibold text-center">
-                Selecciona el lugar de tu preferencia
-              </h3>
+    <div>
+      <div className="border p-6 rounded-md min-h-[430px] w-full">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col gap-6">
+            {/* Título */}
+            <h3 className="text-xl font-semibold text-center">
+              Selecciona el lugar de tu preferencia
+            </h3>
 
-              {/* Mensaje informativo si hay servicio seleccionado */}
-              {reservationData.service && (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-center">
-                  <p className="text-blue-800 text-sm">
-                    Mostrando ubicaciones disponibles para:{' '}
-                    <span className="font-semibold">
-                      {reservationData.service.name}
-                    </span>
-                  </p>
+            {/* Mensaje informativo si hay servicio seleccionado */}
+            {reservationData.service && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-center">
+                <p className="text-blue-800 text-sm">
+                  Mostrando ubicaciones disponibles para:{' '}
+                  <span className="font-semibold">
+                    {reservationData.service.name}
+                  </span>
+                </p>
+              </div>
+            )}
+
+            {/* Barra de búsqueda y filtros */}
+            <div className="flex flex-col md:flex-row justify-between gap-4">
+              <input
+                type="text"
+                placeholder="Buscar lugar específico ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full md:w-1/2 border border-gray-300 rounded-md px-4 py-2"
+              />
+              <div className="flex gap-4">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-gray-300 rounded-md px-4 py-2"
+                >
+                  <option value="">Ordenar por</option>
+                  <option value="district">Distrito</option>
+                  <option value="address">Dirección</option>
+                </select>
+                <select
+                  value={districtFilter}
+                  onChange={(e) => setDistrictFilter(e.target.value)}
+                  className="border border-gray-300 rounded-md px-4 py-2"
+                >
+                  <option value="">Filtrar por distrito</option>
+                  {uniqueDistricts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="text-center text-sm text-gray-600">
+              Resultados: {filteredLocations.length} lugares
+            </div>
+
+            {/* Tabla de ubicaciones */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border p-3 text-left font-medium">
+                      Selección
+                    </th>
+                    <th className="border p-3 text-left font-medium">
+                      Dirección
+                    </th>
+                    <th className="border p-3 text-left font-medium">Lugar</th>
+                    <th className="border p-3 text-left font-medium">
+                      Distrito
+                    </th>
+                    <th className="border p-3 text-left font-medium">
+                      Capacidad
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLocations.map((location) => (
+                    <tr
+                      key={location.id}
+                      className={`hover:bg-gray-50 cursor-pointer ${
+                        selectedLocationId === location.id ? 'bg-blue-50' : ''
+                      }`}
+                      onClick={() => handleLocationSelect(location)}
+                    >
+                      <td className="border p-3 text-center">
+                        <input
+                          type="radio"
+                          name="location"
+                          checked={selectedLocationId === location.id}
+                          onChange={() => handleLocationSelect(location)}
+                          className="w-4 h-4"
+                        />
+                      </td>
+                      <td className="border p-3">{location.address}</td>
+                      <td className="border p-3">{location.pavilion}</td>
+                      <td className="border p-3">{location.district}</td>
+                      <td className="border p-3">
+                        {location.capacity || 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {filteredLocations.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No se encontraron ubicaciones que coincidan con tu búsqueda.
                 </div>
               )}
+            </div>
 
-              {/* Barra de búsqueda y filtros */}
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <input
-                  type="text"
-                  placeholder="Buscar lugar específico ..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-1/2 border border-gray-300 rounded-md px-4 py-2"
-                />
-                <div className="flex gap-4">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2"
-                  >
-                    <option value="">Ordenar por</option>
-                    <option value="district">Distrito</option>
-                    <option value="address">Dirección</option>
-                  </select>
-                  <select
-                    value={districtFilter}
-                    onChange={(e) => setDistrictFilter(e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2"
-                  >
-                    <option value="">Filtrar por distrito</option>
-                    {uniqueDistricts.map((district) => (
-                      <option key={district} value={district}>
-                        {district}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="text-center text-sm text-gray-600">
-                Resultados: {filteredLocations.length} lugares
-              </div>
-
-              {/* Tabla de ubicaciones */}
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border p-3 text-left font-medium">
-                        Selección
-                      </th>
-                      <th className="border p-3 text-left font-medium">
-                        Dirección
-                      </th>
-                      <th className="border p-3 text-left font-medium">
-                        Lugar
-                      </th>
-                      <th className="border p-3 text-left font-medium">
-                        Distrito
-                      </th>
-                      <th className="border p-3 text-left font-medium">
-                        Capacidad
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLocations.map((location) => (
-                      <tr
-                        key={location.id}
-                        className={`hover:bg-gray-50 cursor-pointer ${
-                          selectedLocationId === location.id ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={() => handleLocationSelect(location)}
-                      >
-                        <td className="border p-3 text-center">
-                          <input
-                            type="radio"
-                            name="location"
-                            checked={selectedLocationId === location.id}
-                            onChange={() => handleLocationSelect(location)}
-                            className="w-4 h-4"
-                          />
-                        </td>
-                        <td className="border p-3">{location.address}</td>
-                        <td className="border p-3">{location.pavilion}</td>
-                        <td className="border p-3">{location.district}</td>
-                        <td className="border p-3">
-                          {location.capacity || 'N/A'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {filteredLocations.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    No se encontraron ubicaciones que coincidan con tu búsqueda.
-                  </div>
-                )}
-              </div>
-
-              {/* Paginación */}
-              <div className="flex justify-center items-center gap-4">
-                <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                  Anterior
+            {/* Paginación */}
+            <div className="flex justify-center items-center gap-4">
+              <button className="px-3 py-1 border rounded hover:bg-gray-50">
+                Anterior
+              </button>
+              <div className="flex gap-2">
+                <button className="px-3 py-1 bg-black text-white rounded">
+                  1
                 </button>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1 bg-black text-white rounded">
-                    1
-                  </button>
-                  <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                    2
-                  </button>
-                  <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                    3
-                  </button>
-                </div>
                 <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                  Siguiente
+                  2
+                </button>
+                <button className="px-3 py-1 border rounded hover:bg-gray-50">
+                  3
                 </button>
               </div>
+              <button className="px-3 py-1 border rounded hover:bg-gray-50">
+                Siguiente
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Botones de navegación */}
-        <div className="flex justify-between pt-6">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Anterior
-          </Button>
-          <Button onClick={handleContinue} disabled={!selectedLocationId}>
-            Seleccionar
-          </Button>
-        </div>
       </div>
-    );
+
+      {/* Botones de navegación */}
+      <div className="flex justify-between pt-6">
+        <Button
+          variant="outline"
+          onClick={handleBack}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Anterior
+        </Button>
+        <Button onClick={handleContinue} disabled={!selectedLocationId}>
+          Seleccionar
+        </Button>
+      </div>
+    </div>
+  );
 }
