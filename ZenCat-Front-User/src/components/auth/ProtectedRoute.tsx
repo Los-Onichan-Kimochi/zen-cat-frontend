@@ -15,7 +15,7 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-
+  console.log('isAuthenticated', isAuthenticated);
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       console.log(

@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { sessionsApi, Session } from '@/api/sessions/sessions';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { serviceProfessionalsApi } from '@/api/service-professionals/service-professionals';
-import {ProtectedRoute} from '@/components/auth/ProtectedRoute';
+
 
 export const Route = createFileRoute(ReservaHorarioRoute)({
   component: ScheduleStepComponent,

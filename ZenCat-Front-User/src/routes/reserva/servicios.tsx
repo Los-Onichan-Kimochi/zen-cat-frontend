@@ -6,7 +6,6 @@ import {
 import { ReservaServiciosRoute } from '@/layouts/reservation-layout';
 import { ServiceCarousel } from '@/components/ui/reservation/service-carousel';
 import { Button } from '@/components/ui/button';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 //import gimnasioImage from '../../images/Carrousel/image 148(1).png';
 //import yogaImage from '../../images/Carrousel/image 150(1).png';
 //import funcionalImage from '../../images/Carrousel/image 151(2).png';
@@ -142,59 +141,61 @@ function ServiceStepComponent() {
   };
 
   return (
-    <ProtectedRoute>
-      <div>
-        <div className="border p-6 rounded-md min-h-[430px] w-full">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col gap-6">
-              {/* Título */}
-              <h3 className="text-xl font-semibold text-center">
-                ¡Busca el servicio que más te guste!
-              </h3>
+    <div>
+      <div className="border p-6 rounded-md min-h-[430px] w-full">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col gap-6">
+            {/* Título */}
+            <h3 className="text-xl font-semibold text-center">
+              ¡Busca el servicio que más te guste!
+            </h3>
 
-              {/* Barra de búsqueda y ordenamiento */}
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <input
-                  type="text"
-                  placeholder="Buscar servicio ..."
-                  className="w-full md:w-1/2 border
-                   border-gray-300 rounded-md px-4 py-2"
-                />
-                <select
-                  className="w-full md:w-1/4 border
-                   border-gray-300 rounded-md px-4 py-2"
-                >
-                  <option>Ordenar por</option>
-                  <option value="a-z">A-Z</option>
-                  <option value="z-a">Z-A</option>
-                </select>
-              </div>
-
-              <div className="text-center text-sm text-gray-600">
-                Resultados: {services.length} servicios
-              </div>
-
-              {/* Carousel */}
-              <ServiceCarousel
-                services={services.map((s) => ({
-                  title: s.title,
-                  description: s.description,
-                  imageUrl: s.imageUrl,
-                }))}
-                selected={selected}
-                onSelect={handleSelect}
+            {/* Barra de búsqueda y ordenamiento */}
+            <div className="flex flex-col md:flex-row justify-between gap-4">
+              <input
+                type="text"
+                placeholder="Buscar servicio ..."
+                className="w-full md:w-1/2 border
+                 border-gray-300 rounded-md px-4 py-2"
               />
+              <select
+                className="w-full md:w-1/4 border
+                 border-gray-300 rounded-md px-4 py-2"
+              >
+                <option>Ordenar por</option>
+                <option value="a-z">A-Z</option>
+                <option value="z-a">Z-A</option>
+              </select>
             </div>
+
+            <div className="text-center text-sm text-gray-600">
+              Resultados: {services.length} servicios
+            </div>
+
+            {/* Carousel */}
+            <ServiceCarousel
+              services={services.map((s) => ({
+                title: s.title,
+                description: s.description,
+                imageUrl: s.imageUrl,
+              }))}
+              selected={selected}
+              onSelect={handleSelect}
+            />
           </div>
         </div>
-
-        {/* Botón siguiente */}
-        <div className="flex justify-center pt-6">
-          <Button onClick={handleContinue} disabled={!selected}>
-            Continuar
-          </Button>
-        </div>
       </div>
-    </ProtectedRoute>
+
+      {/* Botón siguiente */}
+      <div className="flex justify-end mt-6">
+        <Button
+          onClick={handleContinue}
+          disabled={!selected || !reservationData.service}
+          className="px-8 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300"
+        >
+          Siguiente
+        </Button>
+      </div>
+    </div>
   );
 }

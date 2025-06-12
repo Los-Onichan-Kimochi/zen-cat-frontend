@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { localsApi, Local } from '@/api/locals/locals';
 import { serviceLocalsApi } from '@/api/service-locals/service-locals';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+
 
 export const Route = createFileRoute(ReservaLugarRoute)({
   component: LocationStepComponent,
@@ -165,7 +165,6 @@ function LocationStepComponent() {
   }
 
   return (
-    <ProtectedRoute>
       <div>
         <div className="border p-6 rounded-md min-h-[430px] w-full">
           <div className="max-w-4xl mx-auto">
@@ -322,6 +321,5 @@ function LocationStepComponent() {
           </Button>
         </div>
       </div>
-    </ProtectedRoute>
-  );
+    );
 }
