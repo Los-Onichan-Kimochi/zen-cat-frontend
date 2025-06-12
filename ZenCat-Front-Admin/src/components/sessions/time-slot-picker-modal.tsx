@@ -41,7 +41,6 @@ export function TimeSlotPickerModal({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-
     setOpen(newOpen);
   };
 

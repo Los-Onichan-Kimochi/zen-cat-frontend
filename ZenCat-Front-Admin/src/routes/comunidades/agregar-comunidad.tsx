@@ -50,13 +50,15 @@ function AddCommunityPage() {
   } = useCommunityForm();
 
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
-  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<MembershipPlan[]>([]);
+  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<
+    MembershipPlan[]
+  >([]);
 
   useEffect(() => {
     const draft = sessionStorage.getItem('draftCommunity');
     const storedServices = sessionStorage.getItem('draftSelectedServices');
     const storedPlans = sessionStorage.getItem('draftSelectedMembershipPlans');
-    
+
     if (draft) reset(JSON.parse(draft));
     if (storedServices) setSelectedServices(JSON.parse(storedServices));
     if (storedPlans) setSelectedMembershipPlans(JSON.parse(storedPlans));
@@ -92,18 +94,22 @@ function AddCommunityPage() {
       }
 
       if (selectedMembershipPlans.length > 0) {
-         const payload = selectedMembershipPlans.map((p) => ({
+        const payload = selectedMembershipPlans.map((p) => ({
           community_id: newCommunity.id,
           plan_id: p.id,
         }));
-        await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({community_plans : payload});
+        await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({
+          community_plans: payload,
+        });
       }
 
       toast.success('Comunidad creada correctamente');
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       navigate({ to: '/comunidades' });
     } catch (err: any) {
-      toast.error('Error al asociar servicios o planes', { description: err.message });
+      toast.error('Error al asociar servicios o planes', {
+        description: err.message,
+      });
     }
   };
 
@@ -140,9 +146,18 @@ function AddCommunityPage() {
               size="sm"
               className="h-10 bg-black text-white font-bold hover:bg-gray-800"
               onClick={() => {
-                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem(
+                  'draftCommunity',
+                  JSON.stringify(watch()),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedServices',
+                  JSON.stringify(selectedServices),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedMembershipPlans',
+                  JSON.stringify(selectedMembershipPlans),
+                );
                 sessionStorage.setItem('modeAddService', 'crear');
                 navigate({ to: '/comunidades/agregar-servicios' });
               }}
@@ -174,15 +189,26 @@ function AddCommunityPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex flex-col gap-1.5">
               <CardTitle>Planes de Membresía</CardTitle>
-              <CardDescription>Seleccione los planes de membresía disponibles</CardDescription>
+              <CardDescription>
+                Seleccione los planes de membresía disponibles
+              </CardDescription>
             </div>
             <Button
               size="sm"
               className="h-10 bg-black text-white font-bold hover:bg-gray-800"
               onClick={() => {
-                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem(
+                  'draftCommunity',
+                  JSON.stringify(watch()),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedServices',
+                  JSON.stringify(selectedServices),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedMembershipPlans',
+                  JSON.stringify(selectedMembershipPlans),
+                );
                 sessionStorage.setItem('modeAddMembershipPlan', 'crear');
                 navigate({ to: '/comunidades/agregar-planes-membresía' });
               }}
@@ -195,10 +221,14 @@ function AddCommunityPage() {
             <CommunityMembershipPlanTable
               data={selectedMembershipPlans}
               onDeleteClick={(plan) =>
-                setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.id))
+                setSelectedMembershipPlans((prev) =>
+                  prev.filter((p) => p.id !== plan.id),
+                )
               }
               onBulkDelete={(ids) =>
-                setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)))
+                setSelectedMembershipPlans((prev) =>
+                  prev.filter((p) => !ids.includes(p.id)),
+                )
               }
               isBulkDeleting={false}
               disableConfirmBulkDelete={true}

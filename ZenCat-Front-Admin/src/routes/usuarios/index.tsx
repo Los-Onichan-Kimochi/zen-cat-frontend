@@ -85,7 +85,7 @@ function UsuariosComponent() {
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       // Resetear selección después de eliminación exitosa
-      setResetSelection(prev => prev + 1);
+      setResetSelection((prev) => prev + 1);
     },
     onError: (err) => {
       toast.error('Error al eliminar usuarios', { description: err.message });

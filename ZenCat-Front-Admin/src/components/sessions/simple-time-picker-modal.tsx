@@ -62,23 +62,22 @@ export function SimpleTimePickerModal({
         }`}
       >
         <Calendar className="h-4 w-4 mr-2" />
-        {disabled 
-          ? 'Selector Deshabilitado' 
-          : selectedRange 
-            ? `${selectedRange.start} - ${selectedRange.end}` 
-            : 'Selector Visual de Horario'
-        }
+        {disabled
+          ? 'Selector Deshabilitado'
+          : selectedRange
+            ? `${selectedRange.start} - ${selectedRange.end}`
+            : 'Selector Visual de Horario'}
       </Button>
 
       {/* Modal Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50" 
+          <div
+            className="fixed inset-0 bg-black/50"
             onClick={handleCloseModal}
           />
-          
+
           {/* Modal Content */}
           <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
             {/* Header */}

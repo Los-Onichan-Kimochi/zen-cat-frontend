@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { authService } from '@/api/auth/auth-service';
 
 // Usando la interfaz simplificada para el contexto
@@ -31,13 +37,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     console.log('AuthProvider: Checking authentication status...');
-    
+
     const initializeAuth = async () => {
       try {
         // First check if there are tokens in cookies
         if (authService.isAuthenticated()) {
           console.log('AuthProvider: Found tokens, fetching current user...');
-          
+
           // Try to get current user info from server
           const currentUser = await authService.getCurrentUser();
           const userData: User = {
@@ -46,19 +52,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
             name: currentUser.name,
             imageUrl: currentUser.imageUrl || currentUser.avatar,
             role: currentUser.role,
-            isAuthenticated: true
+            isAuthenticated: true,
           };
-          
+
           console.log('AuthProvider: Successfully loaded user:', userData);
           setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem('user', JSON.stringify(userData));
         } else {
           // Check localStorage as fallback (for compatibility)
-          console.log('AuthProvider: No tokens found, checking localStorage...');
-          const savedUser = localStorage.getItem("user");
+          console.log(
+            'AuthProvider: No tokens found, checking localStorage...',
+          );
+          const savedUser = localStorage.getItem('user');
           if (savedUser) {
             const userData = JSON.parse(savedUser);
-            console.log('AuthProvider: Found saved user in localStorage:', userData);
+            console.log(
+              'AuthProvider: Found saved user in localStorage:',
+              userData,
+            );
             setUser(userData);
           }
         }
@@ -66,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('AuthProvider: Error during initialization:', error);
         // Clear any invalid data
         authService.logout();
-        localStorage.removeItem("user");
+        localStorage.removeItem('user');
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -80,7 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('AuthProvider: Login called with:', userData);
     const userWithAuth = { ...userData, isAuthenticated: true };
     setUser(userWithAuth);
-    localStorage.setItem("user", JSON.stringify(userWithAuth));
+    localStorage.setItem('user', JSON.stringify(userWithAuth));
   };
 
   const logout = async () => {
@@ -90,10 +101,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.warn('AuthProvider: Server logout failed:', error);
     }
-    
+
     setUser(null);
-    localStorage.removeItem("user");
-    
+    localStorage.removeItem('user');
+
     // Redirect to home instead of login for better UX in user frontend
     window.location.href = '/';
   };
@@ -103,20 +114,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user?.isAuthenticated,
     isLoading,
     login,
-    logout
+    logout,
   };
 
   console.log('AuthProvider: Context value:', {
     hasUser: !!user,
     isAuthenticated: !!user?.isAuthenticated,
     isLoading,
-    userEmail: user?.email
+    userEmail: user?.email,
   });
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

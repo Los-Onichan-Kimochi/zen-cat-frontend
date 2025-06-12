@@ -1,43 +1,49 @@
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
-import { 
-  LoginRequest, 
-  LoginResponse, 
-  RegisterRequest, 
+import {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
   AuthUser,
-  RefreshTokenResponse 
+  RefreshTokenResponse,
 } from '@/types/auth';
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-    
+    const response = await apiClient.post<LoginResponse>(
+      API_ENDPOINTS.AUTH.LOGIN,
+      credentials,
+    );
+
     // Store tokens in cookies after successful login
     if (response.tokens?.access_token && response.tokens?.refresh_token) {
       apiClient.setTokens({
         access_token: response.tokens.access_token,
         refresh_token: response.tokens.refresh_token,
         token_type: response.tokens.token_type || 'Bearer',
-        expires_in: response.tokens.expires_in
+        expires_in: response.tokens.expires_in,
       });
     }
-    
+
     return response;
   },
 
   async register(userData: RegisterRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.REGISTER, userData);
-    
+    const response = await apiClient.post<LoginResponse>(
+      API_ENDPOINTS.AUTH.REGISTER,
+      userData,
+    );
+
     // Store tokens in cookies after successful registration
     if (response.tokens?.access_token && response.tokens?.refresh_token) {
       apiClient.setTokens({
         access_token: response.tokens.access_token,
         refresh_token: response.tokens.refresh_token,
         token_type: response.tokens.token_type || 'Bearer',
-        expires_in: response.tokens.expires_in
+        expires_in: response.tokens.expires_in,
       });
     }
-    
+
     return response;
   },
 
@@ -64,5 +70,5 @@ export const authService = {
 
   isAuthenticated(): boolean {
     return apiClient.isAuthenticated();
-  }
-}; 
+  },
+};

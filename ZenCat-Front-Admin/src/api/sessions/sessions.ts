@@ -16,10 +16,12 @@ const convertLimaToUTC = (limaDateTimeString: string): string => {
   const [datePart, timePart] = limaDateTimeString.split('T');
   const [year, month, day] = datePart.split('-').map(Number);
   const [hour, minute, second = 0] = timePart.split(':').map(Number);
-  
+
   // Crear fecha en UTC considerando que la hora original es de Lima (UTC-5)
-  const utcDate = new Date(Date.UTC(year, month - 1, day, hour + 5, minute, second));
-  
+  const utcDate = new Date(
+    Date.UTC(year, month - 1, day, hour + 5, minute, second),
+  );
+
   return utcDate.toISOString();
 };
 
@@ -88,8 +90,6 @@ export const sessionsApi = {
   },
 
   createSession: async (payload: CreateSessionPayload): Promise<Session> => {
-  
-    
     // Convertir fechas de Lima (UTC-5) a UTC para el backend
     const backendPayload = {
       title: payload.title,
@@ -101,9 +101,7 @@ export const sessionsApi = {
       professional_id: payload.professional_id,
       local_id: payload.local_id,
     };
-    
 
-    
     return apiClient.post<Session>(API_ENDPOINTS.SESSIONS.BASE, backendPayload);
   },
 
@@ -118,8 +116,13 @@ export const sessionsApi = {
     return apiClient.delete(API_ENDPOINTS.SESSIONS.BY_ID(id));
   },
 
-  bulkCreateSessions: async (payload: BulkCreateSessionPayload): Promise<Session[]> => {
-    const data = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}bulk/`, payload);
+  bulkCreateSessions: async (
+    payload: BulkCreateSessionPayload,
+  ): Promise<Session[]> => {
+    const data = await apiClient.post<any>(
+      `${API_ENDPOINTS.SESSIONS.BASE}bulk/`,
+      payload,
+    );
     return data.sessions || data;
   },
 
@@ -142,7 +145,10 @@ export const sessionsApi = {
       exclude_id: data.excludeId || null,
     };
 
-    const result = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}check-conflicts/`, payload);
+    const result = await apiClient.post<any>(
+      `${API_ENDPOINTS.SESSIONS.BASE}check-conflicts/`,
+      payload,
+    );
 
     return {
       hasConflict: result.has_conflict,
@@ -161,7 +167,10 @@ export const sessionsApi = {
       local_id: data.localId || null,
     };
 
-    const result = await apiClient.post<any>(`${API_ENDPOINTS.SESSIONS.BASE}availability/`, payload);
+    const result = await apiClient.post<any>(
+      `${API_ENDPOINTS.SESSIONS.BASE}availability/`,
+      payload,
+    );
 
     return {
       isAvailable: result.is_available,

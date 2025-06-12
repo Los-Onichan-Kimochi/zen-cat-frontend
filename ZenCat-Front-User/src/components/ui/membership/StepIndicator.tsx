@@ -15,7 +15,7 @@ export function StepIndicator({ currentStep, stepLabels }: StepIndicatorProps) {
           const isActive = stepNumber === currentStep;
           const isCompleted = stepNumber < currentStep;
           const isLast = index === stepLabels.length - 1;
-          
+
           return (
             <div key={stepNumber} className="flex items-start">
               {/* Step Circle and Label */}
@@ -25,8 +25,8 @@ export function StepIndicator({ currentStep, stepLabels }: StepIndicatorProps) {
                     isActive
                       ? 'bg-black text-white border-black'
                       : isCompleted
-                      ? 'bg-black text-white border-black'
-                      : 'bg-gray-100 text-gray-400 border-gray-300'
+                        ? 'bg-black text-white border-black'
+                        : 'bg-gray-100 text-gray-400 border-gray-300'
                   }`}
                 >
                   {stepNumber}
@@ -39,7 +39,7 @@ export function StepIndicator({ currentStep, stepLabels }: StepIndicatorProps) {
                   {label}
                 </span>
               </div>
-              
+
               {/* Connecting Line */}
               {!isLast && (
                 <div className="flex items-center h-10 px-6">
@@ -56,4 +56,4 @@ export function StepIndicator({ currentStep, stepLabels }: StepIndicatorProps) {
       </div>
     </div>
   );
-} 
+}

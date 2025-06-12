@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 });
 
 function RouteComponent() {
-  const { user, isLoading, isAuthenticated } = useAuth(); 
+  const { user, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,9 +35,11 @@ function RouteComponent() {
     );
   }
 
-  const welcomeMessage = user?.name ? `Bienvenido, ${user.name}!` : 'Bienvenido!, hackerman';
-  
-    return (
+  const welcomeMessage = user?.name
+    ? `Bienvenido, ${user.name}!`
+    : 'Bienvenido!, hackerman';
+
+  return (
     <div className="p-4 h-full flex flex-col items-center justify-center font-montserrat">
       <h1 className="animate-welcome text-6xl md:text-8xl font-bold text-gray-700 tracking-tight text-center">
         {welcomeMessage}

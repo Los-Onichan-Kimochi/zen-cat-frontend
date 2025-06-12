@@ -15,11 +15,11 @@ export function getSessionCurrentState(session: SessionWithTime): SessionState {
   const startTime = new Date(session.start_time);
   const endTime = new Date(session.end_time);
 
-
-
   // Si la sesión ya fue cancelada o reprogramada, mantener ese estado
-  if (session.state === SessionState.CANCELLED || session.state === SessionState.RESCHEDULED) {
-
+  if (
+    session.state === SessionState.CANCELLED ||
+    session.state === SessionState.RESCHEDULED
+  ) {
     return session.state;
   }
 
@@ -28,19 +28,19 @@ export function getSessionCurrentState(session: SessionWithTime): SessionState {
 
   // Si la sesión ya terminó (con margen)
   if (now.getTime() > endTime.getTime() + bufferTime) {
-
     return SessionState.COMPLETED;
   }
 
   // Si la sesión está en curso (con margen)
-  if (now.getTime() >= startTime.getTime() - bufferTime && now.getTime() <= endTime.getTime() + bufferTime) {
-
+  if (
+    now.getTime() >= startTime.getTime() - bufferTime &&
+    now.getTime() <= endTime.getTime() + bufferTime
+  ) {
     return SessionState.ONGOING;
   }
 
   // Si la sesión está programada para el futuro
   if (now.getTime() < startTime.getTime() - bufferTime) {
-
     return SessionState.SCHEDULED;
   }
 
@@ -87,4 +87,4 @@ export function getSessionStateColor(state: SessionState): string {
     default:
       return 'bg-gray-100 text-gray-800';
   }
-} 
+}

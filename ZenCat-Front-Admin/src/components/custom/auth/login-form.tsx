@@ -27,11 +27,11 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validar campos vacíos
     if (!email.trim() || !password.trim()) {
       toast.error('Error de validación', {
-        description: 'El email y contraseña son obligatorios'
+        description: 'El email y contraseña son obligatorios',
       });
       return;
     }
@@ -41,13 +41,18 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       // Intentar login con el backend
       console.log('LoginForm: Attempting login with:', { email });
-      const response = await authService.login({ email: email.trim(), password });
-      
+      const response = await authService.login({
+        email: email.trim(),
+        password,
+      });
+
       console.log('LoginForm: Login successful, response:', response);
-      
+
       // Validar que la respuesta tenga la estructura esperada
       if (!response.user || !response.tokens?.access_token) {
-        throw new Error('Respuesta del servidor inválida - faltan datos de usuario o tokens');
+        throw new Error(
+          'Respuesta del servidor inválida - faltan datos de usuario o tokens',
+        );
       }
 
       // El authService ya guarda los tokens en cookies
@@ -63,38 +68,40 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         avatar: response.user.image_url || '',
         address: '',
         district: '',
-        phone: ''
+        phone: '',
       };
 
       console.log('LoginForm: Setting user in context:', user);
       login(user);
-      
+
       toast.success('Inicio de sesión exitoso', {
-        description: `Bienvenido, ${user.name}!`
+        description: `Bienvenido, ${user.name}!`,
       });
-      
+
       onLoginSuccess?.();
       navigate({ to: '/' });
     } catch (error: any) {
       console.error('LoginForm: Login error:', error);
-      
+
       // Manejar diferentes tipos de errores
       let errorMessage = 'Credenciales inválidas';
-      
+
       if (error.message) {
         if (error.message.includes('500')) {
-          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+          errorMessage =
+            'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
         } else if (error.message.includes('401')) {
           errorMessage = 'Credenciales incorrectas';
         } else if (error.message.includes('Network')) {
-          errorMessage = 'Error de conexión - Verifique su internet o que el servidor esté funcionando';
+          errorMessage =
+            'Error de conexión - Verifique su internet o que el servidor esté funcionando';
         } else {
           errorMessage = error.message;
         }
       }
-      
+
       toast.error('Error al iniciar sesión', {
-        description: errorMessage
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

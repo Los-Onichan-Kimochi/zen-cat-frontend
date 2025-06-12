@@ -181,7 +181,6 @@ function AddSessionComponent() {
   // Mutación para crear sesión
   const { mutate: createSession, isPending: isCreating } = useMutation({
     mutationFn: (data: CreateSessionPayload) => {
-
       return sessionsApi.createSession(data);
     },
     onSuccess: (result) => {
@@ -196,10 +195,7 @@ function AddSessionComponent() {
   });
 
   const onSubmit = (data: SessionFormData) => {
-
-
     if (hasConflict) {
-
       toast.error('No se puede crear la sesión', {
         description:
           'Existen conflictos de horario que deben resolverse primero',
@@ -218,8 +214,6 @@ function AddSessionComponent() {
     const localEndTime = `${dateString}T${data.end_time}:00`;
     const localDate = `${dateString}T00:00:00`;
 
-
-
     const payload: CreateSessionPayload = {
       title: data.title,
       date: localDate,
@@ -231,7 +225,6 @@ function AddSessionComponent() {
       session_link:
         data.is_virtual && data.session_link ? data.session_link : null,
     };
-
 
     createSession(payload);
   };
@@ -264,8 +257,10 @@ function AddSessionComponent() {
                   {/* Paso 1: Información básica */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span>
-                       Información Básica
+                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                        1
+                      </span>
+                      Información Básica
                     </h3>
                     <div>
                       <Label htmlFor="title">Título de la sesión *</Label>
@@ -327,12 +322,18 @@ function AddSessionComponent() {
                   {/* Paso 2: Profesional */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                        watchedValues.title && watchedValues.date && watchedValues.capacity 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-300 text-gray-600'
-                      }`}>2</span>
-                       Profesional
+                      <span
+                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
+                          watchedValues.title &&
+                          watchedValues.date &&
+                          watchedValues.capacity
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-300 text-gray-600'
+                        }`}
+                      >
+                        2
+                      </span>
+                      Profesional
                     </h3>
                     <div>
                       <Label>Profesional *</Label>
@@ -341,20 +342,32 @@ function AddSessionComponent() {
                         onValueChange={(value) =>
                           setValue('professional_id', value)
                         }
-                        disabled={!watchedValues.title || !watchedValues.date || !watchedValues.capacity}
+                        disabled={
+                          !watchedValues.title ||
+                          !watchedValues.date ||
+                          !watchedValues.capacity
+                        }
                       >
-                        <SelectTrigger className={`transition-colors ${
-                          !watchedValues.title || !watchedValues.date || !watchedValues.capacity
-                            ? 'bg-gray-100 cursor-not-allowed' 
-                            : !watchedValues.professional_id 
-                              ? 'border-blue-300 bg-blue-50 hover:bg-blue-100' 
-                              : 'border-green-300 bg-green-50'
-                        }`}>
-                          <SelectValue placeholder={
-                            !watchedValues.title || !watchedValues.date || !watchedValues.capacity
-                              ? "Completa la información básica primero"
-                              : "Seleccionar profesional"
-                          } />
+                        <SelectTrigger
+                          className={`transition-colors ${
+                            !watchedValues.title ||
+                            !watchedValues.date ||
+                            !watchedValues.capacity
+                              ? 'bg-gray-100 cursor-not-allowed'
+                              : !watchedValues.professional_id
+                                ? 'border-blue-300 bg-blue-50 hover:bg-blue-100'
+                                : 'border-green-300 bg-green-50'
+                          }`}
+                        >
+                          <SelectValue
+                            placeholder={
+                              !watchedValues.title ||
+                              !watchedValues.date ||
+                              !watchedValues.capacity
+                                ? 'Completa la información básica primero'
+                                : 'Seleccionar profesional'
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {isLoadingProfessionals ? (
@@ -367,7 +380,8 @@ function AddSessionComponent() {
                                 key={professional.id}
                                 value={professional.id}
                               >
-                                {professional.name} {professional.first_last_name}
+                                {professional.name}{' '}
+                                {professional.first_last_name}
                               </SelectItem>
                             ))
                           )}
@@ -384,12 +398,16 @@ function AddSessionComponent() {
                   {/* Paso 3: Tipo de sesión */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                        watchedValues.professional_id
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-300 text-gray-600'
-                      }`}>3</span>
-                       Tipo de Sesión
+                      <span
+                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
+                          watchedValues.professional_id
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-300 text-gray-600'
+                        }`}
+                      >
+                        3
+                      </span>
+                      Tipo de Sesión
                     </h3>
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -405,7 +423,12 @@ function AddSessionComponent() {
                           }
                         }}
                       />
-                      <Label htmlFor="is_virtual" className={!watchedValues.professional_id ? 'text-gray-400' : ''}>
+                      <Label
+                        htmlFor="is_virtual"
+                        className={
+                          !watchedValues.professional_id ? 'text-gray-400' : ''
+                        }
+                      >
                         Sesión virtual
                       </Label>
                     </div>
@@ -436,18 +459,22 @@ function AddSessionComponent() {
                           onValueChange={(value) => setValue('local_id', value)}
                           disabled={!watchedValues.professional_id}
                         >
-                          <SelectTrigger className={`transition-colors ${
-                            !watchedValues.professional_id
-                              ? 'bg-gray-100 cursor-not-allowed' 
-                              : !watchedValues.local_id 
-                                ? 'border-blue-300 bg-blue-50 hover:bg-blue-100' 
-                                : 'border-green-300 bg-green-50'
-                          }`}>
-                            <SelectValue placeholder={
+                          <SelectTrigger
+                            className={`transition-colors ${
                               !watchedValues.professional_id
-                                ? "Selecciona un profesional primero"
-                                : "Seleccionar local"
-                            } />
+                                ? 'bg-gray-100 cursor-not-allowed'
+                                : !watchedValues.local_id
+                                  ? 'border-blue-300 bg-blue-50 hover:bg-blue-100'
+                                  : 'border-green-300 bg-green-50'
+                            }`}
+                          >
+                            <SelectValue
+                              placeholder={
+                                !watchedValues.professional_id
+                                  ? 'Selecciona un profesional primero'
+                                  : 'Seleccionar local'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingLocals ? (
@@ -476,12 +503,16 @@ function AddSessionComponent() {
                   {/* Paso 4: Horario (al final) */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                        (watchedValues.is_virtual || watchedValues.local_id)
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-300 text-gray-600'
-                      }`}>4</span>
-                       Horario de la Sesión
+                      <span
+                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
+                          watchedValues.is_virtual || watchedValues.local_id
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-300 text-gray-600'
+                        }`}
+                      >
+                        4
+                      </span>
+                      Horario de la Sesión
                     </h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -501,7 +532,12 @@ function AddSessionComponent() {
                             form.trigger(['start_time', 'end_time']);
                           }}
                           occupiedSlots={availability.busySlots}
-                          disabled={!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)}
+                          disabled={
+                            !watchedValues.date ||
+                            !watchedValues.professional_id ||
+                            (!watchedValues.is_virtual &&
+                              !watchedValues.local_id)
+                          }
                         />
                       </div>
 
@@ -512,10 +548,19 @@ function AddSessionComponent() {
                             id="start_time"
                             type="time"
                             {...form.register('start_time')}
-                            disabled={!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)}
-                            className={(!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)) 
-                              ? 'bg-gray-100 cursor-not-allowed' 
-                              : ''
+                            disabled={
+                              !watchedValues.date ||
+                              !watchedValues.professional_id ||
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
+                            }
+                            className={
+                              !watchedValues.date ||
+                              !watchedValues.professional_id ||
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
+                                ? 'bg-gray-100 cursor-not-allowed'
+                                : ''
                             }
                           />
                           {form.formState.errors.start_time && (
@@ -531,10 +576,19 @@ function AddSessionComponent() {
                             id="end_time"
                             type="time"
                             {...form.register('end_time')}
-                            disabled={!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)}
-                            className={(!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)) 
-                              ? 'bg-gray-100 cursor-not-allowed' 
-                              : ''
+                            disabled={
+                              !watchedValues.date ||
+                              !watchedValues.professional_id ||
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
+                            }
+                            className={
+                              !watchedValues.date ||
+                              !watchedValues.professional_id ||
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
+                                ? 'bg-gray-100 cursor-not-allowed'
+                                : ''
                             }
                           />
                           {form.formState.errors.end_time && (
@@ -544,11 +598,16 @@ function AddSessionComponent() {
                           )}
                         </div>
                       </div>
-                      
-                      {(!watchedValues.date || !watchedValues.professional_id || (!watchedValues.is_virtual && !watchedValues.local_id)) && (
+
+                      {(!watchedValues.date ||
+                        !watchedValues.professional_id ||
+                        (!watchedValues.is_virtual &&
+                          !watchedValues.local_id)) && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                           <p className="text-sm text-yellow-800">
-                             Completa primero la información básica, profesional y tipo de sesión para habilitar la selección de horario.
+                            Completa primero la información básica, profesional
+                            y tipo de sesión para habilitar la selección de
+                            horario.
                           </p>
                         </div>
                       )}

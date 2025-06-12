@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus} from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
@@ -40,7 +40,8 @@ function SessionReservationsComponent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
   // Fetch session data
   const { data: sessionData, isLoading: isLoadingSession } = useQuery({
@@ -49,10 +50,10 @@ function SessionReservationsComponent() {
   });
 
   // Fetch reservations for this session
-  const { 
-    data: reservationsData, 
+  const {
+    data: reservationsData,
     isLoading: isLoadingReservations,
-    error: reservationsError 
+    error: reservationsError,
   } = useQuery({
     queryKey: ['reservations', 'session', sessionId],
     queryFn: () => reservationsApi.getReservationsBySession(sessionId),
@@ -63,7 +64,9 @@ function SessionReservationsComponent() {
     mutationFn: (id: string) => reservationsApi.deleteReservation(id),
     onSuccess: (_, id) => {
       toast.success('Reserva eliminada');
-      queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+      queryClient.invalidateQueries({
+        queryKey: ['reservations', 'session', sessionId],
+      });
       setIsDeleteModalOpen(false);
       setSelectedReservation(null);
     },
@@ -98,12 +101,16 @@ function SessionReservationsComponent() {
   };
 
   const handleCreateSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+    queryClient.invalidateQueries({
+      queryKey: ['reservations', 'session', sessionId],
+    });
     setIsCreateModalOpen(false);
   };
 
   const handleEditSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+    queryClient.invalidateQueries({
+      queryKey: ['reservations', 'session', sessionId],
+    });
     setIsEditModalOpen(false);
     setSelectedReservation(null);
   };
@@ -148,7 +155,7 @@ function SessionReservationsComponent() {
         </Button>
       </div>
 
-      <HeaderDescriptor 
+      <HeaderDescriptor
         title={`RESERVAS - ${session?.title || 'Sesión'}`}
         subtitle={`RESERVAS DE LA SESIÓN ${session ? `(${new Date(session.date).toLocaleDateString('es-ES')})` : ''}`}
       />
@@ -164,7 +171,8 @@ function SessionReservationsComponent() {
             <div>
               <div className="text-sm text-gray-600">Fecha y Hora</div>
               <div className="font-medium">
-                {new Date(session.date).toLocaleDateString('es-ES')} - {session.start_time}
+                {new Date(session.date).toLocaleDateString('es-ES')} -{' '}
+                {session.start_time}
               </div>
             </div>
             <div>
@@ -233,7 +241,8 @@ function SessionReservationsComponent() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar reserva?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará la reserva permanentemente.
+              Esta acción no se puede deshacer. Se eliminará la reserva
+              permanentemente.
               {selectedReservation && (
                 <div className="mt-2 font-medium">
                   Reserva: {selectedReservation.name}
@@ -258,4 +267,4 @@ function SessionReservationsComponent() {
       </AlertDialog>
     </div>
   );
-} 
+}

@@ -61,9 +61,10 @@ export function SignupForm() {
 
       const user = await response.json();
       //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
-      navigate({ to: "/login" });
+      navigate({ to: '/login' });
     } catch (err: any) {
-      const errorMessage = err.message || 'Error desconocido al intentar registrarte.';
+      const errorMessage =
+        err.message || 'Error desconocido al intentar registrarte.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -71,9 +72,9 @@ export function SignupForm() {
     }
   };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <>

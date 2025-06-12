@@ -30,8 +30,8 @@ export function useBulkDelete<T>({
       onSuccess?.(items);
     },
     onError: (err) => {
-      toast.error(`Error al eliminar ${entityNamePlural}`, { 
-        description: err.message 
+      toast.error(`Error al eliminar ${entityNamePlural}`, {
+        description: err.message,
       });
     },
   });
@@ -44,4 +44,4 @@ export function useBulkDelete<T>({
     handleBulkDelete,
     isBulkDeleting,
   };
-} 
+}

@@ -13,7 +13,6 @@ import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 import { CommunityTable } from '@/components/community/community-table';
 
-
 import { Locate, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -52,9 +51,9 @@ function ComunidadesComponent() {
       toast.error('Error al eliminar comunidad', { description: err.message });
     },
   });
-  
+
   const bulkDeleteCommunityMutation = useMutation({
-    mutationFn: (ids: string[]) => 
+    mutationFn: (ids: string[]) =>
       communitiesApi.bulkDeleteCommunities({ communities: ids }),
     onSuccess: (_, ids) => {
       toast.success('Comunidades eliminadas', {
@@ -78,7 +77,7 @@ function ComunidadesComponent() {
   };
 
   const handleEdit = (community: Community) => {
-      navigate({ to: '/comunidades/ver', search: { id: community.id } });
+    navigate({ to: '/comunidades/ver', search: { id: community.id } });
   };
 
   if (error) return <p>Error cargando comunidades: {error.message}</p>;
@@ -134,7 +133,7 @@ function ComunidadesComponent() {
         dbFieldNames={['name', 'purpose', 'image_url']}
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities({communities: data});
+            await communitiesApi.bulkCreateCommunities({ communities: data });
             setShowUploadDialog(false);
             setShowSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['communities'] });

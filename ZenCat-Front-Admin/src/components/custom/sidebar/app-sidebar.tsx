@@ -12,8 +12,6 @@ import { User as UserType } from '@/types/user';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 import '@/styles/custom/no-scrollbar.css';
-import { useAuth } from '@/context/AuthContext'; // importa tu hook
-
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: UserType;
@@ -92,7 +90,7 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
           <div className="flex items-center gap-2 transition-opacity duration-300 ">
             <Cog className="h-5 w-5" />
             <Globe className="h-5 w-5" />
-            <button 
+            <button
               onClick={() => logout()}
               className="hover:bg-zinc-800 p-1 rounded transition-colors"
               title="Cerrar Sesión"

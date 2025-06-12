@@ -48,7 +48,7 @@ export function LocalsTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getLocalColumns({ onEdit, onDelete , onView});
+  const columns = getLocalColumns({ onEdit, onDelete, onView });
 
   const table = useReactTable({
     data,

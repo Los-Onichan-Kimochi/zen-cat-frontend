@@ -29,12 +29,12 @@ class ApiClient {
     Cookies.set('access_token', tokens.access_token, {
       expires: tokens.expires_in ? tokens.expires_in / (24 * 60 * 60) : 1, // Convert seconds to days
       secure: window.location.protocol === 'https:',
-      sameSite: 'strict'
+      sameSite: 'strict',
     });
     Cookies.set('refresh_token', tokens.refresh_token, {
       expires: 7, // 7 days for refresh token
       secure: window.location.protocol === 'https:',
-      sameSite: 'strict'
+      sameSite: 'strict',
     });
   }
 
@@ -54,8 +54,8 @@ class ApiClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${refreshToken}`
-        }
+          Authorization: `Bearer ${refreshToken}`,
+        },
       });
 
       if (response.ok) {
@@ -72,7 +72,7 @@ class ApiClient {
 
   async request<T = any>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getAuthToken();
@@ -110,7 +110,9 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        error.message || `HTTP error! status: ${response.status}`,
+      );
     }
 
     return response.json();
@@ -154,4 +156,4 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(API_CONFIG.BASE_URL); 
+export const apiClient = new ApiClient(API_CONFIG.BASE_URL);

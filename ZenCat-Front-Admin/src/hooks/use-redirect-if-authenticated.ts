@@ -13,4 +13,4 @@ export function useRedirectIfAuthenticated(redirectTo: string = '/') {
   }, [isAuthenticated, isLoading, navigate, redirectTo]);
 
   return { isLoading, isAuthenticated };
-} 
+}

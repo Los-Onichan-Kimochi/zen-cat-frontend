@@ -8,17 +8,20 @@ interface ProtectedRouteProps {
   fallback?: ReactNode;
 }
 
-export function ProtectedRoute({ 
-  children, 
+export function ProtectedRoute({
+  children,
   redirectTo = '/login',
-  fallback 
+  fallback,
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      console.log('ProtectedRoute: User not authenticated, redirecting to:', redirectTo);
+      console.log(
+        'ProtectedRoute: User not authenticated, redirecting to:',
+        redirectTo,
+      );
       navigate({ to: redirectTo });
     }
   }, [isAuthenticated, isLoading, navigate, redirectTo]);
@@ -43,4 +46,4 @@ export function ProtectedRoute({
   }
 
   return <>{children}</>;
-} 
+}

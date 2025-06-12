@@ -23,9 +23,22 @@ import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
 import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
 import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
 import { Region, Provincia, Distrito, UpdateLocalPayload } from '@/types/local';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 const regiones: Region[] = rawRegiones;
 const provincias: Provincia[] = rawProvincias;
 const distritos: Distrito[] = rawDistritos;
@@ -46,11 +59,9 @@ const localFormSchema = z.object({
     .string()
     .min(1, { message: 'El distrito debe ser seleccionado.' }),
   reference: z.string().min(1, { message: 'La referencia es requerida.' }),
-  capacity: z
-    .number()
-    .min(2, {
-      message: 'La capacidad debe ser un numero entero mayor o igual a 2.',
-    }),
+  capacity: z.number().min(2, {
+    message: 'La capacidad debe ser un numero entero mayor o igual a 2.',
+  }),
   image_url: z.any().optional(),
 });
 
@@ -76,9 +87,8 @@ function EditLocalComponent() {
   } = useQuery({
     queryKey: ['local', id],
     queryFn: () => localsApi.getLocalById(id!),
-    enabled: !!id
+    enabled: !!id,
   });
-
 
   const form = useForm<LocalFormData>({
     resolver: zodResolver(localFormSchema),
@@ -101,42 +111,45 @@ function EditLocalComponent() {
     formState: { errors },
     watch,
     reset,
-  } = form
+  } = form;
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [selectedDistrito, setSelectedDistrito] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const department = regiones.find(
-    (region) => region.name === form.watch('region')
-  )
-  const provincia = provincias.find(
-    (prov) => prov.name === form.watch('province')
-  )
-  const provinciasFiltradas = provincias.filter(
-    (prov) => prov.department_id === department?.id
-  )
-  const distritosFiltrados = distritos.filter(
-    (dist) => dist.department_id === department?.id && dist.province_id === provincia?.id
+    (region) => region.name === form.watch('region'),
   );
-    const updateMutation = useMutation({
-      mutationFn: async (
-        data: UpdateLocalPayload & { imageFile?: File | null },
-      ) => {
-        let imageUrl = data.imageFile
-          ? URL.createObjectURL(data.imageFile)
-          : local?.image_url || 'https://via.placeholder.com/150';
-        return localsApi.updateLocal(id!, {
-          local_name: data.local_name,
-          street_name: data.street_name,
-          building_number: data.building_number,
-          region: data.region,
-          province: data.province,
-          district: data.district,
-          reference: data.reference,
-          capacity: data.capacity,
-          image_url: imageUrl,
-        });
-      },onSuccess: () => {
+  const provincia = provincias.find(
+    (prov) => prov.name === form.watch('province'),
+  );
+  const provinciasFiltradas = provincias.filter(
+    (prov) => prov.department_id === department?.id,
+  );
+  const distritosFiltrados = distritos.filter(
+    (dist) =>
+      dist.department_id === department?.id &&
+      dist.province_id === provincia?.id,
+  );
+  const updateMutation = useMutation({
+    mutationFn: async (
+      data: UpdateLocalPayload & { imageFile?: File | null },
+    ) => {
+      let imageUrl = data.imageFile
+        ? URL.createObjectURL(data.imageFile)
+        : local?.image_url || 'https://via.placeholder.com/150';
+      return localsApi.updateLocal(id!, {
+        local_name: data.local_name,
+        street_name: data.street_name,
+        building_number: data.building_number,
+        region: data.region,
+        province: data.province,
+        district: data.district,
+        reference: data.reference,
+        capacity: data.capacity,
+        image_url: imageUrl,
+      });
+    },
+    onSuccess: () => {
       toast.success('Local actualizado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['local', id] });
       setIsEditing(false);
@@ -180,61 +193,65 @@ function EditLocalComponent() {
       <Card>
         <CardHeader>
           <CardTitle>Campos del Local</CardTitle>
-          <CardDescription>
-            Detalles del local para editar
-          </CardDescription>
+          <CardDescription>Detalles del local para editar</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form className='space-y-2' onSubmit={form.handleSubmit((data=>{
-            updateMutation.mutate({ ...data, imageFile });
-            }))}>
+            <form
+              className="space-y-2"
+              onSubmit={form.handleSubmit((data) => {
+                updateMutation.mutate({ ...data, imageFile });
+              })}
+            >
               <FormField
-                name='local_name'
+                name="local_name"
                 control={control}
-                render={({ field }) => <FormItem>
-                  <FormLabel>Nombre del Local</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>}
-              />
-              <FormField
-                control={control}
-                name='street_name'
-                render={({ field }) =>
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Nombre de la calle
-                    </FormLabel>
+                    <FormLabel>Nombre del Local</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>}
+                  </FormItem>
+                )}
               />
               <FormField
                 control={control}
-                name='building_number'
-                render={({ field }) =>
+                name="street_name"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Número de edificio
-                    </FormLabel>
+                    <FormLabel>Nombre de la calle</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>}
+                  </FormItem>
+                )}
               />
-              <div className='flex gap-2'>
+              <FormField
+                control={control}
+                name="building_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de edificio</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-2">
                 <FormField
                   control={control}
-                  name='region'
-                  render={({ field }) =>
+                  name="region"
+                  render={({ field }) => (
                     <FormItem>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccione una región" />
@@ -248,14 +265,19 @@ function EditLocalComponent() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </FormItem>}
+                    </FormItem>
+                  )}
                 />
                 <FormField
                   control={control}
-                  name='province'
-                  render={({ field }) =>
+                  name="province"
+                  render={({ field }) => (
                     <FormItem>
-                      <Select disabled={!form.getValues('region')} onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        disabled={!form.getValues('region')}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccione una provincia" />
@@ -269,14 +291,19 @@ function EditLocalComponent() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </FormItem>}
+                    </FormItem>
+                  )}
                 />
                 <FormField
                   control={control}
-                  name='district'
-                  render={({ field }) =>
+                  name="district"
+                  render={({ field }) => (
                     <FormItem>
-                      <Select disabled={!form.getValues('province')} onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        disabled={!form.getValues('province')}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccione un distrito" />
@@ -290,47 +317,43 @@ function EditLocalComponent() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </FormItem>}
+                    </FormItem>
+                  )}
                 />
-                
               </div>
               <FormField
-                  control={control}
-                  name='reference'
-                  render={({ field }) =>
-                    <FormItem>
-                      <FormLabel>
-                        Referencia
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>}
-                />
-              <FormField
                 control={control}
-                name='capacity'
-                render={({ field }) =>
+                name="reference"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Capacidad
-                    </FormLabel>
+                    <FormLabel>Referencia</FormLabel>
                     <FormControl>
-                      <Input type='number' {...field} />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Capacidad</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <div>
-                <Button type="submit">
-                  Guardar
-                </Button>
+                <Button type="submit">Guardar</Button>
               </div>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

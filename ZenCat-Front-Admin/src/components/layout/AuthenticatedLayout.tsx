@@ -8,19 +8,15 @@ interface AuthenticatedLayoutProps {
   requiredRole?: 'admin' | 'user' | 'guest';
 }
 
-export function AuthenticatedLayout({ 
-  children, 
-  requiredRole 
+export function AuthenticatedLayout({
+  children,
+  requiredRole,
 }: AuthenticatedLayoutProps) {
   const { user } = useAuth();
 
   return (
     <ProtectedRoute requiredRole={requiredRole}>
-      {user && (
-        <MainLayout user={user}>
-          {children}
-        </MainLayout>
-      )}
+      {user && <MainLayout user={user}>{children}</MainLayout>}
     </ProtectedRoute>
   );
-} 
+}

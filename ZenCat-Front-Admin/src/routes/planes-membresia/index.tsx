@@ -52,21 +52,25 @@ function PlanesMembresiaComponent() {
   });
 
   const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: string[]) => 
-        membershipPlansApi.bulkDeleteMembershipPlans({ plans: ids }),
+    mutationFn: (ids: string[]) =>
+      membershipPlansApi.bulkDeleteMembershipPlans({ plans: ids }),
     onSuccess: (_, ids) => {
-      toast.success('Planes eliminados', { description: `${ids.length} registros` });
+      toast.success('Planes eliminados', {
+        description: `${ids.length} registros`,
+      });
       queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples planes', { description: err.message });
+      toast.error('Error al eliminar múltiples planes', {
+        description: err.message,
+      });
     },
   });
 
   const handleBulkDelete = (ids: string[]) => {
     bulkDeleteMutation.mutate(ids, {
       onSuccess: () => {
-        setResetSelectionTrigger(prev => prev + 1);
+        setResetSelectionTrigger((prev) => prev + 1);
       },
     });
   };
@@ -75,7 +79,10 @@ function PlanesMembresiaComponent() {
 
   return (
     <div className="p-6 h-full font-montserrat">
-      <HeaderDescriptor title="PLANES DE MEMBRESÍA" subtitle="LISTADO DE PLANES" />
+      <HeaderDescriptor
+        title="PLANES DE MEMBRESÍA"
+        subtitle="LISTADO DE PLANES"
+      />
 
       <div className="mb-6 flex items-center">
         <HomeCard
@@ -127,8 +134,8 @@ function PlanesMembresiaComponent() {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Comunidades"
-        expectedExcelColumns={["Nombre", "Propósito", "Logo"]}
-        dbFieldNames={["name", "purpose", "image_url"]}
+        expectedExcelColumns={['Nombre', 'Propósito', 'Logo']}
+        dbFieldNames={['name', 'purpose', 'image_url']}
         onParsedData={async (data) => {
           try {
             //await communitiesApi.bulkCreateCommunities(data);
@@ -137,7 +144,7 @@ function PlanesMembresiaComponent() {
             queryClient.invalidateQueries({ queryKey: ['communities'] });
           } catch (error) {
             console.error(error);
-            toast.error("Error durante la carga masiva");
+            toast.error('Error durante la carga masiva');
           }
         }}
       />

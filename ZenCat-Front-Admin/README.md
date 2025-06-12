@@ -123,21 +123,25 @@ Para probar el sistema, puedes usar estas credenciales:
 ### Testing de Autenticación
 
 #### Caso 1: Login Exitoso
+
 1. Ve a `/login`
 2. Ingresa las credenciales válidas
 3. Deberías ser redirigido al dashboard con la barra lateral
 
 #### Caso 2: Login Fallido
-1. Ve a `/login` 
+
+1. Ve a `/login`
 2. Ingresa credenciales incorrectas (cualquier email/password inválido)
 3. Deberías ver un mensaje de error toast
 4. Deberías permanecer en la página de login
 
 #### Caso 3: Protección de Rutas
+
 1. Sin estar logueado, intenta acceder a `/` o `/comunidades`
 2. Deberías ser redirigido automáticamente a `/login`
 
 #### Caso 4: Logout
+
 1. Una vez logueado, busca el ícono de logout en la barra lateral (abajo)
 2. Al hacer click, deberías ser redirigido a `/login`
 3. Intenta acceder a rutas protegidas - deberías ser redirigido a login
@@ -151,7 +155,7 @@ curl -X POST http://localhost:8098/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Nuevo",
-    "first_last_name": "Usuario", 
+    "first_last_name": "Usuario",
     "second_last_name": "Test",
     "email": "nuevo@test.com",
     "password": "password123",
@@ -178,7 +182,7 @@ curl -X POST http://localhost:8098/register/ \
 ## Endpoints de API
 
 - `POST /login/`: Autenticación de usuario
-- `POST /register/`: Registro de nuevo usuario  
+- `POST /register/`: Registro de nuevo usuario
 - `GET /me/`: Información del usuario actual
 - `POST /auth/refresh/`: Renovar tokens
 - `POST /auth/logout/`: Cerrar sesión
@@ -186,16 +190,19 @@ curl -X POST http://localhost:8098/register/ \
 ## Troubleshooting
 
 ### Error: "Credenciales incorrectas" con credenciales válidas
+
 - Verifica que el backend esté ejecutándose en `http://localhost:8098`
 - Confirma que el usuario existe en la base de datos
 - Revisa la consola del navegador para errores de red
 
 ### Error: "Error de conexión"
+
 - Confirma que `VITE_API_BASE_URL` esté configurado correctamente
 - Verifica que el backend esté ejecutándose
 - Revisa las políticas CORS del backend
 
 ### Redirección infinita a login
+
 - Limpia las cookies del navegador
 - Limpia localStorage
 - Verifica que los tokens no estén corruptos en las cookies

@@ -3,19 +3,25 @@ import {
   CreateMembershipPlanPayload,
   UpdateMembershipPlanPayload,
   BulkCreateMembershipPlanPayload,
-  BulkDeleteMembershipPlanPayload
+  BulkDeleteMembershipPlanPayload,
 } from '@/types/membership-plan';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
 export const membershipPlansApi = {
-  
-  createMembershipPlan: async (payload: CreateMembershipPlanPayload): Promise<MembershipPlan> => {
+  createMembershipPlan: async (
+    payload: CreateMembershipPlanPayload,
+  ): Promise<MembershipPlan> => {
     return apiClient.post<MembershipPlan>(API_ENDPOINTS.PLANS.BASE, payload);
   },
 
-  bulkCreateMembershipPlans: async (payload: BulkCreateMembershipPlanPayload): Promise<MembershipPlan[]> => {
-    const data = await apiClient.post<any>(API_ENDPOINTS.PLANS.BULK_CREATE, payload);
+  bulkCreateMembershipPlans: async (
+    payload: BulkCreateMembershipPlanPayload,
+  ): Promise<MembershipPlan[]> => {
+    const data = await apiClient.post<any>(
+      API_ENDPOINTS.PLANS.BULK_CREATE,
+      payload,
+    );
     return data.membership_plans || data;
   },
 
@@ -27,7 +33,9 @@ export const membershipPlansApi = {
       return data;
     }
     console.error('Unexpected data structure from /plan/ endpoint:', data);
-    throw new Error('Unexpected data structure from membership plans API for list');
+    throw new Error(
+      'Unexpected data structure from membership plans API for list',
+    );
   },
 
   getMembershipPlanById: async (id: string): Promise<MembershipPlan> => {
@@ -36,17 +44,21 @@ export const membershipPlansApi = {
 
   updateMembershipPlan: async (
     id: string,
-    payload: UpdateMembershipPlanPayload
+    payload: UpdateMembershipPlanPayload,
   ): Promise<MembershipPlan> => {
-    return apiClient.patch<MembershipPlan>(API_ENDPOINTS.PLANS.BY_ID(id), payload);
+    return apiClient.patch<MembershipPlan>(
+      API_ENDPOINTS.PLANS.BY_ID(id),
+      payload,
+    );
   },
 
   deleteMembershipPlan: async (id: string): Promise<void> => {
     return apiClient.delete(API_ENDPOINTS.PLANS.BY_ID(id));
   },
 
-  bulkDeleteMembershipPlans: async (payload: BulkDeleteMembershipPlanPayload): Promise<void> => {
+  bulkDeleteMembershipPlans: async (
+    payload: BulkDeleteMembershipPlanPayload,
+  ): Promise<void> => {
     return apiClient.delete(API_ENDPOINTS.PLANS.BULK_DELETE, payload);
   },
-
 };

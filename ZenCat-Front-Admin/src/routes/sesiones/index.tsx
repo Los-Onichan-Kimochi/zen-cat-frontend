@@ -23,7 +23,6 @@ import {
 import { SessionsTable } from '@/components/sessions/table';
 import { getSessionCurrentState } from '@/utils/session-status';
 
-
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
 });
@@ -54,7 +53,6 @@ function SesionesComponent() {
   });
 
   // Mock data for reservations - you should replace this with actual API call
-
 
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<
     void,
@@ -105,7 +103,7 @@ function SesionesComponent() {
         end_time: session.end_time,
         state: session.state,
       });
-      
+
       if (currentState in calculatedCounts) {
         calculatedCounts[currentState]++;
       }
@@ -126,8 +124,6 @@ function SesionesComponent() {
     setSessionToDelete(session);
     setIsDeleteModalOpen(true);
   };
-
-
 
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);

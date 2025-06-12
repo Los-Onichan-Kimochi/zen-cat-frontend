@@ -7,16 +7,19 @@ interface GuestOnlyRouteProps {
   redirectTo?: string;
 }
 
-export function GuestOnlyRoute({ 
-  children, 
-  redirectTo = '/' 
+export function GuestOnlyRoute({
+  children,
+  redirectTo = '/',
 }: GuestOnlyRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      console.log('GuestOnlyRoute: User already authenticated, redirecting to:', redirectTo);
+      console.log(
+        'GuestOnlyRoute: User already authenticated, redirecting to:',
+        redirectTo,
+      );
       navigate({ to: redirectTo });
     }
   }, [isAuthenticated, isLoading, navigate, redirectTo]);
@@ -36,4 +39,4 @@ export function GuestOnlyRoute({
   }
 
   return <>{children}</>;
-} 
+}

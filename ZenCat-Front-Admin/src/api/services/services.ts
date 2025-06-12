@@ -8,7 +8,9 @@ import { API_ENDPOINTS } from '@/config/api';
 
 export const servicesApi = {
   getServices: async (): Promise<Service[]> => {
-    const data = await apiClient.get<{ services: Service[] }>(API_ENDPOINTS.SERVICES.BASE);
+    const data = await apiClient.get<{ services: Service[] }>(
+      API_ENDPOINTS.SERVICES.BASE,
+    );
     if (data && Array.isArray(data.services)) {
       return data.services;
     } else if (Array.isArray(data)) {
@@ -38,6 +40,8 @@ export const servicesApi = {
   },
 
   bulkDeleteServices: async (ids: string[]): Promise<void> => {
-    return apiClient.delete(API_ENDPOINTS.SERVICES.BULK_DELETE, { services: ids });
+    return apiClient.delete(API_ENDPOINTS.SERVICES.BULK_DELETE, {
+      services: ids,
+    });
   },
 };

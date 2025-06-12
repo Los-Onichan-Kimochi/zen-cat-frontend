@@ -5,7 +5,15 @@ import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
 import { ViewToolbar } from '@/components/common/view-toolbar';
 
-import { Users, Loader2, MoreHorizontal, ArrowUpDown, Plus, Upload, Trash } from 'lucide-react';
+import {
+  Users,
+  Loader2,
+  MoreHorizontal,
+  ArrowUpDown,
+  Plus,
+  Upload,
+  Trash,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
@@ -13,11 +21,11 @@ import { Service, ServiceType } from '@/types/service';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { 
-  ColumnDef, 
-  Row, 
-  Column, 
-  Table, 
+import {
+  ColumnDef,
+  Row,
+  Column,
+  Table,
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
@@ -28,8 +36,8 @@ import {
   VisibilityState,
   PaginationState,
 } from '@tanstack/react-table';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { ServicesTable } from '@/components/services/table';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import {
@@ -77,7 +85,11 @@ function ServiciosComponent() {
     queryFn: servicesApi.getServices,
   });
 
-  const { mutate: deleteService, isPending: isDeleting } = useMutation<void, Error, string>({
+  const { mutate: deleteService, isPending: isDeleting } = useMutation<
+    void,
+    Error,
+    string
+  >({
     mutationFn: (id) => servicesApi.deleteService(id),
     onSuccess: (_, id) => {
       toast.success('Servicio eliminado', { description: `ID ${id}` });
@@ -130,87 +142,97 @@ function ServiciosComponent() {
     setServiceToDelete(service);
     setIsDeleteModalOpen(true);
   };
-  
-  const columns = useMemo<ColumnDef<Service>[]>(() => [
-    {
-      id: "select",
-      header: ({ table }: { table: Table<Service> }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }: { row: Row<Service> }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value: boolean | 'indeterminate') => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "name",
-      header: ({ column }: { column: Column<Service, unknown> }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Nombre
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
+
+  const columns = useMemo<ColumnDef<Service>[]>(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }: { table: Table<Service> }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value: boolean | 'indeterminate') =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }: { row: Row<Service> }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value: boolean | 'indeterminate') =>
+              row.toggleSelected(!!value)
+            }
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
       },
-      cell: ({ row }: { row: Row<Service> }) => <div>{row.getValue("name")}</div>
-    },
-    {
-      id: "is_virtual",
-      header: "¿Es virtual?",
-      accessorFn: (row: Service) => row.is_virtual ? "Sí" : "No",
-    },
-    {
-      
-      id: "description",
-      header: "Descripción",
-      accessorFn: (row: Service) => row.description,
-    },
-    {
-      id: "actions",
-      cell: ({ row }: { row: Row<Service> }) => {
-        const serv = row.original;
-        return (
-          <div className="flex items-center space-x-2">
+      {
+        accessorKey: 'name',
+        header: ({ column }: { column: Column<Service, unknown> }) => {
+          return (
             <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                localStorage.setItem('currentService', serv.id);
-                navigate({ to: `/servicios/servicio-ver` });
-              }}
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
             >
-              <MoreHorizontal className="h-4 w-4" />
+              Nombre
+              <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
-            <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                setServiceToDelete(serv);
-                setIsDeleteModalOpen(true);
-              }}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        );
+          );
+        },
+        cell: ({ row }: { row: Row<Service> }) => (
+          <div>{row.getValue('name')}</div>
+        ),
       },
-    },
-  ], []);
+      {
+        id: 'is_virtual',
+        header: '¿Es virtual?',
+        accessorFn: (row: Service) => (row.is_virtual ? 'Sí' : 'No'),
+      },
+      {
+        id: 'description',
+        header: 'Descripción',
+        accessorFn: (row: Service) => row.description,
+      },
+      {
+        id: 'actions',
+        cell: ({ row }: { row: Row<Service> }) => {
+          const serv = row.original;
+          return (
+            <div className="flex items-center space-x-2">
+              <Button
+                className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  localStorage.setItem('currentService', serv.id);
+                  navigate({ to: `/servicios/servicio-ver` });
+                }}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+              <Button
+                className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setServiceToDelete(serv);
+                  setIsDeleteModalOpen(true);
+                }}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: servicesData || [],
@@ -292,14 +314,20 @@ function ServiciosComponent() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas eliminar este servicio?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas eliminar este servicio?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">Servicio: {serviceToDelete?.name}</div>
+              <div className="mt-2 font-medium">
+                Servicio: {serviceToDelete?.name}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button
                 variant="destructive"

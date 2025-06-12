@@ -15,9 +15,14 @@ export const communitiesApi = {
     return apiClient.post<Community>(API_ENDPOINTS.COMMUNITIES.BASE, payload);
   },
 
-  bulkCreateCommunities: async (payload: BulkCreateCommunityPayload): Promise<Community[]> => {
+  bulkCreateCommunities: async (
+    payload: BulkCreateCommunityPayload,
+  ): Promise<Community[]> => {
     console.log('Creating communities:', payload);
-    return apiClient.post<Community[]>(API_ENDPOINTS.COMMUNITIES.BULK_CREATE, payload);
+    return apiClient.post<Community[]>(
+      API_ENDPOINTS.COMMUNITIES.BULK_CREATE,
+      payload,
+    );
   },
 
   getCommunities: async (): Promise<Community[]> => {
@@ -39,14 +44,22 @@ export const communitiesApi = {
     id: string,
     payload: UpdateCommunityPayload,
   ): Promise<Community> => {
-    return apiClient.patch<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(id), payload);
+    return apiClient.patch<Community>(
+      API_ENDPOINTS.COMMUNITIES.BY_ID(id),
+      payload,
+    );
   },
 
   deleteCommunity: async (id: string): Promise<void> => {
     return apiClient.delete<void>(API_ENDPOINTS.COMMUNITIES.BY_ID(id));
   },
 
-  bulkDeleteCommunities: async (payload: BulkDeleteCommunityPayload): Promise<void> => {
-    return apiClient.delete<void>(API_ENDPOINTS.COMMUNITIES.BULK_DELETE, payload);
+  bulkDeleteCommunities: async (
+    payload: BulkDeleteCommunityPayload,
+  ): Promise<void> => {
+    return apiClient.delete<void>(
+      API_ENDPOINTS.COMMUNITIES.BULK_DELETE,
+      payload,
+    );
   },
 };

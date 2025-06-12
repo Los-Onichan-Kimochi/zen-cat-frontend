@@ -30,14 +30,20 @@ export const professionalsApi = {
   createProfessional: async (
     payload: CreateProfessionalPayload,
   ): Promise<Professional> => {
-    return apiClient.post<Professional>(API_ENDPOINTS.PROFESSIONALS.BASE, payload);
+    return apiClient.post<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BASE,
+      payload,
+    );
   },
 
   updateProfessional: async (
     id: string,
     payload: UpdateProfessionalPayload,
   ): Promise<Professional> => {
-    return apiClient.patch<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(id), payload);
+    return apiClient.patch<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BY_ID(id),
+      payload,
+    );
   },
 
   deleteProfessional: async (id: string): Promise<void> => {
@@ -45,6 +51,8 @@ export const professionalsApi = {
   },
 
   bulkDeleteProfessionals: async (ids: string[]): Promise<void> => {
-    return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BULK_DELETE, { professionals: ids });
+    return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BULK_DELETE, {
+      professionals: ids,
+    });
   },
 };

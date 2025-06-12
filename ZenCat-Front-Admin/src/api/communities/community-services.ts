@@ -9,7 +9,6 @@ export const communityServicesApi = {
   bulkCreateCommunityServices: async (
     communityServices: CreateCommunityServicePayload[],
   ): Promise<CommunityService[]> => {
-
     const response = await fetch(
       `${API_BASE_URL}/community-service/bulk-create/`,
       {
@@ -26,7 +25,7 @@ export const communityServicesApi = {
     return response.json();
   },
 
-   deleteCommunityService: async (
+  deleteCommunityService: async (
     communityId: string,
     serviceId: string,
   ): Promise<void> => {
@@ -55,22 +54,26 @@ export const communityServicesApi = {
     }
   },
 
-  getCommunityServices: async (communityId?: string, serviceId?: string): Promise<CommunityService[]> => {
+  getCommunityServices: async (
+    communityId?: string,
+    serviceId?: string,
+  ): Promise<CommunityService[]> => {
     const queryParams = new URLSearchParams();
 
-    if (communityId) queryParams.append("communityId", communityId);
-    if (serviceId) queryParams.append("serviceId", serviceId);
+    if (communityId) queryParams.append('communityId', communityId);
+    if (serviceId) queryParams.append('serviceId', serviceId);
 
-    const response = await fetch(`${API_BASE_URL}/community-service/?${queryParams.toString()}`);
+    const response = await fetch(
+      `${API_BASE_URL}/community-service/?${queryParams.toString()}`,
+    );
     if (!response.ok) throw new Error('Error fetching community-services');
     const data = await response.json();
-    
+
     if (data && Array.isArray(data.community_services)) {
       return data.community_services;
     } else if (Array.isArray(data)) {
       return data;
     }
     throw new Error('Unexpected data structure from community-service API');
-  }
-
+  },
 };

@@ -18,11 +18,14 @@ export function useCurrentUser() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {
       // Don't retry on 401 errors (authentication failed)
-      if (error?.message?.includes('401') || error?.message?.includes('Authentication failed')) {
+      if (
+        error?.message?.includes('401') ||
+        error?.message?.includes('Authentication failed')
+      ) {
         return false;
       }
       return failureCount < 3;
-    }
+    },
   });
 }
 
@@ -36,19 +39,19 @@ export function useLogin() {
     onSuccess: (data) => {
       // Cache the current user data
       queryClient.setQueryData(authQueryKeys.currentUser, data.user);
-      
+
       toast.success('Inicio de sesión exitoso', {
-        description: `Bienvenido, ${data.user.name}!`
+        description: `Bienvenido, ${data.user.name}!`,
       });
-      
+
       // Redirect to dashboard
       navigate({ to: '/' });
     },
     onError: (error: Error) => {
       toast.error('Error al iniciar sesión', {
-        description: error.message || 'Credenciales inválidas'
+        description: error.message || 'Credenciales inválidas',
       });
-    }
+    },
   });
 }
 
@@ -62,19 +65,19 @@ export function useRegister() {
     onSuccess: (data) => {
       // Cache the current user data
       queryClient.setQueryData(authQueryKeys.currentUser, data.user);
-      
+
       toast.success('Registro exitoso', {
-        description: `Bienvenido, ${data.user.name}!`
+        description: `Bienvenido, ${data.user.name}!`,
       });
-      
+
       // Redirect to dashboard
       navigate({ to: '/' });
     },
     onError: (error: Error) => {
       toast.error('Error al registrarse', {
-        description: error.message || 'No se pudo completar el registro'
+        description: error.message || 'No se pudo completar el registro',
       });
-    }
+    },
   });
 }
 
@@ -88,28 +91,28 @@ export function useLogout() {
     onSuccess: () => {
       // Clear all cached data
       queryClient.clear();
-      
+
       toast.success('Sesión cerrada correctamente');
-      
+
       // Redirect to login
       navigate({ to: '/login' });
     },
     onError: (error: Error) => {
       toast.error('Error al cerrar sesión', {
-        description: error.message
+        description: error.message,
       });
-    }
+    },
   });
 }
 
 // Hook for checking authentication status
 export function useAuthStatus() {
   const { data: user, isLoading, error } = useCurrentUser();
-  
+
   return {
     user,
     isAuthenticated: !!user && authService.isAuthenticated(),
     isLoading,
-    error
+    error,
   };
-} 
+}

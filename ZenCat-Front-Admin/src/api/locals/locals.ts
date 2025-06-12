@@ -1,4 +1,10 @@
-import { Local, CreateLocalPayload, UpdateLocalPayload, BulkCreateLocalPayload, BulkDeleteLocalPayload } from '@/types/local';
+import {
+  Local,
+  CreateLocalPayload,
+  UpdateLocalPayload,
+  BulkCreateLocalPayload,
+  BulkDeleteLocalPayload,
+} from '@/types/local';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
@@ -24,7 +30,7 @@ export const localsApi = {
 
   updateLocal: async (
     id: string,
-    payload: UpdateLocalPayload
+    payload: UpdateLocalPayload,
   ): Promise<Local> => {
     return apiClient.patch<Local>(API_ENDPOINTS.LOCALS.BY_ID(id), payload);
   },
@@ -37,8 +43,13 @@ export const localsApi = {
     return apiClient.delete(API_ENDPOINTS.LOCALS.BULK_DELETE, payload);
   },
 
-  bulkCreateLocals: async (payload: BulkCreateLocalPayload): Promise<Local[]> => {
-    const data = await apiClient.post<any>(API_ENDPOINTS.LOCALS.BULK_CREATE, payload);
+  bulkCreateLocals: async (
+    payload: BulkCreateLocalPayload,
+  ): Promise<Local[]> => {
+    const data = await apiClient.post<any>(
+      API_ENDPOINTS.LOCALS.BULK_CREATE,
+      payload,
+    );
     return data.locals || data;
   },
 };

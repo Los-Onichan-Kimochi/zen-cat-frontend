@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
   fallback?: ReactNode;
 }
 
-export function ProtectedRoute({ 
-  children, 
+export function ProtectedRoute({
+  children,
   requiredRole,
-  fallback 
+  fallback,
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -38,7 +38,9 @@ export function ProtectedRoute({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Sesión Expirada</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            Sesión Expirada
+          </h1>
           <p className="text-gray-600 mb-4">
             Tu sesión ha expirado. Serás redirigido al login.
           </p>
@@ -63,4 +65,4 @@ export function ProtectedRoute({
   }
 
   return <>{children}</>;
-} 
+}

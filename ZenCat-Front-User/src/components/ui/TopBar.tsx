@@ -48,12 +48,12 @@ export const TopBar = () => {
         >
           Contacto
         </Link>
-        
+
         {/* Enlaces adicionales para usuarios autenticados */}
         {user && (
           <>
-            <Link 
-              to="/reservas" 
+            <Link
+              to="/reservas"
               className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out flex items-center"
             >
               <CalendarIcon className="mr-1 h-4 w-4" />
@@ -68,8 +68,8 @@ export const TopBar = () => {
         {user ? (
           <div className="flex items-center space-x-3">
             {/* Enlace al perfil */}
-            <Link 
-              to="/perfil" 
+            <Link
+              to="/perfil"
               className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-800 transition"
             >
               {user.imageUrl ? (
@@ -83,10 +83,10 @@ export const TopBar = () => {
               )}
               <span className="text-sm">{user.name || user.email}</span>
             </Link>
-            
+
             {/* Icono de perfil para móvil */}
-            <Link 
-              to="/perfil" 
+            <Link
+              to="/perfil"
               className="sm:hidden p-2 rounded-full hover:bg-gray-800 transition"
               aria-label="Mi perfil"
             >
@@ -100,7 +100,7 @@ export const TopBar = () => {
                 <PersonIcon className="h-6 w-6 text-white" />
               )}
             </Link>
-            
+
             {/* Botón de logout */}
             <button
               onClick={logout}

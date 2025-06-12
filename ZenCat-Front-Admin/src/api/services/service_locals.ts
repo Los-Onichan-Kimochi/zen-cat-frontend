@@ -8,15 +8,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const serviceLocalApi = {
   // List all associations (optionally filtered)
-  fetchServiceLocals: async (
-    params?: { serviceId?: string; localId?: string }
-  ): Promise<ServiceLocal[]> => {
+  fetchServiceLocals: async (params?: {
+    serviceId?: string;
+    localId?: string;
+  }): Promise<ServiceLocal[]> => {
     const query = new URLSearchParams();
     if (params?.serviceId) query.append('serviceId', params.serviceId);
     if (params?.localId) query.append('localId', params.localId);
 
     const response = await fetch(
-      `${API_BASE_URL}/service-local/?${query.toString()}`
+      `${API_BASE_URL}/service-local/?${query.toString()}`,
     );
     if (!response.ok) throw new Error('Error fetching service-locals');
     const data = await response.json();
@@ -62,8 +63,7 @@ export const serviceLocalApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!response.ok)
-      throw new Error('Error bulk creating service-locals');
+    if (!response.ok) throw new Error('Error bulk creating service-locals');
     const data = await response.json();
     return data.service_locals;
   },
@@ -91,7 +91,6 @@ export const serviceLocalApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!response.ok)
-      throw new Error('Error bulk deleting service-locals');
+    if (!response.ok) throw new Error('Error bulk deleting service-locals');
   },
 };

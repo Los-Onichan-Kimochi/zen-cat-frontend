@@ -15,7 +15,7 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout/',
     ME: '/me/',
   },
-  
+
   // Community endpoints
   COMMUNITIES: {
     BASE: '/community/',
@@ -23,35 +23,35 @@ export const API_ENDPOINTS = {
     BULK_DELETE: '/community/bulk-delete/',
     BY_ID: (id: string) => `/community/${id}/`,
   },
-  
+
   // User endpoints
   USERS: {
     BASE: '/user/',
     BY_ID: (id: string) => `/user/${id}/`,
     BULK_DELETE: '/user/bulk-delete/',
   },
-  
+
   // Professional endpoints
   PROFESSIONALS: {
     BASE: '/professional/',
     BY_ID: (id: string) => `/professional/${id}/`,
     BULK_DELETE: '/professional/bulk-delete/',
   },
-  
+
   // Session endpoints
   SESSIONS: {
     BASE: '/session/',
     BY_ID: (id: string) => `/session/${id}/`,
     BULK_DELETE: '/session/bulk-delete/',
   },
-  
+
   // Service endpoints
   SERVICES: {
     BASE: '/service/',
     BY_ID: (id: string) => `/service/${id}/`,
     BULK_DELETE: '/service/bulk-delete/',
   },
-  
+
   // Local endpoints
   LOCALS: {
     BASE: '/local/',
@@ -59,7 +59,7 @@ export const API_ENDPOINTS = {
     BULK_CREATE: '/local/bulk-create/',
     BULK_DELETE: '/local/bulk-delete/',
   },
-  
+
   // Plan endpoints
   PLANS: {
     BASE: '/plan/',
@@ -86,4 +86,4 @@ export const HTTP_STATUS = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
-} as const; 
+} as const;

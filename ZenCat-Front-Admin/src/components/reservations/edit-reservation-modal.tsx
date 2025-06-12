@@ -22,7 +22,11 @@ import { X, Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { usuariosApi } from '@/api/usuarios/usuarios';
-import { Reservation, UpdateReservationRequest, ReservationState } from '@/types/reservation';
+import {
+  Reservation,
+  UpdateReservationRequest,
+  ReservationState,
+} from '@/types/reservation';
 
 interface EditReservationModalProps {
   isOpen: boolean;
@@ -81,12 +85,12 @@ export function EditReservationModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name?.trim()) {
       toast.error('El nombre es requerido');
       return;
     }
-    
+
     if (!formData.user_id) {
       toast.error('Debe seleccionar un usuario');
       return;
@@ -103,7 +107,9 @@ export function EditReservationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-xl font-bold">Editar Reserva</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            Editar Reserva
+          </DialogTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -162,8 +168,12 @@ export function EditReservationModal({
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
-                        <span>{user.name} {user.first_last_name}</span>
-                        <span className="text-xs text-gray-500">{user.email}</span>
+                        <span>
+                          {user.name} {user.first_last_name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {user.email}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -190,7 +200,7 @@ export function EditReservationModal({
           <div className="space-y-2">
             <Label htmlFor="state">Estado</Label>
             <Select
-                              value={formData.state || ReservationState.CONFIRMED}
+              value={formData.state || ReservationState.CONFIRMED}
               onValueChange={(value) =>
                 setFormData({ ...formData, state: value as ReservationState })
               }
@@ -199,10 +209,18 @@ export function EditReservationModal({
                 <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ReservationState.CONFIRMED}>Confirmada</SelectItem>
-                <SelectItem value={ReservationState.DONE}>Completada</SelectItem>
-                <SelectItem value={ReservationState.CANCELLED}>Cancelada</SelectItem>
-                <SelectItem value={ReservationState.ANULLED}>Anulada</SelectItem>
+                <SelectItem value={ReservationState.CONFIRMED}>
+                  Confirmada
+                </SelectItem>
+                <SelectItem value={ReservationState.DONE}>
+                  Completada
+                </SelectItem>
+                <SelectItem value={ReservationState.CANCELLED}>
+                  Cancelada
+                </SelectItem>
+                <SelectItem value={ReservationState.ANULLED}>
+                  Anulada
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -227,4 +245,4 @@ export function EditReservationModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

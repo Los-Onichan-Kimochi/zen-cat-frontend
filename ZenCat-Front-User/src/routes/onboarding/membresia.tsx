@@ -9,7 +9,7 @@ const mockCommunity: Community = {
   name: 'Runners',
   description: 'Comunidad de corredores apasionados',
   image: '/community-runners.jpg',
-  membershipPlans: []
+  membershipPlans: [],
 };
 
 const mockPlans: MembershipPlan[] = [
@@ -18,22 +18,22 @@ const mockPlans: MembershipPlan[] = [
     id: '1',
     name: 'Plan básico',
     type: 'Mensual',
-    price: 159.90,
+    price: 159.9,
     duration: '/mes',
     features: [
       'Acceso a una comunidad',
       'Realiza 20 reservas al mes',
       'Recibe notificaciones',
       'Consulta tu historial de reservas',
-      'Puedes desactivar tu membresía desde el perfil'
+      'Puedes desactivar tu membresía desde el perfil',
     ],
-    reservationLimit: 20
+    reservationLimit: 20,
   },
   {
     id: '2',
     name: 'Plan premium',
     type: 'Mensual',
-    price: 199.90,
+    price: 199.9,
     duration: '/mes',
     features: [
       'Acceso a una comunidad',
@@ -41,15 +41,15 @@ const mockPlans: MembershipPlan[] = [
       'Recibe notificaciones',
       'Consulta tu historial de reservas',
       'Puedes desactivar tu membresía desde el perfil',
-      'Acceso prioritario a eventos especiales'
-    ]
+      'Acceso prioritario a eventos especiales',
+    ],
   },
   // Planes Anuales
   {
     id: '3',
     name: 'Plan básico',
     type: 'Anual',
-    price: 1599.90,
+    price: 1599.9,
     duration: '/año',
     features: [
       'Acceso a una comunidad',
@@ -57,15 +57,15 @@ const mockPlans: MembershipPlan[] = [
       'Recibe notificaciones',
       'Consulta tu historial de reservas',
       'Puedes desactivar tu membresía desde el perfil',
-      '2 meses gratis comparado al plan mensual'
+      '2 meses gratis comparado al plan mensual',
     ],
-    reservationLimit: 20
+    reservationLimit: 20,
   },
   {
     id: '4',
     name: 'Plan premium',
     type: 'Anual',
-    price: 1999.90,
+    price: 1999.9,
     duration: '/año',
     features: [
       'Acceso a una comunidad',
@@ -74,9 +74,9 @@ const mockPlans: MembershipPlan[] = [
       'Consulta tu historial de reservas',
       'Puedes desactivar tu membresía desde el perfil',
       'Acceso prioritario a eventos especiales',
-      '2 meses gratis comparado al plan mensual'
-    ]
-  }
+      '2 meses gratis comparado al plan mensual',
+    ],
+  },
 ];
 
 export const Route = createFileRoute('/onboarding/membresia')({
@@ -86,10 +86,7 @@ export const Route = createFileRoute('/onboarding/membresia')({
 function OnboardingMembresiaComponent() {
   return (
     <MembershipOnboardingProvider>
-      <MembershipOnboarding
-        community={mockCommunity}
-        plans={mockPlans}
-      />
+      <MembershipOnboarding community={mockCommunity} plans={mockPlans} />
     </MembershipOnboardingProvider>
   );
-} 
+}

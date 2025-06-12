@@ -67,7 +67,10 @@ export function DataTable<TData>({ table, columns }: DataTableProps<TData>) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center text-gray-500">
+              <TableCell
+                colSpan={columns.length}
+                className="h-32 text-center text-gray-500"
+              >
                 {table.getState().globalFilter
                   ? 'No hay resultados que coincidan con tu búsqueda.'
                   : 'No hay resultados.'}

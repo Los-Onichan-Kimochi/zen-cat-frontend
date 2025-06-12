@@ -23,7 +23,6 @@ import {
 
 import { Local, CreateLocalPayload } from '@/types/local';
 
-
 import { Plus, ChevronLeft } from 'lucide-react';
 
 import '../../index.css';
@@ -36,15 +35,15 @@ function AddLocalPageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
-      register,
-      handleSubmit,
-      control,
-      errors,
-      watch,
-      reset,
-      imageFile,
-      imagePreview,
-      handleImageChange,
+    register,
+    handleSubmit,
+    control,
+    errors,
+    watch,
+    reset,
+    imageFile,
+    imagePreview,
+    handleImageChange,
   } = useLocalForm();
 
   const createLocalMutation = useMutation({
@@ -69,7 +68,7 @@ function AddLocalPageComponent() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.info('Subida simulada de imagen completada');
     }
-    try{
+    try {
       const newLocal = await createLocalMutation.mutateAsync({
         local_name: data.local_name,
         street_name: data.street_name,
@@ -80,11 +79,11 @@ function AddLocalPageComponent() {
         reference: data.reference,
         capacity: data.capacity,
         image_url: data.image_url,
-      })
+      });
       toast.success('Local creado correctamente');
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       navigate({ to: '/locales' });
-    }catch(err: any){
+    } catch (err: any) {
       toast.error('Error al crear local', { description: err.message });
     }
     //createLocalMutation.mutate(payload);

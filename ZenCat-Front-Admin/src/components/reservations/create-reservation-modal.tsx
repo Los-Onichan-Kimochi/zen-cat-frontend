@@ -22,7 +22,10 @@ import { X, Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { usuariosApi } from '@/api/usuarios/usuarios';
-import { CreateReservationRequest, ReservationState } from '@/types/reservation';
+import {
+  CreateReservationRequest,
+  ReservationState,
+} from '@/types/reservation';
 
 interface CreateReservationModalProps {
   isOpen: boolean;
@@ -79,12 +82,12 @@ export function CreateReservationModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('El nombre es requerido');
       return;
     }
-    
+
     if (!formData.user_id) {
       toast.error('Debe seleccionar un usuario');
       return;
@@ -144,8 +147,12 @@ export function CreateReservationModal({
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
-                        <span>{user.name} {user.first_last_name}</span>
-                        <span className="text-xs text-gray-500">{user.email}</span>
+                        <span>
+                          {user.name} {user.first_last_name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {user.email}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -181,10 +188,18 @@ export function CreateReservationModal({
                 <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ReservationState.CONFIRMED}>Confirmada</SelectItem>
-                <SelectItem value={ReservationState.DONE}>Completada</SelectItem>
-                <SelectItem value={ReservationState.CANCELLED}>Cancelada</SelectItem>
-                <SelectItem value={ReservationState.ANULLED}>Anulada</SelectItem>
+                <SelectItem value={ReservationState.CONFIRMED}>
+                  Confirmada
+                </SelectItem>
+                <SelectItem value={ReservationState.DONE}>
+                  Completada
+                </SelectItem>
+                <SelectItem value={ReservationState.CANCELLED}>
+                  Cancelada
+                </SelectItem>
+                <SelectItem value={ReservationState.ANULLED}>
+                  Anulada
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -209,4 +224,4 @@ export function CreateReservationModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -341,7 +341,9 @@ function AgregarUsuario() {
                   >
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
-                    <option value="FOREIGNER_CARD">Carnet de Extranjería</option>
+                    <option value="FOREIGNER_CARD">
+                      Carnet de Extranjería
+                    </option>
                     <option value="PASSPORT">Pasaporte</option>
                   </select>
                   {errors.tipoDoc && (
@@ -368,7 +370,10 @@ function AgregarUsuario() {
                   )}
                 </div>
                 <div>
-                  <label htmlFor="fecha-nacimiento" className="block font-medium mb-1">
+                  <label
+                    htmlFor="fecha-nacimiento"
+                    className="block font-medium mb-1"
+                  >
                     Fecha de nacimiento
                   </label>
                   <Input
@@ -412,7 +417,10 @@ function AgregarUsuario() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="codigo-postal" className="block font-medium mb-1">
+                  <label
+                    htmlFor="codigo-postal"
+                    className="block font-medium mb-1"
+                  >
                     Código postal
                   </label>
                   <Input

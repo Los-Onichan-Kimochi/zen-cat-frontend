@@ -8,15 +8,17 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const serviceProfessionalApi = {
   // List all associations (optionally filtered)
-  fetchServiceProfessionals: async (
-    params?: { serviceId?: string; professionalId?: string }
-  ): Promise<ServiceProfessional[]> => {
+  fetchServiceProfessionals: async (params?: {
+    serviceId?: string;
+    professionalId?: string;
+  }): Promise<ServiceProfessional[]> => {
     const query = new URLSearchParams();
     if (params?.serviceId) query.append('serviceId', params.serviceId);
-    if (params?.professionalId) query.append('professionalId', params.professionalId);
+    if (params?.professionalId)
+      query.append('professionalId', params.professionalId);
 
     const response = await fetch(
-      `${API_BASE_URL}/service-professional/?${query.toString()}`
+      `${API_BASE_URL}/service-professional/?${query.toString()}`,
     );
     if (!response.ok) throw new Error('Error fetching service-professionals');
     const data = await response.json();

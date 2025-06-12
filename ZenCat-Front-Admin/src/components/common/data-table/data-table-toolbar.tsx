@@ -62,7 +62,7 @@ export function DataTableToolbar<TData extends DataWithId>({
   table,
   onBulkDelete,
   isBulkDeleting,
-  isBulkDeleteEnabled=true,
+  isBulkDeleteEnabled = true,
   showBulkDeleteButton = false,
   filterPlaceholder,
   showFilterButton = false,
@@ -95,11 +95,11 @@ export function DataTableToolbar<TData extends DataWithId>({
   }, [table.getState().globalFilter]);
 
   const handleDeleteSelected = () => {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map(
-      row => row.original.id as string
-    );
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.id as string);
 
-    if (selectedIds.length === 0) return; 
+    if (selectedIds.length === 0) return;
 
     if (disableConfirmBulkDelete) {
       onBulkDelete?.(selectedIds);
@@ -108,7 +108,6 @@ export function DataTableToolbar<TData extends DataWithId>({
       setIsBulkDeleteModalOpen(true);
     }
   };
-
 
   const handleConfirmBulkDelete = () => {
     if (onBulkDelete) {

@@ -17,8 +17,9 @@ function MembresiaComponent() {
               Únete a Nuestras Comunidades
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Encuentra tu comunidad perfecta y comienza a disfrutar de experiencias increíbles
-              con personas que comparten tus mismos intereses.
+              Encuentra tu comunidad perfecta y comienza a disfrutar de
+              experiencias increíbles con personas que comparten tus mismos
+              intereses.
             </p>
           </div>
 
@@ -34,11 +35,13 @@ function MembresiaComponent() {
               </div>
               <CardContent className="p-6">
                 <p className="text-gray-600 mb-4">
-                  Únete a nuestra comunidad de corredores. Participa en entrenamientos grupales,
-                  carreras y eventos especiales.
+                  Únete a nuestra comunidad de corredores. Participa en
+                  entrenamientos grupales, carreras y eventos especiales.
                 </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Desde S/ 959.90/mes</span>
+                  <span className="text-sm text-gray-500">
+                    Desde S/ 959.90/mes
+                  </span>
                   <Link to="/onboarding/membresia">
                     <Button className="bg-black text-white hover:bg-gray-800">
                       Únete ahora
@@ -58,12 +61,15 @@ function MembresiaComponent() {
               </div>
               <CardContent className="p-6">
                 <p className="text-gray-600 mb-4">
-                  Encuentra tu equilibrio interior con nuestras clases de yoga y meditación
-                  para todos los niveles.
+                  Encuentra tu equilibrio interior con nuestras clases de yoga y
+                  meditación para todos los niveles.
                 </p>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Próximamente</span>
-                  <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed">
+                  <Button
+                    disabled
+                    className="bg-gray-300 text-gray-500 cursor-not-allowed"
+                  >
                     Próximamente
                   </Button>
                 </div>
@@ -80,12 +86,15 @@ function MembresiaComponent() {
               </div>
               <CardContent className="p-6">
                 <p className="text-gray-600 mb-4">
-                  Alcanza tus metas fitness con entrenamientos personalizados
-                  y acceso a gimnasios premium.
+                  Alcanza tus metas fitness con entrenamientos personalizados y
+                  acceso a gimnasios premium.
                 </p>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Próximamente</span>
-                  <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed">
+                  <Button
+                    disabled
+                    className="bg-gray-300 text-gray-500 cursor-not-allowed"
+                  >
                     Próximamente
                   </Button>
                 </div>
@@ -95,7 +104,9 @@ function MembresiaComponent() {
 
           {/* Beneficios generales */}
           <div className="bg-white rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-center mb-8">¿Por qué elegir nuestras membresías?</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">
+              ¿Por qué elegir nuestras membresías?
+            </h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -134,7 +145,10 @@ function MembresiaComponent() {
               Únete a miles de personas que ya disfrutan de nuestras comunidades
             </p>
             <Link to="/onboarding/membresia">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800 px-8 py-3">
+              <Button
+                size="lg"
+                className="bg-black text-white hover:bg-gray-800 px-8 py-3"
+              >
                 Explorar membresías
               </Button>
             </Link>
