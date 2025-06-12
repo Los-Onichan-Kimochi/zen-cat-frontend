@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -34,6 +34,7 @@ function UsuariosComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [resetSelection, setResetSelection] = useState(0); // Counter to trigger reset
 
   // Query para obtener usuarios
   const {
@@ -44,6 +45,14 @@ function UsuariosComponent() {
     queryKey: ['usuarios'],
     queryFn: () => usuariosApi.getUsuarios(),
   });
+
+  // Debug effect to check onboarding data
+  useEffect(() => {
+    if (usersData) {
+      console.log('Users data in component:', usersData);
+      console.log('First user onboarding data:', usersData[0]?.onboarding);
+    }
+  }, [usersData]);
 
   // Mutation para eliminar usuario
   const { mutate: deleteUser, isPending: isDeleting } = useMutation<
@@ -63,12 +72,24 @@ function UsuariosComponent() {
     },
   });
 
-  const { handleBulkDelete, isBulkDeleting } = useBulkDelete<User>({
-    queryKey: ['usuarios'],
-    deleteFn: usuariosApi.bulkDeleteUsuarios,
-    entityName: 'usuario',
-    entityNamePlural: 'usuarios',
-    getId: (user) => user.id,
+  // Mutation para eliminar múltiples usuarios
+  const { mutate: bulkDeleteUsers, isPending: isBulkDeleting } = useMutation<
+    void,
+    Error,
+    string[]
+  >({
+    mutationFn: (ids) => usuariosApi.bulkDeleteUsuarios(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Usuarios eliminados', {
+        description: `${ids.length} usuario(s) eliminado(s) exitosamente`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      // Resetear selección después de eliminación exitosa
+      setResetSelection(prev => prev + 1);
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar usuarios', { description: err.message });
+    },
   });
 
   const handleEdit = (user: User) => {
@@ -124,8 +145,9 @@ function UsuariosComponent() {
             setIsDeleteModalOpen(true);
           }}
           onViewMemberships={handleViewMemberships}
-          onBulkDelete={handleBulkDelete}
+          onBulkDelete={bulkDeleteUsers}
           isBulkDeleting={isBulkDeleting}
+          resetSelection={resetSelection}
         />
       )}
 

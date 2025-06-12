@@ -58,6 +58,7 @@ function EditarUsuario() {
         description: 'El usuario ha sido actualizado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      queryClient.invalidateQueries({ queryKey: ['usuario', userId] });
       setIsEditing(false);
       setIsConfirmDialogOpen(false);
       navigate({ to: '/usuarios' });
@@ -65,6 +66,48 @@ function EditarUsuario() {
     onError: (error) => {
       toast.error('Error al actualizar usuario', {
         description: error.message || 'No se pudo actualizar el usuario.',
+      });
+    },
+  });
+
+  // Mutation para actualizar solo onboarding
+  const updateOnboardingMutation = useMutation({
+    mutationFn: (onboardingData: any) =>
+      usuariosApi.updateOnboardingByUserId(userId, onboardingData),
+    onSuccess: () => {
+      toast.success('Onboarding actualizado', {
+        description: 'Los datos de onboarding han sido actualizados exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      queryClient.invalidateQueries({ queryKey: ['usuario', userId] });
+      setIsEditing(false);
+      setIsConfirmDialogOpen(false);
+      navigate({ to: '/usuarios' });
+    },
+    onError: (error) => {
+      toast.error('Error al actualizar onboarding', {
+        description: error.message || 'No se pudieron actualizar los datos de onboarding.',
+      });
+    },
+  });
+
+  // Mutation para crear onboarding
+  const createOnboardingMutation = useMutation({
+    mutationFn: (onboardingData: any) =>
+      usuariosApi.createOnboardingByUserId(userId, onboardingData),
+    onSuccess: () => {
+      toast.success('Onboarding creado', {
+        description: 'Los datos de onboarding han sido creados exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      queryClient.invalidateQueries({ queryKey: ['usuario', userId] });
+      setIsEditing(false);
+      setIsConfirmDialogOpen(false);
+      navigate({ to: '/usuarios' });
+    },
+    onError: (error) => {
+      toast.error('Error al crear onboarding', {
+        description: error.message || 'No se pudieron crear los datos de onboarding.',
       });
     },
   });
@@ -78,12 +121,12 @@ function EditarUsuario() {
     celular: '',
     tipoDoc: '',
     numDoc: '',
-    region: '',
-    provincia: '',
+    fechaNacimiento: '',
+    genero: '',
+    ciudad: '',
+    codigoPostal: '',
     distrito: '',
     calle: '',
-    edificio: '',
-    referencia: '',
   });
 
   const [initialValues, setInitialValues] = useState({
@@ -94,12 +137,12 @@ function EditarUsuario() {
     celular: '',
     tipoDoc: '',
     numDoc: '',
-    region: '',
-    provincia: '',
+    fechaNacimiento: '',
+    genero: '',
+    ciudad: '',
+    codigoPostal: '',
     distrito: '',
     calle: '',
-    edificio: '',
-    referencia: '',
   });
 
   const [errors, setErrors] = useState({
@@ -111,6 +154,7 @@ function EditarUsuario() {
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+  const [originallyHadOnboarding, setOriginallyHadOnboarding] = useState(false);
 
   // Cargar datos del usuario al montar el componente
   useEffect(() => {
@@ -121,27 +165,39 @@ function EditarUsuario() {
       const primerApellido = nameParts[1] || '';
       const segundoApellido = nameParts.slice(2).join(' ') || '';
 
+      // Formatear fecha de nacimiento para el input tipo date
+      let fechaNacimientoFormatted = '';
+      if (user.onboarding?.birthDate) {
+        try {
+          const date = new Date(user.onboarding.birthDate);
+          fechaNacimientoFormatted = date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        } catch (error) {
+          console.warn('Error parsing birth date:', error);
+        }
+      }
+
       const newForm = {
         nombres,
         primerApellido,
         segundoApellido,
         correo: user.email,
-        celular: user.phone || '',
-        tipoDoc: '', // No tenemos este dato en el modelo
-        numDoc: '', // No tenemos este dato en el modelo
-        region: '', // No tenemos este dato en el modelo
-        provincia: '', // No tenemos este dato en el modelo
-        distrito: user.district || '',
-        calle: user.address || '',
-        edificio: '', // No tenemos este dato en el modelo
-        referencia: '', // No tenemos este dato en el modelo
+        celular: user.onboarding?.phoneNumber || '',
+        tipoDoc: user.onboarding?.documentType || '',
+        numDoc: user.onboarding?.documentNumber || '',
+        fechaNacimiento: fechaNacimientoFormatted,
+        genero: user.onboarding?.gender || '',
+        ciudad: user.onboarding?.city || '',
+        codigoPostal: user.onboarding?.postalCode || '',
+        distrito: user.onboarding?.district || '',
+        calle: user.onboarding?.address || '',
       };
 
       setForm(newForm);
       setInitialValues(newForm);
 
-      // Habilitar onboarding si hay datos
-      setOnboardingEnabled(!!(user.phone || user.address || user.district));
+      // Habilitar onboarding si hay datos de onboarding
+      setOnboardingEnabled(!!user.onboarding);
+      setOriginallyHadOnboarding(!!user.onboarding);
     }
   }, [user, initialValues.nombres]);
 
@@ -184,7 +240,7 @@ function EditarUsuario() {
       valid = false;
     }
 
-    // Solo validar celular y tipo de documento si el onboarding está habilitado
+    // Solo validar campos de onboarding si está habilitado
     if (onboardingEnabled) {
       // Celular (solo números y longitud 9-15)
       if (form.celular && !form.celular.match(/^\d{9,15}$/)) {
@@ -192,8 +248,8 @@ function EditarUsuario() {
         valid = false;
       }
 
-      // Tipo de documento
-      if (form.tipoDoc && !form.tipoDoc) {
+      // Tipo de documento (solo validar si hay número de documento)
+      if (form.numDoc && !form.tipoDoc) {
         newErrors.tipoDoc = 'Seleccione un tipo de documento';
         valid = false;
       }
@@ -216,18 +272,61 @@ function EditarUsuario() {
   };
 
   const confirmUpdate = () => {
-    const payload: UpdateUserPayload = {
-      name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
-      email: form.correo,
-    };
+    // Determinar qué campos han cambiado
+    const basicUserFieldsChanged = 
+      form.nombres !== initialValues.nombres ||
+      form.primerApellido !== initialValues.primerApellido ||
+      form.segundoApellido !== initialValues.segundoApellido ||
+      form.correo !== initialValues.correo;
 
-    if (onboardingEnabled) {
-      payload.address = form.calle;
-      payload.district = form.distrito;
-      payload.phone = form.celular;
+    const onboardingFieldsChanged = 
+      form.celular !== initialValues.celular ||
+      form.tipoDoc !== initialValues.tipoDoc ||
+      form.numDoc !== initialValues.numDoc ||
+      form.fechaNacimiento !== initialValues.fechaNacimiento ||
+      form.genero !== initialValues.genero ||
+      form.ciudad !== initialValues.ciudad ||
+      form.codigoPostal !== initialValues.codigoPostal ||
+      form.distrito !== initialValues.distrito ||
+      form.calle !== initialValues.calle;
+
+    // Preparar datos de onboarding si están habilitados
+    const onboardingPayload = onboardingEnabled ? {
+      documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
+      documentNumber: form.numDoc,
+      phoneNumber: form.celular,
+      birthDate: form.fechaNacimiento,
+      gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
+      city: form.ciudad,
+      postalCode: form.codigoPostal,
+      district: form.distrito,
+      address: form.calle,
+    } : null;
+
+    // CASO 1: Usuario NO tenía onboarding y ahora lo está agregando
+    if (!originallyHadOnboarding && onboardingEnabled) {
+      console.log('Creating new onboarding for user');
+      createOnboardingMutation.mutate(onboardingPayload!);
     }
+    // CASO 2: Usuario SÍ tenía onboarding, solo cambios de onboarding, sin cambios básicos
+    else if (originallyHadOnboarding && onboardingFieldsChanged && !basicUserFieldsChanged && onboardingEnabled) {
+      console.log('Updating existing onboarding only');
+      updateOnboardingMutation.mutate(onboardingPayload!);
+    }
+    // CASO 3: Cambios en datos básicos del usuario (con o sin onboarding)
+    else {
+      console.log('Using general user update API');
+      const payload: UpdateUserPayload = {
+        name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
+        email: form.correo,
+      };
 
-    updateUserMutation.mutate(payload);
+      if (onboardingEnabled && onboardingPayload) {
+        payload.onboarding = onboardingPayload;
+      }
+
+      updateUserMutation.mutate(payload);
+    }
   };
 
   // Handler para cambios en los inputs
@@ -252,7 +351,13 @@ function EditarUsuario() {
     form.correo !== initialValues.correo ||
     form.celular !== initialValues.celular ||
     form.distrito !== initialValues.distrito ||
-    form.calle !== initialValues.calle;
+    form.calle !== initialValues.calle ||
+    form.tipoDoc !== initialValues.tipoDoc ||
+    form.numDoc !== initialValues.numDoc ||
+    form.fechaNacimiento !== initialValues.fechaNacimiento ||
+    form.genero !== initialValues.genero ||
+    form.ciudad !== initialValues.ciudad ||
+    form.codigoPostal !== initialValues.codigoPostal;
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -411,7 +516,8 @@ function EditarUsuario() {
                   >
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
-                    <option value="Foreign Card">Foreign Card</option>
+                    <option value="FOREIGNER_CARD">Carnet de Extranjería</option>
+                    <option value="PASSPORT">Pasaporte</option>
                   </select>
                   {errors.tipoDoc && (
                     <span className="text-red-500 text-sm">
@@ -432,32 +538,63 @@ function EditarUsuario() {
                     disabled={!isEditing}
                   />
                 </div>
-              </div>
-              <div className="mb-4 font-semibold">Dirección</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="region" className="block font-medium mb-1">
-                    Región
+                  <label htmlFor="fecha-nacimiento" className="block font-medium mb-1">
+                    Fecha de nacimiento
                   </label>
                   <Input
-                    id="region"
-                    name="region"
-                    value={form.region}
+                    id="fecha-nacimiento"
+                    name="fechaNacimiento"
+                    type="date"
+                    value={form.fechaNacimiento}
                     onChange={handleChange}
-                    placeholder="Seleccione una región"
                     disabled={!isEditing}
                   />
                 </div>
                 <div>
-                  <label htmlFor="provincia" className="block font-medium mb-1">
-                    Provincia
+                  <label htmlFor="genero" className="block font-medium mb-1">
+                    Género
+                  </label>
+                  <select
+                    id="genero"
+                    name="genero"
+                    value={form.genero}
+                    onChange={handleChange}
+                    className="w-full h-10 px-3 border border-gray-300 rounded-md"
+                    disabled={!isEditing}
+                  >
+                    <option value="">Seleccione un género</option>
+                    <option value="MALE">Masculino</option>
+                    <option value="FEMALE">Femenino</option>
+                    <option value="OTHER">Otro</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mb-4 font-semibold">Dirección</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="ciudad" className="block font-medium mb-1">
+                    Ciudad
                   </label>
                   <Input
-                    id="provincia"
-                    name="provincia"
-                    value={form.provincia}
+                    id="ciudad"
+                    name="ciudad"
+                    value={form.ciudad}
                     onChange={handleChange}
-                    placeholder="Seleccione una provincia"
+                    placeholder="Ingrese la ciudad"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="codigo-postal" className="block font-medium mb-1">
+                    Código postal
+                  </label>
+                  <Input
+                    id="codigo-postal"
+                    name="codigoPostal"
+                    value={form.codigoPostal}
+                    onChange={handleChange}
+                    placeholder="Ingrese el código postal"
                     disabled={!isEditing}
                   />
                 </div>
@@ -487,35 +624,6 @@ function EditarUsuario() {
                     disabled={!isEditing}
                   />
                 </div>
-                <div>
-                  <label htmlFor="edificio" className="block font-medium mb-1">
-                    Nro. de edificio
-                  </label>
-                  <Input
-                    id="edificio"
-                    name="edificio"
-                    value={form.edificio}
-                    onChange={handleChange}
-                    placeholder="Núm"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="referencia"
-                    className="block font-medium mb-1"
-                  >
-                    Referencia
-                  </label>
-                  <Input
-                    id="referencia"
-                    name="referencia"
-                    value={form.referencia}
-                    onChange={handleChange}
-                    placeholder="Núm"
-                    disabled={!isEditing}
-                  />
-                </div>
               </div>
             </Card>
           )}
@@ -527,10 +635,10 @@ function EditarUsuario() {
               variant="default"
               type="submit"
               disabled={
-                updateUserMutation.isPending || (isEditing && !hasChanges)
+                updateUserMutation.isPending || updateOnboardingMutation.isPending || createOnboardingMutation.isPending || (isEditing && !hasChanges)
               }
             >
-              {updateUserMutation.isPending
+              {updateUserMutation.isPending || updateOnboardingMutation.isPending || createOnboardingMutation.isPending
                 ? 'Guardando...'
                 : isEditing
                   ? 'Guardar'

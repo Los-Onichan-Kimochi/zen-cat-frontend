@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import * as React from 'react';
+import { Link } from '@tanstack/react-router';
 
 export interface CardProps {
   /** Texto principal (p. ej. "Yoga") */
@@ -14,13 +14,7 @@ export interface CardProps {
   Icon: React.ElementType;
 }
 
-const Card: React.FC<CardProps> = ({
-  title,
-  subtitle,
-  imageUrl,
-  to,
-  Icon,
-}) => (
+const Card: React.FC<CardProps> = ({ title, subtitle, imageUrl, to, Icon }) => (
   <Link
     to={to}
     className="group relative block h-52 overflow-hidden rounded-2xl shadow-lg transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1"

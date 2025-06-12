@@ -26,6 +26,7 @@ import { Professional } from '@/types/professional';
 import { CreateServicePayload } from '@/types/service';
 import { servicesApi } from '@/api/services/services';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
+import { serviceLocalApi } from '@/api/services/service_locals';
 
 import {
   ColumnDef,
@@ -120,12 +121,15 @@ function AddServicePageComponent() {
     lugaresSeleccionados?: any[];
   } | null;
 
-  const lugaresIniciales = locationState?.lugaresSeleccionados ?? [];
+  const lugaresIniciales = 
+    locationState?.lugaresSeleccionados ?? [];
+
   const profesionalesIniciales =
     locationState?.profesionalesSeleccionados ?? [];
 
-  const [lugaresSeleccionados, setLugaresSeleccionados] =
-    useState(lugaresIniciales);
+  const [localesSeleccionados, setLocalesSeleccionados] = useState(
+    lugaresIniciales,
+  );
   const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState(
     profesionalesIniciales,
   );
@@ -150,6 +154,19 @@ function AddServicePageComponent() {
         console.error('Error al parsear profesionales guardados', error);
       }
     }
+
+    const storedLocales = localStorage.getItem(
+      'localesSeleccionados',
+    );
+    if (storedLocales) {
+      try {
+
+        setLocalesSeleccionados(JSON.parse(storedLocales));
+        localStorage.removeItem('localesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
+      } catch (error) {
+        console.error('Error al parsear locales guardados', error);
+      }
+    }
   }, []);
 
   const onSubmit = async (data: ServiceFormData) => {
@@ -172,7 +189,8 @@ function AddServicePageComponent() {
       const newService = await servicesApi.createService(payload);
 
       // 2. Bulk create de ServiceProfessional
-      if (profesionalesSeleccionados.length > 0) {
+
+      if(isVirtual === 'true' && profesionalesSeleccionados.length > 0) {
         const bulkPayload = {
           service_professionals: profesionalesSeleccionados.map((prof) => ({
             service_id: newService.id,
@@ -182,11 +200,24 @@ function AddServicePageComponent() {
         await serviceProfessionalApi.bulkCreateServiceProfessionals(
           bulkPayload,
         );
+        toast.success(
+          'Servicio y profesionales asociados creados correctamente.',
+        );
       }
 
-      toast.success(
-        'Servicio y profesionales asociados creados correctamente.',
-      );
+      if(isVirtual === 'false' && localesSeleccionados.length > 0) {
+        const bulkPayload = {
+          service_locals: localesSeleccionados.map((local) => ({
+            service_id: newService.id,
+            local_id: local.id,
+          })),
+        };
+        await serviceLocalApi.bulkCreateServiceLocals(bulkPayload);
+        toast.success(
+          'Servicio y locales asociados creados correctamente.',
+        );
+      }
+
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/servicios' });
     } catch (error: any) {
@@ -225,16 +256,31 @@ function AddServicePageComponent() {
 
   const columnsLocales = [
     {
-      accessorKey: 'name',
+      accessorKey: 'local_name',
       header: 'Nombre',
     },
     {
-      accessorKey: 'street',
-      header: 'Calle',
+      accessorKey: 'district',
+      header: 'Distrito',
     },
     {
-      accessorKey: 'number',
-      header: 'Número',
+      id: 'direccion',
+      header: 'Dirección',
+      accessorFn: (row: any) => `${row.street_name ?? ''} ${row.building_number ?? ''}`,
+      cell: ({ row }: { row: any }) => (
+        <span>
+          {row.original.street_name} {row.original.building_number}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'province',
+      header: 'Provincia',
+    },
+    {
+      accessorKey: 'capacity',
+      header: 'Capacidad',
+      cell: ({ row }: { row: any }) => `${row.original.capacity} personas`,
     },
   ];
 
@@ -245,7 +291,7 @@ function AddServicePageComponent() {
   });
 
   const localesTable = useReactTable({
-    data: lugaresSeleccionados,
+    data: localesSeleccionados,
     columns: columnsLocales,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -418,25 +464,30 @@ function AddServicePageComponent() {
       {isVirtual === 'false' && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Locales Disponibles</CardTitle>
+            <CardTitle>Locales Asociados</CardTitle>
             <CardDescription>
-              Selecciona los locales donde se brindará este servicio presencial.
+              Listado de locales disponibles para este servicio virtual.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex justify-end space-x-2 py-4">
               <Button
-                onClick={() =>
-                  navigate({
-                    to: '/servicios/agregar-locales',
-                    state: { lugaresSeleccionados } as any,
-                  })
-                }
+                onClick={() => {
+                  const data = watch(); // obtiene valores actuales del form
+                  localStorage.setItem('draftService', JSON.stringify(data));
+                  localStorage.setItem(
+                    'localesSeleccionados', 
+                    JSON.stringify(localesSeleccionados));
+                  navigate({ to: '/servicios/agregar-locales' });
+                }}
               >
-                <Plus className="mr-2 h-4 w-4" /> Agregar Lugar
+                <Plus className="mr-2 h-4 w-4" /> Agregar Local
               </Button>
             </div>
-            <DataTable table={localesTable} columns={columnsLocales} />
+            <DataTable
+              table={localesTable}
+              columns={columnsProfesionales}
+            />
           </CardContent>
         </Card>
       )}

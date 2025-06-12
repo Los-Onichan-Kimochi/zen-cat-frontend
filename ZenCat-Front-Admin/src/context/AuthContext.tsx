@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { User } from '@/types/user';
 
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;

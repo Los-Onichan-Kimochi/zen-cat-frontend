@@ -1,45 +1,45 @@
-import * as React from "react";
-import BenefitCard from "./BenefitCard";
+import * as React from 'react';
+import BenefitCard from './BenefitCard';
 import {
   UsersIcon,
   CalendarIcon,
   BellIcon,
   ClockIcon,
-} from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/solid';
 
 // Import images from WhyUs directory
-import comunidadImage from "../../../images/WhyUs/1.jpeg";
-import reservarImage from "../../../images/WhyUs/2.jpeg";
-import recordatoriosImage from "../../../images/WhyUs/3.jpg";
-import historialImage from "../../../images/WhyUs/4.jpeg";
+import comunidadImage from '../../../images/WhyUs/1.jpeg';
+import reservarImage from '../../../images/WhyUs/2.jpeg';
+import recordatoriosImage from '../../../images/WhyUs/3.jpg';
+import historialImage from '../../../images/WhyUs/4.jpeg';
 
 const benefits = [
   {
     imageUrl: comunidadImage,
-    title: "Un solo perfil, múltiples comunidades",
+    title: 'Un solo perfil, múltiples comunidades',
     description:
-      "Participa en actividades de distintos grupos sin cambiar de cuenta. Todo desde un mismo lugar.",
+      'Participa en actividades de distintos grupos sin cambiar de cuenta. Todo desde un mismo lugar.',
     Icon: UsersIcon,
   },
   {
     imageUrl: reservarImage,
-    title: "Reserva fácil, sin complicaciones",
+    title: 'Reserva fácil, sin complicaciones',
     description:
-      "Elige el horario, haz clic y listo. Tus reservas están organizadas y bajo control.",
+      'Elige el horario, haz clic y listo. Tus reservas están organizadas y bajo control.',
     Icon: CalendarIcon,
   },
   {
     imageUrl: recordatoriosImage,
-    title: "Recordatorios automáticos",
+    title: 'Recordatorios automáticos',
     description:
-      "Nunca más pierdas tu clase. Te avisamos cuando se acerca el evento.",
+      'Nunca más pierdas tu clase. Te avisamos cuando se acerca el evento.',
     Icon: BellIcon,
   },
   {
     imageUrl: historialImage,
-    title: "Accede a tu historial siempre",
+    title: 'Accede a tu historial siempre',
     description:
-      "Revisa cuándo, dónde y con quién participaste. Todo queda guardado en tu perfil.",
+      'Revisa cuándo, dónde y con quién participaste. Todo queda guardado en tu perfil.',
     Icon: ClockIcon,
   },
 ];
@@ -55,8 +55,9 @@ const BenefitsSection: React.FC = () => (
         ¿Por qué unirte a <u>Astrocat</u>?
       </h2>
       <p className="text-lg text-gray-700">
-        Conecta con personas como tú. Organiza tu bienestar.  
-        <br />Avanza a tu ritmo.
+        Conecta con personas como tú. Organiza tu bienestar.
+        <br />
+        Avanza a tu ritmo.
       </p>
     </div>
 

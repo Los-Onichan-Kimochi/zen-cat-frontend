@@ -12,6 +12,8 @@ import { User as UserType } from '@/types/user';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 import '@/styles/custom/no-scrollbar.css';
+import { useAuth } from '@/context/AuthContext'; // importa tu hook
+
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: UserType;

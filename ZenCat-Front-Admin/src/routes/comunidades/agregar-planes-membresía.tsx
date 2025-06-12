@@ -24,6 +24,7 @@ import {
 } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { communityMembershipPlansApi } from '@/api/communities/community-membership-plans';
 
 export const Route = createFileRoute('/comunidades/agregar-planes-membresía')({
   component: AddCommunityMembershipPlanPageComponent,
@@ -38,6 +39,14 @@ function AddCommunityMembershipPlanPageComponent() {
   const [globalFilter, setGlobalFilter] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
 
+  const mode = sessionStorage.getItem('modeAddMembershipPlan');
+  const membershipPlansAsociated: string[] = JSON.parse(sessionStorage.getItem('draftSelectedMembershipPlans') ?? '[]').map((plan: MembershipPlan) => plan.id);
+  const currentCommunityId = sessionStorage.getItem('currentCommunity'); // guardado previamente
+
+  const redirectPath = mode === 'editar'
+  ? '/comunidades/ver'
+  : '/comunidades/agregar-comunidad';
+
   const {
     data: membershipPlansData,
     isLoading: isLoadingMembershipPlans,
@@ -48,17 +57,54 @@ function AddCommunityMembershipPlanPageComponent() {
   });
 
   const handleCancel = () => {
-    navigate({ to: '/comunidades/agregar-comunidad' });
+    navigate({ to: redirectPath });
   };
 
-  const handleGuardar = () => {
-    const selected = table.getSelectedRowModel().rows.map(row => row.original);
-    sessionStorage.setItem("draftSelectedMembershipPlans", JSON.stringify(selected));
-    navigate({ to: '/comunidades/agregar-comunidad' });
+  const handleGuardar = async () => {
+    const selectedPlans = table.getSelectedRowModel().rows.map((row) => row.original);
+
+    if (mode === 'editar') {
+      const newPlans = selectedPlans.filter(
+        (plan) => !membershipPlansAsociated.includes(plan.id)
+      );
+
+      if (newPlans.length > 0) {
+        if (!currentCommunityId) {
+          alert('Falta el ID de la comunidad');
+          return;
+        }
+
+        const payload = newPlans.map((p) => ({
+          community_id: currentCommunityId,
+          plan_id: p.id,
+        }));
+
+        try {
+          await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({
+            community_plans: payload,
+          });
+        } catch (error) {
+          console.error('Error al guardar nuevos planes:', error);
+          return;
+        }
+      }
+
+      sessionStorage.removeItem('modeAddMembershipPlan');
+      sessionStorage.removeItem('draftSelectedMembershipPlans');
+
+      navigate({ to: redirectPath, search: { id: currentCommunityId } });
+    } else {
+      sessionStorage.setItem(
+        'draftSelectedMembershipPlans',
+        JSON.stringify(selectedPlans)
+      );
+      navigate({ to: redirectPath });
+    }
   };
 
   useEffect(() => {
     const stored = sessionStorage.getItem('draftSelectedMembershipPlans');
+    console.log(stored)
     if (stored && membershipPlansData) {
       const restored = JSON.parse(stored) as MembershipPlan[];
       const newRowSelection: Record<string, boolean> = {};
@@ -79,16 +125,24 @@ function AddCommunityMembershipPlanPageComponent() {
           aria-label="Select all"
         />
       ),
-      cell: ({ row }) => (
+      cell: ({ row }) => {
+        const membershipPlanId = row.original.id;
+        
+        const asociated = membershipPlansAsociated.includes(membershipPlanId.toString());
+        return (
         <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          checked={row.getIsSelected()|| asociated}
+          disabled={asociated && mode === 'editar'}
+          onCheckedChange={(v) => {
+              if (!asociated) row.toggleSelected(!!v);
+            }}
+            aria-label="Select row"
         />
-      ),
+        );
+      },
       enableSorting: false,
       enableHiding: false,
-      meta: { className: "w-[36px] px-3" },
+      meta: { className: "w-[36px]" },
     },
     {
       accessorKey: "type",
@@ -166,7 +220,6 @@ function AddCommunityMembershipPlanPageComponent() {
               showSortButton={true}
             />
             <div className="flex-grow">
-              <DataTable table={table} columns={columns} />
               <DataTable table={table} columns={columns} />
             </div>
             <DataTablePagination table={table} />

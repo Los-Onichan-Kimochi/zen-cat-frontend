@@ -11,4 +11,4 @@ function ContactoComponent() {
       <p>Contenido de la página Contacto</p>
     </div>
   );
-} 
+}

@@ -14,4 +14,4 @@ export function SignupComponent() {
       </div>
     </GuestOnlyRoute>
   );
-} 
+}

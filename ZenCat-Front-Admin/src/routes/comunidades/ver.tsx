@@ -1,264 +1,352 @@
 'use client';
 
-import {
-  createFileRoute,
-  useNavigate,
-  useSearch,
-} from '@tanstack/react-router';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { UpdateCommunityPayload } from '@/types/community';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, useRef } from 'react';
+
+import { CommunityForm } from '@/components/community/community-basic-form';
+import { CommunityServiceTable } from '@/components/community/community-service-table';
+import { CommunityMembershipPlanTable } from '@/components/community/community-membership-plan-table';
+import { useCommunityForm } from '@/hooks/use-community-basic-form';
+
 import { communitiesApi } from '@/api/communities/communities';
-import { Community } from '@/types/community';
+import { servicesApi } from '@/api/services/services';
+import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
+import { communityServicesApi } from '@/api/communities/community-services';
+import { communityMembershipPlansApi } from '@/api/communities/community-membership-plans';
+import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
+
 import HeaderDescriptor from '@/components/common/header-descriptor';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
-  CardContent,
   CardDescription,
-  CardFooter,
+  CardContent,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud } from 'lucide-react';
-import { toast } from 'sonner';
 
-// Definir esquema de validación con Zod
-const communityUpdateSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido.'),
-  purpose: z.string().min(1, 'El propósito es requerido.'),
-  profileImageFile: z.any().optional(),
-});
-
-type CommunityUpdateFormData = z.infer<typeof communityUpdateSchema>;
+import { Service } from '@/types/service';
+import { MembershipPlan } from '@/types/membership-plan';
+import { UpdateCommunityPayload } from '@/types/community';
+import { Plus, ChevronLeft } from 'lucide-react';
 
 export const Route = createFileRoute('/comunidades/ver')({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      id: search.id as string,
-    };
-  },
-  component: SeeCommunityPageComponent,
+  validateSearch: (search) => ({ id: search.id as string }),
+  component: EditCommunityPage,
 });
 
-export function SeeCommunityPageComponent() {
+function EditCommunityPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const search = useSearch({ from: '/comunidades/ver' });
-  const communityId = search.id;
-
+  const { id } = Route.useSearch();
+  
   const [isEditing, setIsEditing] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
+  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<MembershipPlan[]>([]);
 
-  // Si no hay ID, redirigir
-  useEffect(() => {
-    if (!communityId) {
-      navigate({ to: '/comunidades' });
-    }
-  }, [communityId, navigate]);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const [showServiceConfirmDialog, setShowServiceConfirmDialog] = useState(false);
 
-  // React Hook Form
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<CommunityUpdateFormData>({
-    resolver: zodResolver(communityUpdateSchema),
-    mode: 'onBlur',
-    defaultValues: {
-      name: '',
-      purpose: '',
-    },
-  });
-
+  const [planToDelete, setPlanToDelete] = useState<MembershipPlan | null>(null);
+  const [showPlanConfirmDialog, setShowPlanConfirmDialog] = useState(false);
   const {
     data: community,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['community', communityId],
-    queryFn: () => communitiesApi.getCommunityById(communityId!),
+    queryKey: ['community', id],
+    queryFn: () => communitiesApi.getCommunityById(id),
+  });
+  console.log("Comunidad: ", community)
+  const { data: initialServices } = useQuery({
+    queryKey: ['community-services', id],
+    queryFn: () => communityServicesApi.getCommunityServices(id),
+    enabled: !!id,
   });
 
-  // Mutación para actualizar comunidad
-  const updateMutation = useMutation({
-    mutationFn: async (
-      data: UpdateCommunityPayload & { imageFile?: File | null },
-    ) => {
-      let imageUrl = data.imageFile
-        ? URL.createObjectURL(data.imageFile)
-        : community?.image_url || 'https://via.placeholder.com/150';
-      return communitiesApi.updateCommunity(communityId!, {
-        name: data.name,
-        purpose: data.purpose,
-        image_url: imageUrl,
-      });
-    },
-    onSuccess: () => {
-      toast.success('Comunidad actualizada exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['community', communityId] });
-      setIsEditing(false);
-    },
-    onError: (error: any) => {
-      toast.error('Error al actualizar la comunidad', {
-        description: error.message || 'No se pudo actualizar.',
-      });
-    },
+  const { data: initialPlans } = useQuery({
+    queryKey: ['community-plans', id],
+    queryFn: () => communityMembershipPlansApi.getCommunityMembershipPlans(id),
+    enabled: !!id,
   });
 
-  const onSubmit = (data: CommunityUpdateFormData) => {
-    updateMutation.mutate({ ...data, imageFile });
-  };
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  if (isLoading || !communityId) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin w-12 h-12" />
-      </div>
-    );
-  }
+  const {
+    register,
+    handleSubmit,
+    errors,
+    watch,
+    imageFile,
+    imagePreview,
+    setImagePreview,
+    handleImageChange,
+    reset,
+  } = useCommunityForm();
 
   useEffect(() => {
-    if (community) {
-      // Llenar los campos del formulario con los datos actuales
+    if (community && id) {
+      console.log("Id: ",id);
+      console.log("Comunidad: ", community);
       reset({
         name: community.name,
         purpose: community.purpose,
       });
-
-      // Actualizar vista previa de imagen con la URL actual de la comunidad
-      setImagePreview(community.image_url || null);
+      //setImagePreview(community.image_url ?? null);
     }
-  }, [community, reset]);
+  }, [community, reset, setImagePreview]);
+
+  useEffect(() => {
+    const loadAssociations = async () => {
+      if (initialServices) {
+        const services = await Promise.all(
+          initialServices.map((cs) => servicesApi.getServiceById(cs.service_id))
+        );
+        setSelectedServices(services);
+      }
+
+      if (initialPlans) {
+        const plans = await Promise.all(
+          initialPlans.map((cp) => membershipPlansApi.getMembershipPlanById(cp.plan_id))
+        );
+        setSelectedMembershipPlans(plans);
+      }
+    };
+
+    loadAssociations();
+  }, [initialServices, initialPlans]);
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: UpdateCommunityPayload) => {
+      return communitiesApi.updateCommunity(id, data);
+    },
+    onSuccess: () => {
+      toast.success('Comunidad actualizada correctamente');
+      queryClient.invalidateQueries({ queryKey: ['community', id] });
+      navigate({ to: '/comunidades' });
+    },
+    onError: (err: any) => {
+      toast.error('Error al actualizar', { description: err.message });
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    let imageUrl = community?.image_url || 'https://via.placeholder.com/150';
+    if (imageFile) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.info('Subida simulada de imagen');
+    }
+
+    try {
+      await updateMutation.mutateAsync({
+        name: data.name,
+        purpose: data.purpose,
+        image_url: imageUrl,
+      });
+
+    } catch (err: any) {
+      toast.error('Error al actualizar comunidad', { description: err.message });
+    }
+  };
+
+  const deleteServiceMutation = useMutation({
+    mutationFn: ({ communityId, serviceId }: { communityId: string; serviceId: string }) =>
+      communityServicesApi.deleteCommunityService(communityId, serviceId),
+    onSuccess: (_, service) => {
+      toast.success('Servicio desvinculado');
+      setSelectedServices((prev) => prev.filter((s) => s.id !== service.serviceId));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar servicio', { description: err.message });
+    },
+  });
+
+
+  const bulkDeleteServiceMutation = useMutation({
+    mutationFn: (ids: string[]) => communityServicesApi.bulkDeleteCommunityServices(ids),
+    onSuccess: (_, ids) => {
+      toast.success('Servicios desvinculados');
+      setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar servicios', { description: err.message });
+    },
+  });
+
+  const deleteMembershipPlanMutation = useMutation({
+    mutationFn: ({ communityId, planId }: { communityId: string; planId: string }) =>
+      communityMembershipPlansApi.deleteCommunityMembershipPlan(communityId, planId),
+    onSuccess: (_, plan) => {
+      toast.success('Plan desvinculado');
+      setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.planId));
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar plan', { description: err.message });
+    },
+  });
+
+  const bulkDeleteMembershipPlanMutation = useMutation({
+    mutationFn: (ids: string[]) => communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({community_plans: ids}),
+    onSuccess: (_, ids) => {
+      toast.success('Planes eliminados');
+      setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)));
+      queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
+    },
+    onError: (err) => {
+      toast.error('Error al eliminar múltiples planes', { description: err.message });
+    },
+  });
+
+
+  if (isLoading) {
+    return <p className="p-6">Cargando...</p>;
+  }
 
   if (error) {
-    return <div>Error cargando la comunidad.</div>;
+    return <p className="p-6 text-red-500">Error cargando la comunidad</p>;
   }
 
   return (
-    <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
-      <HeaderDescriptor title="COMUNIDADES" subtitle="Editar Comunidad" />
-      <Card className="mt-6 flex-grow">
-        <CardHeader>
-          <CardTitle>Datos de la comunidad</CardTitle>
-          <CardDescription>
-            Complete la información para editar esta comunidad.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            <div className="grid grid-cols-1 gap-y-6">
-              <div>
-                <Label htmlFor="name" className="mb-2">
-                  Nombre
-                </Label>
-                <Input
-                  id="name"
-                  disabled={!isEditing}
-                  {...register('name')}
-                  aria-invalid={!!errors.name}
-                  aria-describedby="name-error"
-                />
-                {errors.name && (
-                  <p id="name-error" className="text-red-600 text-sm mt-1">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="purpose" className="mb-2">
-                  Propósito
-                </Label>
-                <Textarea
-                  id="purpose"
-                  {...register('purpose')}
-                  disabled={!isEditing}
-                  aria-invalid={!!errors.purpose}
-                  aria-describedby="purpose-error"
-                />
-                {errors.purpose && (
-                  <p id="purpose-error" className="text-red-600 text-sm mt-1">
-                    {errors.purpose.message}
-                  </p>
-                )}
-              </div>
+    <div className="p-6 space-y-6 font-montserrat">
+      <HeaderDescriptor title="COMUNIDADES" subtitle="EDITAR COMUNIDAD" />
+      <div className="mb-4">
+        <Button variant="outline" onClick={() => navigate({ to: '/comunidades' })}>
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Volver
+        </Button>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <CommunityForm
+          register={register}
+          errors={errors}
+          imagePreview={imagePreview}
+          handleImageChange={handleImageChange}
+          isEditing={isEditing}
+        />
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Servicios</CardTitle>
+              <CardDescription>Servicios vinculados a esta comunidad</CardDescription>
             </div>
-            <div className="flex flex-col space-y-6">
-              <div>
-                <Label htmlFor="profileImageFile">Logo</Label>
-                <div className="w-full h-80 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 relative overflow-hidden">
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview}
-                      alt="Vista previa del logo"
-                      className="object-contain h-full w-full"
-                    />
-                  ) : (
-                    <div className="text-center text-gray-400">
-                      <UploadCloud size={48} className="mx-auto mb-1" />
-                      <p>Arrastra o selecciona un archivo</p>
-                      <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
-                    </div>
-                  )}
-                  {isEditing && (
-                    <Input
-                      id="profileImageFile"
-                      type="file"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      accept="image/png, image/jpeg, image/gif"
-                      {...register('profileImageFile')}
-                      onChange={handleImageChange}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end space-x-2">
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => navigate({ to: '/comunidades' })}
-            >
-              Volver
-            </Button>
             <Button
               type="button"
-              variant={isEditing ? 'destructive' : 'default'}
+              disabled={!isEditing}
+              className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
               onClick={() => {
-                if (isEditing) {
-                  handleSubmit(onSubmit)();
-                } else {
-                  setIsEditing(true);
-                }
+                if (!isEditing) return;
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddService', 'editar');
+                navigate({ to: '/comunidades/agregar-servicios' }); //
               }}
-              disabled={isSubmitting}
             >
-              {isEditing ? 'Guardar' : 'Editar'}
+              <Plus className="mr-2 h-4 w-4" /> Agregar
             </Button>
-          </CardFooter>
-        </form>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <CommunityServiceTable
+              data={selectedServices}
+              onDeleteClick={(service) => {
+                setServiceToDelete(service);
+                setShowServiceConfirmDialog(true);
+              }}
+              onBulkDelete={(ids) => bulkDeleteServiceMutation.mutate(ids)}
+              isBulkDeleting={bulkDeleteServiceMutation.isPending}
+              disableConfirmBulkDelete={false}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Planes de Membresía</CardTitle>
+              <CardDescription>Planes asignados a la comunidad</CardDescription>
+            </div>
+            <Button
+              type="button"
+              disabled={!isEditing}
+              className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
+              onClick={() => {
+                if (!isEditing) return;
+                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
+                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
+                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem('modeAddMembershipPlan', 'editar');
+                sessionStorage.setItem('currentCommunity', id);
+                navigate({ to: '/comunidades/agregar-planes-membresía' });
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Agregar
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <CommunityMembershipPlanTable
+              data={selectedMembershipPlans}
+              onDeleteClick={(plan) => {
+                setPlanToDelete(plan);
+                setShowPlanConfirmDialog(true);
+              }}
+              onBulkDelete={(ids) => bulkDeleteMembershipPlanMutation.mutate(ids)}
+              isBulkDeleting={bulkDeleteMembershipPlanMutation.isPending}
+              disableConfirmBulkDelete={false}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </Card>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 w-30 text-base"
+            onClick={() => navigate({ to: '/comunidades' })}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              if (isEditing) {
+                handleSubmit(onSubmit)();
+              } else {
+                setIsEditing(true);
+              }
+            }}
+            className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+          >
+            {isEditing ? 'Guardar' : 'Editar'}
+          </Button>
+        </div>
+      </form>
+      <ConfirmDeleteSingleDialog
+        isOpen={showServiceConfirmDialog}
+        onOpenChange={setShowServiceConfirmDialog}
+        title="¿Estás seguro que deseas eliminar este servicio?"
+        entity="Servicio"
+        itemName={serviceToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (serviceToDelete) {
+            deleteServiceMutation.mutate({ communityId: id, serviceId: serviceToDelete.id });
+          }
+        }}
+      />
+
+      <ConfirmDeleteSingleDialog
+        isOpen={showPlanConfirmDialog}
+        onOpenChange={setShowPlanConfirmDialog}
+        title="¿Estás seguro que deseas eliminar este plan?"
+        entity="Plan de Membresía"
+        itemName={planToDelete?.type ?? ''}
+        onConfirm={() => {
+          if (planToDelete) {
+            deleteMembershipPlanMutation.mutate({ communityId: id, planId: planToDelete.id });
+          }
+        }}
+      />
     </div>
   );
 }

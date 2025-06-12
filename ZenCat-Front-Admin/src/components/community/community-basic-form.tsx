@@ -19,6 +19,7 @@ interface CommunityFormProps {
   errors: FieldErrors<CommunityFormData>;
   imagePreview: string | null;
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isEditing?: boolean;
 }
 
 export function CommunityForm({
@@ -26,6 +27,7 @@ export function CommunityForm({
   errors,
   imagePreview,
   handleImageChange,
+  isEditing=true,
 }: CommunityFormProps) {
   return (
     <Card>
@@ -44,6 +46,7 @@ export function CommunityForm({
             </Label>
             <Input
               id="name"
+              disabled={!isEditing}
               {...register('name')}
               placeholder="Ingrese el nombre de la comunidad"
             />
@@ -57,6 +60,7 @@ export function CommunityForm({
             </Label>
             <Textarea
               id="purpose"
+              disabled={!isEditing}
               {...register('purpose')}
               placeholder="Ingrese un propósito"
             />
@@ -91,6 +95,7 @@ export function CommunityForm({
               <Input
                 id="profileImageFile"
                 type="file"
+                disabled={!isEditing}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 accept="image/png, image/jpeg, image/gif"
                 {...register('profileImageFile')}

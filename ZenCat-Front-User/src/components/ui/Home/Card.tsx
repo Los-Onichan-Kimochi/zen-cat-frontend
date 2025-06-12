@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import * as React from 'react';
+import { Link } from '@tanstack/react-router';
 
 interface CardProps {
   title: string;

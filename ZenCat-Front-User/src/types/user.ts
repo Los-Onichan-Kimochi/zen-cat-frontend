@@ -7,4 +7,4 @@ export interface User {
   isAuthenticated: boolean;
   permissions?: string[];
   avatar?: string;
-} 
+}

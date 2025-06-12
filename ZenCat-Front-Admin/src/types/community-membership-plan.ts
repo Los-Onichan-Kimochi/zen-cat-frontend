@@ -14,5 +14,5 @@ export interface BulkCreateCommunityMembershipPlanPayload {
 }
 
 export interface BulkDeleteCommunityMembershipPlanPayload {
-  community_membership_plans: string[];
+  community_plans: string[];
 }
