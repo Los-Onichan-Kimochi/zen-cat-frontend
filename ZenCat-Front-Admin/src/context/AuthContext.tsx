@@ -6,6 +6,7 @@ import {
   useEffect,
 } from 'react';
 import { User } from '@/types/user';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   user: User | null;
@@ -29,14 +30,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('AuthProvider: Checking saved user...');
     try {
       const savedUser = localStorage.getItem('user');
-      if (savedUser) {
+      const hasAccessToken = !!Cookies.get('access_token');
+      
+      if (savedUser && hasAccessToken) {
         const userData = JSON.parse(savedUser);
-        console.log('AuthProvider: Found saved user:', userData);
+        console.log('AuthProvider: Found saved user with valid tokens:', userData);
         setUser(userData);
+      } else if (savedUser && !hasAccessToken) {
+        console.log('AuthProvider: Found saved user but no access token, clearing localStorage');
+        localStorage.removeItem('user');
+        setUser(null);
+      } else {
+        console.log('AuthProvider: No saved user found');
+        setUser(null);
       }
     } catch (error) {
       console.error('AuthProvider: Error parsing saved user:', error);
       localStorage.removeItem('user');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -55,15 +66,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.location.href = '/login';
   };
 
+  // Check both user state and actual token presence
+  const hasAccessToken = !!Cookies.get('access_token');
+  const isAuthenticated = !!user && hasAccessToken;
+
   const contextValue: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated,
     isLoading,
     login,
     logout,
   };
 
-  console.log('AuthProvider: Context value:', contextValue);
+  console.log('AuthProvider: Context value:', {
+    hasUser: !!user,
+    hasAccessToken,
+    isAuthenticated,
+    isLoading,
+  });
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

@@ -39,11 +39,9 @@ import {
   Upload,
   Trash,
   MapPin,
-  CheckCircle,
 } from 'lucide-react';
 
 import { useToast } from '@/context/ToastContext';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export const Route = createFileRoute('/locales/')({
   component: LocalesComponent,
@@ -83,9 +81,7 @@ function LocalesComponent() {
       toast.success('Local Eliminado', { 
         description: 'El local ha sido eliminado exitosamente.' 
       });
-      await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
-      //setRowSelection({});
     },
     onError: (err) => {
       toast.error('Error al Eliminar', { 
@@ -113,7 +109,6 @@ function LocalesComponent() {
       toast.success('Locales Creados', {
         description: 'Los locales han sido creados exitosamente.',
       });
-      await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       setShowUploadDialog(false);
       setShowSuccess(true);
@@ -259,22 +254,6 @@ function LocalesComponent() {
         description="Todos los locales se registraron correctamente."
         buttonText="Cerrar"
       />
-      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="max-w-md text-center space-y-4">
-          <div className="flex justify-center items-center">
-            <CheckCircle className="h-20 w-20" strokeWidth={1} />
-          </div>
-          <h2 className="text-lg font-semibold">
-            La carga se realizó exitosamente
-          </h2>
-          <Button
-            className="mx-auto bg-gray-800 hover:bg-gray-700 px-6"
-            onClick={() => setShowSuccess(false)}
-          >
-            Salir
-          </Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

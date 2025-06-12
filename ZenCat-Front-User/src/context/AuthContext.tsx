@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from 'react';
 import { authService } from '@/api/auth/auth-service';
+import Cookies from 'js-cookie';
 
 // Usando la interfaz simplificada para el contexto
 export interface User {
@@ -37,54 +38,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     console.log('AuthProvider: Checking authentication status...');
-
-    const initializeAuth = async () => {
-      try {
-        // First check if there are tokens in cookies
-        if (authService.isAuthenticated()) {
-          console.log('AuthProvider: Found tokens, fetching current user...');
-
-          // Try to get current user info from server
-          const currentUser = await authService.getCurrentUser();
-          const userData: User = {
-            id: currentUser.id,
-            email: currentUser.email,
-            name: currentUser.name,
-            imageUrl: currentUser.imageUrl || currentUser.avatar,
-            role: currentUser.role,
-            isAuthenticated: true,
-          };
-
-          console.log('AuthProvider: Successfully loaded user:', userData);
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-        } else {
-          // Check localStorage as fallback (for compatibility)
-          console.log(
-            'AuthProvider: No tokens found, checking localStorage...',
-          );
-          const savedUser = localStorage.getItem('user');
-          if (savedUser) {
-            const userData = JSON.parse(savedUser);
-            console.log(
-              'AuthProvider: Found saved user in localStorage:',
-              userData,
-            );
-            setUser(userData);
-          }
-        }
-      } catch (error) {
-        console.error('AuthProvider: Error during initialization:', error);
-        // Clear any invalid data
-        authService.logout();
+    try {
+      const savedUser = localStorage.getItem('user');
+      const hasAccessToken = !!Cookies.get('access_token');
+      
+      if (savedUser && hasAccessToken) {
+        const userData = JSON.parse(savedUser);
+        console.log('AuthProvider: Found saved user with valid tokens:', userData);
+        setUser(userData);
+      } else if (savedUser && !hasAccessToken) {
+        console.log('AuthProvider: Found saved user but no access token, clearing localStorage');
         localStorage.removeItem('user');
         setUser(null);
-      } finally {
-        setIsLoading(false);
+      } else {
+        console.log('AuthProvider: No saved user found');
+        setUser(null);
       }
-    };
-
-    initializeAuth();
+    } catch (error) {
+      console.error('AuthProvider: Error parsing saved user:', error);
+      localStorage.removeItem('user');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const login = (userData: User) => {
@@ -109,9 +85,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.location.href = '/';
   };
 
+  // Check both user state and actual token presence
+  const hasAccessToken = !!Cookies.get('access_token');
+  const isAuthenticated = !!user?.isAuthenticated && hasAccessToken;
+
   const contextValue: AuthContextType = {
     user,
-    isAuthenticated: !!user?.isAuthenticated,
+    isAuthenticated,
     isLoading,
     login,
     logout,
@@ -119,7 +99,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   console.log('AuthProvider: Context value:', {
     hasUser: !!user,
-    isAuthenticated: !!user?.isAuthenticated,
+    hasAccessToken,
+    isAuthenticated,
     isLoading,
     userEmail: user?.email,
   });

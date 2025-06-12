@@ -1,6 +1,6 @@
 import { CommunityService } from '@/types/community-service';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const communityServicesApi = {
   getCommunityServicesByCommunityId: async (
@@ -8,13 +8,9 @@ export const communityServicesApi = {
   ): Promise<CommunityService[]> => {
     // Temporary workaround: fetch all community services and filter manually
     // TODO: Fix backend to properly filter by community_id query parameter
-    const response = await fetch(`${API_BASE_URL}/community-service/`);
-    if (!response.ok) {
-      throw new Error(
-        `Error fetching services for community with id: ${communityId}`,
-      );
-    }
-    const data = await response.json();
+    const data = await apiClient.get<{ community_services: CommunityService[] }>(
+      API_ENDPOINTS.COMMUNITY_SERVICES.BASE,
+    );
 
     const allCommunityServices = Array.isArray(data.community_services)
       ? data.community_services
