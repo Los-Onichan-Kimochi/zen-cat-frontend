@@ -291,7 +291,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               type="button"
               className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200"
               onClick={handleDeleteSelected}
-              disabled={!rowsSelected || isBulkDeleting || isBulkDeleteEnabled}
+              disabled={!rowsSelected || isBulkDeleting || !isBulkDeleteEnabled}
             >
               <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>

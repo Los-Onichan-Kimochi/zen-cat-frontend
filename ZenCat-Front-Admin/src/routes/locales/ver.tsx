@@ -1,7 +1,6 @@
 'use client';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ArrowLeft, MapPin, Link as LinkIcon, User } from 'lucide-react';

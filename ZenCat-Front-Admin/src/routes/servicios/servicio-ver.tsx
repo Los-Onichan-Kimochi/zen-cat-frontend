@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { servicesApi } from '@/api/services/services';
 import { professionalsApi } from '@/api/professionals/professionals';
@@ -19,8 +19,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2, UploadCloud, Upload, Plus, Trash } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
 import { Professional } from '@/types/professional';
 import { Local } from '@/types/local';
@@ -51,6 +51,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/servicios/servicio-ver')({
   component: SeeServicePageComponent,
@@ -59,6 +60,7 @@ export const Route = createFileRoute('/servicios/servicio-ver')({
 export function SeeServicePageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
 
@@ -127,16 +129,15 @@ export function SeeServicePageComponent() {
         id!,
         professionalId,
       );
-      // Opcional: muestra un toast de éxito
-      toast.success('Profesional eliminado del servicio');
-      // Refresca la lista de asociaciones (si usas React Query)
+      toast.success('Profesional Desvinculado', {
+        description: 'El profesional ha sido desvinculado del servicio exitosamente.',
+      });
       queryClient.invalidateQueries({
         queryKey: ['service-professionals', id],
       });
-      // Si no usas React Query, puedes volver a hacer fetch manualmente aquí
     } catch (error: any) {
-      toast.error('Error al eliminar profesional', {
-        description: error.message,
+      toast.error('Error al Desvincular Profesional', {
+        description: error.message || 'No se pudo desvincular el profesional.',
       });
     }
   }
@@ -145,13 +146,14 @@ export function SeeServicePageComponent() {
     try {
       // Llama a tu API para eliminar la asociación
       await serviceLocalApi.deleteServiceLocal(id!, localId);
-      // Opcional: muestra un toast de éxito
-      toast.success('Local eliminado del servicio');
-      // Refresca la lista de asociaciones (si usas React Query)
+      toast.success('Local Desvinculado', {
+        description: 'El local ha sido desvinculado del servicio exitosamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['service-locals', id] });
-      // Si no usas React Query, puedes volver a hacer fetch manualmente aquí
     } catch (error: any) {
-      toast.error('Error al eliminar local', { description: error.message });
+      toast.error('Error al Desvincular Local', {
+        description: error.message || 'No se pudo desvincular el local.',
+      });
     }
   }
 

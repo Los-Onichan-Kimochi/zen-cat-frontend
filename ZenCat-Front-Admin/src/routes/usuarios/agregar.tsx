@@ -11,7 +11,9 @@ import { Switch } from '@/components/ui/switch';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
 import { CreateUserPayload } from '@/types/user';
-import { toast } from 'sonner';
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
+import { useToast } from '@/context/ToastContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +43,8 @@ export const Route = createFileRoute('/usuarios/agregar')({
 function AgregarUsuario() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   // Estados para los campos y errores
@@ -82,7 +86,7 @@ function AgregarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al crear usuario', {
+      error('Error al crear usuario', {
         description: error.message || 'No se pudo crear el usuario.',
       });
     },
@@ -495,6 +499,8 @@ function AgregarUsuario() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </div>
   );
 }

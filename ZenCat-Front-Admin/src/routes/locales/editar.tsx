@@ -11,7 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { localsApi } from '@/api/locals/locals';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import {
   Card,
   CardHeader,
@@ -74,6 +74,7 @@ export const Route = createFileRoute('/locales/editar')({
 
 function EditLocalComponent() {
   const navigate = useNavigate();
+  const toast = useToast();
   const id =
     typeof window !== 'undefined' ? localStorage.getItem('currentLocal') : null;
   if (!id) {
@@ -150,14 +151,16 @@ function EditLocalComponent() {
       });
     },
     onSuccess: () => {
-      toast.success('Local actualizado exitosamente');
+      toast.success('Local Actualizado', {
+        description: 'El local ha sido actualizado exitosamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['local', id] });
       setIsEditing(false);
       navigate({ to: '/locales' });
     },
     onError: (error: any) => {
-      toast.error('Error al actualizar la comunidad', {
-        description: error.message || 'No se pudo actualizar.',
+      toast.error('Error al Actualizar Local', {
+        description: error.message || 'No se pudo actualizar el local.',
       });
     },
   });

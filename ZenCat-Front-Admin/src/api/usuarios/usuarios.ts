@@ -1,10 +1,11 @@
 import { User, CreateUserPayload, UpdateUserPayload } from '@/types/user';
+import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Función auxiliar para obtener los headers comunes
 const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('access_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -416,13 +417,5 @@ export const usuariosApi = {
       console.error('Error in bulkDeleteUsuarios:', error);
       throw error;
     }
-  },
-
-  deleteUsuario: async (id: string): Promise<void> => {
-    return apiClient.delete(API_ENDPOINTS.USERS.BY_ID(id));
-  },
-
-  bulkDeleteUsuarios: async (ids: string[]): Promise<void> => {
-    return apiClient.delete(API_ENDPOINTS.USERS.BULK_DELETE, { users: ids });
   },
 };

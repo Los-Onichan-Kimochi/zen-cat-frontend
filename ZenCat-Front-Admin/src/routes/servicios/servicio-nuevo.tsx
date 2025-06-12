@@ -18,7 +18,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
 import { Loader2, UploadCloud, Plus, Upload } from 'lucide-react';
 import '../../index.css';
@@ -66,6 +66,7 @@ type ServiceFormData = z.infer<typeof serviceFormSchema>;
 function AddServicePageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -95,7 +96,7 @@ function AddServicePageComponent() {
       navigate({ to: '/servicios' });
     },
     onError: (error) => {
-      toast.error('Error al crear servicio', {
+      toast.error('Error al Crear Servicio', {
         description: error.message || 'No se pudo crear el servicio.',
       });
     },
@@ -167,7 +168,7 @@ function AddServicePageComponent() {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen (simulada)', {
+      toast.info('Imagen Procesada', {
         description: 'Subida de imagen simulada completada.',
       });
     }
@@ -194,9 +195,9 @@ function AddServicePageComponent() {
         await serviceProfessionalApi.bulkCreateServiceProfessionals(
           bulkPayload,
         );
-        toast.success(
-          'Servicio y profesionales asociados creados correctamente.',
-        );
+        toast.success('Profesionales Asociados', {
+          description: 'Servicio y profesionales asociados creados correctamente.',
+        });
       }
 
       if (isVirtual === 'false' && localesSeleccionados.length > 0) {
@@ -207,14 +208,16 @@ function AddServicePageComponent() {
           })),
         };
         await serviceLocalApi.bulkCreateServiceLocals(bulkPayload);
-        toast.success('Servicio y locales asociados creados correctamente.');
+        toast.success('Locales Asociados', {
+          description: 'Servicio y locales asociados creados correctamente.',
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/servicios' });
     } catch (error: any) {
-      toast.error('Error al crear servicio o asociar profesionales', {
-        description: error.message,
+      toast.error('Error al Crear Servicio', {
+        description: error.message || 'No se pudo crear el servicio o asociar profesionales.',
       });
     }
   };

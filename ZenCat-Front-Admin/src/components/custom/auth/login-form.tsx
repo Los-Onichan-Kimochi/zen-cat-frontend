@@ -3,9 +3,11 @@ import { useNavigate } from '@tanstack/react-router';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
 import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/api/auth/auth-service';
-import { toast } from 'sonner';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
+import { useToast } from '@/context/ToastContext';
 
 interface LoginFormProps {
   onLoginSuccess?: () => void;
@@ -24,14 +26,33 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar campos vacíos
+    // Validaciones de entrada
     if (!email.trim() || !password.trim()) {
-      toast.error('Error de validación', {
+      error('Error de validación', {
         description: 'El email y contraseña son obligatorios',
+      });
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      error('Email inválido', {
+        description: 'Por favor ingrese un email válido',
+      });
+      return;
+    }
+
+    // Validar longitud mínima de contraseña
+    if (password.length < 3) {
+      error('Contraseña muy corta', {
+        description: 'La contraseña debe tener al menos 3 caracteres',
       });
       return;
     }
@@ -74,33 +95,47 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       console.log('LoginForm: Setting user in context:', user);
       login(user);
 
-      toast.success('Inicio de sesión exitoso', {
+      toast.success('Inicio de Sesión Exitoso', {
         description: `Bienvenido, ${user.name}!`,
       });
 
       onLoginSuccess?.();
       navigate({ to: '/' });
-    } catch (error: any) {
-      console.error('LoginForm: Login error:', error);
+    } catch (err: any) {
+      console.error('LoginForm: Login error:', err);
 
-      // Manejar diferentes tipos de errores
+      // Manejar diferentes tipos de errores con modals específicos
+      let errorTitle = 'Error al iniciar sesión';
       let errorMessage = 'Credenciales inválidas';
 
-      if (error.message) {
-        if (error.message.includes('500')) {
-          errorMessage =
-            'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
-        } else if (error.message.includes('401')) {
-          errorMessage = 'Credenciales incorrectas';
-        } else if (error.message.includes('Network')) {
-          errorMessage =
-            'Error de conexión - Verifique su internet o que el servidor esté funcionando';
+      if (err.message) {
+        if (err.message.includes('500')) {
+          errorTitle = 'Error del servidor';
+          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+        } else if (err.message.includes('401')) {
+          errorTitle = 'Credenciales incorrectas';
+          errorMessage = 'El email o contraseña son incorrectos. Por favor verifique sus datos.';
+        } else if (err.message.includes('403')) {
+          errorTitle = 'Acceso denegado';
+          errorMessage = 'Su cuenta no tiene permisos para acceder al panel de administración.';
+        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorTitle = 'Error de conexión';
+          errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+        } else if (err.message.includes('timeout')) {
+          errorTitle = 'Tiempo de espera agotado';
+          errorMessage = 'La conexión tardó demasiado tiempo. Intente nuevamente.';
         } else {
-          errorMessage = error.message;
+          errorMessage = err.message;
         }
       }
 
-      toast.error('Error al iniciar sesión', {
+      // Si no hay conexión
+      if (!navigator.onLine) {
+        errorTitle = 'Sin conexión a internet';
+        errorMessage = 'Verifique su conexión a internet e intente nuevamente.';
+      }
+
+      error(errorTitle, {
         description: errorMessage,
       });
     } finally {
@@ -150,13 +185,20 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
           <div className="mt-4 text-center text-sm text-gray-500">
             ¿No tienes una cuenta?{' '}
-            <a href="#" className="underline">
-              Comunícate con tu jefe
-            </a>
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/register' })}
+              className="underline text-blue-600 hover:text-blue-800"
+            >
+              Regístrate aquí
+            </button>
           </div>
           {/* TODO: Add remember me, forgot password links here */}
         </CardContent>
       </Card>
+
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </>
   );
 }
+

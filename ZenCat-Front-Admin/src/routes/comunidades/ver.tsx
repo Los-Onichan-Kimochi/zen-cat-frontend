@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useRef } from 'react';
 
@@ -40,6 +40,7 @@ export const Route = createFileRoute('/comunidades/ver')({
 function EditCommunityPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { id } = Route.useSearch();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -128,12 +129,16 @@ function EditCommunityPage() {
       return communitiesApi.updateCommunity(id, data);
     },
     onSuccess: () => {
-      toast.success('Comunidad actualizada correctamente');
+      toast.success('Comunidad Actualizada', {
+        description: 'La comunidad ha sido actualizada correctamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['community', id] });
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
-      toast.error('Error al actualizar', { description: err.message });
+      toast.error('Error al Actualizar', { 
+        description: err.message || 'No se pudo actualizar la comunidad.' 
+      });
     },
   });
 
@@ -141,7 +146,9 @@ function EditCommunityPage() {
     let imageUrl = community?.image_url || 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Subida simulada de imagen');
+      toast.info('Imagen Procesada', {
+        description: 'Subida simulada de imagen completada.',
+      });
     }
 
     try {
@@ -151,8 +158,8 @@ function EditCommunityPage() {
         image_url: imageUrl,
       });
     } catch (err: any) {
-      toast.error('Error al actualizar comunidad', {
-        description: err.message,
+      toast.error('Error al Actualizar Comunidad', {
+        description: err.message || 'No se pudo actualizar la comunidad.',
       });
     }
   };
@@ -166,13 +173,17 @@ function EditCommunityPage() {
       serviceId: string;
     }) => communityServicesApi.deleteCommunityService(communityId, serviceId),
     onSuccess: (_, service) => {
-      toast.success('Servicio desvinculado');
+      toast.success('Servicio Desvinculado', {
+        description: 'El servicio ha sido desvinculado exitosamente.',
+      });
       setSelectedServices((prev) =>
         prev.filter((s) => s.id !== service.serviceId),
       );
     },
     onError: (err) => {
-      toast.error('Error al eliminar servicio', { description: err.message });
+      toast.error('Error al Desvincular', { 
+        description: err.message || 'No se pudo desvincular el servicio.' 
+      });
     },
   });
 
@@ -180,11 +191,15 @@ function EditCommunityPage() {
     mutationFn: (ids: string[]) =>
       communityServicesApi.bulkDeleteCommunityServices(ids),
     onSuccess: (_, ids) => {
-      toast.success('Servicios desvinculados');
+      toast.success('Servicios Desvinculados', {
+        description: `${ids.length} servicios desvinculados exitosamente.`,
+      });
       setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
     },
     onError: (err) => {
-      toast.error('Error al eliminar servicios', { description: err.message });
+      toast.error('Error al Desvincular Servicios', { 
+        description: err.message || 'No se pudieron desvincular los servicios.' 
+      });
     },
   });
 
@@ -201,13 +216,17 @@ function EditCommunityPage() {
         planId,
       ),
     onSuccess: (_, plan) => {
-      toast.success('Plan desvinculado');
+      toast.success('Plan Desvinculado', {
+        description: 'El plan ha sido desvinculado exitosamente.',
+      });
       setSelectedMembershipPlans((prev) =>
         prev.filter((p) => p.id !== plan.planId),
       );
     },
     onError: (err) => {
-      toast.error('Error al eliminar plan', { description: err.message });
+      toast.error('Error al Desvincular Plan', { 
+        description: err.message || 'No se pudo desvincular el plan.' 
+      });
     },
   });
 
@@ -217,15 +236,17 @@ function EditCommunityPage() {
         community_plans: ids,
       }),
     onSuccess: (_, ids) => {
-      toast.success('Planes eliminados');
+      toast.success('Planes Desvinculados', {
+        description: `${ids.length} planes desvinculados exitosamente.`,
+      });
       setSelectedMembershipPlans((prev) =>
         prev.filter((p) => !ids.includes(p.id)),
       );
       queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples planes', {
-        description: err.message,
+      toast.error('Error al Desvincular Planes', {
+        description: err.message || 'No se pudieron desvincular los planes.',
       });
     },
   });

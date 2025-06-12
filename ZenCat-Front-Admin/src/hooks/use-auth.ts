@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { authService } from '@/api/auth/auth-service';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 
@@ -33,6 +33,7 @@ export function useCurrentUser() {
 export function useLogin() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
@@ -40,7 +41,7 @@ export function useLogin() {
       // Cache the current user data
       queryClient.setQueryData(authQueryKeys.currentUser, data.user);
 
-      toast.success('Inicio de sesión exitoso', {
+      toast.success('Inicio de Sesión Exitoso', {
         description: `Bienvenido, ${data.user.name}!`,
       });
 
@@ -48,8 +49,8 @@ export function useLogin() {
       navigate({ to: '/' });
     },
     onError: (error: Error) => {
-      toast.error('Error al iniciar sesión', {
-        description: error.message || 'Credenciales inválidas',
+      toast.error('Error al Iniciar Sesión', {
+        description: error.message || 'Credenciales inválidas.',
       });
     },
   });
@@ -59,6 +60,7 @@ export function useLogin() {
 export function useRegister() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: (userData: RegisterRequest) => authService.register(userData),
@@ -66,7 +68,7 @@ export function useRegister() {
       // Cache the current user data
       queryClient.setQueryData(authQueryKeys.currentUser, data.user);
 
-      toast.success('Registro exitoso', {
+      toast.success('Registro Exitoso', {
         description: `Bienvenido, ${data.user.name}!`,
       });
 
@@ -74,8 +76,8 @@ export function useRegister() {
       navigate({ to: '/' });
     },
     onError: (error: Error) => {
-      toast.error('Error al registrarse', {
-        description: error.message || 'No se pudo completar el registro',
+      toast.error('Error al Registrarse', {
+        description: error.message || 'No se pudo completar el registro.',
       });
     },
   });
@@ -85,6 +87,7 @@ export function useRegister() {
 export function useLogout() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: authService.logout,
@@ -92,14 +95,16 @@ export function useLogout() {
       // Clear all cached data
       queryClient.clear();
 
-      toast.success('Sesión cerrada correctamente');
+      toast.success('Sesión Cerrada', {
+        description: 'La sesión ha sido cerrada correctamente.',
+      });
 
       // Redirect to login
       navigate({ to: '/login' });
     },
     onError: (error: Error) => {
-      toast.error('Error al cerrar sesión', {
-        description: error.message,
+      toast.error('Error al Cerrar Sesión', {
+        description: error.message || 'No se pudo cerrar la sesión.',
       });
     },
   });

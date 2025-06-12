@@ -42,7 +42,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export const Route = createFileRoute('/locales/')({
@@ -53,6 +53,7 @@ function LocalesComponent() {
   const navigate = useNavigate();
   const { setCurrent } = useLocal();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [localToDelete, setLocalToDelete] = useState<Local | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -79,13 +80,17 @@ function LocalesComponent() {
   const deleteLocalMutation = useMutation({
     mutationFn: (id: string) => localsApi.deleteLocal(id),
     onSuccess: async (_, id) => {
-      toast.success('Local eliminado', { description: `ID ${id}` });
+      toast.success('Local Eliminado', { 
+        description: 'El local ha sido eliminado exitosamente.' 
+      });
       await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       //setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al eliminar local', { description: err.message });
+      toast.error('Error al Eliminar', { 
+        description: err.message || 'No se pudo eliminar el local.' 
+      });
     },
   });
 
@@ -105,15 +110,17 @@ function LocalesComponent() {
   const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
     mutationFn: localsApi.bulkCreateLocals,
     onSuccess: async () => {
-      toast.success('Locales creados exitosamente');
+      toast.success('Locales Creados', {
+        description: 'Los locales han sido creados exitosamente.',
+      });
       await refetchLocals();
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       setShowUploadDialog(false);
       setShowSuccess(true);
     },
     onError: (error: Error) => {
-      toast.error('Error durante la carga masiva', {
-        description: error.message,
+      toast.error('Error en Carga Masiva', {
+        description: error.message || 'No se pudieron crear los locales.',
       });
     },
   });
@@ -227,7 +234,7 @@ function LocalesComponent() {
         ]}
         onParsedData={async (data) => {
           try {
-            bulkCreateLocals(data);
+            bulkCreateLocals({ locals: data });
           } catch (error) {
             console.error(error);
           }

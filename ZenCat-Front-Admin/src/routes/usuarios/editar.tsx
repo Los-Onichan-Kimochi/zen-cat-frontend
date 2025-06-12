@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
 import { UpdateUserPayload } from '@/types/user';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +38,7 @@ export const Route = createFileRoute('/usuarios/editar')({
 function EditarUsuario() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const search = useSearch({ from: '/usuarios/editar' });
   const userId = search.id;
   const [isEditing, setIsEditing] = useState(false);
@@ -54,7 +55,7 @@ function EditarUsuario() {
     mutationFn: (data: UpdateUserPayload) =>
       usuariosApi.updateUsuario(userId, data),
     onSuccess: () => {
-      toast.success('Usuario actualizado', {
+      toast.success('Usuario Actualizado', {
         description: 'El usuario ha sido actualizado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
@@ -64,7 +65,7 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al actualizar usuario', {
+      toast.error('Error al Actualizar Usuario', {
         description: error.message || 'No se pudo actualizar el usuario.',
       });
     },
@@ -75,7 +76,7 @@ function EditarUsuario() {
     mutationFn: (onboardingData: any) =>
       usuariosApi.updateOnboardingByUserId(userId, onboardingData),
     onSuccess: () => {
-      toast.success('Onboarding actualizado', {
+      toast.success('Onboarding Actualizado', {
         description:
           'Los datos de onboarding han sido actualizados exitosamente.',
       });
@@ -86,7 +87,7 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al actualizar onboarding', {
+      toast.error('Error al Actualizar Onboarding', {
         description:
           error.message || 'No se pudieron actualizar los datos de onboarding.',
       });
@@ -98,7 +99,7 @@ function EditarUsuario() {
     mutationFn: (onboardingData: any) =>
       usuariosApi.createOnboardingByUserId(userId, onboardingData),
     onSuccess: () => {
-      toast.success('Onboarding creado', {
+      toast.success('Onboarding Creado', {
         description: 'Los datos de onboarding han sido creados exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
@@ -108,7 +109,7 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al crear onboarding', {
+      toast.error('Error al Crear Onboarding', {
         description:
           error.message || 'No se pudieron crear los datos de onboarding.',
       });

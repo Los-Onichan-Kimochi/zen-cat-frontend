@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
+import { useToast } from '@/context/ToastContext';
 
 import {
   Dialog,
@@ -47,6 +49,8 @@ export function EditReservationModal({
     state: ReservationState.CONFIRMED,
     user_id: '',
   });
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
 
   // Initialize form when reservation changes
   useEffect(() => {
@@ -73,12 +77,14 @@ export function EditReservationModal({
     mutationFn: (data: UpdateReservationRequest) =>
       reservationsApi.updateReservation(reservation!.id, data),
     onSuccess: () => {
-      toast.success('Reserva actualizada exitosamente');
+      toast.success('Reserva Actualizada', {
+        description: 'La reserva ha sido actualizada exitosamente.',
+      });
       onSuccess();
     },
-    onError: (error) => {
-      toast.error('Error al actualizar la reserva', {
-        description: error.message,
+    onError: (err: any) => {
+      error('Error al actualizar la reserva', {
+        description: err.message || 'No se pudo actualizar la reserva',
       });
     },
   });
@@ -87,12 +93,16 @@ export function EditReservationModal({
     e.preventDefault();
 
     if (!formData.name?.trim()) {
-      toast.error('El nombre es requerido');
+      error('Error de validación', {
+        description: 'El nombre es requerido',
+      });
       return;
     }
 
     if (!formData.user_id) {
-      toast.error('Debe seleccionar un usuario');
+      error('Error de validación', {
+        description: 'Debe seleccionar un usuario',
+      });
       return;
     }
 
@@ -243,6 +253,8 @@ export function EditReservationModal({
           </div>
         </form>
       </DialogContent>
+      
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </Dialog>
   );
 }

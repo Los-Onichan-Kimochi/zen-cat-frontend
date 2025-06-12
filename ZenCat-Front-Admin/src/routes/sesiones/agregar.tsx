@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { format } from 'date-fns';
 import React from 'react';
 import {
@@ -121,6 +121,7 @@ export const Route = createFileRoute('/sesiones/agregar')({
 function AddSessionComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const form = useForm<SessionFormData>({
     resolver: zodResolver(sessionSchema),
@@ -184,28 +185,34 @@ function AddSessionComponent() {
       return sessionsApi.createSession(data);
     },
     onSuccess: (result) => {
-      toast.success('Sesión creada exitosamente');
+      toast.success('Sesión Creada', {
+        description: 'La sesión ha sido creada exitosamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       navigate({ to: '/sesiones' });
     },
     onError: (error) => {
       console.error('Error creating session:', error);
-      toast.error('Error al crear sesión', { description: error.message });
+      toast.error('Error al Crear Sesión', { 
+        description: error.message || 'No se pudo crear la sesión.' 
+      });
     },
   });
 
   const onSubmit = (data: SessionFormData) => {
     if (hasConflict) {
-      toast.error('No se puede crear la sesión', {
+      toast.error('Conflicto de Horario', {
         description:
-          'Existen conflictos de horario que deben resolverse primero',
+          'Existen conflictos de horario que deben resolverse primero.',
       });
       return;
     }
 
     // Crear fechas en zona horaria local (Lima, Perú)
     if (!data.date) {
-      toast.error('La fecha es requerida');
+      toast.error('Fecha Requerida', {
+        description: 'Debe seleccionar una fecha para la sesión.',
+      });
       return;
     }
 

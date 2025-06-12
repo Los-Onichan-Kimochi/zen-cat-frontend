@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useCommunityForm } from '@/hooks/use-community-basic-form';
@@ -37,6 +37,7 @@ export const Route = createFileRoute('/comunidades/agregar-comunidad')({
 function AddCommunityPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const {
     register,
@@ -68,14 +69,18 @@ function AddCommunityPage() {
     mutationFn: (data: CreateCommunityPayload) =>
       communitiesApi.createCommunity(data),
     onError: (error) =>
-      toast.error('Error al crear comunidad', { description: error.message }),
+      toast.error('Error al Crear Comunidad', { 
+        description: error.message || 'No se pudo crear la comunidad.' 
+      }),
   });
 
   const onSubmit = async (data: any) => {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Subida simulada de imagen completada');
+      toast.info('Imagen Procesada', {
+        description: 'Subida simulada de imagen completada.',
+      });
     }
 
     try {
@@ -103,12 +108,14 @@ function AddCommunityPage() {
         });
       }
 
-      toast.success('Comunidad creada correctamente');
+      toast.success('Comunidad Creada', {
+        description: 'La comunidad ha sido creada correctamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       navigate({ to: '/comunidades' });
     } catch (err: any) {
-      toast.error('Error al asociar servicios o planes', {
-        description: err.message,
+      toast.error('Error al Asociar Servicios', {
+        description: err.message || 'No se pudieron asociar los servicios o planes.',
       });
     }
   };

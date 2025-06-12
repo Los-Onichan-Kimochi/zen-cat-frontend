@@ -1,5 +1,5 @@
+import { useToast } from '@/context/ToastContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 interface UseBulkDeleteOptions<T> {
   queryKey: string[];
@@ -19,19 +19,20 @@ export function useBulkDelete<T>({
   onSuccess,
 }: UseBulkDeleteOptions<T>) {
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { mutate: bulkDelete, isPending: isBulkDeleting } = useMutation({
     mutationFn: (items: T[]) => deleteFn(items.map(getId)),
     onSuccess: (_, items) => {
-      toast.success(`${entityNamePlural} eliminados`, {
-        description: `${items.length} ${entityNamePlural} eliminados`,
+      toast.success(`${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)} Eliminados`, {
+        description: `Los ${entityNamePlural} seleccionados han sido eliminados exitosamente.`,
       });
       queryClient.invalidateQueries({ queryKey });
       onSuccess?.(items);
     },
-    onError: (err) => {
-      toast.error(`Error al eliminar ${entityNamePlural}`, {
-        description: err.message,
+    onError: (err: any) => {
+      toast.error(`Error al Eliminar ${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)}`, {
+        description: err.message || `No se pudieron eliminar los ${entityNamePlural}.`,
       });
     },
   });

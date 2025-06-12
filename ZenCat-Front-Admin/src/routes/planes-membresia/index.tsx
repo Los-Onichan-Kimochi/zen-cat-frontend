@@ -15,7 +15,7 @@ import { MembershipPlanTable } from '@/components/membership-plan/membership-pla
 
 import { Locate, Plus, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/planes-membresia/')({
   component: PlanesMembresiaComponent,
@@ -24,6 +24,7 @@ export const Route = createFileRoute('/planes-membresia/')({
 function PlanesMembresiaComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -43,11 +44,15 @@ function PlanesMembresiaComponent() {
   const deletePlanMutation = useMutation({
     mutationFn: (id: string) => membershipPlansApi.deleteMembershipPlan(id),
     onSuccess: (_, id) => {
-      toast.success('Plan de membresía eliminado', { description: `ID ${id}` });
+      toast.success('Plan Eliminado', { 
+        description: 'El plan de membresía ha sido eliminado exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar el plan', { description: err.message });
+      toast.error('Error al Eliminar', { 
+        description: err.message || 'No se pudo eliminar el plan.' 
+      });
     },
   });
 
@@ -55,14 +60,14 @@ function PlanesMembresiaComponent() {
     mutationFn: (ids: string[]) =>
       membershipPlansApi.bulkDeleteMembershipPlans({ plans: ids }),
     onSuccess: (_, ids) => {
-      toast.success('Planes eliminados', {
-        description: `${ids.length} registros`,
+      toast.success('Planes Eliminados', {
+        description: `${ids.length} planes eliminados exitosamente.`,
       });
       queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples planes', {
-        description: err.message,
+      toast.error('Error al Eliminar Planes', {
+        description: err.message || 'No se pudieron eliminar los planes.',
       });
     },
   });
@@ -144,7 +149,9 @@ function PlanesMembresiaComponent() {
             queryClient.invalidateQueries({ queryKey: ['communities'] });
           } catch (error) {
             console.error(error);
-            toast.error('Error durante la carga masiva');
+            toast.error('Error en Carga Masiva', {
+              description: 'No se pudieron crear los planes.',
+            });
           }
         }}
       />

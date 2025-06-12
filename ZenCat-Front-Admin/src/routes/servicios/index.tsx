@@ -50,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/servicios/')({
   component: ServiciosComponent,
@@ -63,6 +63,7 @@ interface CalculatedCounts {
 
 function ServiciosComponent() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -92,12 +93,16 @@ function ServiciosComponent() {
   >({
     mutationFn: (id) => servicesApi.deleteService(id),
     onSuccess: (_, id) => {
-      toast.success('Servicio eliminado', { description: `ID ${id}` });
+      toast.success('Servicio Eliminado', { 
+        description: 'El servicio ha sido eliminado exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al Eliminar', { 
+        description: err.message || 'No se pudo eliminar el servicio.' 
+      });
     },
   });
 

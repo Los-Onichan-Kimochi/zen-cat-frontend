@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+'use client';
+
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
@@ -34,6 +36,7 @@ function SessionReservationsComponent() {
   const { sessionId } = Route.useParams();
   const navigate = Route.useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // State for modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -63,15 +66,19 @@ function SessionReservationsComponent() {
   const { mutate: deleteReservation, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => reservationsApi.deleteReservation(id),
     onSuccess: (_, id) => {
-      toast.success('Reserva eliminada');
+      toast.success('Reserva Eliminada', {
+        description: 'La reserva ha sido eliminada exitosamente.',
+      });
       queryClient.invalidateQueries({
         queryKey: ['reservations', 'session', sessionId],
       });
       setIsDeleteModalOpen(false);
       setSelectedReservation(null);
     },
-    onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+    onError: (err: any) => {
+      toast.error('Error al Eliminar Reserva', {
+        description: err.message || 'No se pudo eliminar la reserva.',
+      });
     },
   });
 

@@ -59,9 +59,12 @@ class ApiClient {
       });
 
       if (response.ok) {
-        const tokens: AuthTokens = await response.json();
-        this.setAuthTokens(tokens);
-        return tokens;
+        const text = await response.text();
+        if (text) {
+          const tokens: AuthTokens = JSON.parse(text);
+          this.setAuthTokens(tokens);
+          return tokens;
+        }
       }
     } catch (error) {
       console.error('Token refresh failed:', error);
@@ -109,13 +112,36 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
+      let error = {};
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const text = await response.text();
+          if (text) {
+            error = JSON.parse(text);
+          }
+        }
+      } catch (e) {
+        // Ignore JSON parsing errors for error responses
+      }
       throw new Error(
-        error.message || `HTTP error! status: ${response.status}`,
+        (error as any).message || `HTTP error! status: ${response.status}`,
       );
     }
 
-    return response.json();
+    // Handle empty responses (like DELETE operations that return 204 No Content)
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null as T;
+    }
+
+    // Check if response has content
+    const text = await response.text();
+    if (!text) {
+      return null as T;
+    }
+
+    return JSON.parse(text);
   }
 
   async get<T = any>(endpoint: string): Promise<T> {
