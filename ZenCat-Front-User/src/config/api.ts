@@ -23,6 +23,12 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/community/${id}/`,
   },
 
+  // Community Services endpoints
+  COMMUNITY_SERVICES: {
+    BASE: '/community-service/',
+    BY_COMMUNITY_ID: (communityId: string) => `/community-service/?community_id=${communityId}`,
+  },
+
   // User endpoints
   USERS: {
     BASE: '/user/',

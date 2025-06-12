@@ -71,29 +71,20 @@ function AddLocalPageComponent() {
         description: 'Subida simulada de imagen completada.',
       });
     }
-    try {
-      const newLocal = await createLocalMutation.mutateAsync({
-        local_name: data.local_name,
-        street_name: data.street_name,
-        building_number: data.building_number,
-        district: data.district,
-        province: data.province,
-        region: data.region,
-        reference: data.reference,
-        capacity: data.capacity,
-        image_url: data.image_url,
-      });
-      toast.success('Local Creado', {
-        description: 'El local ha sido creado correctamente.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['locals'] });
-      navigate({ to: '/locales' });
-    } catch (err: any) {
-      toast.error('Error al Crear Local', { 
-        description: err.message || 'No se pudo crear el local.' 
-      });
-    }
-    //createLocalMutation.mutate(payload);
+    
+    const payload = {
+      local_name: data.local_name,
+      street_name: data.street_name,
+      building_number: data.building_number,
+      district: data.district,
+      province: data.province,
+      region: data.region,
+      reference: data.reference,
+      capacity: data.capacity,
+      image_url: data.image_url,
+    };
+    
+    createLocalMutation.mutate(payload);
   };
   return (
     <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">

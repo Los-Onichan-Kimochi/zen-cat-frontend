@@ -1,14 +1,12 @@
 import { Community, UpdateCommunityPayload } from '@/types/community';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const communitiesApi = {
   getCommunities: async (): Promise<Community[]> => {
-    const response = await fetch(`${API_BASE_URL}/community/`);
-    if (!response.ok) {
-      throw new Error('Error fetching professionals');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<{ communities: Community[] }>(
+      API_ENDPOINTS.COMMUNITIES.BASE,
+    );
     if (data && Array.isArray(data.communities)) {
       return data.communities;
     } else if (Array.isArray(data)) {
@@ -19,27 +17,16 @@ export const communitiesApi = {
   },
 
   getCommunityById: async (id: string): Promise<Community> => {
-    const response = await fetch(`${API_BASE_URL}/community/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching community with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(id));
   },
 
   updateCommunity: async (
     id: string,
     payload: UpdateCommunityPayload,
   ): Promise<Community> => {
-    const response = await fetch(`${API_BASE_URL}/community/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating community with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Community>(
+      API_ENDPOINTS.COMMUNITIES.BY_ID(id),
+      payload,
+    );
   },
 };

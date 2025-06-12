@@ -26,8 +26,12 @@ class ApiClient {
   }
 
   private setAuthTokens(tokens: AuthTokens): void {
+    // For development, set access token to expire in 2 hours (0.083 days)
+    // The expires_in from backend is in nanoseconds (Go time.Duration), not seconds
+    const accessTokenExpiry = 2 / 24; // 2 hours in days
+    
     Cookies.set('access_token', tokens.access_token, {
-      expires: tokens.expires_in ? tokens.expires_in / (24 * 60 * 60) : 1, // Convert seconds to days
+      expires: accessTokenExpiry,
       secure: window.location.protocol === 'https:',
       sameSite: 'strict',
     });
