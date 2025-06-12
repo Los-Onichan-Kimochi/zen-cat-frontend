@@ -1,30 +1,23 @@
-export interface Local {
-  id: string;
-  local_name: string;
-  street_name: string;
-  building_number: string;
-  district: string;
-  province: string;
-  region: string;
-  reference: string;
-  capacity: number;
-  image_url: string;
-}
+import {
+  Local,
+  CreateLocalRequest,
+  UpdateLocalRequest,
+  BulkCreateLocalPayload,
+  BulkDeleteLocalPayload,
+} from '@/types/local';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export interface LocalsResponse {
   locals: Local[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export const localsApi = {
   // Get all locals
   getLocals: async (): Promise<Local[]> => {
-    const response = await fetch(`${API_BASE_URL}/local/`);
-    if (!response.ok) {
-      throw new Error('Error fetching locals');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<{ locals: Local[] }>(
+      API_ENDPOINTS.LOCALS.BASE,
+    );
     if (data && Array.isArray(data.locals)) {
       return data.locals;
     } else if (Array.isArray(data)) {
@@ -36,10 +29,6 @@ export const localsApi = {
 
   // Get a specific local by ID
   getLocal: async (localId: string): Promise<Local> => {
-    const response = await fetch(`${API_BASE_URL}/local/${localId}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching local with id ${localId}`);
-    }
-    return response.json();
+    return apiClient.get<Local>(API_ENDPOINTS.LOCALS.BY_ID(localId));
   },
 };

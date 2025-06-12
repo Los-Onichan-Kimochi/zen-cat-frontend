@@ -12,14 +12,16 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { User } from '@/types/user';
 import { getUserColumns } from './columns';
+import { useEffect } from 'react';
 
 interface UsersTableProps {
   data: User[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onViewMemberships: (user: User) => void;
-  onBulkDelete?: (users: User[]) => void;
+  onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting?: boolean;
+  resetSelection?: number;
 }
 
 export function UsersTable({
@@ -29,6 +31,7 @@ export function UsersTable({
   onViewMemberships,
   onBulkDelete,
   isBulkDeleting = false,
+  resetSelection = 0,
 }: UsersTableProps) {
   const {
     sorting,
@@ -71,6 +74,12 @@ export function UsersTable({
     enableRowSelection: true,
   });
 
+  useEffect(() => {
+    if (resetSelection > 0) {
+      setRowSelection({});
+    }
+  }, [resetSelection, setRowSelection]);
+
   return (
     <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
       <DataTableToolbar
@@ -79,21 +88,11 @@ export function UsersTable({
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => {}}
-        exportFileName="usuarios"
-        // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
-        onBulkDelete={
-          onBulkDelete
-            ? (ids: string[]) => {
-                const usersToDelete = data.filter((user) =>
-                  ids.includes(user.id),
-                );
-                onBulkDelete(usersToDelete);
-              }
-            : undefined
-        }
+        onFilterClick={() => console.log('Filtrar')}
+        onBulkDelete={onBulkDelete}
         isBulkDeleting={isBulkDeleting}
+        isBulkDeleteEnabled={true}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

@@ -65,7 +65,7 @@ _Nota: Algunas carpetas como `assets/`, `data/`, `images/`, `styles/`, `config/`
     Este archivo contendrá variables específicas de tu entorno de desarrollo, como URLs de APIs:
 
     ```
-    VITE_API_URL=https://tu.api.desarrollo
+    VITE_API_BASE_URL=http://localhost:8098
     ```
 
     Consulta la documentación interna o pregunta al equipo si necesitas más detalles sobre las variables requeridas.
@@ -110,3 +110,99 @@ En el archivo `package.json`, encontrarás varios scripts útiles que puedes eje
 - `bun run build`: Compila la aplicación para producción.
 - `bun run lint`: Ejecuta ESLint para analizar el código.
 - `bun run preview`: Inicia un servidor local para previsualizar el build de producción.
+
+## Sistema de Autenticación
+
+### Credenciales de Prueba
+
+Para probar el sistema, puedes usar estas credenciales:
+
+- **Email**: `admin@zencat.com`
+- **Password**: `admin123`
+
+### Testing de Autenticación
+
+#### Caso 1: Login Exitoso
+
+1. Ve a `/login`
+2. Ingresa las credenciales válidas
+3. Deberías ser redirigido al dashboard con la barra lateral
+
+#### Caso 2: Login Fallido
+
+1. Ve a `/login`
+2. Ingresa credenciales incorrectas (cualquier email/password inválido)
+3. Deberías ver un mensaje de error toast
+4. Deberías permanecer en la página de login
+
+#### Caso 3: Protección de Rutas
+
+1. Sin estar logueado, intenta acceder a `/` o `/comunidades`
+2. Deberías ser redirigido automáticamente a `/login`
+
+#### Caso 4: Logout
+
+1. Una vez logueado, busca el ícono de logout en la barra lateral (abajo)
+2. Al hacer click, deberías ser redirigido a `/login`
+3. Intenta acceder a rutas protegidas - deberías ser redirigido a login
+
+### Crear Nuevos Usuarios de Prueba
+
+Si necesitas crear más usuarios para testing, puedes usar curl:
+
+```bash
+curl -X POST http://localhost:8098/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Nuevo",
+    "first_last_name": "Usuario",
+    "second_last_name": "Test",
+    "email": "nuevo@test.com",
+    "password": "password123",
+    "image_url": ""
+  }'
+```
+
+## Arquitectura de Autenticación
+
+- **JWT Tokens**: Almacenados en cookies seguras
+- **Refresh Token**: Renovación automática en caso de expiración
+- **API Client**: Interceptor automático para agregar tokens a requests
+- **Context**: Estado global de autenticación con React Context
+- **Route Protection**: Componentes de protección para rutas privadas
+
+## Componentes Principales
+
+- `LoginForm`: Formulario de inicio de sesión
+- `AuthContext`: Contexto de autenticación
+- `ProtectedRoute`: Wrapper para rutas protegidas
+- `AuthenticatedLayout`: Layout con sidebar para usuarios autenticados
+- `api-client`: Cliente HTTP con manejo automático de JWT
+
+## Endpoints de API
+
+- `POST /login/`: Autenticación de usuario
+- `POST /register/`: Registro de nuevo usuario
+- `GET /me/`: Información del usuario actual
+- `POST /auth/refresh/`: Renovar tokens
+- `POST /auth/logout/`: Cerrar sesión
+
+## Troubleshooting
+
+### Error: "Credenciales incorrectas" con credenciales válidas
+
+- Verifica que el backend esté ejecutándose en `http://localhost:8098`
+- Confirma que el usuario existe en la base de datos
+- Revisa la consola del navegador para errores de red
+
+### Error: "Error de conexión"
+
+- Confirma que `VITE_API_BASE_URL` esté configurado correctamente
+- Verifica que el backend esté ejecutándose
+- Revisa las políticas CORS del backend
+
+### Redirección infinita a login
+
+- Limpia las cookies del navegador
+- Limpia localStorage
+- Verifica que los tokens no estén corruptos en las cookies

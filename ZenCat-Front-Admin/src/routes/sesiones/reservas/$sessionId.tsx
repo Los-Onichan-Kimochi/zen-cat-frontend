@@ -1,13 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router';
+'use client';
+
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { ArrowLeft, Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
-import { Reservation, ReservationState } from '@/types/reservation';
-import { Session } from '@/types/session';
+import { Reservation } from '@/types/reservation';
 
 import { Button } from '@/components/ui/button';
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -35,13 +36,15 @@ function SessionReservationsComponent() {
   const { sessionId } = Route.useParams();
   const navigate = Route.useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // State for modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
   // Fetch session data
   const { data: sessionData, isLoading: isLoadingSession } = useQuery({
@@ -50,10 +53,10 @@ function SessionReservationsComponent() {
   });
 
   // Fetch reservations for this session
-  const { 
-    data: reservationsData, 
+  const {
+    data: reservationsData,
     isLoading: isLoadingReservations,
-    error: reservationsError 
+    error: reservationsError,
   } = useQuery({
     queryKey: ['reservations', 'session', sessionId],
     queryFn: () => reservationsApi.getReservationsBySession(sessionId),
@@ -63,13 +66,19 @@ function SessionReservationsComponent() {
   const { mutate: deleteReservation, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => reservationsApi.deleteReservation(id),
     onSuccess: (_, id) => {
-      toast.success('Reserva eliminada');
-      queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+      toast.success('Reserva Eliminada', {
+        description: 'La reserva ha sido eliminada exitosamente.',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['reservations', 'session', sessionId],
+      });
       setIsDeleteModalOpen(false);
       setSelectedReservation(null);
     },
-    onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+    onError: (err: any) => {
+      toast.error('Error al Eliminar Reserva', {
+        description: err.message || 'No se pudo eliminar la reserva.',
+      });
     },
   });
 
@@ -99,12 +108,16 @@ function SessionReservationsComponent() {
   };
 
   const handleCreateSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+    queryClient.invalidateQueries({
+      queryKey: ['reservations', 'session', sessionId],
+    });
     setIsCreateModalOpen(false);
   };
 
   const handleEditSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['reservations', 'session', sessionId] });
+    queryClient.invalidateQueries({
+      queryKey: ['reservations', 'session', sessionId],
+    });
     setIsEditModalOpen(false);
     setSelectedReservation(null);
   };
@@ -149,7 +162,7 @@ function SessionReservationsComponent() {
         </Button>
       </div>
 
-      <HeaderDescriptor 
+      <HeaderDescriptor
         title={`RESERVAS - ${session?.title || 'Sesión'}`}
         subtitle={`RESERVAS DE LA SESIÓN ${session ? `(${new Date(session.date).toLocaleDateString('es-ES')})` : ''}`}
       />
@@ -165,7 +178,8 @@ function SessionReservationsComponent() {
             <div>
               <div className="text-sm text-gray-600">Fecha y Hora</div>
               <div className="font-medium">
-                {new Date(session.date).toLocaleDateString('es-ES')} - {session.start_time}
+                {new Date(session.date).toLocaleDateString('es-ES')} -{' '}
+                {session.start_time}
               </div>
             </div>
             <div>
@@ -234,7 +248,8 @@ function SessionReservationsComponent() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar reserva?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará la reserva permanentemente.
+              Esta acción no se puede deshacer. Se eliminará la reserva
+              permanentemente.
               {selectedReservation && (
                 <div className="mt-2 font-medium">
                   Reserva: {selectedReservation.name}
@@ -259,4 +274,4 @@ function SessionReservationsComponent() {
       </AlertDialog>
     </div>
   );
-} 
+}

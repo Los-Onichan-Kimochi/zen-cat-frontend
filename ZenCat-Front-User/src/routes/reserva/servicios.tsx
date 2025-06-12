@@ -187,9 +187,13 @@ function ServiceStepComponent() {
       </div>
 
       {/* Botón siguiente */}
-      <div className="flex justify-center pt-6">
-        <Button onClick={handleContinue} disabled={!selected}>
-          Continuar
+      <div className="flex justify-end mt-6">
+        <Button
+          onClick={handleContinue}
+          disabled={!selected || !reservationData.service}
+          className="px-8 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300"
+        >
+          Siguiente
         </Button>
       </div>
     </div>

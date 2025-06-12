@@ -64,39 +64,51 @@ export function getUserColumns({
       },
     },
     {
-      accessorKey: 'address',
-      header: ({ column }) => (
-        <div className="text-center font-bold">Dirección</div>
-      ),
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue('address') || '-'}</div>
-      ),
-      meta: {
-        displayName: 'Dirección',
-      },
-    },
-    {
-      accessorKey: 'district',
+      id: 'district',
+      accessorFn: (row) => row.district || row.onboarding?.district,
       header: ({ column }) => (
         <div className="text-center font-bold">Distrito</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue('district') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        const district = user.district || user.onboarding?.district;
+        return <div className="text-center">{district || '-'}</div>;
+      },
       meta: {
         displayName: 'Distrito',
       },
     },
     {
-      accessorKey: 'phone',
+      id: 'phone',
+      accessorFn: (row) => row.phone || row.onboarding?.phoneNumber,
       header: ({ column }) => (
         <div className="text-center font-bold">Teléfono</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue('phone') || '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        const phone = user.phone || user.onboarding?.phoneNumber;
+        return <div className="text-center">{phone || '-'}</div>;
+      },
       meta: {
         displayName: 'Teléfono',
+      },
+    },
+    {
+      id: 'documentNumber',
+      accessorFn: (row) => row.onboarding?.documentNumber,
+      header: ({ column }) => (
+        <div className="text-center font-bold">N° Documento</div>
+      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="text-center">
+            {user.onboarding?.documentNumber || '-'}
+          </div>
+        );
+      },
+      meta: {
+        displayName: 'N° Documento',
       },
     },
     {
@@ -109,31 +121,6 @@ export function getUserColumns({
       ),
       meta: {
         displayName: 'Correo electrónico',
-      },
-    },
-    {
-      accessorKey: 'role',
-      header: ({ column }) => <div className="text-center font-bold">Rol</div>,
-      cell: ({ row }) => {
-        const role = row.getValue('role') as string;
-        return (
-          <div className="flex justify-center">
-            <div
-              className={`px-2 py-1 rounded text-xs font-medium ${
-                role === 'admin'
-                  ? 'bg-red-100 text-red-800'
-                  : role === 'user'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              {role}
-            </div>
-          </div>
-        );
-      },
-      meta: {
-        displayName: 'Rol',
       },
     },
     {

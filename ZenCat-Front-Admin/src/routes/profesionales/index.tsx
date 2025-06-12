@@ -1,8 +1,9 @@
 'use client';
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { ProfessionalProvider } from '@/context/ProfesionalesContext';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
@@ -44,6 +45,7 @@ function ProfesionalesComponent() {
   const navigate = useNavigate();
   const { setCurrent } = useProfessional();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
@@ -64,11 +66,15 @@ function ProfesionalesComponent() {
   >({
     mutationFn: (id) => professionalsApi.deleteProfessional(id),
     onSuccess: (_, id) => {
-      toast.success('Profesional eliminado', { description: `ID ${id}` });
+      toast.success('Profesional Eliminado', { 
+        description: 'El profesional ha sido eliminado exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['professionals'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al Eliminar', { 
+        description: err.message || 'No se pudo eliminar el profesional.' 
+      });
     },
   });
 

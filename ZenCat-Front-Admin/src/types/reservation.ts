@@ -34,4 +34,4 @@ export interface UpdateReservationRequest {
   state?: ReservationState;
   user_id?: string;
   session_id?: string;
-} 
+}

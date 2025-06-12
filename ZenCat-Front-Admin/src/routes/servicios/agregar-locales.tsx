@@ -69,11 +69,13 @@ function ProfesionalesComponent() {
 
   const isLoadingCounts = isLoadingLocals;
   const modo = localStorage.getItem('modoAgregarLocal');
-  const localesAsociados: string[] = JSON.parse(localStorage.getItem('localesAsociados') ?? '[]');
-  
+  const localesAsociados: string[] = JSON.parse(
+    localStorage.getItem('localesAsociados') ?? '[]',
+  );
+
   useEffect(() => {
     const stored = localStorage.getItem('localesSeleccionados');
-    
+
     if (stored && localsData) {
       const restored = JSON.parse(stored) as Local[];
 
@@ -81,77 +83,86 @@ function ProfesionalesComponent() {
       restored.forEach((loc) => {
         newRowSelection[loc.id.toString()] = true;
       });
-      
-      
 
       setRowSelection(newRowSelection);
     }
   }, [localsData]);
 
-  const columns = useMemo<ColumnDef<Local>[]>(() => [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => {
-        const localId = row.original.id;
-        
-        const yaAsociado = localesAsociados.includes(localId.toString());
-        return (
-        <Checkbox
-          checked={row.getIsSelected()|| yaAsociado}
-          disabled={yaAsociado && modo === 'editar'}
-          onCheckedChange={(v) => {
-              if (!yaAsociado) row.toggleSelected(!!v);
-            }}
-            aria-label="Select row"
-        />
-        );
+  const columns = useMemo<ColumnDef<Local>[]>(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => {
+          const localId = row.original.id;
+
+          const yaAsociado = localesAsociados.includes(localId.toString());
+          return (
+            <Checkbox
+              checked={row.getIsSelected() || yaAsociado}
+              disabled={yaAsociado && modo === 'editar'}
+              onCheckedChange={(v) => {
+                if (!yaAsociado) row.toggleSelected(!!v);
+              }}
+              aria-label="Select row"
+            />
+          );
+        },
+        enableSorting: false,
+        enableHiding: false,
       },
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: 'local_name',
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Nombre de Local <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div>{row.getValue('local_name')}</div>,
-    },
-    {
-      id: 'Dirección',
-      header: 'Dirección',
-      accessorFn: (row) => `${row.street_name ?? ''} ${row.building_number ?? ''}`,
-      cell: ({ row }) => (
-        <div>
-          {row.original.street_name} {row.original.building_number}
-        </div>
-      ),
-    },
-    { accessorKey: 'district', header: 'Distrito' },
-    {
-      accessorKey: 'province',
-      header: ({ column }) => (
-        <Button 
-            variant="ghost" 
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Provincia <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
-    { 
-      accessorKey: 'capacity', 
-      header: 'Capacidad' ,
-      cell: ({ row }) => `${row.original.capacity} personas`,
-    },
-  ], []);
+      {
+        accessorKey: 'local_name',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Nombre de Local <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => <div>{row.getValue('local_name')}</div>,
+      },
+      {
+        id: 'Dirección',
+        header: 'Dirección',
+        accessorFn: (row) =>
+          `${row.street_name ?? ''} ${row.building_number ?? ''}`,
+        cell: ({ row }) => (
+          <div>
+            {row.original.street_name} {row.original.building_number}
+          </div>
+        ),
+      },
+      { accessorKey: 'district', header: 'Distrito' },
+      {
+        accessorKey: 'province',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Provincia <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+      },
+      {
+        accessorKey: 'capacity',
+        header: 'Capacidad',
+        cell: ({ row }) => `${row.original.capacity} personas`,
+      },
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: localsData || [],
@@ -191,10 +202,7 @@ function ProfesionalesComponent() {
 
   return (
     <div className="p-6 h-full flex flex-col">
-      <HeaderDescriptor
-        title="LOCALES"
-        subtitle="LISTADO DE LOCALES"
-      />
+      <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
 
       {isLoadingLocals ? (
         <div className="flex justify-center items-center h-64">
@@ -215,10 +223,10 @@ function ProfesionalesComponent() {
           </div>
           <DataTablePagination table={table} />
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-            <Button 
-              variant="outline" 
-              type="button" 
-              onClick={() =>{
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
                 localStorage.removeItem('modoAgregarLocal');
                 localStorage.removeItem('localesAsociados');
                 if (modo === 'editar') {
@@ -226,22 +234,22 @@ function ProfesionalesComponent() {
                 } else {
                   navigate({ to: '/servicios/servicio-nuevo' });
                 }
-              }} className="w-full sm:w-auto"
-              >
-                Cancelar
-                </Button>
+              }}
+              className="w-full sm:w-auto"
+            >
+              Cancelar
+            </Button>
             <Button
               type="button"
-              disabled={
-                isLoadingLocals || selectedLocals.length === 0}
-              onClick={async() => {
+              disabled={isLoadingLocals || selectedLocals.length === 0}
+              onClick={async () => {
                 localStorage.removeItem('modoAgregarLocal');
                 localStorage.removeItem('localesAsociados');
-                if(modo === 'editar') {
+                if (modo === 'editar') {
                   // 1. Obtener IDs ya asociados y los seleccionados
 
                   const nuevos = selectedLocals.filter(
-                    loc => !localesAsociados.includes(loc.id)
+                    (loc) => !localesAsociados.includes(loc.id),
                   );
 
                   // 2. Llamar a la API solo con los nuevos
@@ -253,17 +261,19 @@ function ProfesionalesComponent() {
                       return;
                     }
                     await serviceLocalApi.bulkCreateServiceLocals({
-                        service_locals: nuevos.map(loc => ({
+                      service_locals: nuevos.map((loc) => ({
                         service_id: serviceId,
                         local_id: loc.id,
                       })),
                     });
                   }
                   navigate({ to: '/servicios/servicio-ver' });
-                }
-                 else {
+                } else {
                   // 1. Guardar los seleccionados en el localStorage
-                  localStorage.setItem('localesSeleccionados', JSON.stringify(selectedLocals));
+                  localStorage.setItem(
+                    'localesSeleccionados',
+                    JSON.stringify(selectedLocals),
+                  );
                   navigate({ to: '/servicios/servicio-nuevo' });
                 }
               }}

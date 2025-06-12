@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useRef } from 'react';
 
@@ -40,14 +40,18 @@ export const Route = createFileRoute('/comunidades/ver')({
 function EditCommunityPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { id } = Route.useSearch();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
-  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<MembershipPlan[]>([]);
+  const [selectedMembershipPlans, setSelectedMembershipPlans] = useState<
+    MembershipPlan[]
+  >([]);
 
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
-  const [showServiceConfirmDialog, setShowServiceConfirmDialog] = useState(false);
+  const [showServiceConfirmDialog, setShowServiceConfirmDialog] =
+    useState(false);
 
   const [planToDelete, setPlanToDelete] = useState<MembershipPlan | null>(null);
   const [showPlanConfirmDialog, setShowPlanConfirmDialog] = useState(false);
@@ -59,7 +63,7 @@ function EditCommunityPage() {
     queryKey: ['community', id],
     queryFn: () => communitiesApi.getCommunityById(id),
   });
-  console.log("Comunidad: ", community)
+  console.log('Comunidad: ', community);
   const { data: initialServices } = useQuery({
     queryKey: ['community-services', id],
     queryFn: () => communityServicesApi.getCommunityServices(id),
@@ -86,8 +90,8 @@ function EditCommunityPage() {
 
   useEffect(() => {
     if (community && id) {
-      console.log("Id: ",id);
-      console.log("Comunidad: ", community);
+      console.log('Id: ', id);
+      console.log('Comunidad: ', community);
       reset({
         name: community.name,
         purpose: community.purpose,
@@ -100,14 +104,18 @@ function EditCommunityPage() {
     const loadAssociations = async () => {
       if (initialServices) {
         const services = await Promise.all(
-          initialServices.map((cs) => servicesApi.getServiceById(cs.service_id))
+          initialServices.map((cs) =>
+            servicesApi.getServiceById(cs.service_id),
+          ),
         );
         setSelectedServices(services);
       }
 
       if (initialPlans) {
         const plans = await Promise.all(
-          initialPlans.map((cp) => membershipPlansApi.getMembershipPlanById(cp.plan_id))
+          initialPlans.map((cp) =>
+            membershipPlansApi.getMembershipPlanById(cp.plan_id),
+          ),
         );
         setSelectedMembershipPlans(plans);
       }
@@ -121,12 +129,16 @@ function EditCommunityPage() {
       return communitiesApi.updateCommunity(id, data);
     },
     onSuccess: () => {
-      toast.success('Comunidad actualizada correctamente');
+      toast.success('Comunidad Actualizada', {
+        description: 'La comunidad ha sido actualizada correctamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['community', id] });
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
-      toast.error('Error al actualizar', { description: err.message });
+      toast.error('Error al Actualizar', { 
+        description: err.message || 'No se pudo actualizar la comunidad.' 
+      });
     },
   });
 
@@ -134,7 +146,9 @@ function EditCommunityPage() {
     let imageUrl = community?.image_url || 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Subida simulada de imagen');
+      toast.info('Imagen Procesada', {
+        description: 'Subida simulada de imagen completada.',
+      });
     }
 
     try {
@@ -143,60 +157,99 @@ function EditCommunityPage() {
         purpose: data.purpose,
         image_url: imageUrl,
       });
-
     } catch (err: any) {
-      toast.error('Error al actualizar comunidad', { description: err.message });
+      toast.error('Error al Actualizar Comunidad', {
+        description: err.message || 'No se pudo actualizar la comunidad.',
+      });
     }
   };
 
   const deleteServiceMutation = useMutation({
-    mutationFn: ({ communityId, serviceId }: { communityId: string; serviceId: string }) =>
-      communityServicesApi.deleteCommunityService(communityId, serviceId),
+    mutationFn: ({
+      communityId,
+      serviceId,
+    }: {
+      communityId: string;
+      serviceId: string;
+    }) => communityServicesApi.deleteCommunityService(communityId, serviceId),
     onSuccess: (_, service) => {
-      toast.success('Servicio desvinculado');
-      setSelectedServices((prev) => prev.filter((s) => s.id !== service.serviceId));
+      toast.success('Servicio Desvinculado', {
+        description: 'El servicio ha sido desvinculado exitosamente.',
+      });
+      setSelectedServices((prev) =>
+        prev.filter((s) => s.id !== service.serviceId),
+      );
     },
     onError: (err) => {
-      toast.error('Error al eliminar servicio', { description: err.message });
+      toast.error('Error al Desvincular', { 
+        description: err.message || 'No se pudo desvincular el servicio.' 
+      });
     },
   });
 
-
   const bulkDeleteServiceMutation = useMutation({
-    mutationFn: (ids: string[]) => communityServicesApi.bulkDeleteCommunityServices(ids),
+    mutationFn: (ids: string[]) =>
+      communityServicesApi.bulkDeleteCommunityServices(ids),
     onSuccess: (_, ids) => {
-      toast.success('Servicios desvinculados');
+      toast.success('Servicios Desvinculados', {
+        description: `${ids.length} servicios desvinculados exitosamente.`,
+      });
       setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
     },
     onError: (err) => {
-      toast.error('Error al eliminar servicios', { description: err.message });
+      toast.error('Error al Desvincular Servicios', { 
+        description: err.message || 'No se pudieron desvincular los servicios.' 
+      });
     },
   });
 
   const deleteMembershipPlanMutation = useMutation({
-    mutationFn: ({ communityId, planId }: { communityId: string; planId: string }) =>
-      communityMembershipPlansApi.deleteCommunityMembershipPlan(communityId, planId),
+    mutationFn: ({
+      communityId,
+      planId,
+    }: {
+      communityId: string;
+      planId: string;
+    }) =>
+      communityMembershipPlansApi.deleteCommunityMembershipPlan(
+        communityId,
+        planId,
+      ),
     onSuccess: (_, plan) => {
-      toast.success('Plan desvinculado');
-      setSelectedMembershipPlans((prev) => prev.filter((p) => p.id !== plan.planId));
+      toast.success('Plan Desvinculado', {
+        description: 'El plan ha sido desvinculado exitosamente.',
+      });
+      setSelectedMembershipPlans((prev) =>
+        prev.filter((p) => p.id !== plan.planId),
+      );
     },
     onError: (err) => {
-      toast.error('Error al eliminar plan', { description: err.message });
+      toast.error('Error al Desvincular Plan', { 
+        description: err.message || 'No se pudo desvincular el plan.' 
+      });
     },
   });
 
   const bulkDeleteMembershipPlanMutation = useMutation({
-    mutationFn: (ids: string[]) => communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({community_plans: ids}),
+    mutationFn: (ids: string[]) =>
+      communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({
+        community_plans: ids,
+      }),
     onSuccess: (_, ids) => {
-      toast.success('Planes eliminados');
-      setSelectedMembershipPlans((prev) => prev.filter((p) => !ids.includes(p.id)));
+      toast.success('Planes Desvinculados', {
+        description: `${ids.length} planes desvinculados exitosamente.`,
+      });
+      setSelectedMembershipPlans((prev) =>
+        prev.filter((p) => !ids.includes(p.id)),
+      );
       queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar múltiples planes', { description: err.message });
+      toast.error('Error al Desvincular Planes', {
+        description: err.message || 'No se pudieron desvincular los planes.',
+      });
     },
   });
-
 
   if (isLoading) {
     return <p className="p-6">Cargando...</p>;
@@ -210,7 +263,10 @@ function EditCommunityPage() {
     <div className="p-6 space-y-6 font-montserrat">
       <HeaderDescriptor title="COMUNIDADES" subtitle="EDITAR COMUNIDAD" />
       <div className="mb-4">
-        <Button variant="outline" onClick={() => navigate({ to: '/comunidades' })}>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ to: '/comunidades' })}
+        >
           <ChevronLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
@@ -228,7 +284,9 @@ function EditCommunityPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Servicios</CardTitle>
-              <CardDescription>Servicios vinculados a esta comunidad</CardDescription>
+              <CardDescription>
+                Servicios vinculados a esta comunidad
+              </CardDescription>
             </div>
             <Button
               type="button"
@@ -236,9 +294,18 @@ function EditCommunityPage() {
               className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
               onClick={() => {
                 if (!isEditing) return;
-                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem(
+                  'draftCommunity',
+                  JSON.stringify(watch()),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedServices',
+                  JSON.stringify(selectedServices),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedMembershipPlans',
+                  JSON.stringify(selectedMembershipPlans),
+                );
                 sessionStorage.setItem('modeAddService', 'editar');
                 navigate({ to: '/comunidades/agregar-servicios' }); //
               }}
@@ -273,9 +340,18 @@ function EditCommunityPage() {
               className={isEditing ? '' : 'cursor-not-allowed opacity-70'}
               onClick={() => {
                 if (!isEditing) return;
-                sessionStorage.setItem('draftCommunity', JSON.stringify(watch()));
-                sessionStorage.setItem('draftSelectedServices', JSON.stringify(selectedServices));
-                sessionStorage.setItem('draftSelectedMembershipPlans', JSON.stringify(selectedMembershipPlans));
+                sessionStorage.setItem(
+                  'draftCommunity',
+                  JSON.stringify(watch()),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedServices',
+                  JSON.stringify(selectedServices),
+                );
+                sessionStorage.setItem(
+                  'draftSelectedMembershipPlans',
+                  JSON.stringify(selectedMembershipPlans),
+                );
                 sessionStorage.setItem('modeAddMembershipPlan', 'editar');
                 sessionStorage.setItem('currentCommunity', id);
                 navigate({ to: '/comunidades/agregar-planes-membresía' });
@@ -291,7 +367,9 @@ function EditCommunityPage() {
                 setPlanToDelete(plan);
                 setShowPlanConfirmDialog(true);
               }}
-              onBulkDelete={(ids) => bulkDeleteMembershipPlanMutation.mutate(ids)}
+              onBulkDelete={(ids) =>
+                bulkDeleteMembershipPlanMutation.mutate(ids)
+              }
               isBulkDeleting={bulkDeleteMembershipPlanMutation.isPending}
               disableConfirmBulkDelete={false}
               isEditing={isEditing}
@@ -330,7 +408,10 @@ function EditCommunityPage() {
         itemName={serviceToDelete?.name ?? ''}
         onConfirm={() => {
           if (serviceToDelete) {
-            deleteServiceMutation.mutate({ communityId: id, serviceId: serviceToDelete.id });
+            deleteServiceMutation.mutate({
+              communityId: id,
+              serviceId: serviceToDelete.id,
+            });
           }
         }}
       />
@@ -343,7 +424,10 @@ function EditCommunityPage() {
         itemName={planToDelete?.type ?? ''}
         onConfirm={() => {
           if (planToDelete) {
-            deleteMembershipPlanMutation.mutate({ communityId: id, planId: planToDelete.id });
+            deleteMembershipPlanMutation.mutate({
+              communityId: id,
+              planId: planToDelete.id,
+            });
           }
         }}
       />

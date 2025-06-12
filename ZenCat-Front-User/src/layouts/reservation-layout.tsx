@@ -6,6 +6,7 @@ import {
   ReservationProvider,
   useReservation,
 } from '@/context/reservation-context';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const steps = [
   'Seleccionar servicio',
@@ -71,11 +72,13 @@ const ReservationContent: React.FC = () => {
 
 const ReservationLayout: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ReservationProvider>
-        <ReservationContent />
-      </ReservationProvider>
-    </QueryClientProvider>
+    <ProtectedRoute>
+      <QueryClientProvider client={queryClient}>
+        <ReservationProvider>
+          <ReservationContent />
+        </ReservationProvider>
+      </QueryClientProvider>
+    </ProtectedRoute>
   );
 };
 

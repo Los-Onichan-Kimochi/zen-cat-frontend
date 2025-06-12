@@ -1,14 +1,16 @@
-import { Local, BulkDeleteLocalPayload, CreateLocalPayload, UpdateLocalPayload } from '@/types/local';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import {
+  Local,
+  CreateLocalPayload,
+  UpdateLocalPayload,
+  BulkCreateLocalPayload,
+  BulkDeleteLocalPayload,
+} from '@/types/local';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const localsApi = {
   getLocals: async (): Promise<Local[]> => {
-    const response = await fetch(`${API_BASE_URL}/local/`);
-    if (!response.ok) {
-      throw new Error('Error fetching locals');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<any>(API_ENDPOINTS.LOCALS.BASE);
     if (data && Array.isArray(data.locals)) {
       return data.locals;
     } else if (Array.isArray(data)) {
@@ -17,76 +19,37 @@ export const localsApi = {
     console.error('Unexpected data structure from /local/ endpoint:', data);
     throw new Error('Unexpected data structure from locals API for list');
   },
+
   getLocalById: async (id: string): Promise<Local> => {
-    //console.log(id);
-    const response = await fetch(`${API_BASE_URL}/local/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching local with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Local>(API_ENDPOINTS.LOCALS.BY_ID(id));
   },
+
   createLocal: async (payload: CreateLocalPayload): Promise<Local> => {
-    const response = await fetch(`${API_BASE_URL}/local/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating local');
-    }
-    return response.json();
+    return apiClient.post<Local>(API_ENDPOINTS.LOCALS.BASE, payload);
   },
+
   updateLocal: async (
     id: string,
     payload: UpdateLocalPayload,
   ): Promise<Local> => {
-    const response = await fetch(`${API_BASE_URL}/local/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating local with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Local>(API_ENDPOINTS.LOCALS.BY_ID(id), payload);
   },
+
   deleteLocal: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/local/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting local with id ${id}`);
-    }
+    return apiClient.delete(API_ENDPOINTS.LOCALS.BY_ID(id));
   },
 
   bulkDeleteLocals: async (payload: BulkDeleteLocalPayload): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/local/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting locals');
-    }
+    return apiClient.delete(API_ENDPOINTS.LOCALS.BULK_DELETE, payload);
   },
-  
-  bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {
-    const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ locals }),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk creating locals');
-    }
-    return response.json();
+
+  bulkCreateLocals: async (
+    payload: BulkCreateLocalPayload,
+  ): Promise<Local[]> => {
+    const data = await apiClient.post<any>(
+      API_ENDPOINTS.LOCALS.BULK_CREATE,
+      payload,
+    );
+    return data.locals || data;
   },
 };

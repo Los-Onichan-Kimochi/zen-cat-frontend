@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export interface Professional {
   id: string;
@@ -61,12 +62,9 @@ export const professionalsApi = {
       params.append('specialties', specialties.join(','));
     }
 
-    const response = await fetch(`${API_BASE_URL}/professional/?${params}`);
-    if (!response.ok) {
-      throw new Error('Error fetching professionals');
-    }
-
-    const data = await response.json();
+    const endpoint = `${API_ENDPOINTS.PROFESSIONALS.BASE}?${params}`;
+    const data = await apiClient.get<{ professionals: Professional[] }>(endpoint);
+    
     if (data && typeof data === 'object' && 'professionals' in data) {
       return data.professionals;
     }
@@ -79,30 +77,14 @@ export const professionalsApi = {
 
   // Get a specific professional by ID
   getProfessional: async (professionalId: string): Promise<Professional> => {
-    const response = await fetch(
-      `${API_BASE_URL}/professional/${professionalId}/`,
-    );
-    if (!response.ok) {
-      throw new Error(`Error fetching professional with id ${professionalId}`);
-    }
-    return await response.json();
+    return apiClient.get<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId));
   },
 
   // Create a new professional
   createProfessional: async (
     request: CreateProfessionalRequest,
   ): Promise<Professional> => {
-    const response = await fetch(`${API_BASE_URL}/professional/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating professional');
-    }
-    return await response.json();
+    return apiClient.post<Professional>(API_ENDPOINTS.PROFESSIONALS.BASE, request);
   },
 
   // Update a professional
@@ -110,32 +92,14 @@ export const professionalsApi = {
     professionalId: string,
     request: UpdateProfessionalRequest,
   ): Promise<Professional> => {
-    const response = await fetch(
-      `${API_BASE_URL}/professional/${professionalId}/`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      },
+    return apiClient.patch<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId),
+      request,
     );
-    if (!response.ok) {
-      throw new Error(`Error updating professional with id ${professionalId}`);
-    }
-    return await response.json();
   },
 
   // Delete a professional
   deleteProfessional: async (professionalId: string): Promise<void> => {
-    const response = await fetch(
-      `${API_BASE_URL}/professional/${professionalId}/`,
-      {
-        method: 'DELETE',
-      },
-    );
-    if (!response.ok) {
-      throw new Error(`Error deleting professional with id ${professionalId}`);
-    }
+    return apiClient.delete<void>(API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId));
   },
 };

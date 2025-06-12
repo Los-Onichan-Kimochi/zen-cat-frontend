@@ -3,16 +3,12 @@ import {
   CreateProfessionalPayload,
   UpdateProfessionalPayload,
 } from '@/types/professional';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const professionalsApi = {
   getProfessionals: async (): Promise<Professional[]> => {
-    const response = await fetch(`${API_BASE_URL}/professional/`);
-    if (!response.ok) {
-      throw new Error('Error fetching professionals');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<any>(API_ENDPOINTS.PROFESSIONALS.BASE);
     if (data && Array.isArray(data.professionals)) {
       return data.professionals;
     } else if (Array.isArray(data)) {
@@ -28,65 +24,35 @@ export const professionalsApi = {
   },
 
   getProfessionalById: async (id: string): Promise<Professional> => {
-    const response = await fetch(`${API_BASE_URL}/professional/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching professional with id ${id}`);
-    }
-    return response.json();
+    return apiClient.get<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(id));
   },
 
   createProfessional: async (
     payload: CreateProfessionalPayload,
   ): Promise<Professional> => {
-    const response = await fetch(`${API_BASE_URL}/professional/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating professional');
-    }
-    return response.json();
+    return apiClient.post<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BASE,
+      payload,
+    );
   },
 
   updateProfessional: async (
     id: string,
     payload: UpdateProfessionalPayload,
   ): Promise<Professional> => {
-    const response = await fetch(`${API_BASE_URL}/professional/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`Error updating professional with id ${id}`);
-    }
-    return response.json();
+    return apiClient.patch<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BY_ID(id),
+      payload,
+    );
   },
 
   deleteProfessional: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/professional/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error(`Error deleting professional with id ${id}`);
-    }
+    return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BY_ID(id));
   },
 
   bulkDeleteProfessionals: async (ids: string[]): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/professional/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ professionals: ids }),
+    return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BULK_DELETE, {
+      professionals: ids,
     });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting professionals');
-    }
   },
 };
