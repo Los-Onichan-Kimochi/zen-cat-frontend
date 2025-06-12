@@ -14,7 +14,7 @@ export function ProgressBar({ currentStep, steps }: ProgressBarProps) {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
           const isLast = index === steps.length - 1;
-          
+
           return (
             <div key={stepNumber} className="flex items-start">
               {/* Step Circle and Label */}
@@ -24,8 +24,8 @@ export function ProgressBar({ currentStep, steps }: ProgressBarProps) {
                     isActive
                       ? 'bg-black text-white border-black'
                       : isCompleted
-                      ? 'bg-black text-white border-black'
-                      : 'bg-gray-100 text-gray-400 border-gray-300'
+                        ? 'bg-black text-white border-black'
+                        : 'bg-gray-100 text-gray-400 border-gray-300'
                   }`}
                 >
                   {stepNumber}
@@ -38,7 +38,7 @@ export function ProgressBar({ currentStep, steps }: ProgressBarProps) {
                   {label}
                 </span>
               </div>
-              
+
               {/* Connecting Line */}
               {!isLast && (
                 <div className="flex items-center h-10 px-6">

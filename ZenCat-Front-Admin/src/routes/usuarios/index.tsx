@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { ViewToolbar } from '@/components/common/view-toolbar';
+
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user';
 import { Gem } from 'lucide-react';
@@ -19,9 +20,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
-import { toast } from 'sonner';
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
 import { UsersTable } from '@/components/users/table';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -30,6 +33,8 @@ export const Route = createFileRoute('/usuarios/')({
 function UsuariosComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -61,13 +66,15 @@ function UsuariosComponent() {
   >({
     mutationFn: (id) => usuariosApi.deleteUsuario(id),
     onSuccess: (_, id) => {
-      toast.success('Usuario eliminado', {
-        description: `Usuario eliminado exitosamente`,
+      toast.success('Usuario Eliminado', {
+        description: 'El usuario ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el usuario.',
+      });
     },
   });
 
@@ -79,15 +86,17 @@ function UsuariosComponent() {
   >({
     mutationFn: (ids) => usuariosApi.bulkDeleteUsuarios(ids),
     onSuccess: (_, ids) => {
-      toast.success('Usuarios eliminados', {
-        description: `${ids.length} usuario(s) eliminado(s) exitosamente`,
+      toast.success('Usuarios Eliminados', {
+        description: `${ids.length} usuario(s) eliminado(s) exitosamente.`,
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       // Resetear selección después de eliminación exitosa
-      setResetSelection(prev => prev + 1);
+      setResetSelection((prev) => prev + 1);
     },
     onError: (err) => {
-      toast.error('Error al eliminar usuarios', { description: err.message });
+      toast.error('Error al Eliminar Usuarios', {
+        description: err.message || 'No se pudieron eliminar los usuarios.',
+      });
     },
   });
 
@@ -182,6 +191,8 @@ function UsuariosComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </div>
   );
 }

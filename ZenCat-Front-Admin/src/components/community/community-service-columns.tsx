@@ -6,7 +6,7 @@ import { Trash } from 'lucide-react';
 
 export function getCommunityServiceColumns(
   isEditing: boolean,
-  onDelete?: (service: Service) => void
+  onDelete?: (service: Service) => void,
 ): ColumnDef<Service>[] {
   const columns: ColumnDef<Service>[] = [];
 
@@ -15,7 +15,8 @@ export function getCommunityServiceColumns(
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -42,7 +43,7 @@ export function getCommunityServiceColumns(
       accessorKey: 'is_virtual',
       header: '¿Es virtual?',
       cell: ({ row }) => (row.original.is_virtual ? 'Sí' : 'No'),
-    }
+    },
   );
 
   if (onDelete) {

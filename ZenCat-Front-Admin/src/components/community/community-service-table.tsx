@@ -29,7 +29,7 @@ export function CommunityServiceTable({
   onBulkDelete,
   isBulkDeleting,
   disableConfirmBulkDelete = false,
-  isEditing=true,
+  isEditing = true,
 }: CommunityServiceTableProps) {
   const {
     sorting,

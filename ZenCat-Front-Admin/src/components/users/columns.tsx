@@ -72,9 +72,7 @@ export function getUserColumns({
       cell: ({ row }) => {
         const user = row.original;
         const district = user.district || user.onboarding?.district;
-        return (
-          <div className="text-center">{district || '-'}</div>
-        );
+        return <div className="text-center">{district || '-'}</div>;
       },
       meta: {
         displayName: 'Distrito',
@@ -89,9 +87,7 @@ export function getUserColumns({
       cell: ({ row }) => {
         const user = row.original;
         const phone = user.phone || user.onboarding?.phoneNumber;
-        return (
-          <div className="text-center">{phone || '-'}</div>
-        );
+        return <div className="text-center">{phone || '-'}</div>;
       },
       meta: {
         displayName: 'Teléfono',
@@ -106,7 +102,9 @@ export function getUserColumns({
       cell: ({ row }) => {
         const user = row.original;
         return (
-          <div className="text-center">{user.onboarding?.documentNumber || '-'}</div>
+          <div className="text-center">
+            {user.onboarding?.documentNumber || '-'}
+          </div>
         );
       },
       meta: {

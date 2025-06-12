@@ -42,8 +42,8 @@ export function useCommunityForm() {
     const draftCommunity = sessionStorage.getItem('draftCommunity');
     if (draftCommunity) {
       const values = JSON.parse(draftCommunity);
-      console.log("Resetean valores?")
-      console.log("Values: ", values)
+      console.log('Resetean valores?');
+      console.log('Values: ', values);
       reset(values);
     }
   }, [reset]);

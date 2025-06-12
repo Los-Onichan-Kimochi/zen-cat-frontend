@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { MembershipOnboardingState, MembershipPlan, OnboardingData, PaymentData, Community } from '@/types/membership';
+import {
+  MembershipOnboardingState,
+  MembershipPlan,
+  OnboardingData,
+  PaymentData,
+  Community,
+} from '@/types/membership';
 
 interface MembershipOnboardingContextType {
   state: MembershipOnboardingState;
@@ -13,43 +19,56 @@ interface MembershipOnboardingContextType {
   resetOnboarding: () => void;
 }
 
-const MembershipOnboardingContext = createContext<MembershipOnboardingContextType | undefined>(undefined);
+const MembershipOnboardingContext = createContext<
+  MembershipOnboardingContextType | undefined
+>(undefined);
 
 interface MembershipOnboardingProviderProps {
   children: ReactNode;
 }
 
-export function MembershipOnboardingProvider({ children }: MembershipOnboardingProviderProps) {
+export function MembershipOnboardingProvider({
+  children,
+}: MembershipOnboardingProviderProps) {
   const [state, setState] = useState<MembershipOnboardingState>({
     currentStep: 1,
   });
 
   const setSelectedPlan = (plan: MembershipPlan) => {
-    setState(prev => ({ ...prev, selectedPlan: plan }));
+    setState((prev) => ({ ...prev, selectedPlan: plan }));
   };
 
   const setOnboardingData = (data: OnboardingData) => {
-    setState(prev => ({ ...prev, onboardingData: data }));
+    setState((prev) => ({ ...prev, onboardingData: data }));
   };
 
   const setPaymentData = (data: PaymentData) => {
-    setState(prev => ({ ...prev, paymentData: data }));
+    setState((prev) => ({ ...prev, paymentData: data }));
   };
 
   const setCommunity = (community: Community) => {
-    setState(prev => ({ ...prev, community }));
+    setState((prev) => ({ ...prev, community }));
   };
 
   const nextStep = () => {
-    setState(prev => ({ ...prev, currentStep: Math.min(prev.currentStep + 1, 4) }));
+    setState((prev) => ({
+      ...prev,
+      currentStep: Math.min(prev.currentStep + 1, 4),
+    }));
   };
 
   const prevStep = () => {
-    setState(prev => ({ ...prev, currentStep: Math.max(prev.currentStep - 1, 1) }));
+    setState((prev) => ({
+      ...prev,
+      currentStep: Math.max(prev.currentStep - 1, 1),
+    }));
   };
 
   const goToStep = (step: number) => {
-    setState(prev => ({ ...prev, currentStep: Math.max(1, Math.min(step, 4)) }));
+    setState((prev) => ({
+      ...prev,
+      currentStep: Math.max(1, Math.min(step, 4)),
+    }));
   };
 
   const resetOnboarding = () => {
@@ -80,7 +99,9 @@ export function MembershipOnboardingProvider({ children }: MembershipOnboardingP
 export function useMembershipOnboarding() {
   const context = useContext(MembershipOnboardingContext);
   if (context === undefined) {
-    throw new Error('useMembershipOnboarding must be used within a MembershipOnboardingProvider');
+    throw new Error(
+      'useMembershipOnboarding must be used within a MembershipOnboardingProvider',
+    );
   }
   return context;
-} 
+}

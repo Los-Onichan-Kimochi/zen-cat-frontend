@@ -92,6 +92,7 @@ export function UsersTable({
         onFilterClick={() => console.log('Filtrar')}
         onBulkDelete={onBulkDelete}
         isBulkDeleting={isBulkDeleting}
+        isBulkDeleteEnabled={true}
       />
       <div className="flex-1 overflow-hidden rounded-md border">
         <DataTable table={table} columns={columns} />

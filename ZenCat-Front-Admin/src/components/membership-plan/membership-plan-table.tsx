@@ -1,7 +1,13 @@
 'use client';
 
 import { MembershipPlan } from '@/types/membership-plan';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import { getMembershipPlanColumns } from './membership-plan-columns';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -25,12 +31,18 @@ export function MembershipPlanTable({
   resetRowSelectionTrigger,
 }: MembershipPlanTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getMembershipPlanColumns({ onDelete });
@@ -76,7 +88,7 @@ export function MembershipPlanTable({
         filterPlaceholder="Buscar plan de membresía..."
         exportFileName="planes de membresía"
         showFilterButton
-        onFilterClick={() => console.log("Filtrar")}
+        onFilterClick={() => console.log('Filtrar')}
         showSortButton
       />
       <DataTable table={table} columns={columns} />

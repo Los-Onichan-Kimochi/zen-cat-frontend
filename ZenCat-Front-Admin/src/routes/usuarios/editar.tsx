@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
 import { UpdateUserPayload } from '@/types/user';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +38,7 @@ export const Route = createFileRoute('/usuarios/editar')({
 function EditarUsuario() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const search = useSearch({ from: '/usuarios/editar' });
   const userId = search.id;
   const [isEditing, setIsEditing] = useState(false);
@@ -54,7 +55,7 @@ function EditarUsuario() {
     mutationFn: (data: UpdateUserPayload) =>
       usuariosApi.updateUsuario(userId, data),
     onSuccess: () => {
-      toast.success('Usuario actualizado', {
+      toast.success('Usuario Actualizado', {
         description: 'El usuario ha sido actualizado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
@@ -64,7 +65,7 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al actualizar usuario', {
+      toast.error('Error al Actualizar Usuario', {
         description: error.message || 'No se pudo actualizar el usuario.',
       });
     },
@@ -75,8 +76,9 @@ function EditarUsuario() {
     mutationFn: (onboardingData: any) =>
       usuariosApi.updateOnboardingByUserId(userId, onboardingData),
     onSuccess: () => {
-      toast.success('Onboarding actualizado', {
-        description: 'Los datos de onboarding han sido actualizados exitosamente.',
+      toast.success('Onboarding Actualizado', {
+        description:
+          'Los datos de onboarding han sido actualizados exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       queryClient.invalidateQueries({ queryKey: ['usuario', userId] });
@@ -85,8 +87,9 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al actualizar onboarding', {
-        description: error.message || 'No se pudieron actualizar los datos de onboarding.',
+      toast.error('Error al Actualizar Onboarding', {
+        description:
+          error.message || 'No se pudieron actualizar los datos de onboarding.',
       });
     },
   });
@@ -96,7 +99,7 @@ function EditarUsuario() {
     mutationFn: (onboardingData: any) =>
       usuariosApi.createOnboardingByUserId(userId, onboardingData),
     onSuccess: () => {
-      toast.success('Onboarding creado', {
+      toast.success('Onboarding Creado', {
         description: 'Los datos de onboarding han sido creados exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
@@ -106,8 +109,9 @@ function EditarUsuario() {
       navigate({ to: '/usuarios' });
     },
     onError: (error) => {
-      toast.error('Error al crear onboarding', {
-        description: error.message || 'No se pudieron crear los datos de onboarding.',
+      toast.error('Error al Crear Onboarding', {
+        description:
+          error.message || 'No se pudieron crear los datos de onboarding.',
       });
     },
   });
@@ -273,13 +277,13 @@ function EditarUsuario() {
 
   const confirmUpdate = () => {
     // Determinar qué campos han cambiado
-    const basicUserFieldsChanged = 
+    const basicUserFieldsChanged =
       form.nombres !== initialValues.nombres ||
       form.primerApellido !== initialValues.primerApellido ||
       form.segundoApellido !== initialValues.segundoApellido ||
       form.correo !== initialValues.correo;
 
-    const onboardingFieldsChanged = 
+    const onboardingFieldsChanged =
       form.celular !== initialValues.celular ||
       form.tipoDoc !== initialValues.tipoDoc ||
       form.numDoc !== initialValues.numDoc ||
@@ -291,17 +295,19 @@ function EditarUsuario() {
       form.calle !== initialValues.calle;
 
     // Preparar datos de onboarding si están habilitados
-    const onboardingPayload = onboardingEnabled ? {
-      documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
-      documentNumber: form.numDoc,
-      phoneNumber: form.celular,
-      birthDate: form.fechaNacimiento,
-      gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
-      city: form.ciudad,
-      postalCode: form.codigoPostal,
-      district: form.distrito,
-      address: form.calle,
-    } : null;
+    const onboardingPayload = onboardingEnabled
+      ? {
+          documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
+          documentNumber: form.numDoc,
+          phoneNumber: form.celular,
+          birthDate: form.fechaNacimiento,
+          gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
+          city: form.ciudad,
+          postalCode: form.codigoPostal,
+          district: form.distrito,
+          address: form.calle,
+        }
+      : null;
 
     // CASO 1: Usuario NO tenía onboarding y ahora lo está agregando
     if (!originallyHadOnboarding && onboardingEnabled) {
@@ -309,7 +315,12 @@ function EditarUsuario() {
       createOnboardingMutation.mutate(onboardingPayload!);
     }
     // CASO 2: Usuario SÍ tenía onboarding, solo cambios de onboarding, sin cambios básicos
-    else if (originallyHadOnboarding && onboardingFieldsChanged && !basicUserFieldsChanged && onboardingEnabled) {
+    else if (
+      originallyHadOnboarding &&
+      onboardingFieldsChanged &&
+      !basicUserFieldsChanged &&
+      onboardingEnabled
+    ) {
       console.log('Updating existing onboarding only');
       updateOnboardingMutation.mutate(onboardingPayload!);
     }
@@ -516,7 +527,9 @@ function EditarUsuario() {
                   >
                     <option value="">Seleccione un tipo de documento</option>
                     <option value="DNI">DNI</option>
-                    <option value="FOREIGNER_CARD">Carnet de Extranjería</option>
+                    <option value="FOREIGNER_CARD">
+                      Carnet de Extranjería
+                    </option>
                     <option value="PASSPORT">Pasaporte</option>
                   </select>
                   {errors.tipoDoc && (
@@ -539,7 +552,10 @@ function EditarUsuario() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="fecha-nacimiento" className="block font-medium mb-1">
+                  <label
+                    htmlFor="fecha-nacimiento"
+                    className="block font-medium mb-1"
+                  >
                     Fecha de nacimiento
                   </label>
                   <Input
@@ -586,7 +602,10 @@ function EditarUsuario() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="codigo-postal" className="block font-medium mb-1">
+                  <label
+                    htmlFor="codigo-postal"
+                    className="block font-medium mb-1"
+                  >
                     Código postal
                   </label>
                   <Input
@@ -635,10 +654,15 @@ function EditarUsuario() {
               variant="default"
               type="submit"
               disabled={
-                updateUserMutation.isPending || updateOnboardingMutation.isPending || createOnboardingMutation.isPending || (isEditing && !hasChanges)
+                updateUserMutation.isPending ||
+                updateOnboardingMutation.isPending ||
+                createOnboardingMutation.isPending ||
+                (isEditing && !hasChanges)
               }
             >
-              {updateUserMutation.isPending || updateOnboardingMutation.isPending || createOnboardingMutation.isPending
+              {updateUserMutation.isPending ||
+              updateOnboardingMutation.isPending ||
+              createOnboardingMutation.isPending
                 ? 'Guardando...'
                 : isEditing
                   ? 'Guardar'

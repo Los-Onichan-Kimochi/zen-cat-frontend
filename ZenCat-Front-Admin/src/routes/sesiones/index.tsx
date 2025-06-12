@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import HomeCard from '@/components/common/home-card';
 import { ViewToolbar } from '@/components/common/view-toolbar';
-import { toast } from 'sonner';
+
+import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Calendar, Clock, Users, Activity } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -22,7 +23,6 @@ import {
 import { SessionsTable } from '@/components/sessions/table';
 import { getSessionCurrentState } from '@/utils/session-status';
 
-
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
 });
@@ -39,6 +39,7 @@ interface CalculatedCounts {
 function SesionesComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
@@ -54,7 +55,6 @@ function SesionesComponent() {
 
   // Mock data for reservations - you should replace this with actual API call
 
-
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<
     void,
     Error,
@@ -62,11 +62,15 @@ function SesionesComponent() {
   >({
     mutationFn: (id) => sessionsApi.deleteSession(id),
     onSuccess: (_, id) => {
-      toast.success('Sesión eliminada', { description: `ID ${id}` });
+      toast.success('Sesión Eliminada', { 
+        description: 'La sesión ha sido eliminada exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al Eliminar', { 
+        description: err.message || 'No se pudo eliminar la sesión.' 
+      });
     },
   });
 
@@ -75,13 +79,15 @@ function SesionesComponent() {
       mutationFn: (sessions: Session[]) =>
         sessionsApi.bulkDeleteSessions({ sessions: sessions.map((s) => s.id) }),
       onSuccess: (_, sessions) => {
-        toast.success('Sesiones eliminadas', {
-          description: `${sessions.length} sesiones eliminadas`,
+        toast.success('Sesiones Eliminadas', {
+          description: `${sessions.length} sesiones eliminadas exitosamente.`,
         });
         queryClient.invalidateQueries({ queryKey: ['sessions'] });
       },
       onError: (err) => {
-        toast.error('Error al eliminar sesiones', { description: err.message });
+        toast.error('Error al Eliminar Sesiones', { 
+          description: err.message || 'No se pudieron eliminar las sesiones.' 
+        });
       },
     },
   );
@@ -104,7 +110,7 @@ function SesionesComponent() {
         end_time: session.end_time,
         state: session.state,
       });
-      
+
       if (currentState in calculatedCounts) {
         calculatedCounts[currentState]++;
       }
@@ -125,8 +131,6 @@ function SesionesComponent() {
     setSessionToDelete(session);
     setIsDeleteModalOpen(true);
   };
-
-
 
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
@@ -226,8 +230,6 @@ function SesionesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-
     </div>
   );
 }

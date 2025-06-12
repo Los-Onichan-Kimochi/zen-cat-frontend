@@ -43,4 +43,4 @@ export interface MembershipOnboardingState {
   onboardingData?: OnboardingData;
   paymentData?: PaymentData;
   currentStep: number;
-} 
+}

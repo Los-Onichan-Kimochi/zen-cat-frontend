@@ -8,14 +8,15 @@ import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
 import { OnboardingData } from '@/types/membership';
 
 export function OnboardingStep() {
-  const { state, setOnboardingData, nextStep, prevStep } = useMembershipOnboarding();
-  
+  const { state, setOnboardingData, nextStep, prevStep } =
+    useMembershipOnboarding();
+
   const [formData, setFormData] = useState<OnboardingData>(
-    state.onboardingData || {}
+    state.onboardingData || {},
   );
 
   const handleInputChange = (field: keyof OnboardingData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleContinue = () => {
@@ -23,15 +24,21 @@ export function OnboardingStep() {
     nextStep();
   };
 
-  const isFormValid = formData.documentType && formData.documentNumber && 
-                     formData.phoneNumber && formData.birthDate && 
-                     formData.gender && formData.city;
+  const isFormValid =
+    formData.documentType &&
+    formData.documentNumber &&
+    formData.phoneNumber &&
+    formData.birthDate &&
+    formData.gender &&
+    formData.city;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Información Personal</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            Información Personal
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -40,7 +47,9 @@ export function OnboardingStep() {
               <select
                 id="documentType"
                 value={formData.documentType || ''}
-                onChange={(e) => handleInputChange('documentType', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('documentType', e.target.value)
+                }
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Seleccionar tipo</option>
@@ -55,7 +64,9 @@ export function OnboardingStep() {
               <Input
                 id="documentNumber"
                 value={formData.documentNumber || ''}
-                onChange={(e) => handleInputChange('documentNumber', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('documentNumber', e.target.value)
+                }
                 placeholder="Ingrese número de documento"
               />
             </div>
@@ -65,7 +76,9 @@ export function OnboardingStep() {
               <Input
                 id="phoneNumber"
                 value={formData.phoneNumber || ''}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('phoneNumber', e.target.value)
+                }
                 placeholder="Ingrese número de teléfono"
               />
             </div>
@@ -110,7 +123,9 @@ export function OnboardingStep() {
               <Input
                 id="postalCode"
                 value={formData.postalCode || ''}
-                onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('postalCode', e.target.value)
+                }
                 placeholder="Ingrese código postal"
               />
             </div>
@@ -137,11 +152,7 @@ export function OnboardingStep() {
           </div>
 
           <div className="flex justify-between pt-4">
-            <Button
-              onClick={prevStep}
-              variant="outline"
-              className="px-8"
-            >
+            <Button onClick={prevStep} variant="outline" className="px-8">
               Atrás
             </Button>
             <Button
@@ -156,4 +167,4 @@ export function OnboardingStep() {
       </Card>
     </div>
   );
-} 
+}

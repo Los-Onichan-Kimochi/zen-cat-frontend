@@ -29,15 +29,21 @@ export function CommunityMembershipPlanTable({
   onBulkDelete,
   isBulkDeleting,
   disableConfirmBulkDelete = false,
-  isEditing=true,
+  isEditing = true,
 }: CommunityMembershipPlanTableProps) {
   const {
-    sorting, setSorting,
-    columnFilters, setColumnFilters,
-    columnVisibility, setColumnVisibility,
-    rowSelection, setRowSelection,
-    globalFilter, setGlobalFilter,
-    pagination, setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    setColumnFilters,
+    columnVisibility,
+    setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    globalFilter,
+    setGlobalFilter,
+    pagination,
+    setPagination,
   } = useDataTable();
 
   const columns = getCommunityMembershipPlanColumns(isEditing, onDeleteClick);

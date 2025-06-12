@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useLocalForm } from '@/hooks/use-local-basic-form';
@@ -23,7 +23,6 @@ import {
 
 import { Local, CreateLocalPayload } from '@/types/local';
 
-
 import { Plus, ChevronLeft } from 'lucide-react';
 
 import '../../index.css';
@@ -35,16 +34,17 @@ export const Route = createFileRoute('/locales/agregar')({
 function AddLocalPageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const {
-      register,
-      handleSubmit,
-      control,
-      errors,
-      watch,
-      reset,
-      imageFile,
-      imagePreview,
-      handleImageChange,
+    register,
+    handleSubmit,
+    control,
+    errors,
+    watch,
+    reset,
+    imageFile,
+    imagePreview,
+    handleImageChange,
   } = useLocalForm();
 
   const createLocalMutation = useMutation({
@@ -57,7 +57,7 @@ function AddLocalPageComponent() {
       navigate({ to: '/locales' });
     },
     onError: (error) => {
-      toast.error('Error al crear local', {
+      toast.error('Error al Crear Local', {
         description: error.message || 'No se pudo crear el local.',
       });
     },
@@ -67,9 +67,11 @@ function AddLocalPageComponent() {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Subida simulada de imagen completada');
+      toast.info('Imagen Procesada', {
+        description: 'Subida simulada de imagen completada.',
+      });
     }
-    try{
+    try {
       const newLocal = await createLocalMutation.mutateAsync({
         local_name: data.local_name,
         street_name: data.street_name,
@@ -80,12 +82,16 @@ function AddLocalPageComponent() {
         reference: data.reference,
         capacity: data.capacity,
         image_url: data.image_url,
-      })
-      toast.success('Local creado correctamente');
+      });
+      toast.success('Local Creado', {
+        description: 'El local ha sido creado correctamente.',
+      });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       navigate({ to: '/locales' });
-    }catch(err: any){
-      toast.error('Error al crear local', { description: err.message });
+    } catch (err: any) {
+      toast.error('Error al Crear Local', { 
+        description: err.message || 'No se pudo crear el local.' 
+      });
     }
     //createLocalMutation.mutate(payload);
   };

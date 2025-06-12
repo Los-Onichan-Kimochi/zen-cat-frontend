@@ -29,22 +29,22 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
       id: '1',
       name: 'Plan básico',
       type: 'Mensual',
-      price: 159.90,
+      price: 159.9,
       duration: '/mes',
       features: [
         'Acceso a una comunidad',
         'Realiza 20 reservas al mes',
         'Recibe notificaciones',
         'Consulta tu historial de reservas',
-        'Puedes desactivar tu membresía desde el perfil'
+        'Puedes desactivar tu membresía desde el perfil',
       ],
-      reservationLimit: 20
+      reservationLimit: 20,
     },
     {
       id: '2',
       name: 'Plan premium',
       type: 'Mensual',
-      price: 199.90,
+      price: 199.9,
       duration: '/mes',
       features: [
         'Acceso a una comunidad',
@@ -52,15 +52,15 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
         'Recibe notificaciones',
         'Consulta tu historial de reservas',
         'Puedes desactivar tu membresía desde el perfil',
-        'Acceso prioritario a eventos especiales'
-      ]
+        'Acceso prioritario a eventos especiales',
+      ],
     },
     // Planes Anuales
     {
       id: '3',
       name: 'Plan básico',
       type: 'Anual',
-      price: 1599.90,
+      price: 1599.9,
       duration: '/año',
       features: [
         'Acceso a una comunidad',
@@ -68,15 +68,15 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
         'Recibe notificaciones',
         'Consulta tu historial de reservas',
         'Puedes desactivar tu membresía desde el perfil',
-        '2 meses gratis comparado al plan mensual'
+        '2 meses gratis comparado al plan mensual',
       ],
-      reservationLimit: 20
+      reservationLimit: 20,
     },
     {
       id: '4',
       name: 'Plan premium',
       type: 'Anual',
-      price: 1999.90,
+      price: 1999.9,
       duration: '/año',
       features: [
         'Acceso a una comunidad',
@@ -85,14 +85,14 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
         'Consulta tu historial de reservas',
         'Puedes desactivar tu membresía desde el perfil',
         'Acceso prioritario a eventos especiales',
-        '2 meses gratis comparado al plan mensual'
-      ]
-    }
+        '2 meses gratis comparado al plan mensual',
+      ],
+    },
   ];
 
   const plansToShow = plans.length > 0 ? plans : allPlans;
-  const filteredPlans = plansToShow.filter(plan => plan.type === activeTab);
-  
+  const filteredPlans = plansToShow.filter((plan) => plan.type === activeTab);
+
   // Debug logs
   console.log('Active tab:', activeTab);
   console.log('All plans:', plansToShow);
@@ -103,20 +103,20 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
       {/* Pestañas */}
       <div className="flex justify-center mb-8">
         <div className="bg-gray-100 rounded-lg p-1 flex">
-          <button 
+          <button
             className={`px-8 py-2 rounded-md font-medium transition-all ${
-              activeTab === 'Mensual' 
-                ? 'bg-white text-black shadow-sm' 
+              activeTab === 'Mensual'
+                ? 'bg-white text-black shadow-sm'
                 : 'text-gray-600 hover:text-black'
             }`}
             onClick={() => setActiveTab('Mensual')}
           >
             Mensual
           </button>
-          <button 
+          <button
             className={`px-8 py-2 rounded-md font-medium transition-all ${
-              activeTab === 'Anual' 
-                ? 'bg-white text-black shadow-sm' 
+              activeTab === 'Anual'
+                ? 'bg-white text-black shadow-sm'
                 : 'text-gray-600 hover:text-black'
             }`}
             onClick={() => setActiveTab('Anual')}
@@ -141,17 +141,22 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
             <CardHeader className="pb-4">
               <CardTitle
                 className={`text-xl font-bold ${
-                  state.selectedPlan?.id === plan.id ? 'text-white' : 'text-black'
+                  state.selectedPlan?.id === plan.id
+                    ? 'text-white'
+                    : 'text-black'
                 }`}
               >
                 {plan.name}
               </CardTitle>
               <div
                 className={`text-3xl font-bold ${
-                  state.selectedPlan?.id === plan.id ? 'text-white' : 'text-black'
+                  state.selectedPlan?.id === plan.id
+                    ? 'text-white'
+                    : 'text-black'
                 }`}
               >
-                S/ {plan.price.toFixed(2)}<span className="text-lg font-normal">{plan.duration}</span>
+                S/ {plan.price.toFixed(2)}
+                <span className="text-lg font-normal">{plan.duration}</span>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -160,7 +165,9 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
                   <li
                     key={index}
                     className={`flex items-start text-sm ${
-                      state.selectedPlan?.id === plan.id ? 'text-white' : 'text-gray-700'
+                      state.selectedPlan?.id === plan.id
+                        ? 'text-white'
+                        : 'text-gray-700'
                     }`}
                   >
                     <span className="mr-3 mt-0.5">•</span>
@@ -185,4 +192,4 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
       </div>
     </div>
   );
-} 
+}

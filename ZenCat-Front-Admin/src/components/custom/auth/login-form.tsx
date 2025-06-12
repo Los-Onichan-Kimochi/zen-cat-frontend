@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { User } from '@/types/user';
+import { useNavigate } from '@tanstack/react-router';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate } from '@tanstack/react-router'
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
 import { useAuth } from '@/context/AuthContext';
-
+import { authService } from '@/api/auth/auth-service';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
+import { useToast } from '@/context/ToastContext';
 
 interface LoginFormProps {
-  onLoginSuccess: (user: User) => void;
+  onLoginSuccess?: () => void;
 }
 
-// TODO: Add a loading state and a error state and a success state
 // TODO: Add a forgot password button
 // TODO: Add a register button
 // TODO: Add a social login buttons
@@ -23,98 +23,124 @@ interface LoginFormProps {
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  
-  const [loading2, setLoading2] = useState(false);
-  const [isModalOpen2, setIsModalOpen2] = useState(false);
-  const [error2, setError2] = useState<string | null>(null);
-  const [pingSuccess, setPingSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setIsModalOpen(false);
-    try {
-      const response = await fetch('http://localhost:8098/login/', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-        "email": email,
-        "password": password
-      }),
+
+    // Validaciones de entrada
+    if (!email.trim() || !password.trim()) {
+      error('Error de validación', {
+        description: 'El email y contraseña son obligatorios',
       });
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || "Error al loguear usuario");
-      }
-      const json = await response.json();
-      const user= json.user;
-      console.log(user)
-      login(user)
-      navigate({ to: "/" }); // Redirige si todo va bien
-    } catch (err: any) {
-      const errorMessage =
-        err.message || 'Error desconocido, comunicate con tu jefe.';
-      setError(errorMessage);
-      setIsModalOpen(true);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
 
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
-
-  const handlePing = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading2(true);
-    setError2(null);
-    setIsModalOpen2(false);
-    setPingSuccess(false); // Reset success state
-    try {
-      const response = await fetch('http://localhost:8098/login/', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-        "email": email,
-        "password": password
-      }),
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      error('Email inválido', {
+        description: 'Por favor ingrese un email válido',
       });
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || "Error al loguear usuario");
-      }
-      const json = await response.json();
-      const user= json.user;
-      console.log(user)
-      onLoginSuccess(user);
-      login(user)
-      navigate({ to: "/" }); // Redirige si todo va bien
-    } catch (err: any) {
-      console.error('Error en Ping:', err);
-      setError2(err.message || 'Error al conectar con el servidor de ping.');
-      setPingSuccess(false); // Indicate error
-      setIsModalOpen2(true);
-    } finally {
-      setLoading2(false);
+      return;
     }
-  };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+    // Validar longitud mínima de contraseña
+    if (password.length < 3) {
+      error('Contraseña muy corta', {
+        description: 'La contraseña debe tener al menos 3 caracteres',
+      });
+      return;
+    }
 
-  const handleCloseModal2 = () => {
-    setIsModalOpen2(false);
+    setIsLoading(true);
+
+    try {
+      // Intentar login con el backend
+      console.log('LoginForm: Attempting login with:', { email });
+      const response = await authService.login({
+        email: email.trim(),
+        password,
+      });
+
+      console.log('LoginForm: Login successful, response:', response);
+
+      // Validar que la respuesta tenga la estructura esperada
+      if (!response.user || !response.tokens?.access_token) {
+        throw new Error(
+          'Respuesta del servidor inválida - faltan datos de usuario o tokens',
+        );
+      }
+
+      // El authService ya guarda los tokens en cookies
+      // Ahora guardamos el usuario en el context
+      const user = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name || response.user.email,
+        role: 'admin' as const,
+        password: '', // No guardamos la contraseña
+        isAuthenticated: true,
+        permissions: ['admin'],
+        avatar: response.user.image_url || '',
+        address: '',
+        district: '',
+        phone: '',
+      };
+
+      console.log('LoginForm: Setting user in context:', user);
+      login(user);
+
+      toast.success('Inicio de Sesión Exitoso', {
+        description: `Bienvenido, ${user.name}!`,
+      });
+
+      onLoginSuccess?.();
+      navigate({ to: '/' });
+    } catch (err: any) {
+      console.error('LoginForm: Login error:', err);
+
+      // Manejar diferentes tipos de errores con modals específicos
+      let errorTitle = 'Error al iniciar sesión';
+      let errorMessage = 'Credenciales inválidas';
+
+      if (err.message) {
+        if (err.message.includes('500')) {
+          errorTitle = 'Error del servidor';
+          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+        } else if (err.message.includes('401')) {
+          errorTitle = 'Credenciales incorrectas';
+          errorMessage = 'El email o contraseña son incorrectos. Por favor verifique sus datos.';
+        } else if (err.message.includes('403')) {
+          errorTitle = 'Acceso denegado';
+          errorMessage = 'Su cuenta no tiene permisos para acceder al panel de administración.';
+        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorTitle = 'Error de conexión';
+          errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+        } else if (err.message.includes('timeout')) {
+          errorTitle = 'Tiempo de espera agotado';
+          errorMessage = 'La conexión tardó demasiado tiempo. Intente nuevamente.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      // Si no hay conexión
+      if (!navigator.onLine) {
+        errorTitle = 'Sin conexión a internet';
+        errorMessage = 'Verifique su conexión a internet e intente nuevamente.';
+      }
+
+      error(errorTitle, {
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,7 +164,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
-              disabled={loading}
+              disabled={isLoading}
             />
             <Input
               type="password"
@@ -146,52 +172,22 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <Button
               type="submit"
               className="w-full cursor-pointer"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
-
-          <form onSubmit={handlePing}>
-            <Button
-              type="submit"
-              className="w-full mt-4 bg-blue-800 hover:bg-blue-700 cursor-pointer"
-              disabled={loading2}
-            >
-              {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center text-sm text-gray-500">
-            ¿No tienes una cuenta?{' '}
-            <a href="#" className="underline">
-              Comunícate con tu jefe
-            </a>
-          </div>
           {/* TODO: Add remember me, forgot password links here */}
         </CardContent>
       </Card>
 
-      <ErrorModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Error al intentar iniciar sesión"
-        description={error || 'Ha ocurrido un error.'}
-      />
-
-      <ErrorModal
-        isOpen={isModalOpen2}
-        onClose={handleCloseModal2}
-        title={
-          pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'
-        }
-        description={error2 || 'Ha ocurrido un error.'}
-      />
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </>
   );
 }
+

@@ -14,7 +14,9 @@ export function ConfirmationStep() {
     return {
       transactionId: `TXN${now.toString().slice(-6)}`,
       startDate: new Date().toLocaleDateString('es-PE'),
-      endDate: new Date(now + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-PE')
+      endDate: new Date(now + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(
+        'es-PE',
+      ),
     };
   });
 
@@ -39,7 +41,7 @@ export function ConfirmationStep() {
             Tu membresía se ha activado correctamente
           </p>
         </CardHeader>
-        
+
         <CardContent className="px-8 pb-8">
           {/* Tabla de detalles */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -52,7 +54,9 @@ export function ConfirmationStep() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Plan</span>
-                  <span>{state.selectedPlan?.name} - {state.selectedPlan?.type}</span>
+                  <span>
+                    {state.selectedPlan?.name} - {state.selectedPlan?.type}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Duración</span>
@@ -60,12 +64,15 @@ export function ConfirmationStep() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Cantidad de reservas</span>
-                  <span>{state.selectedPlan?.reservationLimit || 'Ilimitadas'} reservas</span>
+                  <span>
+                    {state.selectedPlan?.reservationLimit || 'Ilimitadas'}{' '}
+                    reservas
+                  </span>
                 </div>
-                                 <div className="flex justify-between py-2 border-b border-gray-200">
-                   <span className="font-medium">Fecha de inicio</span>
-                   <span>{transactionData.startDate}</span>
-                 </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">Fecha de inicio</span>
+                  <span>{transactionData.startDate}</span>
+                </div>
               </div>
 
               {/* Columna derecha */}
@@ -76,20 +83,24 @@ export function ConfirmationStep() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">DNI</span>
-                  <span>{state.onboardingData?.documentNumber || '77677420'}</span>
+                  <span>
+                    {state.onboardingData?.documentNumber || '77677420'}
+                  </span>
                 </div>
-                                 <div className="flex justify-between py-2 border-b border-gray-200">
-                   <span className="font-medium">ID de transacción</span>
-                   <span>{transactionData.transactionId}</span>
-                 </div>
-                 <div className="flex justify-between py-2 border-b border-gray-200">
-                   <span className="font-medium text-lg">Total</span>
-                   <span className="font-bold text-lg">S/ {state.selectedPlan?.price.toFixed(2)}</span>
-                 </div>
-                 <div className="flex justify-between py-2 border-b border-gray-200">
-                   <span className="font-medium">Fecha de fin</span>
-                   <span>{transactionData.endDate}</span>
-                 </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">ID de transacción</span>
+                  <span>{transactionData.transactionId}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium text-lg">Total</span>
+                  <span className="font-bold text-lg">
+                    S/ {state.selectedPlan?.price.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">Fecha de fin</span>
+                  <span>{transactionData.endDate}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -100,7 +111,8 @@ export function ConfirmationStep() {
               ¡Bienvenido a Astrocat!
             </p>
             <p className="text-gray-600">
-              Ya puedes empezar a disfrutar de todos los beneficios de tu membresía
+              Ya puedes empezar a disfrutar de todos los beneficios de tu
+              membresía
             </p>
           </div>
 
@@ -124,4 +136,4 @@ export function ConfirmationStep() {
       </Card>
     </div>
   );
-} 
+}
