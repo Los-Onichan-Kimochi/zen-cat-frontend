@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import { useNavigate, Link } from '@tanstack/react-router';
 
-export function ForgotForm() {
-  const [email, setEmail] = useState('');
+export function ChangePasswordForm() {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,26 +18,10 @@ export function ForgotForm() {
     setError(null);
     setIsModalOpen(false);
     try {
-      const response = await fetch('http://localhost:8098/forgot-password/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-        }),
-      });
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || 'Error al crear usuario');
-      }
-      const json = await response.json();
-      localStorage.setItem(json.pin)
-      
-
+      //POST
     } catch (err: any) {
       const errorMessage =
-        err.message || 'Error desconocido al intentar ingresar correo.';
+        err.message || 'Error desconocido al cambiar contraseña.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -56,34 +41,44 @@ export function ForgotForm() {
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />
           </div>
           <h2 className="text-2xl font-bold text-center">
-            Recuperacion de Contraseña
+            Cambiar Contraseña
           </h2>
           <p className="text-gray-500 text-sm text-center">
-            Ingrese el correo electronico con el que se registró
+            Elija una nueva contraseña
           </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-1">
-              <label className="block text-gray-700 text-sm">
-                Correo electrónico
-              </label>
-              <Input
-                type="email"
-                placeholder="Ingrese su correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                <label className="block text-gray-700 text-sm">Contraseña</label>
+                <Input
+                type="password"
+                placeholder="Ingrese su contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
-                autoFocus
                 disabled={loading}
-              />
+                />
+            </div>
+            <div className="grid gap-1">
+                <label className="block text-gray-700 text-sm">
+                Confirmar su contraseña
+                </label>
+                <Input
+                type="password"
+                placeholder="Ingrese su contraseña otra vez"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+                />
             </div>
             <Button
               type="submit"
               className="w-full cursor-pointer"
               disabled={loading}
             >
-              Recuperar
+            Confirmar
             </Button>
           </form>
         </CardContent>
@@ -91,7 +86,7 @@ export function ForgotForm() {
       <ErrorModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Ese Usuario no Existe"
+        title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
       />
     </>

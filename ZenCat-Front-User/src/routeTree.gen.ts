@@ -21,6 +21,7 @@ import { Route as ReservaRouteImport } from './routes/reserva/route'
 import { Route as LoginRouteImport } from './routes/login/route'
 import { Route as HomeRouteImport } from './routes/home/route'
 import { Route as ForgotRouteImport } from './routes/forgot/route'
+import { Route as ChangepasswordRouteImport } from './routes/changepassword/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as ReservaIndexImport } from './routes/reserva/index'
 import { Route as ReservaServiciosImport } from './routes/reserva/servicios'
@@ -91,6 +92,12 @@ const ForgotRouteRoute = ForgotRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ChangepasswordRouteRoute = ChangepasswordRouteImport.update({
+  id: '/changepassword',
+  path: '/changepassword',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
@@ -142,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/changepassword': {
+      id: '/changepassword'
+      path: '/changepassword'
+      fullPath: '/changepassword'
+      preLoaderRoute: typeof ChangepasswordRouteImport
       parentRoute: typeof rootRoute
     }
     '/forgot': {
@@ -283,6 +297,7 @@ const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -303,6 +318,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -323,6 +339,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -345,6 +362,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/changepassword'
     | '/forgot'
     | '/home'
     | '/login'
@@ -364,6 +382,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/changepassword'
     | '/forgot'
     | '/home'
     | '/login'
@@ -382,6 +401,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/changepassword'
     | '/forgot'
     | '/home'
     | '/login'
@@ -403,6 +423,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangepasswordRouteRoute: typeof ChangepasswordRouteRoute
   ForgotRouteRoute: typeof ForgotRouteRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
@@ -418,6 +439,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangepasswordRouteRoute: ChangepasswordRouteRoute,
   ForgotRouteRoute: ForgotRouteRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
@@ -442,6 +464,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/changepassword",
         "/forgot",
         "/home",
         "/login",
@@ -457,6 +480,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/changepassword": {
+      "filePath": "changepassword/route.tsx"
     },
     "/forgot": {
       "filePath": "forgot/route.tsx"
