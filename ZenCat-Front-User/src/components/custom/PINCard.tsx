@@ -50,8 +50,10 @@ const PINCard: React.FC<PINCardProps> = ({ onComplete }) => {
 
   const verifyPIN = (pin: string) => {
     const pinGuardado = localStorage.getItem('userPIN');
-    if (pin === pinGuardado) {
-      console.log('PIN correcto');
+    const email = localStorage.getItem('pendingEmail'); // viene del paso anterior
+    if (pin === pinGuardado && email) {
+      localStorage.setItem('userEmail', email);
+      localStorage.removeItem('pendingEmail');
       onComplete?.(pin);
       navigate({ to: '/changepassword' }); // Redirige si todo va bien
     } else {

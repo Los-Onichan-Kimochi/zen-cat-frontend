@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate, Link } from '@tanstack/react-router';
+import { useNavigate} from '@tanstack/react-router';
 
 export function ChangePasswordForm() {
   const [password, setPassword] = useState('');
@@ -12,13 +12,43 @@ export function ChangePasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const navigate = useNavigate();
+  
+    useEffect(() => {
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        navigate({ to: '/login' });
+    }
+    }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setIsModalOpen(false);
+    if (password !== confirmPassword) {
+    setError('Las contraseñas no coinciden');
+    setIsModalOpen(true);
+    setLoading(false);
+    return;
+    }
+    const email = localStorage.getItem('userEmail');
     try {
-      //POST
+      const response = await fetch('http://localhost:8098/user/change-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: email,
+            new_password: password,
+        }),
+      });
+      if (!response.ok) {
+        const errBody = await response.json();
+        throw new Error(errBody?.message || 'Error al crear usuario');
+      }
+      navigate({ to: "/login" }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido al cambiar contraseña.';
