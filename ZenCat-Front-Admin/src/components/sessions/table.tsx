@@ -80,7 +80,7 @@ export function SessionsTable({
     .rows.map((row) => row.original);
 
   return (
-    <div className="space-y-4">
+    <div className="flex-1 flex flex-col h-full">
       <DataTableToolbar
         table={table}
         filterPlaceholder="Buscar sesiones..."
@@ -103,7 +103,7 @@ export function SessionsTable({
         }
         isBulkDeleting={isBulkDeleting}
       />
-      <div className="rounded-md border bg-white">
+      <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable table={table} columns={columns} />
       </div>
       <DataTablePagination table={table} />

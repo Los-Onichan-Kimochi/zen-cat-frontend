@@ -140,63 +140,69 @@ function SesionesComponent() {
     return <p>Error cargando sesiones: {errorSessions.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="SESIONES" subtitle="LISTADO DE SESIONES" />
 
-      <div className="flex items-center justify-center space-x-4 mt-2 font-montserrat min-h-[120px] flex-wrap">
-        {counts ? (
-          <>
-            <HomeCard
-              icon={<Calendar className="w-8 h-8 text-blue-600" />}
-              iconBgColor="bg-blue-100"
-              title="Programadas"
-              description={counts[SessionState.SCHEDULED]}
-            />
-            <HomeCard
-              icon={<Activity className="w-8 h-8 text-green-600" />}
-              iconBgColor="bg-green-100"
-              title="En curso"
-              description={counts[SessionState.ONGOING]}
-            />
-            <HomeCard
-              icon={<Clock className="w-8 h-8 text-gray-600" />}
-              iconBgColor="bg-gray-100"
-              title="Completadas"
-              description={counts[SessionState.COMPLETED]}
-            />
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600" />}
-              iconBgColor="bg-teal-100"
-              title="Total de sesiones"
-              description={counts.total}
-            />
-          </>
-        ) : (
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        )}
+      {/* Statistics Section */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-center space-x-4 mt-2 font-montserrat min-h-[120px] flex-wrap">
+          {counts ? (
+            <>
+              <HomeCard
+                icon={<Calendar className="w-8 h-8 text-blue-600" />}
+                iconBgColor="bg-blue-100"
+                title="Programadas"
+                description={counts[SessionState.SCHEDULED]}
+              />
+              <HomeCard
+                icon={<Activity className="w-8 h-8 text-green-600" />}
+                iconBgColor="bg-green-100"
+                title="En curso"
+                description={counts[SessionState.ONGOING]}
+              />
+              <HomeCard
+                icon={<Clock className="w-8 h-8 text-gray-600" />}
+                iconBgColor="bg-gray-100"
+                title="Completadas"
+                description={counts[SessionState.COMPLETED]}
+              />
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-teal-600" />}
+                iconBgColor="bg-teal-100"
+                title="Total de sesiones"
+                description={counts.total}
+              />
+            </>
+          ) : (
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          )}
+        </div>
+
+        <ViewToolbar
+          onAddClick={() => navigate({ to: '/sesiones/agregar' })}
+          onBulkUploadClick={() => {}}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
+        />
       </div>
 
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/sesiones/agregar' })}
-        onBulkUploadClick={() => {}}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
-      {isLoadingSessions ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <SessionsTable
-          data={sessionsData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-        />
-      )}
+      {/* Table Section */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingSessions ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <SessionsTable
+            data={sessionsData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+          />
+        )}
+      </div>
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>

@@ -10,26 +10,33 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { Service } from '@/types/service';
-import { getServiceColumns } from './columns';
+import { AuditLog, AuditLogFilters } from '@/types/audit';
+import { getAuditColumns } from './columns';
+import { useEffect } from 'react';
 
-interface ServicesTableProps {
-  data: Service[];
-  onEdit: (service: Service) => void;
-  onDelete: (service: Service) => void;
-  onView: (service: Service) => void;
-  onBulkDelete?: (services: Service[]) => void;
-  isBulkDeleting?: boolean;
+interface AuditTableProps {
+  data: AuditLog[];
+  onView?: (log: AuditLog) => void;
+  onExport?: () => void;
+  onOpenFilters?: () => void;
+  onRefresh?: () => void;
+  isLoading?: boolean;
+  isRefreshing?: boolean;
+  resetSelection?: number;
+  hasActiveFilters?: boolean;
 }
 
-export function ServicesTable({
+export function AuditTable({
   data,
-  onEdit,
-  onDelete,
   onView,
-  onBulkDelete,
-  isBulkDeleting = false,
-}: ServicesTableProps) {
+  onExport,
+  onOpenFilters,
+  onRefresh,
+  isLoading = false,
+  isRefreshing = false,
+  resetSelection = 0,
+  hasActiveFilters = false,
+}: AuditTableProps) {
   const {
     sorting,
     setSorting,
@@ -45,7 +52,7 @@ export function ServicesTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getServiceColumns({ onEdit, onDelete, onView });
+  const columns = getAuditColumns({ onView });
 
   const table = useReactTable({
     data,
@@ -68,32 +75,30 @@ export function ServicesTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    enableRowSelection: true,
+    enableRowSelection: false,
   });
+
+  useEffect(() => {
+    if (resetSelection > 0) {
+      setRowSelection({});
+    }
+  }, [resetSelection, setRowSelection]);
 
   return (
     <div className="-mx-4 flex-1 flex flex-col px-4 py-2 h-full">
       <DataTableToolbar
         table={table}
-        filterPlaceholder="Buscar servicios..."
+        filterPlaceholder="Buscar en logs de auditoría..."
         showSortButton
-        showFilterButton
-        showExportButton
-        onFilterClick={() => {}}
-        exportFileName="servicios"
-        // Bulk delete functionality
-        showBulkDeleteButton={!!onBulkDelete}
-        onBulkDelete={
-          onBulkDelete
-            ? (ids: string[]) => {
-                const servicesToDelete = data.filter((service) =>
-                  ids.includes(service.id),
-                );
-                onBulkDelete(servicesToDelete);
-              }
-            : undefined
-        }
-        isBulkDeleting={isBulkDeleting}
+        showFilterButton={!!onOpenFilters}
+        showExportButton={!!onExport}
+        showRefreshButton={!!onRefresh}
+        onFilterClick={onOpenFilters}
+        onExportClick={onExport}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
+        isBulkDeleteEnabled={false}
+        hasActiveFilters={hasActiveFilters}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable table={table} columns={columns} />
@@ -101,4 +106,4 @@ export function ServicesTable({
       <DataTablePagination table={table} />
     </div>
   );
-}
+} 

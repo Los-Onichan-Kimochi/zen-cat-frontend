@@ -132,60 +132,66 @@ function ProfesionalesComponent() {
     return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor
         title="PROFESIONALES"
         subtitle="LISTADO DE PROFESIONALES"
       />
 
-      <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
-        {counts ? (
-          <>
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600" />}
-              iconBgColor="bg-teal-100"
-              title="Yoga"
-              description={counts[ProfessionalSpecialty.YOGA_TEACHER]}
-            />
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-pink-600" />}
-              iconBgColor="bg-pink-100"
-              title="Gimnasio"
-              description={counts[ProfessionalSpecialty.GYM_TEACHER]}
-            />
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-blue-600" />}
-              iconBgColor="bg-blue-100"
-              title="Médicos"
-              description={counts[ProfessionalSpecialty.DOCTOR]}
-            />
-          </>
-        ) : (
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        )}
+      {/* Statistics Section */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
+          {counts ? (
+            <>
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-teal-600" />}
+                iconBgColor="bg-teal-100"
+                title="Yoga"
+                description={counts[ProfessionalSpecialty.YOGA_TEACHER]}
+              />
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-pink-600" />}
+                iconBgColor="bg-pink-100"
+                title="Gimnasio"
+                description={counts[ProfessionalSpecialty.GYM_TEACHER]}
+              />
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-blue-600" />}
+                iconBgColor="bg-blue-100"
+                title="Médicos"
+                description={counts[ProfessionalSpecialty.DOCTOR]}
+              />
+            </>
+          ) : (
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          )}
+        </div>
+
+        <ViewToolbar
+          onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
+          onBulkUploadClick={() => {}}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
+        />
       </div>
 
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
-        onBulkUploadClick={() => {}}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
-      {isLoadingProfessionals ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <ProfessionalsTable
-          data={professionalsData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-        />
-      )}
+      {/* Table Section */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingProfessionals ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <ProfessionalsTable
+            data={professionalsData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+          />
+        )}
+      </div>
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>

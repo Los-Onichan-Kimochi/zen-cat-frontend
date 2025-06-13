@@ -81,7 +81,7 @@ export function UsersTable({
   }, [resetSelection, setRowSelection]);
 
   return (
-    <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+    <div className="-mx-4 flex-1 flex flex-col px-4 py-2 h-full">
       <DataTableToolbar
         table={table}
         filterPlaceholder="Buscar usuarios..."
@@ -94,7 +94,7 @@ export function UsersTable({
         isBulkDeleting={isBulkDeleting}
         isBulkDeleteEnabled={true}
       />
-      <div className="flex-1 overflow-hidden rounded-md border">
+      <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable table={table} columns={columns} />
       </div>
       <DataTablePagination table={table} />

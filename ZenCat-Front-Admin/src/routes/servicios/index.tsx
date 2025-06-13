@@ -271,51 +271,59 @@ function ServiciosComponent() {
     return <p>Error cargando servicios: {errorServices.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
-      <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
-        {isLoadingCounts ? (
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        ) : counts ? (
-          <>
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-teal-600" />}
-              iconBgColor="bg-teal-100"
-              title="Servicios virtuales"
-              description={counts[ServiceType.VIRTUAL_SERVICE]}
-            />
-            <HomeCard
-              icon={<Users className="w-8 h-8 text-pink-600" />}
-              iconBgColor="bg-pink-100"
-              title="servicios presenciales"
-              description={counts[ServiceType.PRESENCIAL_SERVICE]}
-            />
-          </>
+      
+      {/* Statistics Section */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
+          {isLoadingCounts ? (
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          ) : counts ? (
+            <>
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-teal-600" />}
+                iconBgColor="bg-teal-100"
+                title="Servicios virtuales"
+                description={counts[ServiceType.VIRTUAL_SERVICE]}
+              />
+              <HomeCard
+                icon={<Users className="w-8 h-8 text-pink-600" />}
+                iconBgColor="bg-pink-100"
+                title="servicios presenciales"
+                description={counts[ServiceType.PRESENCIAL_SERVICE]}
+              />
+            </>
+          ) : (
+            <p>No hay datos de servicios para mostrar conteos.</p>
+          )}
+        </div>
+        
+        <ViewToolbar
+          onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
+          onBulkUploadClick={() => {}}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
+        />
+      </div>
+
+      {/* Table Section */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingServices ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
         ) : (
-          <p>No hay datos de servicios para mostrar conteos.</p>
+          <ServicesTable
+            data={servicesData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+          />
         )}
       </div>
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-        onBulkUploadClick={() => {}}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
-      {isLoadingServices ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <ServicesTable
-          data={servicesData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-        />
-      )}
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
