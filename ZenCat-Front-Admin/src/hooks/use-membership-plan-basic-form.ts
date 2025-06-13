@@ -8,7 +8,9 @@ import { useEffect } from 'react';
 export const membershipPlanFormSchema = z.object({
   type: z.string().min(1, { message: 'El tipo de plan es obligatorio.' }),
   fee: z.number().min(10, { message: 'El precio debe ser un número mayor o igual a 10' }),
-  has_limit: z.boolean( { message: 'El límite es obligatorio' }),
+  has_limit: z.string({
+    required_error: 'Debe seleccionar si tiene límite o no.',
+  }),
   reservation_limit: z.number().nullable().optional(), 
 }).superRefine((data, ctx) => {
   if (data.has_limit && (data.reservation_limit === null || data.reservation_limit === undefined)) {
@@ -28,7 +30,7 @@ export const membershipPlanFormSchema = z.object({
   }
 });
 
-export type membershipPlanFormData = z.infer<typeof membershipPlanFormSchema>;
+export type MembershipPlanFormData = z.infer<typeof membershipPlanFormSchema>;
 
 export function useMembershipPlanForm() {
 
@@ -39,7 +41,7 @@ export function useMembershipPlanForm() {
     formState: { errors },
     watch,
     reset,
-  } = useForm<membershipPlanFormData>({
+  } = useForm<MembershipPlanFormData>({
     resolver: zodResolver(membershipPlanFormSchema),
     defaultValues: {
       type: '',

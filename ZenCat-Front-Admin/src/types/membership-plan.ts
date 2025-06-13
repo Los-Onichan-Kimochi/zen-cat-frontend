@@ -1,6 +1,6 @@
 export enum MembershipPlanType {
-  MONTHLY = 'MONTHLY',
-  ANUAL = 'ANUAL',
+  MONTHLY = 'Mensual',
+  ANUAL = 'Anual',
 }
 
 export interface MembershipPlan {

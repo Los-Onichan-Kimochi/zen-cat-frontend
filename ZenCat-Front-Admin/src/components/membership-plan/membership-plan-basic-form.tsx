@@ -10,31 +10,39 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { UploadCloud } from 'lucide-react';
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
-import { CommunityFormData } from '@/hooks/use-community-basic-form';
+import { UseFormRegister, FieldErrors, Controller, Control } from 'react-hook-form';
+import { MembershipPlanFormData } from '@/hooks/use-membership-plan-basic-form';
+import { MembershipPlanType } from '@/types/membership-plan'
 
-interface CommunityFormProps {
-  register: UseFormRegister<CommunityFormData>;
-  errors: FieldErrors<CommunityFormData>;
-  imagePreview: string | null;
-  handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+interface MembershipPlanFormProps {
+  register: UseFormRegister<MembershipPlanFormData>;
+  errors: FieldErrors<MembershipPlanFormData>;
+  control: Control<MembershipPlanFormData>;
+  has_limit: string,
   isEditing?: boolean;
 }
 
-export function CommunityForm({
+export function MembershipPlanForm({
   register,
   errors,
-  imagePreview,
-  handleImageChange,
+  control,
+  has_limit,
   isEditing=true,
-}: CommunityFormProps) {
+}: MembershipPlanFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Datos de la comunidad</CardTitle>
+        <CardTitle>Datos del plan de membresía</CardTitle>
         <CardDescription>
-          Complete la información para agregar una nueva comunidad.
+          Complete la información para agregar un nuevo plan de membresía.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -42,31 +50,60 @@ export function CommunityForm({
         <div className="grid grid-cols-1 gap-y-6">
           <div>
             <Label htmlFor="name" className="mb-2">
-              Nombres
+              Tipo de plan
             </Label>
-            <Input
-              id="name"
-              disabled={!isEditing}
-              {...register('name')}
-              placeholder="Ingrese el nombre de la comunidad"
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccione un tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(MembershipPlanType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            {errors.type && (
+              <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
             )}
           </div>
           <div>
-            <Label htmlFor="purpose" className="mb-2">
-              Propósito
-            </Label>
-            <Textarea
-              id="purpose"
-              disabled={!isEditing}
-              {...register('purpose')}
-              placeholder="Ingrese un propósito"
-            />
-            {errors.purpose && (
+            <Label className="mb-2 block">¿Tiene límite?</Label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="true"
+                  {...register('has_limit', {
+                    required: 'Debe seleccionar una opción.',
+                  })}
+                />
+                Sí
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="false"
+                  {...register('has_limit', {
+                    required: 'Debe seleccionar una opción.',
+                  })}
+                />
+                No
+              </label>
+            </div>
+            {errors.has_limit && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.purpose.message}
+                {errors.has_limit.message}
               </p>
             )}
           </div>
@@ -74,41 +111,42 @@ export function CommunityForm({
 
         {/* Columna Derecha - Logo */}
         <div className="flex flex-col space-y-6">
-          <div className="flex flex-col">
-            <Label htmlFor="profileImageFile" className="mb-2 self-start">
-              Logo
+          <div>
+            <Label htmlFor="fee" className="mb-2">
+              Precio
             </Label>
-            <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Vista previa"
-                  className="object-contain h-full w-full rounded-md"
-                />
-              ) : (
-                <div className="text-center text-gray-400">
-                  <UploadCloud size={48} className="mx-auto" />
-                  <p>Arrastra o selecciona un archivo</p>
-                  <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
-                </div>
-              )}
+            <Input
+              id="fee"
+              type="number"
+              disabled={!isEditing}
+              {...register('fee', { valueAsNumber: true })}
+              placeholder="Ingrese el precio"
+            />
+            {errors.fee && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.fee.message}
+              </p>
+            )}
+          </div>
+          { has_limit === 'true' && (
+            <div>
+              <Label htmlFor="reservation_limit" className="mb-2">
+                Límite
+              </Label>
               <Input
-                id="profileImageFile"
-                type="file"
+                id="reservation_limit"
+                type="number"
                 disabled={!isEditing}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                accept="image/png, image/jpeg, image/gif"
-                {...register('profileImageFile')}
-                onChange={handleImageChange}
+                {...register('reservation_limit', { valueAsNumber: true })}
+                placeholder="Ingrese el límite de reservas"
               />
-            </div>
-            {errors.profileImageFile &&
-              typeof errors.profileImageFile.message === 'string' && (
+              {errors.reservation_limit && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.profileImageFile.message}
+                  {errors.reservation_limit.message}
                 </p>
               )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
