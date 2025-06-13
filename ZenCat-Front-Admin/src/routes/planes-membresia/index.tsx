@@ -36,6 +36,8 @@ function PlanesMembresiaComponent() {
     data: membershipPlans = [],
     isLoading,
     error,
+    refetch: refetchMembershipPlans,
+    isFetching: isFetchingMembershipPlans,
   } = useQuery({
     queryKey: ['membershipPlans'],
     queryFn: membershipPlansApi.getMembershipPlans,
@@ -80,60 +82,84 @@ function PlanesMembresiaComponent() {
     });
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const result = await refetchMembershipPlans();
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return result;
+  };
+
   if (error) return <p>Error cargando planes: {error.message}</p>;
 
   return (
-    <div className="p-6 h-full font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor
         title="PLANES DE MEMBRESÍA"
         subtitle="LISTADO DE PLANES"
       />
 
-      <div className="mb-6 flex items-center">
-        <HomeCard
-          icon={<Locate className="w-8 h-8 text-indigo-600" />}
-          iconBgColor="bg-indigo-100"
-          title="Planes totales"
-          description={membershipPlans.length}
-        />
-      </div>
-
-      <div className="flex justify-end gap-3 mb-4">
-        <Button
-          onClick={() => {
-            sessionStorage.removeItem('draftMembershipPlan');
-            navigate({ to: '/planes-membresia/agregar' });
-          }}
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Agregar
-        </Button>
-
-        <Button
-          size="sm"
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
-          onClick={() => setShowUploadDialog(true)}
-        >
-          <Upload className="mr-2 h-4 w-4" /> Carga Masiva
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center py-10">
-          <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
+      <div className="flex-shrink-0">
+        <div className="mb-6 flex items-center">
+                     <HomeCard
+             icon={<Locate className="w-8 h-8 text-violet-600" />}
+             iconBgColor="bg-violet-100"
+             title="Planes totales"
+             description={membershipPlans.length}
+             descColor="text-violet-600"
+             isLoading={isFetchingMembershipPlans}
+           />
         </div>
-      ) : (
-        <MembershipPlanTable
-          data={membershipPlans}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteMutation.isPending}
-          onDelete={(plan) => {
-            setPlanToDelete(plan);
-            setIsDeleteModalOpen(true);
-          }}
-          resetRowSelectionTrigger={resetSelectionTrigger}
-        />
-      )}
+
+        <div className="flex justify-end gap-3 mb-4">
+          <Button
+            onClick={() => {
+              sessionStorage.removeItem('draftMembershipPlan');
+              navigate({ to: '/planes-membresia/agregar' });
+            }}
+            className="h-10 bg-black text-white font-bold hover:bg-gray-800"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Agregar
+          </Button>
+
+          <Button
+            size="sm"
+            className="h-10 bg-black text-white font-bold hover:bg-gray-800 cursor-pointer"
+            onClick={() => setShowUploadDialog(true)}
+          >
+            <Upload className="mr-2 h-4 w-4" /> Carga Masiva
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
+          </div>
+        ) : (
+          <MembershipPlanTable
+            data={membershipPlans}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={bulkDeleteMutation.isPending}
+            onDelete={(plan) => {
+              setPlanToDelete(plan);
+              setIsDeleteModalOpen(true);
+            }}
+            resetRowSelectionTrigger={resetSelectionTrigger}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingMembershipPlans}
+          />
+        )}
+      </div>
 
       <BulkCreateDialog
         open={showUploadDialog}

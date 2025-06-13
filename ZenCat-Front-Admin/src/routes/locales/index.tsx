@@ -70,6 +70,7 @@ function LocalesComponent() {
     isLoading: isLoadingLocals,
     error: errorLocals,
     refetch: refetchLocals,
+    isFetching: isFetchingLocals,
   } = useQuery<Local[], Error>({
     queryKey: ['locals'],
     queryFn: localsApi.getLocals,
@@ -158,49 +159,79 @@ function LocalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const result = await refetchLocals();
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return result;
+  };
+
   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
-      <div className="mb-6 flex items-center gap-4">
-        <HomeCard
-          icon={<MapPin className="w-8 h-8 text-teal-600" />}
-          iconBgColor="bg-teal-100"
-          title="Locales totales"
-          description={localsData?.length || 0}
-        />
-        <HomeCard
-          icon={<MapPin className="w-8 h-8 text-blue-600" />}
-          iconBgColor="bg-blue-100"
-          title="Region con mayor cantidad de locales: "
-          description={
-            maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'
-          }
+      
+      {/* Statistics Section */}
+      <div className="flex-shrink-0">
+        <div className="mb-6 flex items-center gap-4">
+          <HomeCard
+            icon={<MapPin className="w-8 h-8 text-emerald-600" />}
+            iconBgColor="bg-emerald-100"
+            title="Locales totales"
+            description={localsData?.length || 0}
+            descColor="text-emerald-600"
+            isLoading={isFetchingLocals}
+          />
+          <HomeCard
+            icon={<MapPin className="w-8 h-8 text-orange-600" />}
+            iconBgColor="bg-orange-100"
+            title="Region con mayor cantidad de locales: "
+            description={
+              maxRegion ? `${maxRegion} (${maxCount})` : 'No disponible'
+            }
+            descColor="text-orange-600"
+            isLoading={isFetchingLocals}
+          />
+        </div>
+        
+        <ViewToolbar
+          onAddClick={() => navigate({ to: '/locales/agregar' })}
+          onBulkUploadClick={() => setShowUploadDialog(true)}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
         />
       </div>
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/locales/agregar' })}
-        onBulkUploadClick={() => setShowUploadDialog(true)}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
 
-      {isLoadingLocals ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <LocalsTable
-          data={localsData || []}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          resetRowSelectionTrigger={resetSelectionTrigger}
-        />
-      )}
+      {/* Table Section */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingLocals ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <LocalsTable
+            data={localsData || []}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            resetRowSelectionTrigger={resetSelectionTrigger}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingLocals}
+          />
+        )}
+      </div>
       <BulkCreateDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}

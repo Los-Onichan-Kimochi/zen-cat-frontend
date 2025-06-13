@@ -7,6 +7,7 @@ import { ConfirmDeleteBulkDialog } from '@/components/common/confirm-delete-dial
 import { Table, Column } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Trash,
   Filter,
@@ -15,6 +16,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  RefreshCw,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,10 +42,15 @@ interface DataTableToolbarProps<TData> {
   filterPlaceholder: string;
   showFilterButton?: boolean;
   onFilterClick?: () => void;
+  onExportClick?: () => void;
   showExportButton?: boolean;
   exportFileName?: string;
   showSortButton?: boolean;
   disableConfirmBulkDelete?: boolean;
+  hasActiveFilters?: boolean;
+  showRefreshButton?: boolean;
+  onRefreshClick?: () => void;
+  isRefreshing?: boolean;
 }
 
 function getColumnDisplayName<TData>(column: Column<TData, unknown>): string {
@@ -67,10 +74,15 @@ export function DataTableToolbar<TData extends DataWithId>({
   filterPlaceholder,
   showFilterButton = false,
   onFilterClick,
+  onExportClick,
   showExportButton = false,
   exportFileName = 'data',
   showSortButton = false,
   disableConfirmBulkDelete = false,
+  hasActiveFilters = false,
+  showRefreshButton = false,
+  onRefreshClick,
+  isRefreshing = false,
 }: DataTableToolbarProps<TData>) {
   const rowsSelected = table.getFilteredSelectedRowModel().rows.length > 0;
   const [filterValue, setFilterValue] = React.useState(
@@ -185,17 +197,30 @@ export function DataTableToolbar<TData extends DataWithId>({
             placeholder={filterPlaceholder}
             value={filterValue}
             onChange={(e) => setFilterValue(e.target.value)}
-            className="max-w-sm h-10"
+            className="max-w-sm h-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
           />
         </div>
         <div className="flex items-center space-x-2 ml-4">
+          {showRefreshButton && onRefreshClick && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefreshClick}
+              disabled={isRefreshing}
+              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+                isRefreshing ? 'bg-blue-50 border-blue-300' : ''
+              }`}
+            >
+              <RefreshCw className={`h-4 w-4 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+            </Button>
+          )}
           {showSortButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
                 >
                   <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />
                   Ordenar por
@@ -230,13 +255,31 @@ export function DataTableToolbar<TData extends DataWithId>({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          {showFilterButton && (
+          {showFilterButton && onFilterClick && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onFilterClick}
+              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+                hasActiveFilters ? 'bg-blue-50 border-blue-300' : ''
+              }`}
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              <span>Filtrar</span>
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800 text-xs">
+                  •
+                </Badge>
+              )}
+            </Button>
+          )}
+          {showFilterButton && !onFilterClick && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
                 >
                   <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -245,22 +288,33 @@ export function DataTableToolbar<TData extends DataWithId>({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onFilterClick}>
+                <DropdownMenuItem>
                   Opción A
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onFilterClick}>
+                <DropdownMenuItem>
                   Opción B
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          {showExportButton && (
+          {showExportButton && onExportClick && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExportClick}
+              className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              <span>Exportar</span>
+            </Button>
+          )}
+          {showExportButton && !onExportClick && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
                 >
                   <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -289,13 +343,14 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="destructive"
               size="sm"
               type="button"
-              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200"
+              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
               onClick={handleDeleteSelected}
               disabled={!rowsSelected || isBulkDeleting || !isBulkDeleteEnabled}
             >
               <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>
           )}
+
         </div>
       </div>
       <ConfirmDeleteBulkDialog

@@ -22,6 +22,8 @@ interface CommunityTableProps {
   onDelete: (community: Community) => void;
   onEdit: (community: Community) => void;
   resetRowSelectionTrigger?: number;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function CommunityTable({
@@ -31,6 +33,8 @@ export function CommunityTable({
   onDelete,
   onEdit,
   resetRowSelectionTrigger,
+  onRefresh,
+  isRefreshing = false,
 }: CommunityTableProps) {
   const {
     sorting,
@@ -80,21 +84,26 @@ export function CommunityTable({
   }, [resetRowSelectionTrigger]);
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <DataTableToolbar
         table={table}
         onBulkDelete={onBulkDelete}
         isBulkDeleting={isBulkDeleting}
         showBulkDeleteButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         filterPlaceholder="Buscar comunidad..."
         exportFileName="comunidades"
         showFilterButton
         onFilterClick={() => {}}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         showSortButton
       />
-      <DataTable table={table} columns={columns} />
+      <div className="flex-1 min-h-0">
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+      </div>
       <DataTablePagination table={table} />
-    </>
+    </div>
   );
 }
