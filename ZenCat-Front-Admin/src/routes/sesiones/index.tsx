@@ -48,6 +48,8 @@ function SesionesComponent() {
     data: sessionsData,
     isLoading: isLoadingSessions,
     error: errorSessions,
+    refetch: refetchSessions,
+    isFetching: isFetchingSessions,
   } = useQuery<Session[], Error>({
     queryKey: ['sessions'],
     queryFn: () => sessionsApi.getSessions(),
@@ -132,6 +134,25 @@ function SesionesComponent() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const [sessionsResult, countsResult] = await Promise.all([
+      refetchSessions(),
+      refetchCounts()
+    ]);
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return { sessionsResult, countsResult };
+  };
+
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
   };
@@ -153,24 +174,32 @@ function SesionesComponent() {
                 iconBgColor="bg-blue-100"
                 title="Programadas"
                 description={counts[SessionState.SCHEDULED]}
+                descColor="text-blue-600"
+                isLoading={isFetchingSessions}
               />
               <HomeCard
                 icon={<Activity className="w-8 h-8 text-green-600" />}
                 iconBgColor="bg-green-100"
                 title="En curso"
                 description={counts[SessionState.ONGOING]}
+                descColor="text-green-600"
+                isLoading={isFetchingSessions}
               />
               <HomeCard
                 icon={<Clock className="w-8 h-8 text-gray-600" />}
                 iconBgColor="bg-gray-100"
                 title="Completadas"
                 description={counts[SessionState.COMPLETED]}
+                descColor="text-gray-600"
+                isLoading={isFetchingSessions}
               />
               <HomeCard
                 icon={<Users className="w-8 h-8 text-teal-600" />}
                 iconBgColor="bg-teal-100"
                 title="Total de sesiones"
                 description={counts.total}
+                descColor="text-teal-600"
+                isLoading={isFetchingSessions}
               />
             </>
           ) : (
@@ -193,14 +222,16 @@ function SesionesComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-          <SessionsTable
-            data={sessionsData || []}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
-            onBulkDelete={handleBulkDelete}
-            isBulkDeleting={isBulkDeleting}
-          />
+                  <SessionsTable
+          data={sessionsData || []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
+          onRefresh={handleRefresh}
+          isRefreshing={isFetchingSessions}
+        />
         )}
       </div>
 

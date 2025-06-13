@@ -22,6 +22,8 @@ interface LocalsTableProps {
   onDelete: (local: Local) => void;
   onView: (local: Local) => void;
   resetRowSelectionTrigger?: number;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function LocalsTable({
@@ -32,6 +34,8 @@ export function LocalsTable({
   onDelete,
   onView,
   resetRowSelectionTrigger,
+  onRefresh,
+  isRefreshing = false,
 }: LocalsTableProps) {
   const {
     sorting,
@@ -87,7 +91,10 @@ export function LocalsTable({
         showSortButton
         showFilterButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         onFilterClick={() => {}}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         exportFileName="locales"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
@@ -104,7 +111,7 @@ export function LocalsTable({
         isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

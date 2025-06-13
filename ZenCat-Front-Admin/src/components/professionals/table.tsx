@@ -20,6 +20,8 @@ interface ProfessionalsTableProps {
   onView: (professional: Professional) => void;
   onBulkDelete?: (professionals: Professional[]) => void;
   isBulkDeleting?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function ProfessionalsTable({
@@ -29,6 +31,8 @@ export function ProfessionalsTable({
   onView,
   onBulkDelete,
   isBulkDeleting = false,
+  onRefresh,
+  isRefreshing = false,
 }: ProfessionalsTableProps) {
   const {
     sorting,
@@ -79,7 +83,10 @@ export function ProfessionalsTable({
         showSortButton
         showFilterButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         onFilterClick={() => {}}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         exportFileName="profesionales"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
@@ -96,7 +103,7 @@ export function ProfessionalsTable({
         isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

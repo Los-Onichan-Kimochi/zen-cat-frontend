@@ -45,6 +45,8 @@ function UsuariosComponent() {
     data: usersData,
     isLoading: isLoadingUsers,
     error: errorUsers,
+    refetch: refetchUsers,
+    isFetching: isFetchingUsers,
   } = useQuery<User[], Error>({
     queryKey: ['usuarios'],
     queryFn: () => usuariosApi.getUsuarios(),
@@ -112,6 +114,22 @@ function UsuariosComponent() {
     navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } });
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const result = await refetchUsers();
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return result;
+  };
+
   const btnSizeClasses = 'h-11 w-28 px-4';
 
   if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
@@ -125,10 +143,12 @@ function UsuariosComponent() {
         <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
           {usersData ? (
             <HomeCard
-              icon={<Gem className="w-8 h-8 text-teal-600" />}
-              iconBgColor="bg-teal-100"
+              icon={<Gem className="w-8 h-8 text-purple-600" />}
+              iconBgColor="bg-purple-100"
               title="Usuarios totales"
               description={usersData.length}
+              descColor="text-purple-600"
+              isLoading={isFetchingUsers}
             />
           ) : (
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
@@ -161,6 +181,8 @@ function UsuariosComponent() {
             onBulkDelete={bulkDeleteUsers}
             isBulkDeleting={isBulkDeleting}
             resetSelection={resetSelection}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingUsers}
           />
         )}
       </div>

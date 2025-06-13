@@ -54,6 +54,8 @@ function ProfesionalesComponent() {
     data: professionalsData,
     isLoading: isLoadingProfessionals,
     error: errorProfessionals,
+    refetch: refetchProfessionals,
+    isFetching: isFetchingProfessionals,
   } = useQuery<Professional[], Error>({
     queryKey: ['professionals'],
     queryFn: professionalsApi.getProfessionals,
@@ -124,6 +126,25 @@ function ProfesionalesComponent() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const [professionalsResult, countsResult] = await Promise.all([
+      refetchProfessionals(),
+      refetchCounts()
+    ]);
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return { professionalsResult, countsResult };
+  };
+
   // handleBulkDelete already provided by the useBulkDelete hook
 
   const btnSizeClasses = 'h-11 w-28 px-4';
@@ -148,18 +169,24 @@ function ProfesionalesComponent() {
                 iconBgColor="bg-teal-100"
                 title="Yoga"
                 description={counts[ProfessionalSpecialty.YOGA_TEACHER]}
+                descColor="text-teal-600"
+                isLoading={isFetchingProfessionals}
               />
               <HomeCard
                 icon={<Users className="w-8 h-8 text-pink-600" />}
                 iconBgColor="bg-pink-100"
                 title="Gimnasio"
                 description={counts[ProfessionalSpecialty.GYM_TEACHER]}
+                descColor="text-pink-600"
+                isLoading={isFetchingProfessionals}
               />
               <HomeCard
                 icon={<Users className="w-8 h-8 text-blue-600" />}
                 iconBgColor="bg-blue-100"
                 title="Médicos"
                 description={counts[ProfessionalSpecialty.DOCTOR]}
+                descColor="text-blue-600"
+                isLoading={isFetchingProfessionals}
               />
             </>
           ) : (
@@ -189,6 +216,8 @@ function ProfesionalesComponent() {
             onView={handleView}
             onBulkDelete={handleBulkDelete}
             isBulkDeleting={isBulkDeleting}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingProfessionals}
           />
         )}
       </div>

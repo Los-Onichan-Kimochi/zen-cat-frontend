@@ -18,11 +18,22 @@ import {
 interface DataTableProps<TData> {
   table: TanStackTable<TData>;
   columns: ColumnDef<TData, any>[];
+  isRefreshing?: boolean;
 }
 
-export function DataTable<TData>({ table, columns }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, columns, isRefreshing = false }: DataTableProps<TData>) {
   return (
     <div className="w-full h-full flex flex-col relative">
+      {/* Loading Overlay */}
+      {isRefreshing && (
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-3">
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Actualizando datos...</p>
+          </div>
+        </div>
+      )}
+
       {/* Fixed Header */}
       <div className="flex-shrink-0 bg-white border-b-2 border-gray-200 shadow-md z-40 sticky top-0">
         <Table className="w-full min-w-full table-fixed">
@@ -52,7 +63,7 @@ export function DataTable<TData>({ table, columns }: DataTableProps<TData>) {
       </div>
 
       {/* Scrollable Body */}
-      <div className="flex-1 overflow-auto">
+      <div className={`flex-1 overflow-auto transition-opacity duration-300 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
         <Table className="w-full min-w-full table-fixed">
           <TableBody>
           {table.getRowModel().rows?.length ? (

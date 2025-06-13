@@ -22,6 +22,8 @@ interface UsersTableProps {
   onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting?: boolean;
   resetSelection?: number;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function UsersTable({
@@ -32,6 +34,8 @@ export function UsersTable({
   onBulkDelete,
   isBulkDeleting = false,
   resetSelection = 0,
+  onRefresh,
+  isRefreshing = false,
 }: UsersTableProps) {
   const {
     sorting,
@@ -89,13 +93,16 @@ export function UsersTable({
         showFilterButton
         showExportButton
         showBulkDeleteButton={!!onBulkDelete}
+        showRefreshButton={!!onRefresh}
         onFilterClick={() => console.log('Filtrar')}
         onBulkDelete={onBulkDelete}
+        onRefreshClick={onRefresh}
         isBulkDeleting={isBulkDeleting}
+        isRefreshing={isRefreshing}
         isBulkDeleteEnabled={true}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

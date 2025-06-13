@@ -20,6 +20,8 @@ interface ServicesTableProps {
   onView: (service: Service) => void;
   onBulkDelete?: (services: Service[]) => void;
   isBulkDeleting?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function ServicesTable({
@@ -29,6 +31,8 @@ export function ServicesTable({
   onView,
   onBulkDelete,
   isBulkDeleting = false,
+  onRefresh,
+  isRefreshing = false,
 }: ServicesTableProps) {
   const {
     sorting,
@@ -79,7 +83,10 @@ export function ServicesTable({
         showSortButton
         showFilterButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         onFilterClick={() => {}}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         exportFileName="servicios"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
@@ -96,7 +103,7 @@ export function ServicesTable({
         isBulkDeleting={isBulkDeleting}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

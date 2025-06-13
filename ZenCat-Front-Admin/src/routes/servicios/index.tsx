@@ -81,6 +81,8 @@ function ServiciosComponent() {
     data: servicesData,
     isLoading: isLoadingServices,
     error: errorServices,
+    refetch: refetchServices,
+    isFetching: isFetchingServices,
   } = useQuery<Service[], Error>({
     queryKey: ['services'],
     queryFn: servicesApi.getServices,
@@ -146,6 +148,25 @@ function ServiciosComponent() {
   const handleDelete = (service: Service) => {
     setServiceToDelete(service);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const [servicesResult, countsResult] = await Promise.all([
+      refetchServices(),
+      refetchCounts()
+    ]);
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return { servicesResult, countsResult };
   };
 
   const columns = useMemo<ColumnDef<Service>[]>(
@@ -286,12 +307,16 @@ function ServiciosComponent() {
                 iconBgColor="bg-teal-100"
                 title="Servicios virtuales"
                 description={counts[ServiceType.VIRTUAL_SERVICE]}
+                descColor="text-teal-600"
+                isLoading={isFetchingServices}
               />
               <HomeCard
                 icon={<Users className="w-8 h-8 text-pink-600" />}
                 iconBgColor="bg-pink-100"
                 title="servicios presenciales"
                 description={counts[ServiceType.PRESENCIAL_SERVICE]}
+                descColor="text-pink-600"
+                isLoading={isFetchingServices}
               />
             </>
           ) : (
@@ -314,14 +339,16 @@ function ServiciosComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-          <ServicesTable
-            data={servicesData || []}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
-            onBulkDelete={handleBulkDelete}
-            isBulkDeleting={isBulkDeleting}
-          />
+                  <ServicesTable
+          data={servicesData || []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          onBulkDelete={handleBulkDelete}
+          isBulkDeleting={isBulkDeleting}
+          onRefresh={handleRefresh}
+          isRefreshing={isFetchingServices}
+        />
         )}
       </div>
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
