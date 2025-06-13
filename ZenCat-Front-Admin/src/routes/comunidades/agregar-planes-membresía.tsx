@@ -1,6 +1,6 @@
 'use client';
 
-import { createFileRoute , useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
@@ -37,15 +37,19 @@ function AddCommunityMembershipPlanPageComponent() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const mode = sessionStorage.getItem('modeAddMembershipPlan');
-  const membershipPlansAsociated: string[] = JSON.parse(sessionStorage.getItem('draftSelectedMembershipPlans') ?? '[]').map((plan: MembershipPlan) => plan.id);
+  const membershipPlansAsociated: string[] = JSON.parse(
+    sessionStorage.getItem('draftSelectedMembershipPlans') ?? '[]',
+  ).map((plan: MembershipPlan) => plan.id);
   const currentCommunityId = sessionStorage.getItem('currentCommunity'); // guardado previamente
 
-  const redirectPath = mode === 'editar'
-  ? '/comunidades/ver'
-  : '/comunidades/agregar-comunidad';
+  const redirectPath =
+    mode === 'editar' ? '/comunidades/ver' : '/comunidades/agregar-comunidad';
 
   const {
     data: membershipPlansData,
@@ -61,11 +65,13 @@ function AddCommunityMembershipPlanPageComponent() {
   };
 
   const handleGuardar = async () => {
-    const selectedPlans = table.getSelectedRowModel().rows.map((row) => row.original);
+    const selectedPlans = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original);
 
     if (mode === 'editar') {
       const newPlans = selectedPlans.filter(
-        (plan) => !membershipPlansAsociated.includes(plan.id)
+        (plan) => !membershipPlansAsociated.includes(plan.id),
       );
 
       if (newPlans.length > 0) {
@@ -96,7 +102,7 @@ function AddCommunityMembershipPlanPageComponent() {
     } else {
       sessionStorage.setItem(
         'draftSelectedMembershipPlans',
-        JSON.stringify(selectedPlans)
+        JSON.stringify(selectedPlans),
       );
       navigate({ to: redirectPath });
     }
@@ -104,7 +110,7 @@ function AddCommunityMembershipPlanPageComponent() {
 
   useEffect(() => {
     const stored = sessionStorage.getItem('draftSelectedMembershipPlans');
-    console.log(stored)
+    console.log(stored);
     if (stored && membershipPlansData) {
       const restored = JSON.parse(stored) as MembershipPlan[];
       const newRowSelection: Record<string, boolean> = {};
@@ -115,51 +121,61 @@ function AddCommunityMembershipPlanPageComponent() {
     }
   }, [membershipPlansData]);
 
-  const columns = useMemo<ColumnDef<MembershipPlan>[]>(() => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => {
-        const membershipPlanId = row.original.id;
-        
-        const asociated = membershipPlansAsociated.includes(membershipPlanId.toString());
-        return (
-        <Checkbox
-          checked={row.getIsSelected()|| asociated}
-          disabled={asociated && mode === 'editar'}
-          onCheckedChange={(v) => {
-              if (!asociated) row.toggleSelected(!!v);
-            }}
-            aria-label="Select row"
-        />
-        );
+  const columns = useMemo<ColumnDef<MembershipPlan>[]>(
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => {
+          const membershipPlanId = row.original.id;
+
+          const asociated = membershipPlansAsociated.includes(
+            membershipPlanId.toString(),
+          );
+          return (
+            <Checkbox
+              checked={row.getIsSelected() || asociated}
+              disabled={asociated && mode === 'editar'}
+              onCheckedChange={(v) => {
+                if (!asociated) row.toggleSelected(!!v);
+              }}
+              aria-label="Select row"
+            />
+          );
+        },
+        enableSorting: false,
+        enableHiding: false,
+        meta: { className: 'w-[36px]' },
       },
-      enableSorting: false,
-      enableHiding: false,
-      meta: { className: "w-[36px]" },
-    },
-    {
-      accessorKey: "type",
-      header: "Tipo de Plan",
-    },
-    {
-      accessorKey: "fee",
-      header: "Precio",
-      cell: ({ row }) => `S/ ${row.original.fee.toFixed(2)}`,
-    },
-    {
-      accessorKey: "reservation_limit",
-      header: "Límite",
-      accessorFn: (row) =>
-        row.reservation_limit == null ? "Sin límite" : row.reservation_limit,
-    },
-  ], []);
+      {
+        accessorKey: 'type',
+        header: 'Tipo de Plan',
+      },
+      {
+        accessorKey: 'fee',
+        header: 'Precio',
+        cell: ({ row }) => `S/ ${row.original.fee.toFixed(2)}`,
+      },
+      {
+        accessorKey: 'reservation_limit',
+        header: 'Límite',
+        accessorFn: (row) =>
+          row.reservation_limit == null ? 'Sin límite' : row.reservation_limit,
+      },
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: membershipPlansData || [],
@@ -188,11 +204,15 @@ function AddCommunityMembershipPlanPageComponent() {
     debugTable: true,
   });
 
-  if (errorMembershipPlans) return <p>Error cargando planes: {errorMembershipPlans.message}</p>;
+  if (errorMembershipPlans)
+    return <p>Error cargando planes: {errorMembershipPlans.message}</p>;
 
   return (
     <div className="p-6 h-full font-montserrat">
-      <HeaderDescriptor title="COMUNIDADES" subtitle="AGREGAR PLANES DE MEMBRESÍA" />
+      <HeaderDescriptor
+        title="COMUNIDADES"
+        subtitle="AGREGAR PLANES DE MEMBRESÍA"
+      />
 
       <div className="mb-4">
         <Button variant="outline" size="default" onClick={handleCancel}>
@@ -228,8 +248,17 @@ function AddCommunityMembershipPlanPageComponent() {
       </div>
 
       <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-        <Button variant="outline" onClick={handleCancel} className="h-10 w-30 text-base">Cancelar</Button>
-        <Button onClick={handleGuardar} className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800">
+        <Button
+          variant="outline"
+          onClick={handleCancel}
+          className="h-10 w-30 text-base"
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleGuardar}
+          className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+        >
           Guardar
         </Button>
       </div>

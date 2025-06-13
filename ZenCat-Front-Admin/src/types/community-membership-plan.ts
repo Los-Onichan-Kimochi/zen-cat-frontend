@@ -2,7 +2,7 @@ export interface CommunityMembershipPlan {
   id: string;
   community_id: string;
   plan_id: string;
-} 
+}
 
 export interface CreateCommunityMembershipPlanPayload {
   community_id: string;

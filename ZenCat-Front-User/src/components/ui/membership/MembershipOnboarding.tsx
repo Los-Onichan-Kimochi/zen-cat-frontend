@@ -12,14 +12,22 @@ interface MembershipOnboardingProps {
   plans: MembershipPlan[];
 }
 
-export function MembershipOnboarding({ community, plans }: MembershipOnboardingProps) {
+export function MembershipOnboarding({
+  community,
+  plans,
+}: MembershipOnboardingProps) {
   const { state, setCommunity } = useMembershipOnboarding();
 
   useEffect(() => {
     setCommunity(community);
   }, [community, setCommunity]);
 
-  const stepLabels = ['Seleccionar plan', 'Onboarding', 'Datos de pago', 'Confirmación'];
+  const stepLabels = [
+    'Seleccionar plan',
+    'Onboarding',
+    'Datos de pago',
+    'Confirmación',
+  ];
 
   const renderCurrentStep = () => {
     switch (state.currentStep) {
@@ -58,10 +66,8 @@ export function MembershipOnboarding({ community, plans }: MembershipOnboardingP
         />
 
         {/* Current Step Content */}
-        <div className="mt-8">
-          {renderCurrentStep()}
-        </div>
+        <div className="mt-8">{renderCurrentStep()}</div>
       </div>
     </div>
   );
-} 
+}

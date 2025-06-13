@@ -14,10 +14,13 @@ export function getMembershipPlanColumns({
 }: GetMembershipPlanColumnsProps): ColumnDef<MembershipPlan>[] {
   return [
     {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -31,44 +34,51 @@ export function getMembershipPlanColumns({
       ),
       enableSorting: false,
       enableHiding: false,
-      meta: { className: "w-[36px] px-3" },
+      meta: { className: 'w-[36px] px-3' },
     },
     {
-      accessorKey: "id",
-      header: "Código",
+      accessorKey: 'id',
+      header: 'Código',
       cell: ({ row }) => {
-        const value = row.getValue("id") as string;
+        const value = row.getValue('id') as string;
         return (
-          <div className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap" title={value}>
+          <div
+            className="max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap"
+            title={value}
+          >
             {value}
           </div>
         );
       },
-      meta: { className: "w-[150px]" },
+      meta: { className: 'w-[150px]' },
     },
     {
-      accessorKey: "type",
-      header: "Tipo de Plan",
+      accessorKey: 'type',
+      header: 'Tipo de Plan',
     },
     {
-      accessorKey: "fee",
-      header: "Precio",
+      accessorKey: 'fee',
+      header: 'Precio',
     },
     {
-      accessorKey: "reservation_limit",
-      header: "Límite",
+      accessorKey: 'reservation_limit',
+      header: 'Límite',
       accessorFn: (row) =>
-        row.reservation_limit == null ? "Sin límite" : row.reservation_limit,
+        row.reservation_limit == null ? 'Sin límite' : row.reservation_limit,
     },
     {
-      id: "actions",
-      header: "Acciones",
+      id: 'actions',
+      header: 'Acciones',
       cell: ({ row }) => {
         const membershipPlan = row.original;
         return (
           <div className="flex gap-2 items-center">
             <Link to="/planes-membresia/ver" search={{ id: membershipPlan.id }}>
-              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 border border-black rounded-full">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 border border-black rounded-full"
+              >
                 <MoreHorizontal className="!w-5 !h-5" />
               </Button>
             </Link>
@@ -83,7 +93,7 @@ export function getMembershipPlanColumns({
           </div>
         );
       },
-      meta: { className: "w-[100px]" },
+      meta: { className: 'w-[100px]' },
     },
   ];
 }

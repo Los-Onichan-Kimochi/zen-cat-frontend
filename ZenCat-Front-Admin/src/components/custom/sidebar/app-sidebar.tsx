@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, Cog, User as UserIcon } from 'lucide-react';
+import { Globe, Cog, User as UserIcon, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -10,9 +10,8 @@ import {
 import { menuItems } from '@/types/navbar-items';
 import { User as UserType } from '@/types/user';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useAuth } from '@/context/AuthContext';
 import '@/styles/custom/no-scrollbar.css';
-import { useAuth } from '@/context/AuthContext'; // importa tu hook
-
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: UserType;
@@ -23,7 +22,6 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
   const routerState = useRouterState();
   const activePath = routerState.location.pathname;
   const { logout } = useAuth();
-
 
   return (
     <Sidebar
@@ -91,10 +89,11 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
           </div>
           <div className="flex items-center gap-2 transition-opacity duration-300 ">
             <Cog className="h-5 w-5" />
+            <Globe className="h-5 w-5" />
             <button
-              onClick={logout}
-              className="p-2 rounded-full hover:bg-white hover:text-black transition"
-              aria-label="Cerrar sesión"
+              onClick={() => logout()}
+              className="hover:bg-zinc-800 p-1 rounded transition-colors"
+              title="Cerrar Sesión"
             >
               <LogOut className="h-5 w-5" />
             </button>

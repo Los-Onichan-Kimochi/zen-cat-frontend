@@ -27,7 +27,7 @@ export function CommunityForm({
   errors,
   imagePreview,
   handleImageChange,
-  isEditing=true,
+  isEditing = true,
 }: CommunityFormProps) {
   return (
     <Card>

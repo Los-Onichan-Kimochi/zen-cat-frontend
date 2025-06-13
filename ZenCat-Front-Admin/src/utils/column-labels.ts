@@ -39,6 +39,14 @@ export const getColumnLabel = (columnKey: string): string => {
     role: 'Rol',
     status: 'Estado',
 
+    // Audit columns
+    user: 'Usuario',
+    action: 'Acción',
+    entityType: 'Entidad',
+    success: 'Estado',
+    ipAddress: 'Dirección IP',
+    createdAt: 'Fecha y Hora',
+
     // Common columns
     select: 'Seleccionar',
     actions: 'Acciones',

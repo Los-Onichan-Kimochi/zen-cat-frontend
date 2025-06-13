@@ -1,10 +1,11 @@
 import { User, CreateUserPayload, UpdateUserPayload } from '@/types/user';
+import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Función auxiliar para obtener los headers comunes
 const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('access_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -14,12 +15,15 @@ const getHeaders = () => {
 // Función para mapear los datos del backend a nuestro tipo User
 const mapBackendUserToUser = (backendUser: any): User => {
   console.log('Mapping backend user:', backendUser);
-  
+
   return {
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
-    role: (backendUser.rol || backendUser.role || 'user') as 'admin' | 'user' | 'guest',
+    role: (backendUser.rol || backendUser.role || 'user') as
+      | 'admin'
+      | 'user'
+      | 'guest',
     password: backendUser.password || '',
     isAuthenticated: false,
     permissions: backendUser.permissions || [],
@@ -28,27 +32,29 @@ const mapBackendUserToUser = (backendUser: any): User => {
     district: backendUser.district,
     phone: backendUser.phone,
     // Mapear datos del onboarding usando snake_case
-    onboarding: backendUser.onboarding ? {
-      id: backendUser.onboarding.id,
-      documentType: backendUser.onboarding.document_type,
-      documentNumber: backendUser.onboarding.document_number,
-      phoneNumber: backendUser.onboarding.phone_number,
-      birthDate: backendUser.onboarding.birth_date,
-      gender: backendUser.onboarding.gender,
-      city: backendUser.onboarding.city,
-      postalCode: backendUser.onboarding.postal_code,
-      district: backendUser.onboarding.district,
-      address: backendUser.onboarding.address,
-      createdAt: backendUser.onboarding.created_at,
-      updatedAt: backendUser.onboarding.updated_at,
-    } : undefined,
+    onboarding: backendUser.onboarding
+      ? {
+          id: backendUser.onboarding.id,
+          documentType: backendUser.onboarding.document_type,
+          documentNumber: backendUser.onboarding.document_number,
+          phoneNumber: backendUser.onboarding.phone_number,
+          birthDate: backendUser.onboarding.birth_date,
+          gender: backendUser.onboarding.gender,
+          city: backendUser.onboarding.city,
+          postalCode: backendUser.onboarding.postal_code,
+          district: backendUser.onboarding.district,
+          address: backendUser.onboarding.address,
+          createdAt: backendUser.onboarding.created_at,
+          updatedAt: backendUser.onboarding.updated_at,
+        }
+      : undefined,
   };
 };
 
 // Función para transformar el payload del frontend al formato del backend
 const transformPayloadToBackend = (payload: CreateUserPayload): any => {
   console.log('Original payload:', payload);
-  
+
   const backendPayload: any = {
     name: payload.name,
     email: payload.email,
@@ -87,7 +93,7 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
 // Función para transformar el payload de actualización al formato del backend
 const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
   console.log('Original update payload:', payload);
-  
+
   const backendPayload: any = {};
 
   if (payload.name) backendPayload.name = payload.name;
@@ -126,7 +132,7 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
 // Función para transformar el payload de onboarding al formato del backend
 const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
   console.log('Original onboarding payload:', onboardingData);
-  
+
   const backendPayload: any = {};
 
   // Solo agregar campos que estén presentes (todos son opcionales en PATCH)
@@ -167,7 +173,6 @@ const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
 export const usuariosApi = {
   getUsuarios: async (): Promise<User[]> => {
     try {
-  
       const response = await fetch(`${API_BASE_URL}/user/`, {
         headers: getHeaders(),
       });
@@ -200,7 +205,7 @@ export const usuariosApi = {
       // Mapear cada usuario usando la función de mapeo
       const mappedUsers = rawUsers.map(mapBackendUserToUser);
       console.log('Mapped users with onboarding:', mappedUsers);
-      
+
       return mappedUsers;
     } catch (error) {
       console.error('Error in getUsuarios:', error);
@@ -224,11 +229,11 @@ export const usuariosApi = {
 
       const rawUser = await response.json();
       console.log('Raw user data:', rawUser);
-      
+
       // Mapear el usuario individual
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped single user:', mappedUser);
-      
+
       return mappedUser;
     } catch (error) {
       console.error('Error in getUsuarioById:', error);
@@ -239,7 +244,7 @@ export const usuariosApi = {
   createUsuario: async (payload: CreateUserPayload): Promise<User> => {
     try {
       const transformedPayload = transformPayloadToBackend(payload);
-      
+
       const response = await fetch(`${API_BASE_URL}/user/`, {
         method: 'POST',
         headers: getHeaders(),
@@ -256,11 +261,11 @@ export const usuariosApi = {
 
       const rawUser = await response.json();
       console.log('Raw created user data:', rawUser);
-      
+
       // Mapear el usuario creado
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped created user:', mappedUser);
-      
+
       return mappedUser;
     } catch (error) {
       console.error('Error in createUsuario:', error);
@@ -274,7 +279,7 @@ export const usuariosApi = {
   ): Promise<User> => {
     try {
       const transformedPayload = transformUpdatePayloadToBackend(payload);
-      
+
       const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
         method: 'PATCH',
         headers: getHeaders(),
@@ -291,11 +296,11 @@ export const usuariosApi = {
 
       const rawUser = await response.json();
       console.log('Raw updated user data:', rawUser);
-      
+
       // Mapear el usuario actualizado
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped updated user:', mappedUser);
-      
+
       return mappedUser;
     } catch (error) {
       console.error('Error in updateUsuario:', error);
@@ -308,13 +313,17 @@ export const usuariosApi = {
     onboardingData: any,
   ): Promise<any> => {
     try {
-      const transformedPayload = transformOnboardingPayloadToBackend(onboardingData);
-      
-      const response = await fetch(`${API_BASE_URL}/onboarding/user/${userId}/`, {
-        method: 'PATCH',
-        headers: getHeaders(),
-        body: JSON.stringify(transformedPayload),
-      });
+      const transformedPayload =
+        transformOnboardingPayloadToBackend(onboardingData);
+
+      const response = await fetch(
+        `${API_BASE_URL}/onboarding/user/${userId}/`,
+        {
+          method: 'PATCH',
+          headers: getHeaders(),
+          body: JSON.stringify(transformedPayload),
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -326,7 +335,7 @@ export const usuariosApi = {
 
       const updatedOnboarding = await response.json();
       console.log('Raw updated onboarding data:', updatedOnboarding);
-      
+
       return updatedOnboarding;
     } catch (error) {
       console.error('Error in updateOnboardingByUserId:', error);
@@ -339,13 +348,17 @@ export const usuariosApi = {
     onboardingData: any,
   ): Promise<any> => {
     try {
-      const transformedPayload = transformOnboardingPayloadToBackend(onboardingData);
-      
-      const response = await fetch(`${API_BASE_URL}/onboarding/user/${userId}/`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(transformedPayload),
-      });
+      const transformedPayload =
+        transformOnboardingPayloadToBackend(onboardingData);
+
+      const response = await fetch(
+        `${API_BASE_URL}/onboarding/user/${userId}/`,
+        {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(transformedPayload),
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -357,7 +370,7 @@ export const usuariosApi = {
 
       const createdOnboarding = await response.json();
       console.log('Raw created onboarding data:', createdOnboarding);
-      
+
       return createdOnboarding;
     } catch (error) {
       console.error('Error in createOnboardingByUserId:', error);

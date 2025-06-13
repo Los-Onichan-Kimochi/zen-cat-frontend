@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { ViewToolbar } from '@/components/common/view-toolbar';
+
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user';
 import { Gem } from 'lucide-react';
@@ -19,9 +20,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
-import { toast } from 'sonner';
+import { ModalNotifications } from '@/components/custom/common/modal-notifications';
+import { useModalNotifications } from '@/hooks/use-modal-notifications';
 import { UsersTable } from '@/components/users/table';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -30,6 +33,8 @@ export const Route = createFileRoute('/usuarios/')({
 function UsuariosComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { modal, error, closeModal } = useModalNotifications();
+  const toast = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -40,6 +45,8 @@ function UsuariosComponent() {
     data: usersData,
     isLoading: isLoadingUsers,
     error: errorUsers,
+    refetch: refetchUsers,
+    isFetching: isFetchingUsers,
   } = useQuery<User[], Error>({
     queryKey: ['usuarios'],
     queryFn: () => usuariosApi.getUsuarios(),
@@ -61,13 +68,15 @@ function UsuariosComponent() {
   >({
     mutationFn: (id) => usuariosApi.deleteUsuario(id),
     onSuccess: (_, id) => {
-      toast.success('Usuario eliminado', {
-        description: `Usuario eliminado exitosamente`,
+      toast.success('Usuario Eliminado', {
+        description: 'El usuario ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
     },
     onError: (err) => {
-      toast.error('Error al eliminar', { description: err.message });
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el usuario.',
+      });
     },
   });
 
@@ -79,15 +88,17 @@ function UsuariosComponent() {
   >({
     mutationFn: (ids) => usuariosApi.bulkDeleteUsuarios(ids),
     onSuccess: (_, ids) => {
-      toast.success('Usuarios eliminados', {
-        description: `${ids.length} usuario(s) eliminado(s) exitosamente`,
+      toast.success('Usuarios Eliminados', {
+        description: `${ids.length} usuario(s) eliminado(s) exitosamente.`,
       });
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       // Resetear selección después de eliminación exitosa
-      setResetSelection(prev => prev + 1);
+      setResetSelection((prev) => prev + 1);
     },
     onError: (err) => {
-      toast.error('Error al eliminar usuarios', { description: err.message });
+      toast.error('Error al Eliminar Usuarios', {
+        description: err.message || 'No se pudieron eliminar los usuarios.',
+      });
     },
   });
 
@@ -103,52 +114,78 @@ function UsuariosComponent() {
     navigate({ to: '/usuarios/ver_membresia', search: { id: user.id } });
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const result = await refetchUsers();
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return result;
+  };
+
   const btnSizeClasses = 'h-11 w-28 px-4';
 
   if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
 
   return (
-    <div className="p-6 h-full flex flex-col font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="USUARIOS" subtitle="LISTADO DE USUARIOS" />
 
-      <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
-        {usersData ? (
-          <HomeCard
-            icon={<Gem className="w-8 h-8 text-teal-600" />}
-            iconBgColor="bg-teal-100"
-            title="Usuarios totales"
-            description={usersData.length}
-          />
-        ) : (
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        )}
+      {/* Statistics Section */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
+          {usersData ? (
+            <HomeCard
+              icon={<Gem className="w-8 h-8 text-purple-600" />}
+              iconBgColor="bg-purple-100"
+              title="Usuarios totales"
+              description={usersData.length}
+              descColor="text-purple-600"
+              isLoading={isFetchingUsers}
+            />
+          ) : (
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          )}
+        </div>
+
+        <ViewToolbar
+          onAddClick={() => navigate({ to: '/usuarios/agregar' })}
+          onBulkUploadClick={() => {}}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
+        />
       </div>
 
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/usuarios/agregar' })}
-        onBulkUploadClick={() => {}}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
-      {isLoadingUsers ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <UsersTable
-          data={usersData || []}
-          onEdit={handleEdit}
-          onDelete={(u) => {
-            setUserToDelete(u);
-            setIsDeleteModalOpen(true);
-          }}
-          onViewMemberships={handleViewMemberships}
-          onBulkDelete={bulkDeleteUsers}
-          isBulkDeleting={isBulkDeleting}
-          resetSelection={resetSelection}
-        />
-      )}
+      {/* Table Section */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingUsers ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <UsersTable
+            data={usersData || []}
+            onEdit={handleEdit}
+            onDelete={(u) => {
+              setUserToDelete(u);
+              setIsDeleteModalOpen(true);
+            }}
+            onViewMemberships={handleViewMemberships}
+            onBulkDelete={bulkDeleteUsers}
+            isBulkDeleting={isBulkDeleting}
+            resetSelection={resetSelection}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingUsers}
+          />
+        )}
+      </div>
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
@@ -182,6 +219,8 @@ function UsuariosComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ModalNotifications modal={modal} onClose={closeModal} />
     </div>
   );
 }

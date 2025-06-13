@@ -18,7 +18,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
 import { Loader2, UploadCloud, Plus, Upload } from 'lucide-react';
 import '../../index.css';
@@ -66,6 +66,7 @@ type ServiceFormData = z.infer<typeof serviceFormSchema>;
 function AddServicePageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -95,7 +96,7 @@ function AddServicePageComponent() {
       navigate({ to: '/servicios' });
     },
     onError: (error) => {
-      toast.error('Error al crear servicio', {
+      toast.error('Error al Crear Servicio', {
         description: error.message || 'No se pudo crear el servicio.',
       });
     },
@@ -121,15 +122,13 @@ function AddServicePageComponent() {
     lugaresSeleccionados?: any[];
   } | null;
 
-  const lugaresIniciales = 
-    locationState?.lugaresSeleccionados ?? [];
+  const lugaresIniciales = locationState?.lugaresSeleccionados ?? [];
 
   const profesionalesIniciales =
     locationState?.profesionalesSeleccionados ?? [];
 
-  const [localesSeleccionados, setLocalesSeleccionados] = useState(
-    lugaresIniciales,
-  );
+  const [localesSeleccionados, setLocalesSeleccionados] =
+    useState(lugaresIniciales);
   const [profesionalesSeleccionados, setProfesionalesSeleccionados] = useState(
     profesionalesIniciales,
   );
@@ -147,7 +146,6 @@ function AddServicePageComponent() {
     );
     if (storedProfesionales) {
       try {
-
         setProfesionalesSeleccionados(JSON.parse(storedProfesionales));
         localStorage.removeItem('profesionalesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
       } catch (error) {
@@ -155,12 +153,9 @@ function AddServicePageComponent() {
       }
     }
 
-    const storedLocales = localStorage.getItem(
-      'localesSeleccionados',
-    );
+    const storedLocales = localStorage.getItem('localesSeleccionados');
     if (storedLocales) {
       try {
-
         setLocalesSeleccionados(JSON.parse(storedLocales));
         localStorage.removeItem('localesSeleccionados'); // Limpia si solo quieres usarlo 1 vez
       } catch (error) {
@@ -173,7 +168,7 @@ function AddServicePageComponent() {
     let imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen (simulada)', {
+      toast.info('Imagen Procesada', {
         description: 'Subida de imagen simulada completada.',
       });
     }
@@ -190,7 +185,7 @@ function AddServicePageComponent() {
 
       // 2. Bulk create de ServiceProfessional
 
-      if(isVirtual === 'true' && profesionalesSeleccionados.length > 0) {
+      if (isVirtual === 'true' && profesionalesSeleccionados.length > 0) {
         const bulkPayload = {
           service_professionals: profesionalesSeleccionados.map((prof) => ({
             service_id: newService.id,
@@ -200,12 +195,12 @@ function AddServicePageComponent() {
         await serviceProfessionalApi.bulkCreateServiceProfessionals(
           bulkPayload,
         );
-        toast.success(
-          'Servicio y profesionales asociados creados correctamente.',
-        );
+        toast.success('Profesionales Asociados', {
+          description: 'Servicio y profesionales asociados creados correctamente.',
+        });
       }
 
-      if(isVirtual === 'false' && localesSeleccionados.length > 0) {
+      if (isVirtual === 'false' && localesSeleccionados.length > 0) {
         const bulkPayload = {
           service_locals: localesSeleccionados.map((local) => ({
             service_id: newService.id,
@@ -213,16 +208,16 @@ function AddServicePageComponent() {
           })),
         };
         await serviceLocalApi.bulkCreateServiceLocals(bulkPayload);
-        toast.success(
-          'Servicio y locales asociados creados correctamente.',
-        );
+        toast.success('Locales Asociados', {
+          description: 'Servicio y locales asociados creados correctamente.',
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/servicios' });
     } catch (error: any) {
-      toast.error('Error al crear servicio o asociar profesionales', {
-        description: error.message,
+      toast.error('Error al Crear Servicio', {
+        description: error.message || 'No se pudo crear el servicio o asociar profesionales.',
       });
     }
   };
@@ -266,7 +261,8 @@ function AddServicePageComponent() {
     {
       id: 'direccion',
       header: 'Dirección',
-      accessorFn: (row: any) => `${row.street_name ?? ''} ${row.building_number ?? ''}`,
+      accessorFn: (row: any) =>
+        `${row.street_name ?? ''} ${row.building_number ?? ''}`,
       cell: ({ row }: { row: any }) => (
         <span>
           {row.original.street_name} {row.original.building_number}
@@ -445,8 +441,9 @@ function AddServicePageComponent() {
                   const data = watch(); // obtiene valores actuales del form
                   localStorage.setItem('draftService', JSON.stringify(data));
                   localStorage.setItem(
-                    'profesionalesSeleccionados', 
-                    JSON.stringify(profesionalesSeleccionados));
+                    'profesionalesSeleccionados',
+                    JSON.stringify(profesionalesSeleccionados),
+                  );
                   navigate({ to: '/servicios/agregar-profesionales' });
                 }}
               >
@@ -476,18 +473,16 @@ function AddServicePageComponent() {
                   const data = watch(); // obtiene valores actuales del form
                   localStorage.setItem('draftService', JSON.stringify(data));
                   localStorage.setItem(
-                    'localesSeleccionados', 
-                    JSON.stringify(localesSeleccionados));
+                    'localesSeleccionados',
+                    JSON.stringify(localesSeleccionados),
+                  );
                   navigate({ to: '/servicios/agregar-locales' });
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" /> Agregar Local
               </Button>
             </div>
-            <DataTable
-              table={localesTable}
-              columns={columnsProfesionales}
-            />
+            <DataTable table={localesTable} columns={columnsProfesionales} />
           </CardContent>
         </Card>
       )}

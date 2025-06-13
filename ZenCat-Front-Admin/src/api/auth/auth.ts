@@ -1,3 +1,6 @@
+// Legacy auth API - kept for backward compatibility
+// New auth system is in auth-service.ts
+
 import { User } from '@/types/user';
 import { dummyUsers } from '@/data/dummy-users';
 
@@ -5,7 +8,7 @@ import { dummyUsers } from '@/data/dummy-users';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const authApi = {
-  // Simulate login
+  // Simulate login - DEPRECATED: Use authService.login instead
   async login(email: string, password: string): Promise<User> {
     await delay(1000);
 
@@ -25,7 +28,7 @@ export const authApi = {
     return dummyUsers[0];
   },
 
-  // Simulate logout
+  // Simulate logout - DEPRECATED: Use authService.logout instead
   async logout(): Promise<void> {
     await delay(500);
   },

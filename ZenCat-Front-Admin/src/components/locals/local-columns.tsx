@@ -3,7 +3,14 @@ import { Local } from '@/types/local';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MoreHorizontal, Trash, Eye, Edit } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 interface GetLocalColumnsProps {
   onEdit: (local: Local) => void;
   onDelete: (local: Local) => void;
@@ -45,9 +52,7 @@ export function getLocalColumns({
     },
     {
       accessorKey: 'id',
-      header: () => (
-        <div className="text-center font-bold">Código</div>
-      ),
+      header: () => <div className="text-center font-bold">Código</div>,
       cell: ({ row }) => {
         const value = row.getValue('id') as string;
         return (
@@ -77,20 +82,18 @@ export function getLocalColumns({
     },
     {
       id: 'address',
-      header: () => (
-        <div className="text-center font-bold">Dirección</div>
-      ),
+      header: () => <div className="text-center font-bold">Dirección</div>,
       accessorFn: (row) => `${row.street_name} ${row.building_number}`,
-      cell: ({ getValue }) => <div className="text-center">{getValue() as string}</div>,
+      cell: ({ getValue }) => (
+        <div className="text-center">{getValue() as string}</div>
+      ),
       meta: {
         displayName: 'Dirección',
       },
     },
     {
       accessorKey: 'district',
-      header: () => (
-        <div className="text-center font-bold">Distrito</div>
-      ),
+      header: () => <div className="text-center font-bold">Distrito</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('district')}</div>
       ),
@@ -100,9 +103,7 @@ export function getLocalColumns({
     },
     {
       accessorKey: 'province',
-      header: () => (
-        <div className="text-center font-bold">Provincia</div>
-      ),
+      header: () => <div className="text-center font-bold">Provincia</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('province')}</div>
       ),
@@ -112,9 +113,7 @@ export function getLocalColumns({
     },
     {
       accessorKey: 'region',
-      header: () => (
-        <div className="text-center font-bold">Región</div>
-      ),
+      header: () => <div className="text-center font-bold">Región</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('region')}</div>
       ),
@@ -124,9 +123,7 @@ export function getLocalColumns({
     },
     {
       accessorKey: 'capacity',
-      header: () => (
-        <div className="text-center font-bold">Capacidad</div>
-      ),
+      header: () => <div className="text-center font-bold">Capacidad</div>,
       cell: ({ row }) => {
         const capacity = row.getValue('capacity') as number;
         return <div className="text-center">{capacity} personas</div>;
@@ -137,9 +134,7 @@ export function getLocalColumns({
     },
     {
       id: 'actions',
-      header: () => (
-        <div className="text-center font-bold">Acciones</div>
-      ),
+      header: () => <div className="text-center font-bold">Acciones</div>,
       cell: ({ row }) => {
         const local = row.original;
         return (
@@ -186,7 +181,7 @@ export function getLocalColumns({
               }}
               title="Eliminar"
             >
-              <Trash className="!w-5 !h-5"/>
+              <Trash className="!w-5 !h-5" />
             </Button>
           </div>
         );

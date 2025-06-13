@@ -102,16 +102,14 @@ export function TimeSlotCalendar({
   const handleSlotClick = useCallback(
     (e: React.MouseEvent, time: string, slot: TimeSlot) => {
       if (disabled || slot.isOccupied || isDragging) return;
-      
-  
-      
+
       // Click simple - seleccionar 1 slot (30 minutos por defecto)
       const startIndex = timeSlots.findIndex((s) => s.time === time);
       const endIndex = Math.min(startIndex + 1, timeSlots.length - 1);
       const endTime = timeSlots[endIndex]?.time || time;
-      
+
       onRangeSelect({ start: time, end: endTime });
-      
+
       // Reset estados después del click
       setIsSelecting(false);
       setSelectionStart(null);
@@ -125,7 +123,7 @@ export function TimeSlotCalendar({
   const handleSlotMouseDown = useCallback(
     (e: React.MouseEvent, time: string, slot: TimeSlot) => {
       if (disabled || slot.isOccupied) return;
-      
+
       e.preventDefault();
       setIsSelecting(true);
       setSelectionStart(time);
@@ -149,7 +147,7 @@ export function TimeSlotCalendar({
     if (isSelecting && selectionStart && previewEnd && isDragging) {
       const start = selectionStart <= previewEnd ? selectionStart : previewEnd;
       const end = selectionStart <= previewEnd ? previewEnd : selectionStart;
-      
+
       const startIndex = timeSlots.findIndex((s) => s.time === start);
       const endIndex = timeSlots.findIndex((s) => s.time === end);
       const finalEndIndex = Math.max(startIndex + 1, endIndex + 1);
@@ -157,12 +155,19 @@ export function TimeSlotCalendar({
 
       onRangeSelect({ start, end: finalEnd });
     }
-    
+
     setIsSelecting(false);
     setSelectionStart(null);
     setPreviewEnd(null);
     setIsDragging(false);
-  }, [isSelecting, selectionStart, previewEnd, isDragging, timeSlots, onRangeSelect]);
+  }, [
+    isSelecting,
+    selectionStart,
+    previewEnd,
+    isDragging,
+    timeSlots,
+    onRangeSelect,
+  ]);
 
   // Limpiar selección
   const handleCalendarMouseLeave = useCallback(() => {
@@ -187,7 +192,8 @@ export function TimeSlotCalendar({
         )}
         {isSelecting && selectionStart && previewEnd && (
           <div className="mt-2 text-sm font-medium text-blue-600">
-            Seleccionando: {selectionStart} - {previewEnd} {isDragging ? '(arrastrando)' : ''}
+            Seleccionando: {selectionStart} - {previewEnd}{' '}
+            {isDragging ? '(arrastrando)' : ''}
           </div>
         )}
       </div>

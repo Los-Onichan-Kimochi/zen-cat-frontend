@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from '@/lib/api-client';
 
 export interface ServiceProfessional {
   id: string;
@@ -34,14 +34,9 @@ export const serviceProfessionalsApi = {
       params.append('professional_ids', professionalIds.join(','));
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/service-professional/?${params}`,
-    );
-    if (!response.ok) {
-      throw new Error('Error fetching service-professional associations');
-    }
-
-    const data = await response.json();
+    const endpoint = `/service-professional/?${params}`;
+    const data = await apiClient.get<{ service_professionals: ServiceProfessional[] }>(endpoint);
+    
     if (data && typeof data === 'object' && 'service_professionals' in data) {
       return data.service_professionals;
     }
@@ -57,32 +52,16 @@ export const serviceProfessionalsApi = {
     serviceId: string,
     professionalId: string,
   ): Promise<ServiceProfessional> => {
-    const response = await fetch(
-      `${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`,
+    return apiClient.get<ServiceProfessional>(
+      `/service-professional/${serviceId}/${professionalId}/`,
     );
-    if (!response.ok) {
-      throw new Error(
-        `Error fetching service-professional association for service ${serviceId} and professional ${professionalId}`,
-      );
-    }
-    return await response.json();
   },
 
   // Create a new service-professional association
   createServiceProfessional: async (
     request: CreateServiceProfessionalRequest,
   ): Promise<ServiceProfessional> => {
-    const response = await fetch(`${API_BASE_URL}/service-professional/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating service-professional association');
-    }
-    return await response.json();
+    return apiClient.post<ServiceProfessional>('/service-professional/', request);
   },
 
   // Delete a service-professional association
@@ -90,17 +69,9 @@ export const serviceProfessionalsApi = {
     serviceId: string,
     professionalId: string,
   ): Promise<void> => {
-    const response = await fetch(
-      `${API_BASE_URL}/service-professional/${serviceId}/${professionalId}/`,
-      {
-        method: 'DELETE',
-      },
+    return apiClient.delete<void>(
+      `/service-professional/${serviceId}/${professionalId}/`,
     );
-    if (!response.ok) {
-      throw new Error(
-        `Error deleting service-professional association for service ${serviceId} and professional ${professionalId}`,
-      );
-    }
   },
 
   // Get professionals available for a specific service

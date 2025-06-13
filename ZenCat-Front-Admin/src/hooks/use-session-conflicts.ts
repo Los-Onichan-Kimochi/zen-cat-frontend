@@ -107,7 +107,6 @@ export function useDayAvailability(
   const { data, isLoading } = useQuery<AvailabilityResult>({
     queryKey: ['day-availability', date, professionalId, localId],
     queryFn: () => {
-
       if (!date) {
         return Promise.resolve({ isAvailable: true, busySlots: [] });
       }
@@ -127,7 +126,6 @@ export function useDayAvailability(
     if (isLoading || !data) {
       return { isAvailable: true, busySlots: [] };
     }
-
 
     return {
       isAvailable: data.isAvailable,
