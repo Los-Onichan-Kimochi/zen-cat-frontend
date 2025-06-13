@@ -105,10 +105,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen(false);
   };
 
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
-
   const handleGoogleSuccess = (credentialResponse: any) => {
     const decodedToken: any = jwtDecode(credentialResponse.credential);
 
