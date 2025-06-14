@@ -31,7 +31,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import HeaderDescriptor from '@/components/common/header-descriptor';
-import { toast } from 'sonner';
+import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
 import { Loader2, UploadCloud } from 'lucide-react';
 import '../../index.css';
@@ -64,6 +64,7 @@ type ProfessionalFormData = z.infer<typeof professionalFormSchema>;
 function AddProfessionalPageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -94,7 +95,7 @@ function AddProfessionalPageComponent() {
       navigate({ to: '/profesionales' });
     },
     onError: (error) => {
-      toast.error('Error al crear profesional', {
+      toast.error('Error al Crear Profesional', {
         description: error.message || 'No se pudo crear el profesional.',
       });
     },

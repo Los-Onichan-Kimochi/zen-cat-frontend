@@ -1,7 +1,7 @@
 'use client';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { professionalsApi } from '@/api/professionals/professionals';
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -26,6 +26,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
+import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/profesionales/ver')({
   component: SeeProfessionalPageComponent,
@@ -33,6 +34,8 @@ export const Route = createFileRoute('/profesionales/ver')({
 
 export function SeeProfessionalPageComponent() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
 
@@ -69,6 +72,23 @@ export function SeeProfessionalPageComponent() {
   } = useQuery({
     queryKey: ['professional', id],
     queryFn: () => professionalsApi.getProfessionalById(id!),
+  });
+
+  const updateProfessionalMutation = useMutation({
+    mutationFn: (data: any) => professionalsApi.updateProfessional(id!, data),
+    onSuccess: () => {
+      toast.success('Profesional Actualizado', {
+        description: 'El profesional ha sido actualizado exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['professional', id] });
+      setIsEditing(false);
+      setIsEditConfirmOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error('Error al Actualizar Profesional', {
+        description: error.message || 'No se pudo actualizar el profesional.',
+      });
+    },
   });
 
   useEffect(() => {
@@ -230,7 +250,7 @@ export function SeeProfessionalPageComponent() {
               <Button
                 variant="destructive"
                 onClick={() => {
-                  professionalsApi.updateProfessional(id!, {
+                  updateProfessionalMutation.mutate({
                     name,
                     first_last_name: firstLast,
                     second_last_name: secondLast,
@@ -246,10 +266,12 @@ export function SeeProfessionalPageComponent() {
                     email,
                     phone_number: phone,
                   });
-                  setIsEditing(false);
-                  setIsEditConfirmOpen(false);
                 }}
+                disabled={updateProfessionalMutation.isPending}
               >
+                {updateProfessionalMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Confirmar
               </Button>
             </AlertDialogAction>

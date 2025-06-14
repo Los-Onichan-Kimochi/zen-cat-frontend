@@ -116,7 +116,9 @@ export function ReservationsTable({
         const userEmail = row.original.user_email;
         return (
           <div>
-            <div className="font-medium">{userName || 'Usuario desconocido'}</div>
+            <div className="font-medium">
+              {userName || 'Usuario desconocido'}
+            </div>
             {userEmail && (
               <div className="text-sm text-gray-500">{userEmail}</div>
             )}
@@ -130,9 +132,7 @@ export function ReservationsTable({
       cell: ({ row }) => {
         const state = row.getValue('state') as ReservationState;
         return (
-          <Badge className={getStateColor(state)}>
-            {getStateLabel(state)}
-          </Badge>
+          <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
         );
       },
     },
@@ -221,7 +221,7 @@ export function ReservationsTable({
         showSortButton
         showFilterButton
         showExportButton
-                  onFilterClick={() => {}}
+        onFilterClick={() => {}}
         exportFileName="reservas"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
@@ -240,4 +240,4 @@ export function ReservationsTable({
       <DataTable table={table} columns={columns} />
     </div>
   );
-} 
+}

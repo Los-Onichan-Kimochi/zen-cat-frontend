@@ -1,69 +1,58 @@
-import { CommunityMembershipPlan , BulkCreateCommunityMembershipPlanPayload, BulkDeleteCommunityMembershipPlanPayload } from '@/types/community-membership-plan';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import {
+  CommunityMembershipPlan,
+  BulkCreateCommunityMembershipPlanPayload,
+  BulkDeleteCommunityMembershipPlanPayload,
+} from '@/types/community-membership-plan';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export const communityMembershipPlansApi = {
-
-  bulkCreateCommunityMembershipPlans: async (payload: BulkCreateCommunityMembershipPlanPayload): Promise<CommunityMembershipPlan[]> => {
+  bulkCreateCommunityMembershipPlans: async (
+    payload: BulkCreateCommunityMembershipPlanPayload,
+  ): Promise<CommunityMembershipPlan[]> => {
     console.log('Creating community membership plans:', payload);
-    const response = await fetch(`${API_BASE_URL}/community-plan/bulk-create/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    console.log('Error response:', response);
-    if (!response.ok) {
-      console.log('Error response:', response);
-      throw new Error('Error asociating membership plans with communities');
-    }
-    return response.json(); 
+    const data = await apiClient.post<any>(
+      API_ENDPOINTS.COMMUNITY_PLANS.BULK_CREATE,
+      payload
+    );
+    console.log('Success response:', data);
+    return data.community_plans || data;
   },
 
   deleteCommunityMembershipPlan: async (
     communityId: string,
     planId: string,
   ): Promise<void> => {
-    const response = await fetch(
-      `${API_BASE_URL}/community-plan/${communityId}/${planId}/`,
-      {
-        method: 'DELETE',
-      },
+    return apiClient.delete<void>(
+      API_ENDPOINTS.COMMUNITY_PLANS.BY_IDS(communityId, planId)
     );
-    if (!response.ok) throw new Error('Error deleting community-plan');
   },
 
-  bulkDeleteCommunityMembershipPlans: async (payload: BulkDeleteCommunityMembershipPlanPayload): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/community-plan/bulk-delete/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Error bulk deleting community-membership-plans');
-    }
+  bulkDeleteCommunityMembershipPlans: async (
+    payload: BulkDeleteCommunityMembershipPlanPayload,
+  ): Promise<void> => {
+    return apiClient.delete<void>(
+      API_ENDPOINTS.COMMUNITY_PLANS.BULK_DELETE,
+      payload
+    );
   },
 
-  getCommunityMembershipPlans: async (communityId?: string, planId?: string): Promise<CommunityMembershipPlan[]> => {
+  getCommunityMembershipPlans: async (
+    communityId?: string,
+    planId?: string,
+  ): Promise<CommunityMembershipPlan[]> => {
     const queryParams = new URLSearchParams();
+    if (communityId) queryParams.append('communityId', communityId);
+    if (planId) queryParams.append('planId', planId);
 
-    if (communityId) queryParams.append("communityId", communityId);
-    if (planId) queryParams.append("planId", planId);
+    const endpoint = `${API_ENDPOINTS.COMMUNITY_PLANS.BASE}?${queryParams.toString()}`;
+    const data = await apiClient.get<any>(endpoint);
 
-    const response = await fetch(`${API_BASE_URL}/community-plan/?${queryParams.toString()}`);
-
-    if (!response.ok) throw new Error('Error fetching community-membership-plans');
-    const data = await response.json();
-    
     if (data && Array.isArray(data.community_plans)) {
       return data.community_plans;
     } else if (Array.isArray(data)) {
       return data;
     }
     throw new Error('Unexpected data structure from community-plan API');
-  }
-
-}; 
+  },
+};

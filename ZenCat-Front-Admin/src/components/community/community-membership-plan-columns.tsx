@@ -6,7 +6,7 @@ import { Trash } from 'lucide-react';
 
 export function getCommunityMembershipPlanColumns(
   isEditing: boolean,
-  onDelete?: (membershipPlan: MembershipPlan) => void
+  onDelete?: (membershipPlan: MembershipPlan) => void,
 ): ColumnDef<MembershipPlan>[] {
   const columns: ColumnDef<MembershipPlan>[] = [];
 
@@ -15,7 +15,8 @@ export function getCommunityMembershipPlanColumns(
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -35,20 +36,20 @@ export function getCommunityMembershipPlanColumns(
 
   columns.push(
     {
-      accessorKey: "type",
-      header: "Tipo de Plan",
+      accessorKey: 'type',
+      header: 'Tipo de Plan',
     },
     {
-      accessorKey: "fee",
-      header: "Precio",
+      accessorKey: 'fee',
+      header: 'Precio',
       cell: ({ row }) => `S/ ${row.original.fee.toFixed(2)}`,
     },
     {
-      accessorKey: "reservation_limit",
-      header: "Límite",
+      accessorKey: 'reservation_limit',
+      header: 'Límite',
       accessorFn: (row) =>
-        row.reservation_limit == null ? "Sin límite" : row.reservation_limit,
-    }
+        row.reservation_limit == null ? 'Sin límite' : row.reservation_limit,
+    },
   );
 
   if (onDelete) {

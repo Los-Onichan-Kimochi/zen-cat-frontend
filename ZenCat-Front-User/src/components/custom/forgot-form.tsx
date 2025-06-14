@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { User } from '@/types/user';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate, Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 export function ForgotForm() {
   const [email, setEmail] = useState('');
@@ -12,16 +11,34 @@ export function ForgotForm() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setIsModalOpen(false);
     try {
-      //POST
+      const response = await fetch('http://localhost:8098/forgot-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
+      if (!response.ok) {
+        const errBody = await response.json();
+        throw new Error(errBody?.message || 'Error al crear usuario');
+      }
+      const json = await response.json();
+      localStorage.setItem("userPIN", json.pin);
+      localStorage.setItem('pendingEmail', email);
+      navigate({ to: "/pin" }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
-        err.message || 'Error desconocido al intentar registrarte.';
+        err.message || 'Error desconocido al intentar ingresar correo.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -76,7 +93,7 @@ export function ForgotForm() {
       <ErrorModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Error al intentar iniciar sesión"
+        title="Ese Usuario no Existe"
         description={error || 'Ha ocurrido un error.'}
       />
     </>

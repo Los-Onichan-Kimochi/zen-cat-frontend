@@ -5,16 +5,23 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
+import { authService } from '@/api/auth/auth-service';
+import Cookies from 'js-cookie';
 
+// Usando la interfaz simplificada para el contexto
 export interface User {
   id?: string;
   name?: string;
   email?: string;
   imageUrl?: string;
+  role?: string;
+  isAuthenticated?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
   login: (userData: User) => void;
   logout: () => void;
 }
@@ -27,28 +34,79 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    console.log('AuthProvider: Checking authentication status...');
+    try {
+      const savedUser = localStorage.getItem('user');
+      const hasAccessToken = !!Cookies.get('access_token');
+      
+      if (savedUser && hasAccessToken) {
+        const userData = JSON.parse(savedUser);
+        console.log('AuthProvider: Found saved user with valid tokens:', userData);
+        setUser(userData);
+      } else if (savedUser && !hasAccessToken) {
+        console.log('AuthProvider: Found saved user but no access token, clearing localStorage');
+        localStorage.removeItem('user');
+        setUser(null);
+      } else {
+        console.log('AuthProvider: No saved user found');
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('AuthProvider: Error parsing saved user:', error);
+      localStorage.removeItem('user');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    console.log('AuthProvider: Login called with:', userData);
+    const userWithAuth = { ...userData, isAuthenticated: true };
+    setUser(userWithAuth);
+    localStorage.setItem('user', JSON.stringify(userWithAuth));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    console.log('AuthProvider: Logout called');
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.warn('AuthProvider: Server logout failed:', error);
+    }
+
     setUser(null);
     localStorage.removeItem('user');
+
+    // Redirect to home instead of login for better UX in user frontend
+    window.location.href = '/';
   };
 
+  // Check both user state and actual token presence
+  const hasAccessToken = !!Cookies.get('access_token');
+  const isAuthenticated = !!user?.isAuthenticated && hasAccessToken;
+
+  const contextValue: AuthContextType = {
+    user,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+  };
+
+  console.log('AuthProvider: Context value:', {
+    hasUser: !!user,
+    hasAccessToken,
+    isAuthenticated,
+    isLoading,
+    userEmail: user?.email,
+  });
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

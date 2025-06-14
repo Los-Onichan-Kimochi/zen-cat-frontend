@@ -1,19 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-export interface ServiceLocal {
-  id: string;
-  service_id: string;
-  local_id: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at?: string;
-  updated_by: string;
-}
-
-export interface CreateServiceLocalRequest {
-  service_id: string;
-  local_id: string;
-}
+import {
+  ServiceLocal,
+  CreateServiceLocalRequest,
+  BulkCreateServiceLocalPayload,
+  BulkDeleteServiceLocalPayload,
+} from '@/types/service-local';
+import { apiClient } from '@/lib/api-client';
 
 export interface ServiceLocalsResponse {
   service_locals: ServiceLocal[];
@@ -26,12 +17,10 @@ export const serviceLocalsApi = {
     localIds?: string[],
   ): Promise<ServiceLocal[]> => {
     // TODO: Backend not filtering correctly by query parameters, implementing manual filtering
-    const response = await fetch(`${API_BASE_URL}/service-local/`);
-    if (!response.ok) {
-      throw new Error('Error fetching service-local associations');
-    }
-
-    const data = await response.json();
+    const data = await apiClient.get<{ service_locals: ServiceLocal[] }>(
+      '/service-local/',
+    );
+    
     let allServiceLocals: ServiceLocal[] = [];
     if (data && typeof data === 'object' && 'service_locals' in data) {
       allServiceLocals = data.service_locals;
@@ -70,32 +59,14 @@ export const serviceLocalsApi = {
     serviceId: string,
     localId: string,
   ): Promise<ServiceLocal> => {
-    const response = await fetch(
-      `${API_BASE_URL}/service-local/${serviceId}/${localId}/`,
-    );
-    if (!response.ok) {
-      throw new Error(
-        `Error fetching service-local association for service ${serviceId} and local ${localId}`,
-      );
-    }
-    return await response.json();
+    return apiClient.get<ServiceLocal>(`/service-local/${serviceId}/${localId}/`);
   },
 
   // Create a new service-local association
   createServiceLocal: async (
     request: CreateServiceLocalRequest,
   ): Promise<ServiceLocal> => {
-    const response = await fetch(`${API_BASE_URL}/service-local/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-      throw new Error('Error creating service-local association');
-    }
-    return await response.json();
+    return apiClient.post<ServiceLocal>('/service-local/', request);
   },
 
   // Delete a service-local association
@@ -103,17 +74,7 @@ export const serviceLocalsApi = {
     serviceId: string,
     localId: string,
   ): Promise<void> => {
-    const response = await fetch(
-      `${API_BASE_URL}/service-local/${serviceId}/${localId}/`,
-      {
-        method: 'DELETE',
-      },
-    );
-    if (!response.ok) {
-      throw new Error(
-        `Error deleting service-local association for service ${serviceId} and local ${localId}`,
-      );
-    }
+    return apiClient.delete<void>(`/service-local/${serviceId}/${localId}/`);
   },
 
   // Get locals available for a specific service

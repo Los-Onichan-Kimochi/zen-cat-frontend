@@ -12,14 +12,18 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { User } from '@/types/user';
 import { getUserColumns } from './columns';
+import { useEffect } from 'react';
 
 interface UsersTableProps {
   data: User[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onViewMemberships: (user: User) => void;
-  onBulkDelete?: (users: User[]) => void;
+  onBulkDelete?: (ids: string[]) => void;
   isBulkDeleting?: boolean;
+  resetSelection?: number;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function UsersTable({
@@ -29,6 +33,9 @@ export function UsersTable({
   onViewMemberships,
   onBulkDelete,
   isBulkDeleting = false,
+  resetSelection = 0,
+  onRefresh,
+  isRefreshing = false,
 }: UsersTableProps) {
   const {
     sorting,
@@ -71,32 +78,31 @@ export function UsersTable({
     enableRowSelection: true,
   });
 
+  useEffect(() => {
+    if (resetSelection > 0) {
+      setRowSelection({});
+    }
+  }, [resetSelection, setRowSelection]);
+
   return (
-    <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
+    <div className="-mx-4 flex-1 flex flex-col px-4 py-2 h-full">
       <DataTableToolbar
         table={table}
         filterPlaceholder="Buscar usuarios..."
         showSortButton
         showFilterButton
         showExportButton
-        onFilterClick={() => {}}
-        exportFileName="usuarios"
-        // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
-        onBulkDelete={
-          onBulkDelete
-            ? (ids: string[]) => {
-                const usersToDelete = data.filter((user) =>
-                  ids.includes(user.id),
-                );
-                onBulkDelete(usersToDelete);
-              }
-            : undefined
-        }
+        showRefreshButton={!!onRefresh}
+        onFilterClick={() => console.log('Filtrar')}
+        onBulkDelete={onBulkDelete}
+        onRefreshClick={onRefresh}
         isBulkDeleting={isBulkDeleting}
+        isRefreshing={isRefreshing}
+        isBulkDeleteEnabled={true}
       />
-      <div className="flex-1 overflow-hidden rounded-md border">
-        <DataTable table={table} columns={columns} />
+      <div className="flex-1 overflow-hidden rounded-md border bg-white">
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

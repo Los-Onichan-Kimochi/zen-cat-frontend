@@ -11,7 +11,7 @@ interface GetCommunityColumnsProps {
 
 export function getCommunityColumns({
   onDelete,
-  onEdit
+  onEdit,
 }: GetCommunityColumnsProps): ColumnDef<Community>[] {
   return [
     {
@@ -39,9 +39,7 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'id',
-      header: () => (
-        <div className="text-center font-bold">Código</div>
-      ),
+      header: () => <div className="text-center font-bold">Código</div>,
       cell: ({ row }) => {
         const value = row.getValue('id') as string;
         return (
@@ -57,18 +55,14 @@ export function getCommunityColumns({
     },
     {
       accessorKey: 'name',
-      header: () => (
-        <div className="text-center font-bold">Nombre</div>
-      ),
+      header: () => <div className="text-center font-bold">Nombre</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('name')}</div>
       ),
     },
     {
       accessorKey: 'purpose',
-      header: () => (
-        <div className="text-center font-bold">Propósito</div>
-      ),
+      header: () => <div className="text-center font-bold">Propósito</div>,
       cell: ({ row }) => (
         <div className="text-center">{row.getValue('purpose')}</div>
       ),
@@ -86,9 +80,7 @@ export function getCommunityColumns({
     },
     {
       id: 'actions',
-      header: () => (
-        <div className="text-center font-bold">Acciones</div>
-      ),
+      header: () => <div className="text-center font-bold">Acciones</div>,
       cell: ({ row }) => {
         const communiy = row.original;
         return (
@@ -111,7 +103,7 @@ export function getCommunityColumns({
               }}
               title="Eliminar"
             >
-              <Trash className="!w-5 !h-5"/>
+              <Trash className="!w-5 !h-5" />
             </Button>
           </div>
         );

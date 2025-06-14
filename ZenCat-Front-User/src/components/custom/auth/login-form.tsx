@@ -7,6 +7,11 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/api/auth/auth-service';
+
+interface LoginFormProps {
+  onLoginSuccess?: (user: any) => void;
+}
 
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -21,35 +26,74 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [error2, setError2] = useState<string | null>(null);
   const [pingSuccess, setPingSuccess] = useState(false);
 
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validar campos vacíos
+    if (!email.trim() || !password.trim()) {
+      setError('El email y contraseña son obligatorios');
+      setIsModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setIsModalOpen(false);
+
     try {
-      const response = await fetch('http://localhost:8098/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
+      console.log('LoginForm: Attempting login with authService:', { email });
+      const response = await authService.login({
+        email: email.trim(),
+        password: password.trim(),
       });
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || 'Error al loguear usuario');
+
+      console.log('LoginForm: Login successful, response:', response);
+
+      // Validar que la respuesta tenga la estructura esperada
+      if (!response.user || !response.tokens?.access_token) {
+        throw new Error(
+          'Respuesta del servidor inválida - faltan datos de usuario o tokens',
+        );
       }
-      const json = await response.json();
-      const user = json.user;
-      console.log(user);
-      onLoginSuccess(user);
+
+      // El authService ya guarda los tokens en cookies automáticamente
+      const user = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name || response.user.email.split('@')[0],
+        imageUrl: response.user.image_url,
+        role: response.user.rol || 'user',
+        isAuthenticated: true,
+      };
+
+      console.log('LoginForm: Setting user in context:', user);
       login(user);
-      navigate({ to: '/' }); // Redirige si todo va bien
+      onLoginSuccess?.(user);
+      navigate({ to: '/' });
     } catch (err: any) {
-      const errorMessage =
-        err.message || 'Error desconocido, comunicate con tu jefe.';
+      console.error('LoginForm: Login error:', err);
+
+      // Manejar diferentes tipos de errores
+      let errorMessage = 'Credenciales inválidas';
+
+      if (err.message) {
+        if (err.message.includes('500') || err.message.includes('401')) {
+          errorMessage =
+            'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+        } else if (
+          err.message.includes('Network') ||
+          err.message.includes('Failed to fetch')
+        ) {
+          errorMessage =
+            'Error de conexión - Verifique su internet o que el servidor esté funcionando';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -57,53 +101,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     }
   };
 
-  const handlePing = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading2(true);
-    setError2(null);
-    setIsModalOpen2(false);
-    setPingSuccess(false); // Reset success state
-    try {
-      const response = await fetch('http://localhost:8098/health-check/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Error HTTP: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const data = await response.json();
-      const responseString = JSON.stringify(data, null, 2);
-      setError2(responseString);
-      setPingSuccess(true);
-      setIsModalOpen2(true);
-    } catch (err: any) {
-      console.error('Error en Ping:', err);
-      setError2(err.message || 'Error al conectar con el servidor de ping.');
-      setPingSuccess(false);
-      setIsModalOpen2(true);
-    } finally {
-      setLoading2(false);
-    }
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
-  const handleCloseModal2 = () => {
-    setIsModalOpen2(false);
-  };
-
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     const decodedToken: any = jwtDecode(credentialResponse.credential);
@@ -119,6 +119,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       email: decodedToken.email,
       imageUrl: decodedToken.picture,
     });
+    
+
+
     navigate({ to: '/' });
   };
 
@@ -207,17 +210,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               ¿Olvidaste tu contraseña? Presiona aquí
             </Link>
           </div>
-
-          {/* Botón de "Ping de datos" reintegrado */}
-          <form onSubmit={handlePing} className="mt-4">
-            <Button
-              type="submit"
-              className="w-full cursor-pointer bg-blue-800 hover:bg-blue-700"
-              disabled={loading2}
-            >
-              {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
-            </Button>
-          </form>
         </CardContent>
       </Card>
 
@@ -226,16 +218,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         onClose={handleCloseModal}
         title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
-      />
-
-      {/* ErrorModal para el "Ping de datos" */}
-      <ErrorModal
-        isOpen={isModalOpen2}
-        onClose={handleCloseModal2}
-        title={
-          pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'
-        }
-        description={error2 || 'Ha ocurrido un error.'}
       />
     </>
   );

@@ -20,6 +20,8 @@ interface SessionsTableProps {
   onView: (session: Session) => void;
   onBulkDelete?: (sessions: Session[]) => void;
   isBulkDeleting?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function SessionsTable({
@@ -29,6 +31,8 @@ export function SessionsTable({
   onView,
   onBulkDelete,
   isBulkDeleting = false,
+  onRefresh,
+  isRefreshing = false,
 }: SessionsTableProps) {
   const {
     sorting,
@@ -80,14 +84,17 @@ export function SessionsTable({
     .rows.map((row) => row.original);
 
   return (
-    <div className="space-y-4">
+    <div className="flex-1 flex flex-col h-full">
       <DataTableToolbar
         table={table}
         filterPlaceholder="Buscar sesiones..."
         showSortButton
         showFilterButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         onFilterClick={() => {}}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         exportFileName="sesiones"
         // Bulk delete functionality
         showBulkDeleteButton={!!onBulkDelete}
@@ -103,8 +110,8 @@ export function SessionsTable({
         }
         isBulkDeleting={isBulkDeleting}
       />
-      <div className="rounded-md border bg-white">
-        <DataTable table={table} columns={columns} />
+      <div className="flex-1 overflow-hidden rounded-md border bg-white">
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
       </div>
       <DataTablePagination table={table} />
     </div>

@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useEffect, useState } from 'react';
 import { handleImageFile } from '@/utils/handleImageFile';
-import { set } from 'date-fns';
 
 export const communityFormSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
@@ -42,8 +41,8 @@ export function useCommunityForm() {
     const draftCommunity = sessionStorage.getItem('draftCommunity');
     if (draftCommunity) {
       const values = JSON.parse(draftCommunity);
-      console.log("Resetean valores?")
-      console.log("Values: ", values)
+      console.log('Resetean valores?');
+      console.log('Values: ', values);
       reset(values);
     }
   }, [reset]);

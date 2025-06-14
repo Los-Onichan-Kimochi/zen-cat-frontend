@@ -1,3 +1,6 @@
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
+
 export interface Session {
   id: string;
   title: string;
@@ -49,16 +52,12 @@ export interface ConflictResult {
   local_conflicts: Session[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export const sessionsApi = {
   // Get all sessions
   getSessions: async (): Promise<Session[]> => {
-    const response = await fetch(`${API_BASE_URL}/session/`);
-    if (!response.ok) {
-      throw new Error('Error fetching sessions');
-    }
-    const data = await response.json();
+    const data = await apiClient.get<{ sessions: Session[] }>(
+      API_ENDPOINTS.SESSIONS.BASE,
+    );
     if (data && Array.isArray(data.sessions)) {
       return data.sessions;
     } else if (Array.isArray(data)) {
@@ -70,44 +69,20 @@ export const sessionsApi = {
 
   // Get a specific session by ID
   getSession: async (sessionId: string): Promise<Session> => {
-    const response = await fetch(`${API_BASE_URL}/session/${sessionId}/`);
-    if (!response.ok) {
-      throw new Error(`Error fetching session with id ${sessionId}`);
-    }
-    return response.json();
+    return apiClient.get<Session>(API_ENDPOINTS.SESSIONS.BY_ID(sessionId));
   },
 
   // Get availability for a specific date
   getAvailability: async (
     request: AvailabilityRequest,
   ): Promise<AvailabilityResult> => {
-    const response = await fetch(`${API_BASE_URL}/session/availability/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-      throw new Error('Error fetching availability');
-    }
-    return response.json();
+    return apiClient.post<AvailabilityResult>('/session/availability/', request);
   },
 
   // Check for conflicts
   checkConflicts: async (
     request: CheckConflictRequest,
   ): Promise<ConflictResult> => {
-    const response = await fetch(`${API_BASE_URL}/session/check-conflicts/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-      throw new Error('Error checking conflicts');
-    }
-    return response.json();
+    return apiClient.post<ConflictResult>('/session/check-conflicts/', request);
   },
 };

@@ -23,10 +23,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { 
-  getSessionCurrentState, 
-  getSessionStateColor, 
-  getSessionStateLabel 
+import {
+  getSessionCurrentState,
+  getSessionStateColor,
+  getSessionStateLabel,
 } from '@/utils/session-status';
 
 interface GetSessionColumnsProps {
@@ -34,8 +34,6 @@ interface GetSessionColumnsProps {
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
 }
-
-
 
 export function getSessionColumns({
   onEdit,
@@ -146,7 +144,7 @@ export function getSessionColumns({
           end_time: session.end_time,
           state: session.state,
         });
-        
+
         return (
           <div className="flex justify-center">
             <div
@@ -215,9 +213,9 @@ export function getSessionColumns({
               className="h-8 px-3 bg-black text-white hover:bg-gray-800 font-medium"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate({ 
-                  to: '/sesiones/reservas/$sessionId', 
-                  params: { sessionId: session.id } 
+                navigate({
+                  to: '/sesiones/reservas/$sessionId',
+                  params: { sessionId: session.id },
                 });
               }}
             >

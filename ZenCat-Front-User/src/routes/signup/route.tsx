@@ -1,14 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { SignupForm } from '@/components/custom/signup-form';
+import { GuestOnlyRoute } from '@/components/auth/GuestOnlyRoute';
 
 export const Route = createFileRoute('/signup')({
   component: SignupComponent,
 });
 
-function SignupComponent() {
+export function SignupComponent() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <SignupForm />
-    </div>
+    <GuestOnlyRoute>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <SignupForm />
+      </div>
+    </GuestOnlyRoute>
   );
 }
