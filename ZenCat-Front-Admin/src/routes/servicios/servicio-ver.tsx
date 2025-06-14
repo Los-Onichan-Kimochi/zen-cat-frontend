@@ -481,7 +481,7 @@ export function SeeServicePageComponent() {
                 }}
                 disabled={!isEditing}
               >
-                <Plus className="mr-2 h-4 w-4" /> Agregar Profesional
+                <Plus className="mr-2 h-4 w-4" /> Agregar Local
               </Button>
             </div>
             <DataTable
