@@ -37,6 +37,8 @@ function ComunidadesComponent() {
     data: communitiesData = [],
     isLoading,
     error,
+    refetch: refetchCommunities,
+    isFetching: isFetchingCommunities,
   } = useQuery({
     queryKey: ['communities'],
     queryFn: communitiesApi.getCommunities,
@@ -85,50 +87,74 @@ function ComunidadesComponent() {
     navigate({ to: '/comunidades/ver', search: { id: community.id } });
   };
 
+  const handleRefresh = async () => {
+    const startTime = Date.now();
+    
+    const result = await refetchCommunities();
+    
+    // Asegurar que pase al menos 1 segundo
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, 1000 - elapsedTime);
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+    }
+    
+    return result;
+  };
+
   if (error) return <p>Error cargando comunidades: {error.message}</p>;
 
   return (
-    <div className="p-6 h-full font-montserrat">
+    <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="COMUNIDADES" subtitle="LISTADO DE COMUNIDADES" />
 
-      <div className="mb-6 flex items-center">
-        <HomeCard
-          icon={<Locate className="w-8 h-8 text-teal-600" />}
-          iconBgColor="bg-teal-100"
-          title="Comunidades totales"
-          description={communitiesData.length}
+      <div className="flex-shrink-0">
+        <div className="mb-6 flex items-center">
+          <HomeCard
+            icon={<Locate className="w-8 h-8 text-teal-600" />}
+            iconBgColor="bg-teal-100"
+            title="Comunidades totales"
+            description={communitiesData.length}
+            descColor="text-teal-600"
+            isLoading={isFetchingCommunities}
+          />
+        </div>
+
+        <ViewToolbar
+          onAddClick={() => {
+            sessionStorage.removeItem('draftCommunity');
+            sessionStorage.removeItem('draftSelectedServices');
+            sessionStorage.removeItem('draftSelectedMembershipPlans');
+            navigate({ to: '/comunidades/agregar-comunidad' });
+          }}
+          onBulkUploadClick={() => setShowUploadDialog(true)}
+          addButtonText="Agregar"
+          bulkUploadButtonText="Carga Masiva"
         />
       </div>
 
-      <ViewToolbar
-        onAddClick={() => {
-          sessionStorage.removeItem('draftCommunity');
-          sessionStorage.removeItem('draftSelectedServices');
-          sessionStorage.removeItem('draftSelectedMembershipPlans');
-          navigate({ to: '/comunidades/agregar-comunidad' });
-        }}
-        onBulkUploadClick={() => setShowUploadDialog(true)}
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
-      {isLoading ? (
-        <div className="flex justify-center items-center py-10">
-          <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
-        </div>
-      ) : (
-        <CommunityTable
-          data={communitiesData}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={bulkDeleteCommunityMutation.isPending}
-          onEdit={handleEdit}
-          onDelete={(com) => {
-            setCommunityToDelete(com);
-            setIsDeleteModalOpen(true);
-          }}
-          resetRowSelectionTrigger={resetSelectionTrigger}
-        />
-      )}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
+          </div>
+        ) : (
+          <CommunityTable
+            data={communitiesData}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={bulkDeleteCommunityMutation.isPending}
+            onEdit={handleEdit}
+            onDelete={(com) => {
+              setCommunityToDelete(com);
+              setIsDeleteModalOpen(true);
+            }}
+            resetRowSelectionTrigger={resetSelectionTrigger}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingCommunities}
+          />
+        )}
+      </div>
 
       <BulkCreateDialog
         open={showUploadDialog}

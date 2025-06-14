@@ -75,7 +75,7 @@ export function CommunityServiceTable({
   });
 
   return (
-    <>
+    <div className="flex-1 flex flex-col h-full">
       <DataTableToolbar
         table={table}
         onBulkDelete={(ids: string[]) => onBulkDelete(ids)}
@@ -90,8 +90,10 @@ export function CommunityServiceTable({
         showSortButton
         disableConfirmBulkDelete={disableConfirmBulkDelete}
       />
-      <DataTable table={table} columns={columns} />
+      <div className="flex-1 overflow-hidden rounded-md border bg-white">
+        <DataTable table={table} columns={columns} />
+      </div>
       <DataTablePagination table={table} />
-    </>
+    </div>
   );
 }
