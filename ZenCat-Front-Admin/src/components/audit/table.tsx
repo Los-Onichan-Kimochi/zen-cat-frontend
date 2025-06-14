@@ -10,33 +10,33 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { Local } from '@/types/local';
-import { getLocalColumns } from './local-columns';
+import { AuditLog, AuditLogFilters } from '@/types/audit';
+import { getAuditColumns } from './columns';
 import { useEffect } from 'react';
 
-interface LocalsTableProps {
-  data: Local[];
-  onBulkDelete: (locals: Local[]) => void;
-  isBulkDeleting: boolean;
-  onEdit: (local: Local) => void;
-  onDelete: (local: Local) => void;
-  onView: (local: Local) => void;
-  resetRowSelectionTrigger?: number;
+interface AuditTableProps {
+  data: AuditLog[];
+  onView?: (log: AuditLog) => void;
+  onExport?: () => void;
+  onOpenFilters?: () => void;
   onRefresh?: () => void;
+  isLoading?: boolean;
   isRefreshing?: boolean;
+  resetSelection?: number;
+  hasActiveFilters?: boolean;
 }
 
-export function LocalsTable({
+export function AuditTable({
   data,
-  onBulkDelete,
-  isBulkDeleting,
-  onEdit,
-  onDelete,
   onView,
-  resetRowSelectionTrigger,
+  onExport,
+  onOpenFilters,
   onRefresh,
+  isLoading = false,
   isRefreshing = false,
-}: LocalsTableProps) {
+  resetSelection = 0,
+  hasActiveFilters = false,
+}: AuditTableProps) {
   const {
     sorting,
     setSorting,
@@ -52,7 +52,7 @@ export function LocalsTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getLocalColumns({ onEdit, onDelete, onView });
+  const columns = getAuditColumns({ onView });
 
   const table = useReactTable({
     data,
@@ -75,40 +75,30 @@ export function LocalsTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    enableRowSelection: true,
+    enableRowSelection: false,
   });
 
   useEffect(() => {
-    table.resetRowSelection();
-    setRowSelection({});
-  }, [resetRowSelectionTrigger]);
+    if (resetSelection > 0) {
+      setRowSelection({});
+    }
+  }, [resetSelection, setRowSelection]);
 
   return (
     <div className="-mx-4 flex-1 flex flex-col px-4 py-2 h-full">
       <DataTableToolbar
         table={table}
-        filterPlaceholder="Buscar local..."
+        filterPlaceholder="Buscar en logs de auditoría..."
         showSortButton
-        showFilterButton
-        showExportButton
+        showFilterButton={!!onOpenFilters}
+        showExportButton={!!onExport}
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => {}}
+        onFilterClick={onOpenFilters}
+        onExportClick={onExport}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
-        exportFileName="locales"
-        // Bulk delete functionality
-        showBulkDeleteButton={!!onBulkDelete}
-        onBulkDelete={
-          onBulkDelete
-            ? (ids: string[]) => {
-                const localsToDelete = data.filter((local) =>
-                  ids.includes(local.id),
-                );
-                onBulkDelete(localsToDelete);
-              }
-            : undefined
-        }
-        isBulkDeleting={isBulkDeleting}
+        isBulkDeleteEnabled={false}
+        hasActiveFilters={hasActiveFilters}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
@@ -116,4 +106,4 @@ export function LocalsTable({
       <DataTablePagination table={table} />
     </div>
   );
-}
+} 

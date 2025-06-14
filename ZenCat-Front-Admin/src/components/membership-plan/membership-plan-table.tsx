@@ -21,6 +21,8 @@ interface MembershipPlanTableProps {
   isBulkDeleting: boolean;
   onDelete: (membershipPlan: MembershipPlan) => void;
   resetRowSelectionTrigger?: number;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function MembershipPlanTable({
@@ -29,6 +31,8 @@ export function MembershipPlanTable({
   isBulkDeleting,
   onDelete,
   resetRowSelectionTrigger,
+  onRefresh,
+  isRefreshing = false,
 }: MembershipPlanTableProps) {
   const {
     sorting,
@@ -78,21 +82,26 @@ export function MembershipPlanTable({
   }, [resetRowSelectionTrigger]);
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <DataTableToolbar
         table={table}
         onBulkDelete={onBulkDelete}
         isBulkDeleting={isBulkDeleting}
         showBulkDeleteButton
         showExportButton
+        showRefreshButton={!!onRefresh}
         filterPlaceholder="Buscar plan de membresía..."
         exportFileName="planes de membresía"
         showFilterButton
         onFilterClick={() => console.log('Filtrar')}
+        onRefreshClick={onRefresh}
+        isRefreshing={isRefreshing}
         showSortButton
       />
-      <DataTable table={table} columns={columns} />
+      <div className="flex-1 min-h-0">
+        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+      </div>
       <DataTablePagination table={table} />
-    </>
+    </div>
   );
 }

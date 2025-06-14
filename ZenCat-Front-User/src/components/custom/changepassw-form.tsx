@@ -1,44 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate} from '@tanstack/react-router';
 
-export function ForgotForm() {
-  const [email, setEmail] = useState('');
+export function ChangePasswordForm() {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  
+    useEffect(() => {
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        navigate({ to: '/login' });
+    }
+    }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setIsModalOpen(false);
+    if (password !== confirmPassword) {
+    setError('Las contraseñas no coinciden');
+    setIsModalOpen(true);
+    setLoading(false);
+    return;
+    }
+    const email = localStorage.getItem('userEmail');
     try {
-      const response = await fetch('http://localhost:8098/forgot-password/', {
+      const response = await fetch('http://localhost:8098/user/change-password/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
+            email: email,
+            new_password: password,
         }),
       });
       if (!response.ok) {
         const errBody = await response.json();
         throw new Error(errBody?.message || 'Error al crear usuario');
       }
-      const json = await response.json();
-      localStorage.setItem("userPIN", json.pin);
-      localStorage.setItem('pendingEmail', email);
-      navigate({ to: "/pin" }); // Redirige si todo va bien
+      navigate({ to: "/login" }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
-        err.message || 'Error desconocido al intentar ingresar correo.';
+        err.message || 'Error desconocido al cambiar contraseña.';
       setError(errorMessage);
       setIsModalOpen(true);
     } finally {
@@ -58,34 +71,44 @@ export function ForgotForm() {
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />
           </div>
           <h2 className="text-2xl font-bold text-center">
-            Recuperacion de Contraseña
+            Cambiar Contraseña
           </h2>
           <p className="text-gray-500 text-sm text-center">
-            Ingrese el correo electronico con el que se registró
+            Elija una nueva contraseña
           </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-1">
-              <label className="block text-gray-700 text-sm">
-                Correo electrónico
-              </label>
-              <Input
-                type="email"
-                placeholder="Ingrese su correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                <label className="block text-gray-700 text-sm">Contraseña</label>
+                <Input
+                type="password"
+                placeholder="Ingrese su contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
-                autoFocus
                 disabled={loading}
-              />
+                />
+            </div>
+            <div className="grid gap-1">
+                <label className="block text-gray-700 text-sm">
+                Confirmar su contraseña
+                </label>
+                <Input
+                type="password"
+                placeholder="Ingrese su contraseña otra vez"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+                />
             </div>
             <Button
               type="submit"
               className="w-full cursor-pointer"
               disabled={loading}
             >
-              Recuperar
+            Confirmar
             </Button>
           </form>
         </CardContent>
@@ -93,7 +116,7 @@ export function ForgotForm() {
       <ErrorModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Ese Usuario no Existe"
+        title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
       />
     </>

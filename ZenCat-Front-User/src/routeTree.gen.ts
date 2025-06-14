@@ -17,9 +17,11 @@ import { Route as ComunidadesRouteImport } from './routes/comunidades'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as SignupRouteRouteImport } from './routes/signup/route'
 import { Route as ReservaRouteRouteImport } from './routes/reserva/route'
+import { Route as PinRouteRouteImport } from './routes/pin/route'
 import { Route as LoginRouteRouteImport } from './routes/login/route'
 import { Route as HomeRouteRouteImport } from './routes/home/route'
 import { Route as ForgotRouteRouteImport } from './routes/forgot/route'
+import { Route as ChangepasswordRouteRouteImport } from './routes/changepassword/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReservasIndexRouteImport } from './routes/reservas/index'
 import { Route as ReservaIndexRouteImport } from './routes/reserva/index'
@@ -69,6 +71,11 @@ const ReservaRouteRoute = ReservaRouteRouteImport.update({
   path: '/reserva',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PinRouteRoute = PinRouteRouteImport.update({
+  id: '/pin',
+  path: '/pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRouteRoute = LoginRouteRouteImport.update({
   id: '/login',
   path: '/login',
@@ -82,6 +89,11 @@ const HomeRouteRoute = HomeRouteRouteImport.update({
 const ForgotRouteRoute = ForgotRouteRouteImport.update({
   id: '/forgot',
   path: '/forgot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangepasswordRouteRoute = ChangepasswordRouteRouteImport.update({
+  id: '/changepassword',
+  path: '/changepassword',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -127,9 +139,11 @@ const OnboardingMembresiaRoute = OnboardingMembresiaRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/pin': typeof PinRouteRoute
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -148,9 +162,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/pin': typeof PinRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidades': typeof ComunidadesRoute
@@ -169,9 +185,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/changepassword': typeof ChangepasswordRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
+  '/pin': typeof PinRouteRoute
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -191,73 +209,81 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/forgot'
-    | '/home'
-    | '/login'
-    | '/reserva'
-    | '/signup'
-    | '/como-funciona'
-    | '/comunidades'
-    | '/contacto'
-    | '/membresia'
-    | '/perfil'
-    | '/precios'
-    | '/onboarding/membresia'
-    | '/reserva/confirmacion'
-    | '/reserva/horario'
-    | '/reserva/lugar'
-    | '/reserva/servicios'
-    | '/reserva/'
-    | '/reservas'
+  | '/'
+  | '/changepassword'
+  | '/forgot'
+  | '/home'
+  | '/login'
+  | '/pin'
+  | '/reserva'
+  | '/signup'
+  | '/como-funciona'
+  | '/comunidades'
+  | '/contacto'
+  | '/membresia'
+  | '/perfil'
+  | '/precios'
+  | '/onboarding/membresia'
+  | '/reserva/confirmacion'
+  | '/reserva/horario'
+  | '/reserva/lugar'
+  | '/reserva/servicios'
+  | '/reserva/'
+  | '/reservas'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/forgot'
-    | '/home'
-    | '/login'
-    | '/signup'
-    | '/como-funciona'
-    | '/comunidades'
-    | '/contacto'
-    | '/membresia'
-    | '/perfil'
-    | '/precios'
-    | '/onboarding/membresia'
-    | '/reserva/confirmacion'
-    | '/reserva/horario'
-    | '/reserva/lugar'
-    | '/reserva/servicios'
-    | '/reserva'
-    | '/reservas'
+  | '/'
+  | '/changepassword'
+  | '/forgot'
+  | '/home'
+  | '/login'
+  | '/pin'
+  | '/signup'
+  | '/como-funciona'
+  | '/comunidades'
+  | '/contacto'
+  | '/membresia'
+  | '/perfil'
+  | '/precios'
+  | '/onboarding/membresia'
+  | '/reserva/confirmacion'
+  | '/reserva/horario'
+  | '/reserva/lugar'
+  | '/reserva/servicios'
+  | '/reserva'
+  | '/reservas'
   id:
-    | '__root__'
-    | '/'
-    | '/forgot'
-    | '/home'
-    | '/login'
-    | '/reserva'
-    | '/signup'
-    | '/como-funciona'
-    | '/comunidades'
-    | '/contacto'
-    | '/membresia'
-    | '/perfil'
-    | '/precios'
-    | '/onboarding/membresia'
-    | '/reserva/confirmacion'
-    | '/reserva/horario'
-    | '/reserva/lugar'
-    | '/reserva/servicios'
-    | '/reserva/'
-    | '/reservas/'
+  | '__root__'
+  | '/'
+  | '/changepassword'
+  | '/forgot'
+  | '/home'
+  | '/login'
+  | '/pin'
+  | '/reserva'
+  | '/signup'
+  | '/como-funciona'
+  | '/comunidades'
+  | '/contacto'
+  | '/membresia'
+  | '/perfil'
+  | '/precios'
+  | '/onboarding/membresia'
+  | '/reserva/confirmacion'
+  | '/reserva/horario'
+  | '/reserva/lugar'
+  | '/reserva/servicios'
+  | '/reserva/'
+  | '/reservas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangepasswordRouteRoute: typeof ChangepasswordRouteRoute
   ForgotRouteRoute: typeof ForgotRouteRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
+  PinRouteRoute: typeof PinRouteRoute
   ReservaRouteRoute: typeof ReservaRouteRouteWithChildren
   SignupRouteRoute: typeof SignupRouteRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
@@ -328,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReservaRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pin': {
+      id: '/pin'
+      path: '/pin'
+      fullPath: '/pin'
+      preLoaderRoute: typeof PinRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -347,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot'
       fullPath: '/forgot'
       preLoaderRoute: typeof ForgotRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changepassword': {
+      id: '/changepassword'
+      path: '/changepassword'
+      fullPath: '/changepassword'
+      preLoaderRoute: typeof ChangepasswordRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -430,9 +470,11 @@ const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangepasswordRouteRoute: ChangepasswordRouteRoute,
   ForgotRouteRoute: ForgotRouteRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
+  PinRouteRoute: PinRouteRoute,
   ReservaRouteRoute: ReservaRouteRouteWithChildren,
   SignupRouteRoute: SignupRouteRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
