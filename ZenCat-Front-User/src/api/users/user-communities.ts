@@ -12,8 +12,8 @@ export interface UserOnboarding {
     document_type: 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
     document_number: string;
     phone_number: string;
-    birth_date: string;
-    gender: 'MALE' | 'FEMALE' | 'OTHER';
+    birth_date: string | null;
+    gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
     city: string;
     postal_code: string;
     district: string;
@@ -50,10 +50,10 @@ export interface UserWithMemberships {
     email: string;
     name: string;
     first_last_name: string;
-    second_last_name: string;
+    second_last_name: string | null;
     password: string;
     image_url: string;
-    rol: 'ADMINISTRATOR' | 'USER';
+    rol: 'ADMINISTRATOR' | 'USER' | 'CLIENT';
     onboarding: UserOnboarding;
     memberships: Membership[];
 }
@@ -105,18 +105,24 @@ function mapMembershipStatus(apiStatus: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED'): 'ac
  * Transform API membership data to frontend format
  */
 export function transformMembershipsToFrontend(memberships: Membership[]): Community[] {
-    return memberships.map((membership) => ({
-        id: membership.community.id,
-        name: membership.community.name,
-        type: membership.community.purpose,
-        status: mapMembershipStatus(membership.status),
-        membershipId: membership.id,
-        startDate: membership.start_date,
-        endDate: membership.end_date,
-        planType: membership.plan.type,
-        fee: membership.plan.fee,
-        reservationLimit: membership.plan.reservation_limit,
-    }));
+    if (!memberships || memberships.length === 0) {
+        return [];
+    }
+
+    return memberships.map((membership) => {
+        return {
+            id: membership.community.id,
+            name: membership.community.name,
+            type: membership.community.purpose,
+            status: mapMembershipStatus(membership.status),
+            membershipId: membership.id,
+            startDate: membership.start_date,
+            endDate: membership.end_date,
+            planType: membership.plan.type,
+            fee: membership.plan.fee,
+            reservationLimit: membership.plan.reservation_limit,
+        };
+    });
 }
 
 /**
@@ -144,25 +150,27 @@ export function useUserCommunities(userId?: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!userId) {
+            setLoading(false);
+            setError('No se proporcionó ID de usuario');
+            return;
+        }
+
         const fetchUserData = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                let userData: UserWithMemberships;
-
-                if (userId) {
-                    userData = await userCommunitiesService.getUserById(userId);
-                } else {
-                    userData = await userCommunitiesService.getCurrentUser();
-                }
+                const userData = await userCommunitiesService.getUserById(userId);
 
                 setUser(userData);
                 setMemberships(userData.memberships || []);
-                setCommunities(transformMembershipsToFrontend(userData.memberships || []));
+
+                const transformedCommunities = transformMembershipsToFrontend(userData.memberships || []);
+                setCommunities(transformedCommunities);
             } catch (err) {
-                console.error('Error fetching user data:', err);
-                setError(err instanceof Error ? err.message : 'Error al obtener los datos del usuario');
+                setError(`Error del API: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+                setCommunities([]);
             } finally {
                 setLoading(false);
             }
@@ -188,7 +196,6 @@ export function useUserCommunities(userId?: string) {
             setMemberships(userData.memberships || []);
             setCommunities(transformMembershipsToFrontend(userData.memberships || []));
         } catch (err) {
-            console.error('Error refreshing user data:', err);
             setError(err instanceof Error ? err.message : 'Error al actualizar los datos del usuario');
         } finally {
             setLoading(false);

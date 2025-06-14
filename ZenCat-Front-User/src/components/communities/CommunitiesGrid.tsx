@@ -76,8 +76,7 @@ export function CommunitiesGrid({
         }
     }
 
-    const handleCommunityAction = (communityId: string, action: string) => {
-        console.log(`Acción '${action}' en comunidad ${communityId}`)
+    const handleCommunityAction = (_communityId: string, _action: string) => {
         // Aquí puedes implementar la lógica específica para cada acción
     }
 
@@ -100,16 +99,26 @@ export function CommunitiesGrid({
         <div className="space-y-8">
             {/* Flechas de navegación y grid */}
             <div className="relative">
-                <NavigationArrows
-                    onPrevious={handlePrevious}
-                    onNext={handleNext}
-                    canGoPrevious={canGoPrevious}
-                    canGoNext={canGoNext}
-                    className="absolute -left-16 -right-16 top-1/2 -translate-y-1/2 z-10"
-                />
+                {/* Solo mostrar flechas si hay más de una página */}
+                {totalPages > 1 && (
+                    <NavigationArrows
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        canGoPrevious={canGoPrevious}
+                        canGoNext={canGoNext}
+                        className="absolute -left-16 -right-16 top-1/2 -translate-y-1/2 z-10"
+                    />
+                )}
 
-                {/* Grid de comunidades */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Grid de comunidades adaptivo */}
+                <div className={`flex flex-wrap justify-center gap-6 ${currentCommunities.length === 1
+                        ? '' // Una comunidad centrada
+                        : currentCommunities.length === 2
+                            ? 'max-w-xl mx-auto' // Dos comunidades
+                            : currentCommunities.length === 3
+                                ? 'max-w-4xl mx-auto' // Tres comunidades  
+                                : 'max-w-6xl mx-auto' // Cuatro comunidades
+                    }`}>
                     {currentCommunities.map((community) => (
                         <CommunityCard
                             key={community.id}

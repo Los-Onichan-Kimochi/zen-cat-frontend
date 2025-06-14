@@ -46,25 +46,27 @@ export function CommunityCard({ community, onAction }: CommunityCardProps) {
     const config = statusConfig[community.status]
 
     return (
-        <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-center space-y-3">
-                {/* Tipo de comunidad */}
-                <div className="text-xs text-gray-600 font-medium">
-                    {community.type}
-                </div>
+        <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow w-64 min-h-[200px]">
+            <div className="text-center space-y-4 h-full flex flex-col justify-between">
+                <div className="space-y-3">
+                    {/* Tipo de comunidad */}
+                    <div className="text-xs text-gray-600 font-medium">
+                        Comunidad
+                    </div>
 
-                {/* Nombre de la comunidad */}
-                <h3 className="text-lg font-bold text-black">
-                    {community.name}
-                </h3>
+                    {/* Nombre de la comunidad */}
+                    <h3 className="text-lg font-bold text-black">
+                        {community.name}
+                    </h3>
 
-                {/* Estado de membresía */}
-                <div className={cn(
-                    "inline-block px-3 py-1 rounded-full text-xs font-medium",
-                    config.textColor,
-                    config.bgColor
-                )}>
-                    {config.label}
+                    {/* Estado de membresía */}
+                    <div className={cn(
+                        "inline-block px-3 py-1 rounded-full text-xs font-medium",
+                        config.textColor,
+                        config.bgColor
+                    )}>
+                        {config.label}
+                    </div>
                 </div>
 
                 {/* Botón de acción */}
