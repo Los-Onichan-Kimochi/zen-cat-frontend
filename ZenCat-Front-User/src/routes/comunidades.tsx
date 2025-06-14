@@ -5,7 +5,7 @@ import {
   FilterControls,
   CommunitiesGrid
 } from '@/components/communities';
-import { mockCommunities } from '@/data/mock-communities';
+import { useUserCommunities } from '@/api/users/user-communities';
 
 export const Route = createFileRoute('/comunidades')({
   component: ComunidadesComponent,
@@ -15,6 +15,31 @@ function ComunidadesComponent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [filterBy, setFilterBy] = useState('all')
+
+  // Fetch user communities - ahora devuelve las comunidades ya transformadas
+  const { communities, loading, error } = useUserCommunities();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white relative flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando comunidades...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white relative flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error al cargar las comunidades</p>
+          <p className="text-gray-600 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -47,7 +72,7 @@ function ComunidadesComponent() {
           {/* Communities Grid Container */}
           <div className="relative px-12">
             <CommunitiesGrid
-              communities={mockCommunities}
+              communities={communities}
               searchTerm={searchTerm}
               sortBy={sortBy}
               filterBy={filterBy}

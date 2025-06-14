@@ -5,6 +5,12 @@ export interface Community {
     name: string
     status: 'active' | 'suspended' | 'expired'
     type: string
+    membershipId?: string
+    startDate?: string
+    endDate?: string
+    planType?: 'MONTHLY' | 'ANNUAL'
+    fee?: number
+    reservationLimit?: number
 }
 
 interface CommunityCardProps {
