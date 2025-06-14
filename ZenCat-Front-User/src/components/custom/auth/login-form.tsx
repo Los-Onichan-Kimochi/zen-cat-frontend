@@ -101,48 +101,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     }
   };
 
-  const handlePing = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading2(true);
-    setError2(null);
-    setIsModalOpen2(false);
-    setPingSuccess(false); // Reset success state
-    try {
-      const response = await fetch('http://localhost:8098/health-check/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Error HTTP: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const data = await response.json();
-      const responseString = JSON.stringify(data, null, 2);
-      setError2(responseString);
-      setPingSuccess(true);
-      setIsModalOpen2(true);
-    } catch (err: any) {
-      console.error('Error en Ping:', err);
-      setError2(err.message || 'Error al conectar con el servidor de ping.');
-      setPingSuccess(false);
-      setIsModalOpen2(true);
-    } finally {
-      setLoading2(false);
-    }
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
-  };
-
-  const handleCloseModal2 = () => {
-    setIsModalOpen2(false);
   };
 
   const handleGoogleSuccess = (credentialResponse: any) => {
@@ -159,6 +119,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       email: decodedToken.email,
       imageUrl: decodedToken.picture,
     });
+    
+
+
     navigate({ to: '/' });
   };
 
@@ -247,17 +210,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
               ¿Olvidaste tu contraseña? Presiona aquí
             </Link>
           </div>
-
-          {/* Botón de "Ping de datos" reintegrado */}
-          <form onSubmit={handlePing} className="mt-4">
-            <Button
-              type="submit"
-              className="w-full cursor-pointer bg-blue-800 hover:bg-blue-700"
-              disabled={loading2}
-            >
-              {loading2 ? 'Pingeando datos...' : 'Ping de datos'}
-            </Button>
-          </form>
         </CardContent>
       </Card>
 
@@ -266,16 +218,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         onClose={handleCloseModal}
         title="Error al intentar iniciar sesión"
         description={error || 'Ha ocurrido un error.'}
-      />
-
-      {/* ErrorModal para el "Ping de datos" */}
-      <ErrorModal
-        isOpen={isModalOpen2}
-        onClose={handleCloseModal2}
-        title={
-          pingSuccess ? 'Ping Exitoso! Respuesta:' : 'Error en Ping de Datos'
-        }
-        description={error2 || 'Ha ocurrido un error.'}
       />
     </>
   );
