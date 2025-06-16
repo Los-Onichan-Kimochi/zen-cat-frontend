@@ -113,6 +113,7 @@ export function transformMembershipsToFrontend(memberships: Membership[]): Commu
         return {
             id: membership.community.id,
             name: membership.community.name,
+            image: membership.community.image_url,
             type: membership.community.purpose,
             status: mapMembershipStatus(membership.status),
             membershipId: membership.id,

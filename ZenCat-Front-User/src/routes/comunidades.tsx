@@ -4,7 +4,8 @@ import {
   SearchInput,
   FilterControls,
   CommunitiesGrid,
-  InformationCommunity
+  InformationCommunity,
+  Community
 } from '@/components/communities';
 import { useUserCommunities } from '@/api/users/user-communities';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +19,7 @@ function ComunidadesComponent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [filterBy, setFilterBy] = useState('all')
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
 
   // Obtener el usuario del contexto de autenticación (igual que en perfil.tsx)
   const { user } = useAuth();
@@ -53,12 +55,18 @@ function ComunidadesComponent() {
     );
   }
 
+  const selectCommunity = (communityId: string) => {
+    const community = communities.find((c) => c.id == communityId);
+    setSelectedCommunity(community || null);
+    console.log("Fue seleccionado")
+  }
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-white relative">
         {/* Header with TopBar space */}
         <div className="pt-6">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-7xl mx-auto px-6">
             {/* Header */}
             <div className="text-center mb-4">
               <h1 className="text-2xl font-bold text-black mb-4">
@@ -90,12 +98,15 @@ function ComunidadesComponent() {
                 sortBy={sortBy}
                 filterBy={filterBy}
                 itemsPerPage={4}
+                selectCommunity = {selectCommunity}
               />
             </div>
 
             {/* Information Community Box */}
             <div className="mt-8 px-12">
-              <InformationCommunity />
+              <InformationCommunity 
+                community={selectedCommunity}
+              />
             </div>
           </div>
         </div>

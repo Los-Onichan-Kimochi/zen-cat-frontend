@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 export interface Community {
     id: string
     name: string
+    image: string
     status: 'active' | 'suspended' | 'expired'
     type: string
     membershipId?: string
@@ -71,7 +72,7 @@ export function CommunityCard({ community, onAction }: CommunityCardProps) {
 
                 {/* Botón de acción */}
                 <button
-                    onClick={() => onAction(community.id, community.status === 'suspended' ? 'activate' : 'view')}
+                    onClick={() => onAction(community.id, community.status)}
                     className={cn(
                         "w-full py-2 px-4 rounded-md text-sm font-medium transition-colors",
                         config.buttonStyle

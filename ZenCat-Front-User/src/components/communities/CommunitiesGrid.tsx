@@ -9,6 +9,7 @@ interface CommunitiesGridProps {
     sortBy: string
     filterBy: string
     itemsPerPage?: number
+    selectCommunity: (communityId: string) => void
 }
 
 export function CommunitiesGrid({
@@ -16,7 +17,8 @@ export function CommunitiesGrid({
     searchTerm,
     sortBy,
     filterBy,
-    itemsPerPage = 4
+    itemsPerPage = 4,
+    selectCommunity
 }: CommunitiesGridProps) {
     const [currentPage, setCurrentPage] = useState(0)
 
@@ -78,6 +80,14 @@ export function CommunitiesGrid({
 
     const handleCommunityAction = (_communityId: string, _action: string) => {
         // Aquí puedes implementar la lógica específica para cada acción
+        console.log("Función más general")
+        if (_action === "active"){//When the membership is active
+            selectCommunity(_communityId);
+        }else if (_action === "suspended"){//When the membership is suspended
+
+        }else {//When the membership is expired
+
+        }
     }
 
     // Reset página cuando cambian los filtros
