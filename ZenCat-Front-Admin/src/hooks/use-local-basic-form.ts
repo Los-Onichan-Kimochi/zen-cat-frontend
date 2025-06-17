@@ -30,7 +30,11 @@ export const localFormSchema = z.object({
 
 export type LocalFormData = z.infer<typeof localFormSchema>;
 
-export function useLocalForm() {
+interface UseLocalFormProps {
+  defaultValues?: Partial<LocalFormData>;
+}
+
+export function useLocalForm(props?: UseLocalFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -53,6 +57,7 @@ export function useLocalForm() {
       reference: '',
       capacity: 0,
       image_url: '',
+      ...props?.defaultValues,
     },
   });
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,5 +81,7 @@ export function useLocalForm() {
     imageFile,
     imagePreview,
     handleImageChange,
+    setImagePreview,
+    setImageFile,
   };
 }
