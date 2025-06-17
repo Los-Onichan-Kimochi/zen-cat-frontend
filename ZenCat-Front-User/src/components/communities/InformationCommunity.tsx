@@ -126,8 +126,52 @@ export function InformationCommunity({
               </div>
             </div>
           </div>
-        <TabsContent value="servicios" className="mt-6">
-          {/* Aquí iría el contenido para la pestaña "Servicios" */}
+        <TabsContent value="servicios" className="mt-4">
+          <div className="bg-white border border-gray-300 rounded-lg shadow-sm py-6">
+            <div className='text-center'>
+              <h1 className="text-4xl font-black">¡Busca el servicio que más te guste!</h1>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 mt-4 px-2">
+              {/* Bloque de información de membresía */}
+              <div className="px-4 space-y-4">
+                <h2 className='font-bold text-2xl mb-4'>Membresía</h2>
+                <div className="space-y-5">
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Tipo de plan:</p>
+                    <p>{community.planType}</p>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Reservas disponibles:</p>
+                    <p>{community.reservationLimit}</p>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Reservas usadas:</p>
+                    <p>{community.reservedCount}</p>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Fecha de inicio:</p>
+                    <p>
+                      {community.startDate
+                        ? format(new Date(community.startDate), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })
+                        : 'Sin fecha'}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Fecha de fin:</p>
+                    <p>
+                      {community.endDate
+                        ? format(new Date(community.endDate), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })
+                        : 'Sin fecha'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
