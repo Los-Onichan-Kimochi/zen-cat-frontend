@@ -11,7 +11,7 @@ import { useUserCommunities } from '@/api/users/user-communities';
 import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-export const Route = createFileRoute('/comunidades')({
+export const Route = createFileRoute('/mis-comunidades')({
   component: ComunidadesComponent,
 });
 
