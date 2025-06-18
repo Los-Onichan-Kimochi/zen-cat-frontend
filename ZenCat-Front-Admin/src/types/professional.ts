@@ -38,3 +38,11 @@ export interface CreateProfessionalPayload {
 }
 
 export type UpdateProfessionalPayload = Partial<CreateProfessionalPayload>;
+
+export interface BulkCreateProfessionalPayload {
+  professionals: CreateProfessionalPayload[];
+}
+
+export interface BulkDeleteProfessionalPayload {
+  professionals: string[]; // array of professional IDs
+}

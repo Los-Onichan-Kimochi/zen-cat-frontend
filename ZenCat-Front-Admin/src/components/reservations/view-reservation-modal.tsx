@@ -122,9 +122,7 @@ export function ViewReservationModal({
             </div>
 
             {/* User Info */}
-            {(reservation.user_name ||
-              reservation.user_email ||
-              reservation.user_phone) && (
+            {(reservation.user_name || reservation.user_phone) && (
               <div className="border-t pt-4">
                 <h3 className="text-lg font-semibold mb-3">
                   Información del Usuario
@@ -134,12 +132,6 @@ export function ViewReservationModal({
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-gray-400" />
                       <span>{reservation.user_name}</span>
-                    </div>
-                  )}
-                  {reservation.user_email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <span>{reservation.user_email}</span>
                     </div>
                   )}
                   {reservation.user_phone && (
