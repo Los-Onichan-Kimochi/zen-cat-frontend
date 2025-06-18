@@ -37,15 +37,17 @@ interface UseLocalFormProps {
 export function useLocalForm(props?: UseLocalFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-
-  const {
+  /*
+  {
     register,
     handleSubmit,
     control,
     formState: { errors },
     watch,
     reset,
-  } = useForm<LocalFormData>({
+  }
+  */
+  const form = useForm<LocalFormData>({
     resolver: zodResolver(localFormSchema),
     defaultValues: {
       local_name: '',
@@ -67,17 +69,12 @@ export function useLocalForm(props?: UseLocalFormProps) {
     const draftLocal = sessionStorage.getItem('draftLocal');
     if (draftLocal) {
       const values = JSON.parse(draftLocal);
-      reset(values);
+      form.reset(values);
     }
-  }, [reset]);
+  }, [form]);
 
   return {
-    register,
-    handleSubmit,
-    control,
-    errors,
-    watch,
-    reset,
+    form,
     imageFile,
     imagePreview,
     handleImageChange,
