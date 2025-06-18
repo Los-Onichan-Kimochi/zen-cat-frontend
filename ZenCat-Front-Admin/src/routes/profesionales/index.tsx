@@ -1,6 +1,6 @@
 'use client';
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
 import { ProfessionalProvider } from '@/context/ProfesionalesContext';
 
@@ -26,6 +26,7 @@ import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { useProfessional } from '@/context/ProfesionalesContext';
 import { ProfessionalsTable } from '@/components/professionals/table';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 
 export const Route = createFileRoute('/profesionales/')({
   component: () => (
@@ -49,6 +50,7 @@ function ProfesionalesComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
 
   const {
     data: professionalsData,
@@ -61,31 +63,47 @@ function ProfesionalesComponent() {
     queryFn: professionalsApi.getProfessionals,
   });
 
-  const { mutate: deleteProfessional, isPending: isDeleting } = useMutation<
+  const { mutate: deleteProfessional } = useMutation<
     void,
     Error,
     string
   >({
     mutationFn: (id) => professionalsApi.deleteProfessional(id),
-    onSuccess: (_, id) => {
-      toast.success('Profesional Eliminado', { 
-        description: 'El profesional ha sido eliminado exitosamente.' 
+    onSuccess: () => {
+      toast.success('Profesional Eliminado', {
+        description: 'El profesional ha sido eliminado exitosamente.'
       });
       queryClient.invalidateQueries({ queryKey: ['professionals'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar el profesional.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el profesional.'
       });
     },
   });
 
   const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Professional>({
     queryKey: ['professionals'],
-    deleteFn: professionalsApi.bulkDeleteProfessionals,
+    deleteFn: (ids: string[]) => professionalsApi.bulkDeleteProfessionals({ professionals: ids }),
     entityName: 'profesional',
     entityNamePlural: 'profesionales',
     getId: (professional) => professional.id,
+  });
+
+  const { mutate: bulkCreateProfessionals } = useMutation({
+    mutationFn: professionalsApi.bulkCreateProfessionals,
+    onSuccess: async () => {
+      toast.success('Profesionales Creados', {
+        description: 'Los profesionales han sido creados exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['professionals'] });
+      setShowUploadDialog(false);
+    },
+    onError: (error: Error) => {
+      toast.error('Error en Carga Masiva', {
+        description: error.message || 'No se pudieron crear los profesionales.',
+      });
+    },
   });
 
   const counts = useMemo<CalculatedCounts | null>(() => {
@@ -113,7 +131,7 @@ function ProfesionalesComponent() {
 
   const handleEdit = (professional: Professional) => {
     setCurrent(professional);
-    navigate({ to: '/profesionales/editar' });
+    navigate({ to: '/profesionales/nuevo' }); // Cambiar a nuevo ya que editar no existe
   };
 
   const handleView = (professional: Professional) => {
@@ -128,26 +146,21 @@ function ProfesionalesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
-    const [professionalsResult, countsResult] = await Promise.all([
-      refetchProfessionals(),
-      refetchCounts()
-    ]);
-    
+
+    const professionalsResult = await refetchProfessionals();
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
       await new Promise(resolve => setTimeout(resolve, remainingTime));
     }
-    
-    return { professionalsResult, countsResult };
+
+    return professionalsResult;
   };
 
   // handleBulkDelete already provided by the useBulkDelete hook
-
-  const btnSizeClasses = 'h-11 w-28 px-4';
 
   if (errorProfessionals)
     return <p>Error cargando profesionales: {errorProfessionals.message}</p>;
@@ -196,7 +209,7 @@ function ProfesionalesComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)}
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
@@ -253,6 +266,40 @@ function ProfesionalesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Create Dialog */}
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Profesionales"
+        expectedExcelColumns={[
+          'Nombre',
+          'Primer Apellido',
+          'Segundo Apellido',
+          'Especialidad',
+          'Email',
+          'Teléfono',
+          'Tipo',
+          'URL de Imagen',
+        ]}
+        dbFieldNames={[
+          'name',
+          'first_last_name',
+          'second_last_name',
+          'specialty',
+          'email',
+          'phone_number',
+          'type',
+          'image_url',
+        ]}
+        onParsedData={async (data) => {
+          try {
+            bulkCreateProfessionals({ professionals: data });
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
     </div>
   );
 }

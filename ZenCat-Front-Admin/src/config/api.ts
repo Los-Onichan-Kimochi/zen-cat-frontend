@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
   PROFESSIONALS: {
     BASE: '/professional/',
     BY_ID: (id: string) => `/professional/${id}/`,
+    BULK_CREATE: '/professional/bulk-create/',
     BULK_DELETE: '/professional/bulk-delete/',
   },
 
