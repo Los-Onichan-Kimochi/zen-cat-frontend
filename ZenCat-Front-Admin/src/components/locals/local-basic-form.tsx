@@ -63,45 +63,23 @@ export function LocalForm({
   isReadOnly = false,
   //handleSubmit,
 }: LocalFormProps) {
-  const { control, register, formState: { errors }, setValue, getValues} = useFormContext();
-  /*
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [selectedProvincia, setSelectedProvincia] = useState<string | null>(
-    null,
+  const { control, register, formState: { errors }, getValues, watch} = useFormContext();
+
+  
+  const department = regiones.find(
+    (region) => region.name === watch('region'),
   );
-  const [selectedDistrito, setSelectedDistrito] = useState<string | null>(null);
+  const provincia = provincias.find(
+    (prov) => prov.name === watch('province'),
+  );
   const provinciasFiltradas = provincias.filter(
-    (prov) => prov.department_id === selectedRegion,
+    (prov) => prov.department_id === department?.id,
   );
   const distritosFiltrados = distritos.filter(
     (dist) =>
-      dist.department_id === selectedRegion &&
-      dist.province_id === selectedProvincia,
+      dist.department_id === department?.id &&
+      dist.province_id === provincia?.id,
   );
-  */
-  const regionValue = getValues('region')
-  const provinceValue = getValues('province')
-
-  const provinciasFiltradas = useMemo(
-    () => provincias.filter((p) => p.department_id === regionValue),
-    [regionValue]
-  );
-  const distritosFiltrados = useMemo(
-    () => distritos.filter((d) => d.province_id === provinceValue),
-    [provinceValue]
-  );
-  useEffect(() => {
-    // Si cambias la región, limpia provincia y distrito
-    if (!provinciasFiltradas.some((p) => p.id === provinceValue)) {
-      setValue('province', '');
-      setValue('district', '');
-    }
-    // Si cambias la provincia, limpia distrito
-    if (!distritosFiltrados.some((d) => d.id === control._formValues?.district)) {
-      setValue('district', '');
-    }
-    // eslint-disable-next-line
-  }, [regionValue, provinceValue]);
 
   return (
     <Card>
@@ -164,19 +142,20 @@ export function LocalForm({
                     <FormControl>
                       <Select
                         disabled={isReadOnly}
+                        onValueChange={field.onChange}
                         value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setValue('province', '');
-                          setValue('district', '');
-                        }}
+                        //onValueChange={(value) => {
+                        //  field.onChange(value);
+                        //  setValue('province', '');
+                        //  setValue('district', '');
+                        //}}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione región" />
                         </SelectTrigger>
                         <SelectContent>
                           {regiones.map((region) => (
-                            <SelectItem key={region.id} value={region.id}>
+                            <SelectItem value={region.name}>
                               {region.name}
                             </SelectItem>
                           ))}
@@ -195,19 +174,20 @@ export function LocalForm({
                     <FormLabel>Provincia</FormLabel>
                     <FormControl>
                       <Select
-                        disabled={isReadOnly || !regionValue}
+                        disabled={!getValues('region')}
                         value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setValue('district', '');
-                        }}
+                        onValueChange={field.onChange}
+                        //onValueChange={(value) => {
+                        //  field.onChange(value);
+                        //  setValue('district', '');
+                        //}}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione provincia" />
                         </SelectTrigger>
                         <SelectContent>
                           {provinciasFiltradas.map((prov) => (
-                            <SelectItem key={prov.id} value={prov.id}>
+                            <SelectItem value={prov.name}>
                               {prov.name}
                             </SelectItem>
                           ))}
@@ -226,7 +206,7 @@ export function LocalForm({
                     <FormLabel>Distrito</FormLabel>
                     <FormControl>
                       <Select
-                        disabled={isReadOnly || !provinceValue}
+                        disabled={!getValues('province')}
                         value={field.value}
                         onValueChange={field.onChange}
                       >
@@ -235,7 +215,7 @@ export function LocalForm({
                         </SelectTrigger>
                         <SelectContent>
                           {distritosFiltrados.map((dist) => (
-                            <SelectItem key={dist.id} value={dist.id}>
+                            <SelectItem key={dist.name} value={dist.name}>
                               {dist.name}
                             </SelectItem>
                           ))}
