@@ -8,7 +8,9 @@ import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
+import { usuariosApi } from '@/api/usuarios/usuarios';
 import { Reservation } from '@/types/reservation';
+import { User } from '@/types/user';
 
 import { Button } from '@/components/ui/button';
 import HeaderDescriptor from '@/components/common/header-descriptor';
@@ -52,6 +54,12 @@ function SessionReservationsComponent() {
     queryFn: () => sessionsApi.getSessionById(sessionId),
   });
 
+  // Fetch users data
+  const { data: usersData, isLoading: isLoadingUsers } = useQuery<User[]>({
+    queryKey: ['usuarios'],
+    queryFn: () => usuariosApi.getUsuarios(),
+  });
+
   // Fetch reservations for this session
   const {
     data: reservationsData,
@@ -59,7 +67,17 @@ function SessionReservationsComponent() {
     error: reservationsError,
   } = useQuery({
     queryKey: ['reservations', 'session', sessionId],
-    queryFn: () => reservationsApi.getReservationsBySession(sessionId),
+    queryFn: async () => {
+      try {
+        const response = await reservationsApi.getReservationsBySession(sessionId);
+        return {
+          reservations: Array.isArray(response) ? response : response?.reservations || []
+        };
+      } catch (error) {
+        console.error('Error fetching reservations:', error);
+        return { reservations: [] };
+      }
+    },
   });
 
   // Delete mutation
@@ -93,12 +111,24 @@ function SessionReservationsComponent() {
 
   // Handlers
   const handleView = (reservation: Reservation) => {
-    setSelectedReservation(reservation);
+    // Enriquecer la reserva seleccionada con datos de usuario
+    const user = (usersData || []).find((u) => u.id === reservation.user_id);
+    const enrichedReservation = {
+      ...reservation,
+      user_name: user ? user.name : 'Usuario desconocido'
+    };
+    setSelectedReservation(enrichedReservation);
     setIsViewModalOpen(true);
   };
 
   const handleEdit = (reservation: Reservation) => {
-    setSelectedReservation(reservation);
+    // Enriquecer la reserva seleccionada con datos de usuario
+    const user = (usersData || []).find((u) => u.id === reservation.user_id);
+    const enrichedReservation = {
+      ...reservation,
+      user_name: user ? user.name : 'Usuario desconocido'
+    };
+    setSelectedReservation(enrichedReservation);
     setIsEditModalOpen(true);
   };
 
@@ -122,7 +152,7 @@ function SessionReservationsComponent() {
     setSelectedReservation(null);
   };
 
-  if (isLoadingSession || isLoadingReservations) {
+  if (isLoadingSession || isLoadingReservations || isLoadingUsers) {
     return (
       <div className="p-6 h-full flex flex-col font-montserrat">
         <div className="flex justify-center items-center h-64">
@@ -144,8 +174,32 @@ function SessionReservationsComponent() {
     );
   }
 
-  const reservations = reservationsData?.reservations || [];
+  const reservations = Array.isArray(reservationsData?.reservations) 
+    ? reservationsData.reservations 
+    : [];
   const session = sessionData;
+  const users = usersData || [];
+
+  // Enriquecer los datos de reserva con la información del usuario
+  const enrichedReservations = reservations.map(reservation => {
+    const user = (usersData || []).find((u) => u.id === reservation.user_id);
+    return {
+      ...reservation,
+      user_name: user ? user.name : 'Usuario desconocido'
+    };
+  });
+
+  console.log('Reservations Data:', {
+    raw: reservationsData,
+    processed: reservations,
+    enriched: enrichedReservations,
+    error: reservationsError
+  });
+
+  console.log('Users Data:', {
+    count: users.length,
+    users
+  });
 
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
@@ -205,7 +259,7 @@ function SessionReservationsComponent() {
 
       {/* Table */}
       <ReservationsTable
-        data={reservations}
+        data={enrichedReservations}
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
@@ -219,6 +273,8 @@ function SessionReservationsComponent() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
         sessionId={sessionId}
+        users={users}
+        sessionName={session?.title || ''}
       />
 
       {/* Edit Modal */}
