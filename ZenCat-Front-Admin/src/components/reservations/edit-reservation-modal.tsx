@@ -69,18 +69,28 @@ export function EditReservationModal({
   // Fetch users for the select
   const { data: usersData, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['usuarios'],
-    queryFn: () => usuariosApi.fetchUsuarios(),
+    queryFn: () => usuariosApi.getUsuarios(),
     enabled: isOpen, // Only fetch when modal is open
   });
 
   const { mutate: updateReservation, isPending: isUpdating } = useMutation({
-    mutationFn: (data: UpdateReservationRequest) =>
-      reservationsApi.updateReservation(reservation!.id, data),
+    mutationFn: (data: UpdateReservationRequest) => {
+      // Convert reservation_time to ISO format for backend
+      const updatedData = {
+        ...data,
+        // Only include reservation_time if it's provided and valid
+        ...(data.reservation_time && {
+          reservation_time: new Date(data.reservation_time).toISOString(),
+        }),
+      };
+      return reservationsApi.updateReservation(reservation!.id, updatedData);
+    },
     onSuccess: () => {
       toast.success('Reserva Actualizada', {
         description: 'La reserva ha sido actualizada exitosamente.',
       });
       onSuccess();
+      onClose();
     },
     onError: (err: any) => {
       error('Error al actualizar la reserva', {
@@ -111,7 +121,13 @@ export function EditReservationModal({
 
   if (!reservation) return null;
 
-  const users = usersData?.users || [];
+  const users = usersData || [];
+
+  // Find the current user for display
+  const currentUser = users.find(user => user.id === reservation.user_id);
+  const currentUserDisplay = currentUser ? 
+    `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}` : 
+    'Usuario no encontrado';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -156,9 +172,20 @@ export function EditReservationModal({
             />
           </div>
 
+          {/* Current User Display (read-only) */}
+          <div className="space-y-2">
+            <Label htmlFor="current-user">Usuario Actual</Label>
+            <Input
+              id="current-user"
+              value={currentUserDisplay}
+              disabled
+              className="bg-gray-100"
+            />
+          </div>
+
           {/* User Selection */}
           <div className="space-y-2">
-            <Label htmlFor="user">Usuario</Label>
+            <Label htmlFor="user">Cambiar Usuario</Label>
             {isLoadingUsers ? (
               <div className="flex items-center gap-2 p-2 border rounded">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -179,7 +206,7 @@ export function EditReservationModal({
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
                         <span>
-                          {user.name} {user.first_last_name}
+                          {user.name}
                         </span>
                         <span className="text-xs text-gray-500">
                           {user.email}

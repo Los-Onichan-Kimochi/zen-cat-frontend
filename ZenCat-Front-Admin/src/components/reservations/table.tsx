@@ -113,15 +113,11 @@ export function ReservationsTable({
       header: 'Usuario',
       cell: ({ row }) => {
         const userName = row.original.user_name;
-        const userEmail = row.original.user_email;
         return (
           <div>
             <div className="font-medium">
               {userName || 'Usuario desconocido'}
             </div>
-            {userEmail && (
-              <div className="text-sm text-gray-500">{userEmail}</div>
-            )}
           </div>
         );
       },
