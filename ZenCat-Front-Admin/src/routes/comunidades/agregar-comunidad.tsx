@@ -45,9 +45,12 @@ function AddCommunityPage() {
     errors,
     imageFile,
     imagePreview,
+    imageBytes,
     watch,
     reset,
     handleImageChange,
+    setImagePreview,
+    setImageBytes,
   } = useCommunityForm();
 
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
@@ -75,20 +78,31 @@ function AddCommunityPage() {
   });
 
   const onSubmit = async (data: any) => {
-    let imageUrl = 'https://via.placeholder.com/150';
+    // Generate a unique filename for S3
+    let imageUrl = 'default-community-image.jpg';
     if (imageFile) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen Procesada', {
-        description: 'Subida simulada de imagen completada.',
+      const timestamp = Date.now();
+      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
+      imageUrl = `community-${timestamp}.${fileExtension}`;
+      
+      toast.info('Procesando Imagen', {
+        description: 'Preparando imagen para subir a S3.',
       });
     }
 
     try {
-      const newCommunity = await createCommunityMutation.mutateAsync({
+      const payload: CreateCommunityPayload = {
         name: data.name,
         purpose: data.purpose,
         image_url: imageUrl,
-      });
+      };
+
+      // Add image bytes if available
+      if (imageBytes && imageBytes.length > 0) {
+        payload.image_bytes = imageBytes;
+      }
+
+      const newCommunity = await createCommunityMutation.mutateAsync(payload);
 
       if (selectedServices.length > 0) {
         const payload = selectedServices.map((s) => ({
