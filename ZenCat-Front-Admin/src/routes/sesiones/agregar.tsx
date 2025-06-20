@@ -264,7 +264,7 @@ function AddSessionComponent() {
                   {/* Paso 1: Información básica */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         1
                       </span>
                       Información Básica
@@ -330,13 +330,7 @@ function AddSessionComponent() {
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                       <span
-                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                          watchedValues.title &&
-                          watchedValues.date &&
-                          watchedValues.capacity
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-300 text-gray-600'
-                        }`}
+                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 bg-black text-white`}
                       >
                         2
                       </span>
@@ -349,30 +343,15 @@ function AddSessionComponent() {
                         onValueChange={(value) =>
                           setValue('professional_id', value)
                         }
-                        disabled={
-                          !watchedValues.title ||
-                          !watchedValues.date ||
-                          !watchedValues.capacity
-                        }
+                        
                       >
                         <SelectTrigger
-                          className={`transition-colors ${
-                            !watchedValues.title ||
-                            !watchedValues.date ||
-                            !watchedValues.capacity
-                              ? 'bg-gray-100 cursor-not-allowed'
-                              : !watchedValues.professional_id
-                                ? 'border-blue-300 bg-blue-50 hover:bg-blue-100'
-                                : 'border-green-300 bg-green-50'
+                          className={`transition-colors 'bg-gray-100 cursor-not-allowed border-blue-300 bg-blue-50'
                           }`}
                         >
                           <SelectValue
                             placeholder={
-                              !watchedValues.title ||
-                              !watchedValues.date ||
-                              !watchedValues.capacity
-                                ? 'Completa la información básica primero'
-                                : 'Seleccionar profesional'
+                                'Seleccionar profesional'
                             }
                           />
                         </SelectTrigger>
@@ -406,11 +385,7 @@ function AddSessionComponent() {
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                       <span
-                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                          watchedValues.professional_id
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-300 text-gray-600'
-                        }`}
+                        className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 bg-black text-white`}
                       >
                         3
                       </span>
@@ -420,7 +395,6 @@ function AddSessionComponent() {
                       <Checkbox
                         id="is_virtual"
                         checked={watchedValues.is_virtual}
-                        disabled={!watchedValues.professional_id}
                         onCheckedChange={(checked) => {
                           setValue('is_virtual', !!checked);
                           if (checked) {
@@ -432,8 +406,7 @@ function AddSessionComponent() {
                       />
                       <Label
                         htmlFor="is_virtual"
-                        className={
-                          !watchedValues.professional_id ? 'text-gray-400' : ''
+                        className={'text-gray-400'
                         }
                       >
                         Sesión virtual
@@ -450,7 +423,6 @@ function AddSessionComponent() {
                           type="url"
                           {...form.register('session_link')}
                           placeholder="https://meet.google.com/..."
-                          disabled={!watchedValues.professional_id}
                         />
                         {form.formState.errors.session_link && (
                           <p className="text-red-500 text-sm mt-1">
@@ -464,23 +436,13 @@ function AddSessionComponent() {
                         <Select
                           value={watchedValues.local_id}
                           onValueChange={(value) => setValue('local_id', value)}
-                          disabled={!watchedValues.professional_id}
                         >
                           <SelectTrigger
-                            className={`transition-colors ${
-                              !watchedValues.professional_id
-                                ? 'bg-gray-100 cursor-not-allowed'
-                                : !watchedValues.local_id
-                                  ? 'border-blue-300 bg-blue-50 hover:bg-blue-100'
-                                  : 'border-green-300 bg-green-50'
+                            className={`transition-colors border-blue-300 bg-blue-50 hover:bg-blue-100
                             }`}
                           >
                             <SelectValue
-                              placeholder={
-                                !watchedValues.professional_id
-                                  ? 'Selecciona un profesional primero'
-                                  : 'Seleccionar local'
-                              }
+                              placeholder={'Seleccionar local'}
                             />
                           </SelectTrigger>
                           <SelectContent>
@@ -513,7 +475,7 @@ function AddSessionComponent() {
                       <span
                         className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
                           watchedValues.is_virtual || watchedValues.local_id
-                            ? 'bg-blue-500 text-white'
+                            ? 'bg-black text-white'
                             : 'bg-gray-300 text-gray-600'
                         }`}
                       >
