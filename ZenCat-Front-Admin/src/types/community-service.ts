@@ -10,4 +10,10 @@ export interface CreateCommunityServicePayload {
   service_id: string;
 }
 
-export type BulkCreateCommunityServicePayload = CreateCommunityServicePayload[];
+export interface BulkCreateCommunityServicePayload {
+  community_services: CreateCommunityServicePayload[];
+}
+
+export interface BulkDeleteCommunityServicePayload {
+  community_services: string[];
+}

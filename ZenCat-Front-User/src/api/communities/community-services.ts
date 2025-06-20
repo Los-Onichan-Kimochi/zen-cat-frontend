@@ -1,6 +1,7 @@
 import { CommunityService } from '@/types/community-service';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
+import { Service } from '@/types/service';
 
 export const communityServicesApi = {
   getCommunityServicesByCommunityId: async (
@@ -26,5 +27,14 @@ export const communityServicesApi = {
     );
 
     return filteredServices;
+  },
+
+  getServicesByCommunityId: async(communityId: string): Promise<Service[]> => {
+    const response = await apiClient.get<{ services: Service[] }>(
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId)
+    );
+    
+    const services = Array.isArray(response.services) ? response.services : [];
+    return services;
   },
 };

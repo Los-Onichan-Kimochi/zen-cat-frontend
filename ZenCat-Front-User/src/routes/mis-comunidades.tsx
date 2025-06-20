@@ -10,9 +10,8 @@ import {
 import { useUserCommunities } from '@/api/users/user-communities';
 import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { apiClient } from '@/lib/api-client';
-import { API_ENDPOINTS } from '@/config/api';
 import { Service } from '@/types/service';
+import { communityServicesApi } from '@/api/communities/community-services';
 
 export const Route = createFileRoute('/mis-comunidades')({
   component: ComunidadesComponent,
@@ -59,23 +58,13 @@ function ComunidadesComponent() {
     );
   }
 
-  // Define getCommunityServices outside of selectCommunity
-  async function getServicesByCommunity(communityId: string): Promise<Service[]> {
-    const response = await apiClient.get<{ services: Service[] }>(
-      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId)
-    );
-    
-    const services = Array.isArray(response.services) ? response.services : [];
-    return services;
-  }
-
   // Actualizar servicios cuando se selecciona una comunidad
   const selectCommunity = async (communityId: string) => {
     const community = communities.find((c) => c.id == communityId);
     setSelectedCommunity(community || null);
     
     if (community) {
-      const services = await getServicesByCommunity(community.id);
+      const services = await communityServicesApi.getServicesByCommunityId(community.id);
       setServices(services);  // Guardar los servicios asociados en el estado
     }
   };

@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react'
 import { CommunityCard, Community } from './CommunityCard'
 import { CommunityPlaceholder } from './CommunityPlaceholder'
 import { NavigationArrows } from './NavigationArrows'
+import { useNavigate } from '@tanstack/react-router'
+import { ActivateMembershipDialog } from './ActivateMembershipDialog'
 
 interface CommunitiesGridProps {
     communities: Community[]
@@ -20,7 +22,11 @@ export function CommunitiesGrid({
     itemsPerPage = 4,
     selectCommunity
 }: CommunitiesGridProps) {
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(0)
+    const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null)
+    const [showActivateDialog, setShowActivateDialog] = useState(false)
+    const [communityToActivate, setCommunityToActivate] = useState<Community | null>(null)
 
     // Filtrar y buscar comunidades
     const filteredCommunities = useMemo(() => {
@@ -79,15 +85,31 @@ export function CommunitiesGrid({
     }
 
     const handleCommunityAction = (_communityId: string, _action: string) => {
-        // Aquí puedes implementar la lógica específica para cada acción
-        console.log("Función más general")
-        if (_action === "active"){//When the membership is active
+        
+        if (_action === "active"){//When the membership is active        // Seleccionar la comunidad independientemente del estado
+            setSelectedCommunityId(_communityId);
             selectCommunity(_communityId);
-        }else if (_action === "suspended"){//When the membership is suspended
-
-        }else {//When the membership is expired
-
+        } else if (_action === "suspended"){//When the membership is suspended
+            // Encontrar la comunidad por ID
+            const community = communities.find(c => c.id === _communityId);
+            if (community) {
+                setCommunityToActivate(community);
+                setShowActivateDialog(true);
+            }
+        } else {//When the membership is expired
+            //Redirect to inscription page
+            navigate({
+                //to: '/comunidades/inscripcion',
+                //search: { id: _communityId } // se pasa como query param
+            });
         }
+    }
+
+    const handleActivateMembership = () => {
+        // Aquí iría la lógica para activar la membresía en la BD
+        console.log(`Activando membresía para comunidad: ${communityToActivate?.id}`);
+        // Cerrar el diálogo
+        setShowActivateDialog(false);
     }
 
     // Reset página cuando cambian los filtros
@@ -134,6 +156,7 @@ export function CommunitiesGrid({
                             key={community.id}
                             community={community}
                             onAction={handleCommunityAction}
+                            isSelected={selectedCommunityId === community.id}
                         />
                     ))}
                 </div>
@@ -146,6 +169,14 @@ export function CommunitiesGrid({
                     Mostrando {currentCommunities.length} de {filteredCommunities.length} comunidades
                 </div>
             )}
+
+            {/* Diálogo de activación de membresía */}
+            <ActivateMembershipDialog
+                isOpen={showActivateDialog}
+                onClose={() => setShowActivateDialog(false)}
+                onActivate={handleActivateMembership}
+                communityName={communityToActivate?.name}
+            />
         </div>
     )
 }

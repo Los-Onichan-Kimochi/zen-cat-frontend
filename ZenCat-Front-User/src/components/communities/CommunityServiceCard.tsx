@@ -11,23 +11,23 @@ interface CommunityServiceCardProps {
 export function CommunityServiceCard({ community, service, onAction }: CommunityServiceCardProps) {
     console.log(service)
     return (
-        <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow w-64 min-h-[200px]">
-            <div className="text-center space-y-4 h-full flex flex-col justify-between">
-                <div className="space-y-3">
-                    {/* Nombre del servicio */}
-                    <h3 className="text-lg font-bold text-black">
-                        {service.name}
-                    </h3>
-                    {/* Descripción del servicio */}
-                    <div>
-                        
-                    </div>
-                </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm m-2 flex flex-col justify-between">
+            <div className="space-y-3">
+                {/* Nombre del servicio */}
+                <h3 className="text-xl font-bold text-center">
+                    {service.name}
+                </h3>
+                {/* Descripción del servicio */}
+                <p className="text-sm text-gray-700 text-justify">
+                    {service.description}
+                </p>
+            </div>
 
-                {/* Botón de acción */}
+            {/* Botón de acción */}
+            <div className="mt-4">
                 <Button
-                    onClick={() => onAction(community.id, community.status)}
-                    className="w-full py-2 px-4 rounded-md text-sm font-medium transition-colors bg-black text-white hover:bg-gray-800"
+                    onClick={() => onAction(community.id, 'reserve')}
+                    className="w-full bg-black text-white hover:bg-gray-800"
                 >
                     Nueva reserva
                 </Button>

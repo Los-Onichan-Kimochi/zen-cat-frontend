@@ -3,7 +3,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CommunityForm } from '@/components/community/community-basic-form';
 import { CommunityServiceTable } from '@/components/community/community-service-table';
@@ -189,12 +189,15 @@ function EditCommunityPage() {
 
   const bulkDeleteServiceMutation = useMutation({
     mutationFn: (ids: string[]) =>
-      communityServicesApi.bulkDeleteCommunityServices(ids),
+      communityServicesApi.bulkDeleteCommunityServices({
+          community_services: ids,
+      }),
     onSuccess: (_, ids) => {
       toast.success('Servicios Desvinculados', {
         description: `${ids.length} servicios desvinculados exitosamente.`,
       });
       setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+      queryClient.invalidateQueries({ queryKey: ['community-services', id] });
     },
     onError: (err) => {
       toast.error('Error al Desvincular Servicios', { 
@@ -307,6 +310,7 @@ function EditCommunityPage() {
                   JSON.stringify(selectedMembershipPlans),
                 );
                 sessionStorage.setItem('modeAddService', 'editar');
+                sessionStorage.setItem('currentCommunity', id);
                 navigate({ to: '/comunidades/agregar-servicios' }); //
               }}
             >
