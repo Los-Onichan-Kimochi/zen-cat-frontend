@@ -5,6 +5,7 @@ import { TabCommunityServices } from './TabCommunityServices';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Service } from '@/types/service';
+import { useNavigate } from '@tanstack/react-router';
 
 interface InformationCommunityProps {
   community: Community | null;
@@ -15,6 +16,20 @@ export function InformationCommunity({
   community,
   services,
 }: InformationCommunityProps) {
+
+    const navigate = useNavigate(); // Inicializa el hook de navegación
+
+  const handleViewReservations = () => {
+    if (community) {
+      // Codificar el nombre de la comunidad para la URL
+      // Redirigir a la URL correcta con los parámetros
+      navigate({
+        to: `/mis-comunidades/${community.id}/reservas/historial`, // La ruta
+        search: { name: community.name } // Parámetro adicional de consulta
+      });
+    }
+  };
+
 
   if (community == null) {
     // Si no hay comunidad, mostramos solo la imagen de AstroCat dentro de un div estilizado como Card
@@ -84,7 +99,7 @@ export function InformationCommunity({
               <div className="space-y-2 px-4 border-r border-gray-500">
                 <h2 className='font-bold text-2xl'>Acciones</h2>
                 <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">Nueva reserva</Button>
-                <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">Ver reservas</Button>
+                <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white" onClick={handleViewReservations}>Ver reservas</Button>
                 <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">Ver membresías</Button>
                 <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">Suspender membresía</Button>
               </div>

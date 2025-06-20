@@ -14,7 +14,7 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 import { Service } from '@/types/service';
 
-export const Route = createFileRoute('/mis-comunidades')({
+export const Route = createFileRoute('/mis-comunidades/')({
   component: ComunidadesComponent,
 });
 
