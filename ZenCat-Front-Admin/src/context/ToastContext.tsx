@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useCustomToast } from '@/hooks/use-custom-toast';
 import { ToastContainer } from '@/components/ui/toast-container';
 
-interface ToastContextType {
+export interface ToastContextType {
   success: (title: string, options?: { description?: string; duration?: number }) => string;
   error: (title: string, options?: { description?: string; duration?: number }) => string;
   info: (title: string, options?: { description?: string; duration?: number }) => string;
