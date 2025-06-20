@@ -51,6 +51,7 @@ interface LocalFormProps {
   imagePreview: string | null;
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isReadOnly?: boolean;
+  description?: string;
   //handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
@@ -61,6 +62,7 @@ export function LocalForm({
   imagePreview,
   handleImageChange,
   isReadOnly = false,
+  description = "Complete la información para agregar un nuevo local.",
   //handleSubmit,
 }: LocalFormProps) {
   const { control, register, formState: { errors }, getValues, watch} = useFormContext();
@@ -86,7 +88,7 @@ export function LocalForm({
       <CardHeader>
         <CardTitle>Datos del local</CardTitle>
         <CardDescription>
-          Complete la información para agregar un nuevo local.
+          {description}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -155,7 +157,7 @@ export function LocalForm({
                         </SelectTrigger>
                         <SelectContent>
                           {regiones.map((region) => (
-                            <SelectItem value={region.name}>
+                            <SelectItem key={region.name} value={region.name}>
                               {region.name}
                             </SelectItem>
                           ))}
@@ -174,7 +176,7 @@ export function LocalForm({
                     <FormLabel>Provincia</FormLabel>
                     <FormControl>
                       <Select
-                        disabled={!getValues('region')}
+                        disabled={isReadOnly || !getValues('region')}
                         value={field.value}
                         onValueChange={field.onChange}
                         //onValueChange={(value) => {
@@ -187,7 +189,7 @@ export function LocalForm({
                         </SelectTrigger>
                         <SelectContent>
                           {provinciasFiltradas.map((prov) => (
-                            <SelectItem value={prov.name}>
+                            <SelectItem key={prov.name} value={prov.name}>
                               {prov.name}
                             </SelectItem>
                           ))}
@@ -206,7 +208,7 @@ export function LocalForm({
                     <FormLabel>Distrito</FormLabel>
                     <FormControl>
                       <Select
-                        disabled={!getValues('province')}
+                        disabled={isReadOnly || !getValues('province')}
                         value={field.value}
                         onValueChange={field.onChange}
                       >

@@ -39,6 +39,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FormProvider } from 'react-hook-form';
+import { useLocalForm } from '@/hooks/use-local-basic-form';
+import { LocalForm } from '@/components/locals/local-basic-form';
+import { toast } from 'sonner';
+
 const regiones: Region[] = rawRegiones;
 const provincias: Provincia[] = rawProvincias;
 const distritos: Distrito[] = rawDistritos;
@@ -105,6 +110,7 @@ function EditLocalComponent() {
       image_url: local?.image_url || null,
     },
   });
+  /*
   const {
     register,
     handleSubmit,
@@ -113,24 +119,24 @@ function EditLocalComponent() {
     watch,
     reset,
   } = form;
+   */
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [selectedDistrito, setSelectedDistrito] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const department = regiones.find(
-    (region) => region.name === form.watch('region'),
-  );
-  const provincia = provincias.find(
-    (prov) => prov.name === form.watch('province'),
-  );
-  const provinciasFiltradas = provincias.filter(
-    (prov) => prov.department_id === department?.id,
-  );
-  const distritosFiltrados = distritos.filter(
-    (dist) =>
-      dist.department_id === department?.id &&
-      dist.province_id === provincia?.id,
-  );
+    useEffect(() => {
+    if (local) {
+      form.reset({
+        local_name: local.local_name || '',
+        street_name: local.street_name || '',
+        building_number: local.building_number || '',
+        region: local.region || '',
+        province: local.province || '',
+        district: local.district || '',
+        reference: local.reference || '',
+        capacity: local.capacity || 0,
+        image_url: local.image_url || null,
+      });
+    }
+  }, [local, form]);
   const updateMutation = useMutation({
     mutationFn: async (
       data: UpdateLocalPayload & { imageFile?: File | null },
@@ -155,7 +161,7 @@ function EditLocalComponent() {
         description: 'El local ha sido actualizado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['local', id] });
-      setIsEditing(false);
+      //setIsEditing(false);
       navigate({ to: '/locales' });
     },
     onError: (error: any) => {
@@ -199,162 +205,38 @@ function EditLocalComponent() {
           <CardDescription>Detalles del local para editar</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
+          <FormProvider {...form}>
             <form
               className="space-y-2"
               onSubmit={form.handleSubmit((data) => {
                 updateMutation.mutate({ ...data, imageFile });
               })}
             >
-              <FormField
-                name="local_name"
-                control={control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Local</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <LocalForm
+                imagePreview={local.image_url}
+                handleImageChange={() => {}}
+                isReadOnly={false}
+                description="Edite los datos del local y guarde los cambios"
               />
-              <FormField
-                control={control}
-                name="street_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre de la calle</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name="building_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de edificio</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex gap-2">
-                <FormField
-                  control={control}
-                  name="region"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione una región" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {regiones.map((region) => (
-                            <SelectItem value={region.name}>
-                              {region.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="province"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        disabled={!form.getValues('region')}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione una provincia" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {provinciasFiltradas.map((region) => (
-                            <SelectItem value={region.name}>
-                              {region.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="district"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        disabled={!form.getValues('province')}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione un distrito" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {distritosFiltrados.map((region) => (
-                            <SelectItem key={region.name} value={region.name}>
-                              {region.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={control}
-                name="reference"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Referencia</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name="capacity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capacidad</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div>
-                <Button type="submit">Guardar</Button>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => navigate({ to: '/locales' })}
+                  className="h-10 w-30 text-base"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
+                  disabled={updateMutation.isPending}
+                >
+                  Guardar
+                </Button>
               </div>
             </form>
-          </Form>
+          </FormProvider>
         </CardContent>
       </Card>
     </div>
