@@ -81,7 +81,10 @@ function PlanesMembresiaComponent() {
       },
     });
   };
-
+  const handleView = (membershipPlan: MembershipPlan) => {
+    localStorage.setItem('currentMembershipPlan', membershipPlan.id);
+    navigate({ to: `/planes-membresia/ver`, search: { id: membershipPlan.id } });
+  };
   const handleRefresh = async () => {
     const startTime = Date.now();
     
@@ -97,7 +100,17 @@ function PlanesMembresiaComponent() {
     
     return result;
   };
+  const totalSinLimite = membershipPlans.filter(
+    (plan) =>
+      plan.reservation_limit === null ||
+      plan.reservation_limit === undefined
+  ).length;
 
+  const totalConLimite = membershipPlans.filter(
+    (plan) =>
+      plan.reservation_limit !== null &&
+      plan.reservation_limit !== undefined
+  ).length;
   if (error) return <p>Error cargando planes: {error.message}</p>;
 
   return (
@@ -108,13 +121,29 @@ function PlanesMembresiaComponent() {
       />
 
       <div className="flex-shrink-0">
-        <div className="mb-6 flex items-center">
-                     <HomeCard
+        <div className="mb-6 gap-4 flex items-center">
+          <HomeCard
              icon={<Locate className="w-8 h-8 text-violet-600" />}
              iconBgColor="bg-violet-100"
              title="Planes totales"
              description={membershipPlans.length}
              descColor="text-violet-600"
+             isLoading={isFetchingMembershipPlans}
+           />
+           <HomeCard
+             icon={<Locate className="w-8 h-8 text-green-600" />}
+             iconBgColor="bg-green-100"
+             title="Planes sin límite"
+             description={totalSinLimite}
+             descColor="text-green-600"
+             isLoading={isFetchingMembershipPlans}
+           />
+           <HomeCard
+             icon={<Locate className="w-8 h-8 text-orange-600" />}
+             iconBgColor="bg-orange-100"
+             title="Planes con límite"
+             description={totalConLimite}
+             descColor="text-orange-600"
              isLoading={isFetchingMembershipPlans}
            />
         </div>
@@ -154,6 +183,7 @@ function PlanesMembresiaComponent() {
               setPlanToDelete(plan);
               setIsDeleteModalOpen(true);
             }}
+            onView={handleView}
             resetRowSelectionTrigger={resetSelectionTrigger}
             onRefresh={handleRefresh}
             isRefreshing={isFetchingMembershipPlans}

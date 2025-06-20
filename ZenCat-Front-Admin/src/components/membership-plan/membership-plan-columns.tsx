@@ -2,15 +2,18 @@ import { ColumnDef } from '@tanstack/react-table';
 import { MembershipPlan } from '@/types/membership-plan';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Trash, MoreHorizontal } from 'lucide-react';
+import { Trash, MoreHorizontal, Eye } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { on } from 'events';
 
 interface GetMembershipPlanColumnsProps {
   onDelete: (membershipPlan: MembershipPlan) => void;
+  onView: (membershipPlan: MembershipPlan) => void;
 }
 
 export function getMembershipPlanColumns({
   onDelete,
+  onView,
 }: GetMembershipPlanColumnsProps): ColumnDef<MembershipPlan>[] {
   return [
     {
@@ -73,15 +76,15 @@ export function getMembershipPlanColumns({
         const membershipPlan = row.original;
         return (
           <div className="flex gap-2 items-center">
-            <Link to="/planes-membresia/ver" search={{ id: membershipPlan.id }}>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0 border border-black rounded-full"
-              >
-                <MoreHorizontal className="!w-5 !h-5" />
-              </Button>
-            </Link>
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(membershipPlan);
+              }}
+            >
+              <Eye className="!w-5 !h-5" />
+            </Button>
             <Button
               size="sm"
               variant="ghost"
