@@ -199,13 +199,7 @@ function EditLocalComponent() {
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="LOCALES" subtitle="Editar el local" />
-      <Card>
-        <CardHeader>
-          <CardTitle>Campos del Local</CardTitle>
-          <CardDescription>Detalles del local para editar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FormProvider {...form}>
+      <FormProvider {...form}>
             <form
               className="space-y-2"
               onSubmit={form.handleSubmit((data) => {
@@ -237,8 +231,6 @@ function EditLocalComponent() {
               </div>
             </form>
           </FormProvider>
-        </CardContent>
-      </Card>
     </div>
   );
 }

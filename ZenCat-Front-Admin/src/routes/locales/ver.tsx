@@ -53,7 +53,6 @@ export function SeeLocalPageComponent() {
     queryFn: () => localsApi.getLocalById(id!),
   });
   const [isEditing, setIsEditing] = useState(false);
-
 // 1. Siempre inicializa el formulario, aunque local sea undefined
   const localForm = useLocalForm({
     defaultValues: local || {},
@@ -119,7 +118,9 @@ export function SeeLocalPageComponent() {
       <HeaderDescriptor title="LOCALES" subtitle={!isEditing ? "Visualización del local" : "Editar local"} />
       <FormProvider {...localForm.form}>
         <form
-          onSubmit={localForm.form.handleSubmit(handleSave)}
+          onSubmit={isEditing
+            ? localForm.form.handleSubmit(handleSave)
+            : (e) => e.preventDefault()}
           className="mb-4"
         >
           
@@ -145,8 +146,9 @@ export function SeeLocalPageComponent() {
               <Button
                 type="button"
                 onClick={() => {
-                  //console.log('Click en Editar');
+                  console.log('Click en Editar , entre ');
                   setIsEditing(true)
+                  
                   localStorage.setItem('currentLocal', id? id : '');
                   navigate({ to: `/locales/editar`})
                 }}
@@ -156,10 +158,8 @@ export function SeeLocalPageComponent() {
               </Button>
               ) : (
                 <Button
-                  type="submit"
-                  
+                  type='submit'
                   className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
-                  
                 >
                   Guardar
                 </Button>
