@@ -62,7 +62,7 @@ export function getCommunityMembershipPlanColumns(
           variant="ghost"
           type="button"
           disabled={!isEditing}
-          className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-200 hover:shadow-md transition-all duration-200"
+          className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(row.original);

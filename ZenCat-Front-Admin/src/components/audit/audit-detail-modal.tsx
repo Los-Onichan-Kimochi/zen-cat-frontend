@@ -49,7 +49,26 @@ export function AuditDetailModal({
   };
 
   const formatDate = (dateString: string) => {
+    // Validate if dateString is valid before creating Date object
+    if (!dateString || dateString === '') {
+      return {
+        date: 'Fecha no disponible',
+        time: 'Hora no disponible',
+        full: 'Fecha y hora no disponibles',
+      };
+    }
+    
     const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return {
+        date: 'Fecha inválida',
+        time: 'Hora inválida',
+        full: 'Fecha y hora inválidas',
+      };
+    }
+    
     return {
       date: format(date, 'dd/MM/yyyy', { locale: es }),
       time: format(date, 'HH:mm:ss', { locale: es }),

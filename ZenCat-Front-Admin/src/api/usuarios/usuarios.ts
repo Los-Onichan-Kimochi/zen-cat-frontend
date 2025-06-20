@@ -16,14 +16,25 @@ const getHeaders = () => {
 const mapBackendUserToUser = (backendUser: any): User => {
   console.log('Mapping backend user:', backendUser);
 
+  // Mapear roles del backend al frontend
+  const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
+    switch (backendRole) {
+      case 'ADMINISTRATOR':
+        return 'admin';
+      case 'CLIENT':
+        return 'user';
+      case 'GUEST':
+        return 'guest';
+      default:
+        return 'user'; // Default fallback
+    }
+  };
+
   return {
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
-    role: (backendUser.rol || backendUser.role || 'user') as
-      | 'admin'
-      | 'user'
-      | 'guest',
+    role: mapRole(backendUser.rol || backendUser.role || 'CLIENT'),
     password: backendUser.password || '',
     isAuthenticated: false,
     permissions: backendUser.permissions || [],

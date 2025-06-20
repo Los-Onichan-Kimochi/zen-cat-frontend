@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,13 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+// Removed problematic Select components - using native HTML select instead
 import {
   Popover,
   PopoverContent,
@@ -27,15 +21,67 @@ import { CalendarIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { AuditLogFilters, ACTION_CONFIGS, ENTITY_CONFIGS } from '@/types/audit';
+import { AuditLogFilters, ACTION_CONFIGS, ENTITY_CONFIGS, AuditAction, AuditEntityType } from '@/types/audit';
 
-interface AuditFiltersModalProps {
+interface FiltersModalProps {
   isOpen: boolean;
   onClose: () => void;
   filters: AuditLogFilters;
   onFiltersChange: (filters: AuditLogFilters) => void;
   onClearFilters: () => void;
   onApplyFilters: () => void;
+}
+
+// Pre-calcular opciones para evitar recálculos en cada render
+const ACTION_OPTIONS = Object.entries(ACTION_CONFIGS).map(([key, config]) => ({
+  value: key as AuditAction,
+  label: config.label,
+  color: config.color,
+}));
+
+const ENTITY_OPTIONS = Object.entries(ENTITY_CONFIGS).map(([key, config]) => ({
+  value: key as AuditEntityType,
+  label: config.label,
+  color: config.color,
+}));
+
+const USER_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Administrador' },
+  { value: 'user', label: 'Usuario' },
+  { value: 'guest', label: 'Invitado' },
+];
+
+// Simple select component that doesn't use portals or complex focus management
+function SimpleSelect({ 
+  value, 
+  onValueChange, 
+  placeholder, 
+  options,
+  className 
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder: string;
+  options: Array<{ value: string; label: string; color?: string }>;
+  className?: string;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onValueChange(e.target.value)}
+      className={cn(
+        "w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none",
+        className
+      )}
+    >
+      <option value="" disabled hidden>{placeholder}</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 export function AuditFiltersModal({
@@ -45,284 +91,237 @@ export function AuditFiltersModal({
   onFiltersChange,
   onClearFilters,
   onApplyFilters,
-}: AuditFiltersModalProps) {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  
-  const activeFiltersCount = Object.values(filters).filter(value => 
-    value !== undefined && value !== '' && value !== null
-  ).length - 2; // Exclude page and limit from count
+}: FiltersModalProps) {
+  const [localFilters, setLocalFilters] = useState<AuditLogFilters>(filters);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
 
-  const updateFilter = (key: keyof AuditLogFilters, value: any) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value === '' || value === 'all' ? undefined : value,
-    });
-  };
+  // Sincronizar filtros locales cuando cambien los filtros externos
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
 
-  const formatDate = (date: Date | undefined) =>
-    date ? format(date, 'dd/MM/yyyy', { locale: es }) : 'Seleccionar fecha';
-
-  const handleApply = () => {
-    onApplyFilters();
-    onClose();
-  };
-
-  const handleClear = () => {
-    onClearFilters();
-  };
-
-  const handleDropdownChange = (dropdownName: string, isOpen: boolean) => {
-    if (isOpen) {
-      setOpenDropdown(dropdownName);
-    } else if (openDropdown === dropdownName) {
-      setOpenDropdown(null);
+  // Cleanup: Close popovers when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setStartDateOpen(false);
+      setEndDateOpen(false);
     }
-  };
+  }, [isOpen]);
+
+  // Memoizar contador de filtros activos
+  const activeFiltersCount = useMemo(() => {
+    return Object.entries(localFilters).filter(([key, value]) => 
+      key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
+    ).length;
+  }, [localFilters]);
+
+  const updateLocalFilter = useCallback((key: keyof AuditLogFilters, value: any) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    const clearedFilters = {
+      page: 1,
+      limit: localFilters.limit || 25,
+    };
+    setLocalFilters(clearedFilters);
+    onClearFilters();
+  }, [localFilters.limit, onClearFilters]);
+
+  const handleApplyFilters = useCallback(() => {
+    onFiltersChange(localFilters);
+    onApplyFilters();
+  }, [localFilters, onFiltersChange, onApplyFilters]);
+
+  const formatDate = useCallback((date: Date) => {
+    return format(date, 'yyyy-MM-dd');
+  }, []);
+
+  // Check if any component that creates a focus scope is open
+  const hasOpenFocusScope = startDateOpen || endDateOpen;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-6xl min-h-[50vh] max-h-[90vh] min-w-[50vw] overflow-y-auto font-montserrat animate-in fade-in-0 zoom-in-95 duration-300">
-        <DialogHeader className="pb-8">
-          <DialogTitle className="flex items-center space-x-3 text-xl">
-            <Filter className="h-6 w-6 text-gray-600" />
-            <span>Filtros Avanzados</span>
-            {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {activeFiltersCount} {activeFiltersCount === 1 ? 'filtro' : 'filtros'}
-              </Badge>
-            )}
-          </DialogTitle>
-        </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter size={20} />
+              Filtros de Auditoría
+              {activeFiltersCount > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} activo{activeFiltersCount !== 1 ? 's' : ''}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="py-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {/* User Search */}
-            <div className="space-y-4">
-              <Label htmlFor="user-search" className="text-sm font-medium text-gray-700">
-                Buscar Usuario
+          <div className="grid gap-4 py-4">
+            {/* Búsqueda de Usuario */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="user_search" className="text-right">
+                Usuario
               </Label>
               <Input
-                id="user-search"
-                placeholder="Email o nombre..."
-                value={filters.user_search || ''}
-                onChange={(e) => updateFilter('user_search', e.target.value)}
-                className="w-full h-11"
+                id="user_search"
+                placeholder="Buscar por email o ID..."
+                value={localFilters.user_search || ''}
+                onChange={(e) => updateLocalFilter('user_search', e.target.value)}
+                className="col-span-3"
               />
             </div>
 
-            {/* Action Filter */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Tipo de Acción</Label>
-              <Select
-                value={filters.action || 'all'}
-                onValueChange={(value) => updateFilter('action', value)}
-                open={openDropdown === 'action'}
-                onOpenChange={(isOpen) => handleDropdownChange('action', isOpen)}
-              >
-                <SelectTrigger className="h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm">
-                  <SelectValue placeholder="Seleccionar acción" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las acciones</SelectItem>
-                  {Object.entries(ACTION_CONFIGS).map(([action, config]) => (
-                    <SelectItem key={action} value={action}>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={`${config.className} text-xs px-2 py-0`}>
-                          {config.label}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Acción */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="action" className="text-right">
+                Acción
+              </Label>
+                          <div className="col-span-3">
+              <SimpleSelect
+                value={localFilters.action || 'all_actions'}
+                onValueChange={(value) => updateLocalFilter('action', value === 'all_actions' ? undefined : value)}
+                placeholder="Seleccionar acción..."
+                options={[
+                  { value: 'all_actions', label: 'Todas las acciones' },
+                  ...ACTION_OPTIONS
+                ]}
+              />
+            </div>
             </div>
 
-            {/* Entity Type Filter */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Tipo de Entidad</Label>
-              <Select
-                value={filters.entity_type || 'all'}
-                onValueChange={(value) => updateFilter('entity_type', value)}
-                open={openDropdown === 'entity_type'}
-                onOpenChange={(isOpen) => handleDropdownChange('entity_type', isOpen)}
-              >
-                <SelectTrigger className="h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm">
-                  <SelectValue placeholder="Seleccionar entidad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las entidades</SelectItem>
-                  {Object.entries(ENTITY_CONFIGS).map(([entity, config]) => (
-                    <SelectItem key={entity} value={entity}>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={`${config.className} text-xs px-2 py-0`}>
-                          {config.label}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Tipo de Entidad */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="entity_type" className="text-right">
+                Entidad
+              </Label>
+                          <div className="col-span-3">
+              <SimpleSelect
+                value={localFilters.entity_type || 'all_entities'}
+                onValueChange={(value) => updateLocalFilter('entity_type', value === 'all_entities' ? undefined : value)}
+                placeholder="Seleccionar entidad..."
+                options={[
+                  { value: 'all_entities', label: 'Todas las entidades' },
+                  ...ENTITY_OPTIONS
+                ]}
+              />
+            </div>
             </div>
 
-            {/* User Role Filter */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Rol de Usuario</Label>
-              <Select
-                value={filters.user_role || 'all'}
-                onValueChange={(value) => updateFilter('user_role', value)}
-                open={openDropdown === 'user_role'}
-                onOpenChange={(isOpen) => handleDropdownChange('user_role', isOpen)}
-              >
-                <SelectTrigger className="h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm">
-                  <SelectValue placeholder="Seleccionar rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los roles</SelectItem>
-                  <SelectItem value="admin">
-                    <Badge className="bg-red-50 text-red-700 border-red-200 text-xs px-2 py-0">
-                      Admin
-                    </Badge>
-                  </SelectItem>
-                  <SelectItem value="user">
-                    <Badge className="bg-gray-50 text-gray-700 border-gray-200 text-xs px-2 py-0">
-                      User
-                    </Badge>
-                  </SelectItem>
-                  <SelectItem value="guest">
-                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-2 py-0">
-                      Guest
-                    </Badge>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Rol de Usuario */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="user_role" className="text-right">
+                Rol
+              </Label>
+                          <div className="col-span-3">
+              <SimpleSelect
+                value={localFilters.user_role || 'all_roles'}
+                onValueChange={(value) => updateLocalFilter('user_role', value === 'all_roles' ? undefined : value)}
+                placeholder="Seleccionar rol..."
+                options={[
+                  { value: 'all_roles', label: 'Todos los roles' },
+                  ...USER_ROLE_OPTIONS
+                ]}
+              />
+            </div>
             </div>
 
-            {/* Success Filter */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Estado</Label>
-              <Select
-                value={filters.success?.toString() || 'all'}
-                onValueChange={(value) => updateFilter('success', value === 'all' ? undefined : value === 'true')}
-                open={openDropdown === 'success'}
-                onOpenChange={(isOpen) => handleDropdownChange('success', isOpen)}
-              >
-                <SelectTrigger className="h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="true">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Exitoso</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="false">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span>Con errores</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Fecha de Inicio */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Desde</Label>
+              <div className="col-span-3">
+                <Popover open={startDateOpen && isOpen} onOpenChange={setStartDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !localFilters.start_date && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {localFilters.start_date ? (
+                        format(new Date(localFilters.start_date), 'PPP', { locale: es })
+                      ) : (
+                        'Fecha inicio'
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={localFilters.start_date ? new Date(localFilters.start_date) : undefined}
+                      onSelect={(date) => {
+                        updateLocalFilter('start_date', date ? formatDate(date) : undefined);
+                        setStartDateOpen(false);
+                      }}
+                      disabled={(date) => date > new Date()}
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
-            {/* Start Date */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Fecha Inicio</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm",
-                      !filters.start_date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.start_date 
-                      ? formatDate(new Date(filters.start_date))
-                      : 'Seleccionar fecha inicio'
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.start_date ? new Date(filters.start_date) : undefined}
-                    onSelect={(date) => updateFilter('start_date', date?.toISOString().split('T')[0])}
-                    locale={es}
-                    initialFocus
-                    disabled={(date) => date > new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* End Date */}
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700">Fecha Fin</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-11 transition-all duration-200 hover:border-gray-400 hover:shadow-sm",
-                      !filters.end_date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.end_date 
-                      ? formatDate(new Date(filters.end_date))
-                      : 'Seleccionar fecha fin'
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.end_date ? new Date(filters.end_date) : undefined}
-                    onSelect={(date) => updateFilter('end_date', date?.toISOString().split('T')[0])}
-                    locale={es}
-                    initialFocus
-                    disabled={(date) => {
-                      const today = new Date();
-                      const startDate = filters.start_date ? new Date(filters.start_date) : null;
-                      return date > today || (startDate ? date < startDate : false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
+            {/* Fecha de Fin */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Hasta</Label>
+              <div className="col-span-3">
+                <Popover open={endDateOpen && isOpen} onOpenChange={setEndDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !localFilters.end_date && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {localFilters.end_date ? (
+                        format(new Date(localFilters.end_date), 'PPP', { locale: es })
+                      ) : (
+                        'Fecha fin'
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={localFilters.end_date ? new Date(localFilters.end_date) : undefined}
+                      onSelect={(date) => {
+                        updateLocalFilter('end_date', date ? formatDate(date) : undefined);
+                        setEndDateOpen(false);
+                      }}
+                      disabled={(date) => {
+                        const minDate = localFilters.start_date ? new Date(localFilters.start_date) : undefined;
+                        return date > new Date() || (minDate && date < minDate);
+                      }}
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </div>
-        </div>
 
-        <DialogFooter className="flex justify-between pt-8 border-t mt-6">
-          <Button 
-            variant="outline" 
-            onClick={handleClear}
-            disabled={activeFiltersCount === 0}
-            className="text-gray-600 h-11 px-6 transition-all duration-200 hover:shadow-md hover:border-gray-400 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Limpiar Filtros
-          </Button>
-          <div className="flex space-x-4">
+          <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={onClose} 
-              className="h-11 px-6 transition-all duration-200 hover:shadow-md hover:border-gray-400 active:scale-95"
+              onClick={handleClearFilters}
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
             >
-              Cancelar
+              Limpiar Filtros
             </Button>
             <Button 
-              onClick={handleApply} 
-              className="bg-black hover:bg-gray-800 text-white h-11 px-6 transition-all duration-200 hover:shadow-lg active:scale-95"
+              onClick={handleApplyFilters}
+              className="transition-all duration-200 hover:bg-black hover:text-white"
             >
               Aplicar Filtros
             </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-} 
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  } 

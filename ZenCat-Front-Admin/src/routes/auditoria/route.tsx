@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
@@ -22,7 +22,6 @@ function AuditoriaComponent() {
     page: 1,
     limit: 25,
   });
-  const [tempFilters, setTempFilters] = useState<AuditLogFilters>(filters);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -53,50 +52,57 @@ function AuditoriaComponent() {
     refetchOnWindowFocus: false,
   });
 
-  const handleFiltersChange = (newFilters: AuditLogFilters) => {
-    setTempFilters(newFilters);
-  };
+  // Memoizar si hay filtros activos para evitar recálculos
+  const hasActiveFilters = useMemo(() => {
+    return Object.entries(filters).some(([key, value]) => 
+      key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
+    );
+  }, [filters]);
 
-  const handleApplyFilters = () => {
+  const handleFiltersChange = useCallback((newFilters: AuditLogFilters) => {
     setFilters({
-      ...tempFilters,
+      ...newFilters,
       page: 1, // Reset to first page when filters change
     });
-  };
+  }, []);
 
-  const handleClearFilters = () => {
+  const handleApplyFilters = useCallback(() => {
+    // This will be called by the modal after updating filters
+    setIsFiltersModalOpen(false);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
     const clearedFilters = {
       page: 1,
       limit: filters.limit,
     };
-    setTempFilters(clearedFilters);
     setFilters(clearedFilters);
-  };
+  }, [filters.limit]);
 
-  const handleOpenFiltersModal = () => {
-    setTempFilters(filters); // Sync temp filters with current filters
+  const handleOpenFiltersModal = useCallback(() => {
+    // Close detail modal if open to prevent focus conflicts
+    if (isDetailModalOpen) {
+      setIsDetailModalOpen(false);
+      setSelectedLog(null);
+    }
     setIsFiltersModalOpen(true);
-  };
+  }, [isDetailModalOpen]);
 
-  const handleViewLog = (log: AuditLog) => {
+  const handleViewLog = useCallback((log: AuditLog) => {
+    // Close filters modal if open to prevent focus conflicts
+    if (isFiltersModalOpen) {
+      setIsFiltersModalOpen(false);
+    }
     setSelectedLog(log);
     setIsDetailModalOpen(true);
-  };
+  }, [isFiltersModalOpen]);
 
-  const handleExportLogs = async () => {
-    try {
-      // TODO: Implement export functionality
-      toast.info('Exportar Logs', {
-        description: 'Funcionalidad de exportación en desarrollo',
-      });
-    } catch (error) {
-      toast.error('Error al Exportar', {
-        description: 'No se pudieron exportar los logs de auditoría',
-      });
-    }
-  };
+  const handleCloseDetailModal = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedLog(null);
+  }, []);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     const startTime = Date.now();
     
     // Ejecutar ambos refetch en paralelo
@@ -114,12 +120,7 @@ function AuditoriaComponent() {
     }
     
     return { logsResult, statsResult };
-  };
-
-  // Check if there are active filters (excluding page and limit)
-  const hasActiveFilters = Object.entries(filters).some(([key, value]) => 
-    key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
-  );
+  }, [refetchLogs, refetchStats]);
 
   if (errorLogs) {
     return (
@@ -164,7 +165,7 @@ function AuditoriaComponent() {
           <AuditTable
             data={auditData?.logs || []}
             onView={handleViewLog}
-            onExport={handleExportLogs}
+            onExport={undefined}
             onOpenFilters={handleOpenFiltersModal}
             onRefresh={handleRefresh}
             isLoading={isLoadingLogs}
@@ -178,7 +179,7 @@ function AuditoriaComponent() {
       <AuditFiltersModal
         isOpen={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
-        filters={tempFilters}
+        filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
         onApplyFilters={handleApplyFilters}
@@ -187,10 +188,7 @@ function AuditoriaComponent() {
       {/* Detail Modal */}
       <AuditDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedLog(null);
-        }}
+        onClose={handleCloseDetailModal}
         auditLog={selectedLog}
       />
     </div>

@@ -20,7 +20,7 @@ export function ViewToolbar({
     <div className="flex justify-end gap-3 mb-4 font-montserrat">
       <Button
         onClick={onAddClick}
-        className="h-10 bg-black text-white font-bold hover:bg-gray-800 transition-all duration-200"
+        className="h-10 bg-black text-white font-bold hover:bg-black hover:text-white transition-all duration-200"
       >
         <Plus className="mr-2 h-4 w-4" /> {addButtonText}
       </Button>
@@ -28,7 +28,7 @@ export function ViewToolbar({
       {showBulkUpload && (
         <Button
           size="sm"
-          className="h-10 bg-black text-white font-bold hover:bg-gray-800 transition-all duration-200 cursor-pointer"
+          className="h-10 bg-black text-white font-bold hover:bg-black hover:text-white transition-all duration-200 cursor-pointer"
           onClick={onBulkUploadClick || (() => {})}
         >
           <Upload className="mr-2 h-4 w-4" /> {bulkUploadButtonText}

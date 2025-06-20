@@ -1,5 +1,4 @@
 'use client';
-import { useMemo, useCallback, useEffect, memo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,12 +10,14 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { AuditLog, AuditLogFilters } from '@/types/audit';
-import { getAuditColumns } from './columns';
+import { ErrorLog } from '@/types/error-log';
+import { getErrorColumns } from './columns';
+import { useEffect, useCallback } from 'react';
+import { getActionConfig, getEntityConfig } from '@/types/audit';
 
-interface AuditTableProps {
-  data: AuditLog[];
-  onView?: (log: AuditLog) => void;
+interface ErrorTableProps {
+  data: ErrorLog[];
+  onView?: (log: ErrorLog) => void;
   onExport?: () => void;
   onOpenFilters?: () => void;
   onRefresh?: () => void;
@@ -26,7 +27,7 @@ interface AuditTableProps {
   hasActiveFilters?: boolean;
 }
 
-export const AuditTable = memo(function AuditTable({
+export function ErrorTable({
   data,
   onView,
   onExport,
@@ -36,7 +37,7 @@ export const AuditTable = memo(function AuditTable({
   isRefreshing = false,
   resetSelection = 0,
   hasActiveFilters = false,
-}: AuditTableProps) {
+}: ErrorTableProps) {
   const {
     sorting,
     setSorting,
@@ -52,60 +53,63 @@ export const AuditTable = memo(function AuditTable({
     setPagination,
   } = useDataTable();
 
-  const columns = useMemo(() => {
-    return getAuditColumns({ onView });
-  }, [onView]);
+  const columns = getErrorColumns({ onView });
 
+  // Función de filtro global personalizada que incluye búsqueda en badges
   const globalFilterFn = useCallback((row: any, columnIds: string[], filterValue: string) => {
     if (!filterValue) return true;
     
     const searchValue = filterValue.toLowerCase();
     const rowData = row.original;
 
+    // Lista de todas las posibles coincidencias
     const searchableValues = [
+      // Campos básicos
       rowData.userEmail,
       rowData.ipAddress,
       rowData.userAgent,
       rowData.entityName,
       rowData.errorMessage,
       
+      // Action labels específicos
+      'fallo de autenticación',
+      'fallo al crear',
+      'fallo al actualizar', 
+      'fallo al eliminar',
       'inicio de sesión',
       'crear registro',
       'actualizar datos',
       'eliminar registro',
-      'creación masiva',
-      'eliminación masiva',
-      'registro de usuario',
-      'suscripción',
-      'cancelar suscripción',
-      'nueva reserva',
-      'cancelar reserva',
-      'actualizar perfil',
       
+      // Entity labels específicos
       'usuario del sistema',
       'comunidad',
       'profesional',
       'local',
-      'sede',
-      'plan de membresía',
       'servicio',
       'sesión',
-      'clase',
       'reserva',
-      'membresía',
-      'proceso de registro',
-      'plan de comunidad',
-      'servicio comunitario',
-      'asignación servicio-local',
-      'asignación servicio-profesional'
+      
+      // Error descriptions específicos  
+      'credenciales incorrectas',
+      'error al crear usuario del sistema',
+      'error al crear',
+      'error al actualizar',
+      'error al eliminar',
+      'error del sistema',
+      'sin autorización',
+      'datos inválidos',
+      'registro no encontrado'
     ].filter(Boolean);
 
+    // Buscar en todos los valores
     for (const value of searchableValues) {
       if (value && value.toString().toLowerCase().includes(searchValue)) {
         return true;
       }
     }
 
+    // Buscar en fecha formateada
     if (rowData.createdAt) {
       try {
         const date = new Date(rowData.createdAt);
@@ -157,7 +161,7 @@ export const AuditTable = memo(function AuditTable({
     <div className="-mx-4 flex-1 flex flex-col px-4 py-2 h-full">
       <DataTableToolbar
         table={table}
-        filterPlaceholder="Buscar en auditoría..."
+        filterPlaceholder="Buscar en logs de errores..."
         showSortButton
         showFilterButton={!!onOpenFilters}
         showExportButton={true}
@@ -169,7 +173,7 @@ export const AuditTable = memo(function AuditTable({
         isBulkDeleteEnabled={false}
         isBulkDeleting={false}
         hasActiveFilters={hasActiveFilters}
-        exportFileName="audit-logs"
+        exportFileName="error-logs"
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
@@ -177,4 +181,6 @@ export const AuditTable = memo(function AuditTable({
       <DataTablePagination table={table} showRowSelection={false} />
     </div>
   );
-}); 
+}
+
+export default ErrorTable; 

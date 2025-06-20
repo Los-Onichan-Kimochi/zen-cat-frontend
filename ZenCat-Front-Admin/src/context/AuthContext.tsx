@@ -6,6 +6,7 @@ import {
   useEffect,
 } from 'react';
 import { User } from '@/types/user';
+import { authService } from '@/api/auth/auth-service';
 import Cookies from 'js-cookie';
 
 interface AuthContextType {
@@ -13,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (userData: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,10 +60,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log('AuthProvider: Logout called');
     setUser(null);
     localStorage.removeItem('user');
+    await authService.logout();
     window.location.href = '/login';
   };
 
