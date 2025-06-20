@@ -2,6 +2,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
+import { showImageUpdateProcessing } from '@/utils/image-toast-helpers';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -191,9 +192,7 @@ function EditCommunityPage() {
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
       imageUrl = `community-${timestamp}.${fileExtension}`;
       
-      toast.info('Procesando Imagen', {
-        description: 'Preparando imagen para actualizar en S3.',
-      });
+      showImageUpdateProcessing(toast);
     }
 
     try {

@@ -2,6 +2,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
+import { showImageUploadProcessing } from '@/utils/image-toast-helpers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useCommunityForm } from '@/hooks/use-community-basic-form';
@@ -49,8 +50,6 @@ function AddCommunityPage() {
     watch,
     reset,
     handleImageChange,
-    setImagePreview,
-    setImageBytes,
   } = useCommunityForm();
 
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
@@ -85,9 +84,7 @@ function AddCommunityPage() {
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
       imageUrl = `community-${timestamp}.${fileExtension}`;
       
-      toast.info('Procesando Imagen', {
-        description: 'Preparando imagen para subir a S3.',
-      });
+      showImageUploadProcessing(toast);
     }
 
     try {

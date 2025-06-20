@@ -80,45 +80,6 @@ export function base64ToImageUrl(base64String: string): string {
 }
 
 /**
- * Converts a byte array from backend to a blob URL for display
- * @deprecated Use base64ToImageUrl instead
- */
-export function byteArrayToImageUrl(byteArray: number[]): string {
-  console.log('byteArrayToImageUrl - Recibido array de longitud:', byteArray.length);
-  console.log('byteArrayToImageUrl - Primeros 10 bytes:', byteArray.slice(0, 10));
-  
-  const uint8Array = new Uint8Array(byteArray);
-  console.log('byteArrayToImageUrl - Uint8Array creado, longitud:', uint8Array.length);
-  
-  // Try to detect image type from first few bytes
-  let mimeType = 'image/jpeg'; // default
-  if (uint8Array.length >= 4) {
-    // Check for PNG signature
-    if (uint8Array[0] === 0x89 && uint8Array[1] === 0x50 && uint8Array[2] === 0x4E && uint8Array[3] === 0x47) {
-      mimeType = 'image/png';
-    }
-    // Check for JPEG signature
-    else if (uint8Array[0] === 0xFF && uint8Array[1] === 0xD8) {
-      mimeType = 'image/jpeg';
-    }
-    // Check for GIF signature
-    else if (uint8Array[0] === 0x47 && uint8Array[1] === 0x49 && uint8Array[2] === 0x46) {
-      mimeType = 'image/gif';
-    }
-  }
-  
-  console.log('byteArrayToImageUrl - MIME type detectado:', mimeType);
-  
-  const blob = new Blob([uint8Array], { type: mimeType });
-  console.log('byteArrayToImageUrl - Blob creado, tamaño:', blob.size);
-  
-  const url = URL.createObjectURL(blob);
-  console.log('byteArrayToImageUrl - URL generada:', url);
-  
-  return url;
-}
-
-/**
  * Enhanced image file handler that also converts to byte array
  */
 export function handleImageFileWithBytes(

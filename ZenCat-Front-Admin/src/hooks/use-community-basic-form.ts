@@ -15,6 +15,10 @@ export const communityFormSchema = z.object({
 export type CommunityFormData = z.infer<typeof communityFormSchema>;
 
 export function useCommunityForm() {
+  // Representaciones de la imagen:
+  // 1. File: Objeto File original del navegadorl
+  // 2. Preview: Data URL para mostrar en la UI
+  // 3. Bytes: Array numérico para enviar al backend
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBytes, setImageBytes] = useState<number[] | null>(null);
