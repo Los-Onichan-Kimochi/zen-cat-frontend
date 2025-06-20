@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/context/ToastContext';
 
 const sessionSearchSchema = z.object({
@@ -110,6 +110,24 @@ function SessionDetailComponent() {
     queryFn: localsApi.getLocals,
     enabled: !!session,
   });
+
+  // Find professional and local details - use useMemo to update when formData changes in edit mode
+  const professional = useMemo(() => {
+    if (!professionals) return null;
+    return isEditing 
+      ? professionals.find(p => p.id === formData.professional_id)
+      : professionals.find(p => p.id === session?.professional_id);
+  }, [professionals, session?.professional_id, formData.professional_id, isEditing]);
+
+  const local = useMemo(() => {
+    if (!locals) return null;
+    return isEditing
+      ? locals.find(l => l.id === formData.local_id)
+      : locals.find(l => l.id === session?.local_id);
+  }, [locals, session?.local_id, formData.local_id, isEditing]);
+
+  // Check if session is virtual - use formData when in edit mode
+  const isVirtual = isEditing ? formData.is_virtual : (session && !session.local_id);
 
   // Update session mutation
   const updateSessionMutation = useMutation({
@@ -235,13 +253,6 @@ function SessionDetailComponent() {
     }
   };
 
-  // Find professional and local details
-  const professional = professionals?.find(p => p.id === session?.professional_id);
-  const local = locals?.find(l => l.id === session?.local_id);
-  
-  // Check if session is virtual
-  const isVirtual = session && !session.local_id;
-
   // Format date and times for display
   const formattedDate = session?.date 
     ? format(new Date(session.date), "yyyy-MM-dd")
@@ -285,42 +296,11 @@ function SessionDetailComponent() {
 
   return (
     <div className="p-6 h-full">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center mb-6">
         <Button variant="outline" onClick={() => navigate({ to: '/sesiones' })}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
-        {isEditing ? (
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => setIsEditing(false)}
-              variant="outline"
-              className="flex items-center"
-            >
-              <X className="mr-2 h-4 w-4" />
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="bg-green-600 text-white hover:bg-green-700 flex items-center"
-              disabled={updateSessionMutation.isPending}
-            >
-              {updateSessionMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Guardar Cambios
-            </Button>
-          </div>
-        ) : (
-          <Button
-            onClick={() => setIsEditing(true)}
-            className="bg-black text-white hover:bg-gray-800"
-          >
-            Editar Sesión
-          </Button>
-        )}
       </div>
 
       <div className="max-w-6xl mx-auto">
@@ -339,7 +319,7 @@ function SessionDetailComponent() {
                   {/* Paso 1: Información básica */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         1
                       </span>
                       Información Básica
@@ -388,7 +368,7 @@ function SessionDetailComponent() {
                   {/* Paso 2: Profesional */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         2
                       </span>
                       Profesional
@@ -421,7 +401,7 @@ function SessionDetailComponent() {
                   {/* Paso 3: Tipo de sesión */}
                   <div className="space-y-4 border-b pb-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         3
                       </span>
                       Tipo de Sesión
@@ -483,7 +463,7 @@ function SessionDetailComponent() {
                   {/* Paso 4: Horario */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         4
                       </span>
                       Horario de la Sesión
@@ -520,7 +500,7 @@ function SessionDetailComponent() {
                   {/* Estado de la sesión */}
                   <div className="space-y-4 border-t pt-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                      <span className="bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
                         5
                       </span>
                       Estado de la Sesión
@@ -687,6 +667,39 @@ function SessionDetailComponent() {
                 )}
               </CardContent>
             </Card>
+            
+            {/* Botón de editar fuera de cualquier tarjeta */}
+            {isEditing ? (
+              <div className="flex space-x-2 mt-6">
+                <Button
+                  onClick={() => setIsEditing(false)}
+                  variant="outline"
+                  className="flex items-center w-1/2"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  className="bg-green-600 text-white hover:bg-green-700 flex items-center w-1/2"
+                  disabled={updateSessionMutation.isPending}
+                >
+                  {updateSessionMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Guardar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => setIsEditing(true)}
+                className="w-full bg-black text-white hover:bg-gray-800 mt-6"
+              >
+                Editar Sesión
+              </Button>
+            )}
           </div>
         </div>
       </div>
