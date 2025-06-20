@@ -80,8 +80,7 @@ export const ReservationProvider: React.FC<ReservationProviderProps> = ({
   children,
 }) => {
   const [reservationData, setReservationData] = useState<ReservationData>({
-    communityId: 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450', // ZenCat Wellness Community (UUID fijo)
-    userId: '11111111-1111-1111-1111-111111111111', // Usuario Demo (UUID fijo)
+    // Se puede inicializar vacío o con valores por defecto según se necesite
   });
 
   const updateReservation = useCallback((data: Partial<ReservationData>) => {
@@ -90,8 +89,7 @@ export const ReservationProvider: React.FC<ReservationProviderProps> = ({
 
   const resetReservation = useCallback(() => {
     setReservationData({
-      communityId: 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450', // ZenCat Wellness Community (UUID fijo)
-      userId: '11111111-1111-1111-1111-111111111111', // Usuario Demo (UUID fijo)
+      // Resetear a un estado vacío o con valores por defecto
     });
   }, []);
 

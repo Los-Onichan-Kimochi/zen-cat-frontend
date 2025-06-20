@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { SuspendMembershipDialog } from './SuspendMembershipDialog';
 import { CancelMembershipDialog } from './CancelMembershipDialog';
+import { useNavigate } from '@tanstack/react-router';
 
 interface TabCommunityGeneralProps {
   community: Community | null;
@@ -13,10 +14,21 @@ interface TabCommunityGeneralProps {
 export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const navigate = useNavigate();
 
   if (!community) {
     return <div>No hay información disponible</div>;
   }
+
+  const handleNewReservation = () => {
+    // Navegar a la página de servicios pasando el communityId como search param
+    navigate({
+      to: '/reserva/servicios',
+      search: {
+        communityId: community.id
+      }
+    });
+  };
 
   const handleSuspendMembership = () => {
     // Aquí iría la lógica para suspender la membresía en la BD
@@ -44,8 +56,8 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
               {community.status === 'active'
                 ? 'Membresía activa'
                 : community.status === 'suspended'
-                ? 'Membresía suspendida'
-                : 'Membresía vencida'}
+                  ? 'Membresía suspendida'
+                  : 'Membresía vencida'}
             </p>
           </div>
         </div>
@@ -62,7 +74,10 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
           {/* Bloque de botones */}
           <div className="space-y-2 px-4 border-r border-l border-gray-500">
             <h2 className='font-bold text-2xl'>Acciones</h2>
-            <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+            <Button
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              onClick={handleNewReservation}
+            >
               Nueva reserva
             </Button>
             <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
@@ -71,14 +86,14 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
             <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
               Ver membresías
             </Button>
-            <Button 
+            <Button
               className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
               onClick={() => setShowSuspendDialog(true)}
               disabled={community.status !== 'active'}
             >
               Suspender membresía
             </Button>
-            <Button 
+            <Button
               className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
               onClick={() => setShowCancelDialog(true)}
             >
@@ -94,15 +109,15 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
                 <p>{community.planType === 'MONTHLY' ? 'Plan básico mensual' : 'Plan anual'}</p>
               </div>
 
-            <div className="flex justify-between">
-              <p className="text-gray-600">Reservas disponibles:</p>
-              <p></p>
-            </div>
+              <div className="flex justify-between">
+                <p className="text-gray-600">Reservas disponibles:</p>
+                <p></p>
+              </div>
 
-            <div className="flex justify-between">
-              <p className="text-gray-600">Reservas usadas:</p>
-              <p></p>
-            </div>
+              <div className="flex justify-between">
+                <p className="text-gray-600">Reservas usadas:</p>
+                <p></p>
+              </div>
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Fecha de inicio:</p>
@@ -133,7 +148,7 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
         onSuspend={handleSuspendMembership}
         communityName={community.name}
       />
-      
+
       <CancelMembershipDialog
         isOpen={showCancelDialog}
         onClose={() => setShowCancelDialog(false)}
