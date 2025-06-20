@@ -1,4 +1,5 @@
 import {
+  BulkCreateServicePayload,//para carga masiva
   Service,
   CreateServicePayload,
   UpdateServicePayload,
@@ -7,6 +8,26 @@ import {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const servicesApi = {
+  bulkCreateServices: async (payload: BulkCreateServicePayload) : Promise<Service[]> => {
+    console.log('Payload enviado a /service/bulk-create:', payload);
+
+    const response = await fetch(`${API_BASE_URL}/service/bulk-create/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload), // enviamos como { services: [...] }
+    });
+
+    console.log('Código de respuesta:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Respuesta del servidor:', errorText);
+      throw new Error('Error al cargar servicios masivamente');
+    }
+
+    return response.json();
+  },
+
   getServices: async (): Promise<Service[]> => {
     const response = await fetch(`${API_BASE_URL}/service/`);
     if (!response.ok) {

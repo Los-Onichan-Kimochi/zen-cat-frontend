@@ -8,9 +8,10 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
+import { BulkCreateLocalPayload } from '@/types/local'; //adicionar
 import { LocalProvider, useLocal } from '@/context/LocalesContext';
 import { LocalsTable } from '@/components/locals/local-table';
-import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog} from '@/components/common/confirm-delete-dialogs';
+import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog } from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { Button } from '@/components/ui/button';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
@@ -29,7 +30,7 @@ import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
 
 import { toast } from 'sonner';
-import { Dialog, DialogContent} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 
 
@@ -89,33 +90,37 @@ function LocalesComponent() {
       setResetSelectionTrigger(prev => prev + 1);
     },
   });
-
-  const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
-    mutationFn: localsApi.bulkCreateLocals,
-    onSuccess: async () => {
-      toast.success('Locales creados exitosamente');
-      await refetchLocals();
-      queryClient.invalidateQueries({ queryKey: ['locals'] });
-      setShowUploadDialog(false);
-      setShowSuccess(true);
-    },
-    onError: (error: Error) => {
-      toast.error('Error durante la carga masiva', { description: error.message });
-    },
-  });
-
+  /** 
+    const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation<
+      Local[],                          // Tipo de dato que devuelve el servidor
+      Error,                            // Tipo de error
+      BulkCreateLocalPayload            // Tipo de dato que se le pasa (¡la clave!)
+    >({
+      mutationFn: localsApi.bulkCreateLocals,
+      onSuccess: async () => {
+        toast.success('Locales creados exitosamente');
+        await refetchLocals();
+        queryClient.invalidateQueries({ queryKey: ['locals'] });
+        setShowUploadDialog(false);
+        setShowSuccess(true);
+      },
+      onError: (error: Error) => {
+        toast.error('Error durante la carga masiva', { description: error.message });
+      },
+    });
+  */
   const { maxRegion, maxCount } = useMemo(() => {
     const regionCounts = localsData?.reduce(
-    (acc, local) => {
+      (acc, local) => {
         const region = local.region; // Asegúrate de que `region` es el nombre correcto
         acc[region] = (acc[region] || 0) + 1;
         return acc;
       },
-    {} as Record<string, number>,
-  );
+      {} as Record<string, number>,
+    );
     let maxRegion = '';
     let maxCount = 0;
-  
+
     if (regionCounts) {
       for (const [region, count] of Object.entries(regionCounts)) {
         if (count > maxCount) {
@@ -129,19 +134,19 @@ function LocalesComponent() {
   const handleEdit = (local: Local) => {
     setCurrent(local);
     localStorage.setItem('currentLocal', local.id);
-    navigate({ to: '/locales/editar', search: { id: local.id }  });
+    navigate({ to: '/locales/editar', search: { id: local.id } });
   };
 
   const handleView = (local: Local) => {
     localStorage.setItem('currentLocal', local.id);
-    navigate({ to: `/locales/ver` , search: { id: local.id } });
+    navigate({ to: `/locales/ver`, search: { id: local.id } });
   };
 
   const handleDelete = (local: Local) => {
     setLocalToDelete(local);
     setIsDeleteModalOpen(true);
   };
-  
+
   if (errorLocals) return <p>Error cargando locales: {errorLocals.message}</p>;
 
   return (
@@ -185,40 +190,73 @@ function LocalesComponent() {
           resetRowSelectionTrigger={resetSelectionTrigger}
         />
       )}
+
       <BulkCreateDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Locales"
         expectedExcelColumns={[
-          'Nombre del Local',
-          'Nombre de la Calle',
-          'Número de Edificio',
-          'Distrito',
-          'Provincia',
-          'Región',
-          'Referencia',
-          'Capacidad',
-          'URL de Imagen'
+          'Nombre del Local', 'Nombre de la Calle', 'Número de Edificio', 'Distrito',
+          'Provincia', 'Región', 'Referencia', 'Capacidad', 'URL de Imagen'
         ]}
         dbFieldNames={[
-          'local_name',
-          'street_name',
-          'building_number',
-          'district',
-          'province',
-          'region',
-          'reference',
-          'capacity',
-          'image_url'
+          'local_name', 'street_name', 'building_number', 'district',
+          'province', 'region', 'reference', 'capacity', 'image_url'
         ]}
         onParsedData={async (data) => {
           try {
-            bulkCreateLocals(data);
-          } catch (error) {
-            console.error(error);
+            const transformedData = data.map((item) => ({
+              local_name: item.local_name?.toString().trim(),
+              street_name: item.street_name?.toString().trim(),
+              building_number: item.building_number?.toString().trim(),
+              district: item.district?.toString().trim(),
+              province: item.province?.toString().trim(),
+              region: item.region?.toString().trim(),
+              reference: item.reference?.toString().trim(),
+              capacity: Number(item.capacity),
+              image_url: item.image_url?.toString().trim(),
+            }));
+
+            // Validación básica
+            const isValid = transformedData.every((item) =>
+              item.local_name &&
+              item.street_name &&
+              item.building_number &&
+              item.district &&
+              item.province &&
+              item.region &&
+              item.reference &&
+              !isNaN(item.capacity) &&
+              item.image_url
+            );
+
+            if (!isValid) {
+              toast.error('Algunos registros tienen campos vacíos o inválidos.');
+              console.error('Datos inválidos:', transformedData);
+              return;
+            }
+
+            console.log('Request final:', JSON.stringify({ locals: transformedData }, null, 2));
+            await localsApi.bulkCreateLocals({ locals: transformedData });
+            queryClient.invalidateQueries({ queryKey: ['locals'] });
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+
+          } catch (error: any) {
+            if (error instanceof Error) {
+              toast.error('Error durante la carga masiva', {
+                description: error.message,
+              });
+            } else {
+              toast.error('Error desconocido durante la carga masiva');
+            }
+            console.error('Detalle del error:', error);
           }
         }}
+
       />
+
+
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}

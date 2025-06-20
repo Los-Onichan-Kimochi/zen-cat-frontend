@@ -1,4 +1,10 @@
-import { Local, BulkDeleteLocalPayload, CreateLocalPayload, UpdateLocalPayload } from '@/types/local';
+import {
+  BulkCreateLocalPayload,  
+  BulkDeleteLocalPayload, 
+  Local, 
+  CreateLocalPayload, 
+  UpdateLocalPayload,
+} from '@/types/local';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -76,16 +82,19 @@ export const localsApi = {
     }
   },
   
-  bulkCreateLocals: async (locals: CreateLocalPayload[]): Promise<Local[]> => {
+  bulkCreateLocals: async (payload: BulkCreateLocalPayload): Promise<Local[]> => {
     const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ locals }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      throw new Error('Error bulk creating locals');
+      //throw new Error('Error bulk creating locals');
+      // para corroborar
+      const text = await response.text();
+      throw new Error(text);
     }
     return response.json();
   },

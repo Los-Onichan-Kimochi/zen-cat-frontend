@@ -1,4 +1,5 @@
 import {
+  BulkCreateProfessionalPayload,
   Professional,
   CreateProfessionalPayload,
   UpdateProfessionalPayload,
@@ -77,6 +78,21 @@ export const professionalsApi = {
     }
   },
 
+  bulkCreateProfessionals: async (payload: BulkCreateProfessionalPayload
+  ): Promise<Professional[]> => {
+    const response = await fetch(`${API_BASE_URL}/professional/bulk-create/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text);
+    }
+
+    return response.json();
+  },
   bulkDeleteProfessionals: async (ids: string[]): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/professional/bulk-delete/`, {
       method: 'DELETE',

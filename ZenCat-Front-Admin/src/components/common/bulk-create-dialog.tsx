@@ -13,6 +13,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import ErrorDialog from '@/components/common/error-dialog';
+import { toast } from 'sonner';
 
 interface BulkCreateDialogProps {
   open: boolean;
@@ -21,6 +22,8 @@ interface BulkCreateDialogProps {
   expectedExcelColumns: string[];
   dbFieldNames: string[];
   onParsedData: (data: any[]) => void;
+  existingNames?: string[];
+  validateUniqueNames?: boolean;
 }
 
 export function BulkCreateDialog({
@@ -30,6 +33,8 @@ export function BulkCreateDialog({
   onParsedData,
   expectedExcelColumns,
   dbFieldNames,
+  existingNames = [],
+  validateUniqueNames = false,
 }: BulkCreateDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -96,10 +101,7 @@ export function BulkCreateDialog({
         })[0] as string[];
 
         function normalizeText(text: string): string {
-          return text
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+          return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
         }
 
         const normalizedHeaders = headers.map(normalizeText);
@@ -111,18 +113,72 @@ export function BulkCreateDialog({
 
         if (!headersAreValid) {
           setColumnErrorMessage(
-            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`,
+            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`
           );
           setShowColumnErrorDialog(true);
           return;
         }
 
         const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-
         const finalData = mapDataWithColumns(rawData);
 
-        if (!finalData || finalData.length === 0) {
-          setError('El archivo está vacío o mal estructurado.');
+        // Validar duplicados contra nombres existentes si se habilita
+        const combinedErrors: string[] = [];
+
+        if (validateUniqueNames) {
+          // 1. Validar duplicados internos del Excel
+          const internalNameCounts = new Map<string, number>();
+          finalData.forEach((row) => {
+            const name = row.name?.toString().trim().toLowerCase();
+            if (!name) return;
+            internalNameCounts.set(name, (internalNameCounts.get(name) || 0) + 1);
+          });
+          const internalDuplicates = Array.from(internalNameCounts.entries())
+            .filter(([_, count]) => count > 1)
+            .map(([name]) => name);
+
+          if (internalDuplicates.length > 0) {
+            combinedErrors.push(
+              `El archivo contiene nombres de comunidad repetidos: ${internalDuplicates.join(', ')}`
+            );
+          }
+
+          // 2. Validar duplicados contra los ya existentes
+          const namesFromExcel = finalData.map((row) =>
+            row.name?.toString().trim().toLowerCase()
+          );
+          const existingLowerNames = existingNames.map((name) =>
+            name.trim().toLowerCase()
+          );
+          const conflicts = namesFromExcel.filter((name) =>
+            existingLowerNames.includes(name)
+          );
+          if (conflicts.length > 0) {
+            combinedErrors.push(
+              `Ya existen comunidades con estos nombres: ${[...new Set(conflicts)].join(', ')}`
+            );
+          }
+        }
+
+        // Validar filas incompletas
+        const invalidRowIndices: number[] = [];
+        finalData.forEach((row, index) => {
+          const isComplete = dbFieldNames.every((field) => {
+            const value = row[field];
+            return typeof value === 'string' ? value.trim() !== '' : Boolean(value);
+          });
+          if (!isComplete) {
+            invalidRowIndices.push(index + 2);
+          }
+        });
+
+        if (invalidRowIndices.length > 0) {
+          combinedErrors.push(`Las siguientes filas tienen campos incompletos: ${invalidRowIndices.join(', ')}`);
+        }
+
+        // Si hay errores, mostrar todos juntos
+        if (combinedErrors.length > 0) {
+          setError(combinedErrors.join('\n'));
           return;
         }
 
@@ -131,7 +187,7 @@ export function BulkCreateDialog({
         setError(null);
         onOpenChange(false);
       } catch (err) {
-        setError('Error al procesar el archivo.');
+        setError('Ocurrió un error inesperado procesando el archivo.');
         console.error(err);
       }
     };
@@ -151,7 +207,6 @@ export function BulkCreateDialog({
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
 
-          {/* Zona para soltar archivo */}
           <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
@@ -163,7 +218,6 @@ export function BulkCreateDialog({
             </h2>
           </div>
 
-          {/* Área de selección por clic */}
           <div
             onClick={() => inputRef.current?.click()}
             className="flex items-center justify-between border rounded px-4 py-2 w-full bg-white shadow-sm cursor-pointer hover:bg-gray-50 mt-4 transition"
