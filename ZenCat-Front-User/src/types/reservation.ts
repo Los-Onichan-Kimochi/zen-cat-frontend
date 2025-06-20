@@ -16,6 +16,7 @@ export interface Reservation {
 export enum ReservationState {
   DONE = 'DONE',
   CONFIRMED = 'CONFIRMED',
+  ONGOING = 'ONGOING',
   CANCELLED = 'CANCELLED',
   ANULLED = 'ANULLED',
 }

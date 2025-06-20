@@ -52,14 +52,84 @@ const CommunityReservasLayout = () => {
       setLoadingReservations(true);
       setErrorReservations(null);
       try {
-        // --- AQUÍ ES DONDE CONECTARÁS CON TU BACKEND ---
-        const response = await fetch(`/api/communities/${communityId}/reservations`); // Ajusta esta URL a tu endpoint real
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: Reservation[] = await response.json();
-        setAllReservations(data);
-        // --- FIN DE LA CONEXIÓN CON EL BACKEND ---
+        // --- SIMULACIÓN DE DATOS DUMMY ---
+        const dummyData: Reservation[] = [
+          {
+            "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "name": "Clase de Yoga Matutina",
+            "user_name": "Juan Pérez",
+            "teacher": "Ana García",
+            "place": "Pabellón A",
+            "reservation_time": "2025-06-20T09:00:00Z", // Hoy
+            "state": "ONGOING" // En proceso
+          },
+          {
+            "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "name": "Consulta Pediátrica",
+            "user_name": "María López",
+            "teacher": "Dr. Luis Martínez",
+            "place": "Edificio Central",
+            "reservation_time": "2025-06-19T14:30:00Z", // Ayer
+            "state": "DONE" // Completada
+          },
+          {
+            "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "name": "Acceso a Gimnasio",
+            "user_name": "Carlos Sánchez",
+            "teacher": null,
+            "place": "Gimnasio Principal",
+            "reservation_time": "2025-06-15T18:00:00Z", // Dentro de la última semana
+            "state": "ONGOING" // En proceso
+          },
+          {
+            "id": "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "name": "Clase de Pilates",
+            "user_name": "Laura Torres",
+            "teacher": "Elena Ruiz",
+            "place": "Salón de Usos Múltiples",
+            "reservation_time": "2025-06-10T10:00:00Z", // Más antigua que la última semana
+            "state": "DONE" // Completada
+          },
+          {
+            "id": "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "name": "Sesión de Mindfulness",
+            "user_name": "Pedro Gómez",
+            "teacher": null,
+            "place": "Área Recreativa",
+            "reservation_time": "2025-06-05T16:00:00Z", // Más antigua
+            "state": "CANCELLED" // Cancelada
+          },
+          {
+            "id": "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "name": "Entrenamiento Funcional",
+            "user_name": "Ana Morales",
+            "teacher": "Ricardo Castro",
+            "place": "Zona Deportiva",
+            "reservation_time": "2025-06-20T17:00:00Z", // Hoy
+            "state": "ONGOING" // En proceso
+          },
+          {
+            "id": "a0b1c2d3-e4f5-6789-0123-456789abcdef",
+            "name": "Clase de Zumba",
+            "user_name": "Sofía Díaz",
+            "teacher": "Carolina Vega",
+            "place": "Pabellón A",
+            "reservation_time": "2025-06-17T19:00:00Z", // Dentro de la última semana
+            "state": "DONE" // Completada
+          }
+        ];
+
+        setAllReservations(dummyData);
+        // --- FIN SIMULACIÓN DE DATOS DUMMY ---
+
+        // Comenta o elimina la llamada real al backend durante el desarrollo con dummy data
+        // const response = await fetch(`/api/communities/${communityId}/reservations`);
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        // const data: Reservation[] = await response.json();
+        // setAllReservations(data);
+
       } catch (err) {
         console.error("Error al cargar reservas:", err);
         setErrorReservations('No se pudieron cargar las reservaciones. Inténtalo de nuevo más tarde.');
