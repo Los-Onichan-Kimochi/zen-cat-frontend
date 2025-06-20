@@ -170,8 +170,8 @@ const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
   return backendPayload;
 };
 
-export const usuariosApi = {
-  getUsuarios: async (): Promise<User[]> => {
+export const userApi = {
+  getUsers: async (): Promise<User[]> => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/`, {
         headers: getHeaders(),
@@ -181,7 +181,7 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error fetching usuarios: ${response.status} ${response.statusText}`,
+          `Error fetching Users: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -193,27 +193,27 @@ export const usuariosApi = {
       // Intentar diferentes estructuras de respuesta
       if (data && Array.isArray(data.users)) {
         rawUsers = data.users;
-      } else if (data && Array.isArray(data.usuarios)) {
-        rawUsers = data.usuarios;
+      } else if (data && Array.isArray(data.Users)) {
+        rawUsers = data.Users;
       } else if (Array.isArray(data)) {
         rawUsers = data;
       } else {
         console.error('Unexpected data structure from /user/ endpoint:', data);
-        throw new Error('Unexpected data structure from usuarios API for list');
+        throw new Error('Unexpected data structure from Users API for list');
       }
 
-      // Mapear cada usuario usando la función de mapeo
+      // Mapear cada User usando la función de mapeo
       const mappedUsers = rawUsers.map(mapBackendUserToUser);
       console.log('Mapped users with onboarding:', mappedUsers);
 
       return mappedUsers;
     } catch (error) {
-      console.error('Error in getUsuarios:', error);
+      console.error('Error in getUsers:', error);
       throw error;
     }
   },
 
-  getUsuarioById: async (id: string): Promise<User> => {
+  getUserById: async (id: string): Promise<User> => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
         headers: getHeaders(),
@@ -223,25 +223,25 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error fetching usuario with id ${id}: ${response.status} ${response.statusText}`,
+          `Error fetching User with id ${id}: ${response.status} ${response.statusText}`,
         );
       }
 
       const rawUser = await response.json();
       console.log('Raw user data:', rawUser);
 
-      // Mapear el usuario individual
+      // Mapear el User individual
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped single user:', mappedUser);
 
       return mappedUser;
     } catch (error) {
-      console.error('Error in getUsuarioById:', error);
+      console.error('Error in getUserById:', error);
       throw error;
     }
   },
 
-  createUsuario: async (payload: CreateUserPayload): Promise<User> => {
+  createUser: async (payload: CreateUserPayload): Promise<User> => {
     try {
       const transformedPayload = transformPayloadToBackend(payload);
 
@@ -255,25 +255,25 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error creating usuario: ${response.status} ${response.statusText}`,
+          `Error creating User: ${response.status} ${response.statusText}`,
         );
       }
 
       const rawUser = await response.json();
       console.log('Raw created user data:', rawUser);
 
-      // Mapear el usuario creado
+      // Mapear el User creado
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped created user:', mappedUser);
 
       return mappedUser;
     } catch (error) {
-      console.error('Error in createUsuario:', error);
+      console.error('Error in createUser:', error);
       throw error;
     }
   },
 
-  updateUsuario: async (
+  updateUser: async (
     id: string,
     payload: UpdateUserPayload,
   ): Promise<User> => {
@@ -290,20 +290,20 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error updating usuario with id ${id}: ${response.status} ${response.statusText}`,
+          `Error updating User with id ${id}: ${response.status} ${response.statusText}`,
         );
       }
 
       const rawUser = await response.json();
       console.log('Raw updated user data:', rawUser);
 
-      // Mapear el usuario actualizado
+      // Mapear el User actualizado
       const mappedUser = mapBackendUserToUser(rawUser);
       console.log('Mapped updated user:', mappedUser);
 
       return mappedUser;
     } catch (error) {
-      console.error('Error in updateUsuario:', error);
+      console.error('Error in updateUser:', error);
       throw error;
     }
   },
@@ -378,7 +378,7 @@ export const usuariosApi = {
     }
   },
 
-  deleteUsuario: async (id: string): Promise<void> => {
+  deleteUser: async (id: string): Promise<void> => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
         method: 'DELETE',
@@ -389,16 +389,16 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error deleting usuario with id ${id}: ${response.status} ${response.statusText}`,
+          `Error deleting User with id ${id}: ${response.status} ${response.statusText}`,
         );
       }
     } catch (error) {
-      console.error('Error in deleteUsuario:', error);
+      console.error('Error in deleteUser:', error);
       throw error;
     }
   },
 
-  bulkDeleteUsuarios: async (ids: string[]): Promise<void> => {
+  bulkDeleteUsers: async (ids: string[]): Promise<void> => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/bulk-delete/`, {
         method: 'DELETE',
@@ -410,11 +410,11 @@ export const usuariosApi = {
         const errorData = await response.json().catch(() => null);
         console.error('Error response:', response.status, errorData);
         throw new Error(
-          `Error bulk deleting usuarios: ${response.status} ${response.statusText}`,
+          `Error bulk deleting Users: ${response.status} ${response.statusText}`,
         );
       }
     } catch (error) {
-      console.error('Error in bulkDeleteUsuarios:', error);
+      console.error('Error in bulkDeleteUsers:', error);
       throw error;
     }
   },

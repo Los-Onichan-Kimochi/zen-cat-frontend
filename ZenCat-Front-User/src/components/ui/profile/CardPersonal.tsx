@@ -21,6 +21,10 @@ interface CardPersonalProps {
     setCPhone: (value: string) => void;
     currentGender: string;
     setCGender: (value: string) => void;
+    name: string;
+    document: string;
+    documentType: string;
+    birthDay: string;
 }
 
 const CardPersonal: React.FC<CardPersonalProps> = ({
@@ -30,13 +34,12 @@ const CardPersonal: React.FC<CardPersonalProps> = ({
     currentPhone,
     setCPhone,
     currentGender,
-    setCGender
+    setCGender,
+    name,
+    document,
+    documentType,
+    birthDay
 }) => {
-    // States always disabled
-    const [name, setName] = useState('default name');
-    const [document, setDocument] = useState('default document');
-    const [documentType, setDocumentType] = useState('default documentType');
-    const [birthDay, setBirthDay] = useState('2000-01-01');
 
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -63,7 +66,7 @@ const CardPersonal: React.FC<CardPersonalProps> = ({
                             <label className="block text-gray-700 text-sm">Nombres y apellidos</label>
                             <Input
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => { }}
                                 disabled
                                 className="disabled:opacity-100 disabled:cursor-default bg-gray-50"
                             />
@@ -73,7 +76,7 @@ const CardPersonal: React.FC<CardPersonalProps> = ({
                             <StaticDropdown
                                 list={DocumentTypeList}
                                 selectedValue={documentType}
-                                onSelect={setDocumentType}
+                                onSelect={() => { }}
                                 placeholder={documentType}
                                 triggerTextColor="disabled:opacity-100 disabled:cursor-default bg-gray-50"
                             />
@@ -82,7 +85,7 @@ const CardPersonal: React.FC<CardPersonalProps> = ({
                             <label className="block text-gray-700 text-sm">Número de documento</label>
                             <Input
                                 value={document}
-                                onChange={(e) => setDocument(e.target.value)}
+                                onChange={(e) => { }}
                                 disabled
                                 className="disabled:opacity-100 disabled:cursor-default bg-gray-50"
                             />
@@ -118,7 +121,7 @@ const CardPersonal: React.FC<CardPersonalProps> = ({
                             <Input
                                 type="date"
                                 value={birthDay}
-                                onChange={(e) => setBirthDay(e.target.value)}
+                                onChange={(e) => { }}
                                 disabled
                                 className={isOnGray ? "disabled:opacity-100 disabled:cursor-default bg-gray-50" : ""}
                                 required

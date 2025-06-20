@@ -17,55 +17,127 @@ import { Input } from '../input';
 import CardTest from './CardTest';
 import CardPersonal from './CardPersonal';
 import CardDirection from './CardDirection';
+import { useAuth } from '@/context/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { User, CreateUserPayload } from '@/types/user';
+import { userApi } from '@/api/user/user';
 
 const ProfileSection: React.FC = () => {
-    const [name, setName] = useState('xd');
-    // States for personal form
-    const [email, setEmail] = useState('email@default.com');
-    const [phone, setPhone] = useState('123456789');
-    const [gender, setGender] = useState('marica');
-
-    const [currentEmail, setCEmail] = useState(email);
-    const [currentPhone, setCPhone] = useState(phone);
-    const [currentGender, setCGender] = useState(gender);
-    // States for direction form
-    const [city, setCity] = useState('lima');
-    const [district, setDistrict] = useState('limon');
-    const [address, setAddress] = useState('la iglesia');
-    const [postal, setPostal] = useState('123');
-
-    const [currentCity, setCCity] = useState(city);
-    const [currentDistrict, setCDistrict] = useState(district);
-    const [currentAddress, setCAddress] = useState(address);
-    const [currentPostal, setCPostal] = useState(postal);
-    // States for control
+    const { user: authUser, isAuthenticated } = useAuth();
+    // Control states
     const [current_form, setCurrentForm] = useState('personal_form');
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [isChanged, setisChanged] = useState(false);
     const [isOnGray, setisOnGray] = useState(true);
 
-    //debuggin
+    // API CALL with loading state
+    const {
+        data: apiUserData,
+        isLoading,
+        isError,
+    } = useQuery<User, Error>({
+        queryKey: ['user', authUser?.id],
+        queryFn: async () => {
+            if (!authUser?.id) throw new Error('No user ID available');
+            const response = await userApi.getUserById(authUser.id);
+
+            return response;
+        },
+        enabled: isAuthenticated && !!authUser?.id,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false
+    });
+    // Initialize all state with empty values
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [gender, setGender] = useState('OTHER');
+    const [city, setCity] = useState('');
+    const [district, setDistrict] = useState('');
+    const [address, setAddress] = useState('');
+    const [postal, setPostal] = useState('');
+
+    const [document, setDocument] = useState('default document');
+    const [documentType, setDocumentType] = useState('default documentType');
+    const [birthDay, setBirthDay] = useState('2000-01-01');
+
+    // Current form values
+    const [currentEmail, setCEmail] = useState(email);
+    const [currentPhone, setCPhone] = useState(phone);
+    const [currentGender, setCGender] = useState(gender);
+    const [currentCity, setCCity] = useState(city);
+    const [currentDistrict, setCDistrict] = useState(district);
+    const [currentAddress, setCAddress] = useState(address);
+    const [currentPostal, setCPostal] = useState(postal);
+
+    // Initialize form when API data loads
     useEffect(() => {
-        console.log('Save Dialog State:', isSaveDialogOpen);
-        console.log('On gray State:', isOnGray);
-        console.log('Change State:', isChanged);
-        console.log('address:', address);
-        console.log('currentAddress:', currentAddress);
-        console.log('---------------------');
+        if (apiUserData) {
+            // Transform API data to match your frontend interface
+            const userData = apiUserData;
+            const onboarding = userData.onboarding || {};
 
-    }, [isSaveDialogOpen, isOnGray, isChanged]);
+            // Base user info
+            setName(userData.name || '');
+            setEmail(userData.email || '');
 
-    const saveChanges = () => {
-        setEmail(currentEmail);
-        setPhone(currentPhone);
-        setGender(currentGender);
+            // Onboarding info - now using camelCase from the mapped data
+            setPhone(onboarding.phoneNumber || '');
+            setGender(onboarding.gender || 'OTHER');
+            setCity(onboarding.city || '');
+            setDistrict(onboarding.district || '');
+            setAddress(onboarding.address || '');
+            setPostal(onboarding.postalCode || '');
 
-        setCity(currentCity)
-        setAddress(currentAddress);
-        setPostal(currentPostal);
-        setDistrict(currentDistrict);
-        // api call
+            setDocument(onboarding.documentNumber || '');
+            setDocumentType(onboarding.documentType || 'DNI');
+            setBirthDay(onboarding.birthDate || '2000-01-01');
+
+            // Update current form values
+            setCEmail(userData.email || '');
+            setCPhone(onboarding.phoneNumber || '');
+            setCGender(onboarding.gender || 'OTHER');
+            setCCity(onboarding.city || '');
+            setCDistrict(onboarding.district || '');
+            setCAddress(onboarding.address || '');
+            setCPostal(onboarding.postalCode || '');
+
+            console.log('Mapped user data:', userData);
+        }
+    }, [apiUserData]);
+
+    // Loading state
+    if (isLoading) {
+        return <div>Loading profile data...</div>;
     }
+
+    // Error state
+    if (isError) {
+        return <div>Error loading profile data</div>;
+    }
+
+    const saveChanges = async () => {
+        try {
+            // Update local state first
+            setEmail(currentEmail);
+            setPhone(currentPhone);
+            setGender(currentGender);
+            setCity(currentCity);
+            setAddress(currentAddress);
+            setPostal(currentPostal);
+            setDistrict(currentDistrict);
+
+            // API call to update user info
+            await updateUserProfile();
+
+            // Show success message or handle accordingly
+            console.log('Changes saved successfully!');
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            // Optionally show error to user
+            rollbackChanges(); // Revert changes if API call fails
+        }
+    };
 
     const verifyChanges = () => {
         if (email !== currentEmail ||
@@ -95,22 +167,20 @@ const ProfileSection: React.FC = () => {
         setCPostal(postal);
         setCDistrict(district);
     }
-    const handleSaveChanges = (e: React.FormEvent) => {
+    const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log('handleSaveChanges called');
-        console.log('Save Dialog State:', isSaveDialogOpen);
-        console.log('On gray State:', isOnGray);
-        console.log('Change State:', isChanged);
-        console.log('---------------------');
         if (isChanged) {
-            saveChanges();
-
-            setIsSaveDialogOpen(false);
-            setisChanged(false);
-            setisOnGray(true);
+            try {
+                await saveChanges();
+                setIsSaveDialogOpen(false);
+                setisChanged(false);
+                setisOnGray(true);
+            } catch (error) {
+                // Handle error (show toast, etc.)
+                console.error('Error saving changes:', error);
+            }
         }
-
     };
 
     const handleCancel = (e: React.FormEvent) => {
@@ -130,7 +200,38 @@ const ProfileSection: React.FC = () => {
         }
 
     };
+    const updateUserProfile = async () => {
+        if (!authUser?.id) return;
 
+        try {
+            // Prepare the update payload
+            const updatePayload = {
+                name: name, // You might want to make this editable too
+                onboarding: {
+                    phoneNumber: currentPhone,
+                    gender: currentGender,
+                    city: currentCity,
+                    district: currentDistrict,
+                    address: currentAddress,
+                    postalCode: currentPostal,
+                    documentNumber: document,
+                    documentType: documentType,
+                    birthDate: birthDay
+                }
+            };
+
+            console.log('Updating user with payload:', updatePayload);
+
+            // Call the API
+            const updatedUser = await userApi.updateOnboardingByUserId(authUser.id, updatePayload);
+
+            console.log('User updated successfully:', updatedUser);
+            return updatedUser;
+        } catch (error) {
+            console.error('Failed to update user:', error);
+            throw error;
+        }
+    };
     return (
         <section className=" pb-16">
             {/* 1. Encabezado */}
@@ -190,6 +291,10 @@ const ProfileSection: React.FC = () => {
                                 setCPhone={setCPhone}
                                 currentGender={currentGender}
                                 setCGender={setCGender}
+                                name={name}
+                                document={document}
+                                documentType={documentType}
+                                birthDay={birthDay}
                             />
                         </div>
                     </TabsContent>
