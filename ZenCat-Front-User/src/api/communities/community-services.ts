@@ -9,9 +9,9 @@ export const communityServicesApi = {
   ): Promise<CommunityService[]> => {
     // Temporary workaround: fetch all community services and filter manually
     // TODO: Fix backend to properly filter by community_id query parameter
-    const data = await apiClient.get<{ community_services: CommunityService[] }>(
-      API_ENDPOINTS.COMMUNITY_SERVICES.BASE,
-    );
+    const data = await apiClient.get<{
+      community_services: CommunityService[];
+    }>(API_ENDPOINTS.COMMUNITY_SERVICES.BASE);
 
     const allCommunityServices = Array.isArray(data.community_services)
       ? data.community_services
@@ -29,11 +29,11 @@ export const communityServicesApi = {
     return filteredServices;
   },
 
-  getServicesByCommunityId: async(communityId: string): Promise<Service[]> => {
+  getServicesByCommunityId: async (communityId: string): Promise<Service[]> => {
     const response = await apiClient.get<{ services: Service[] }>(
-      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId)
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId),
     );
-    
+
     const services = Array.isArray(response.services) ? response.services : [];
     return services;
   },

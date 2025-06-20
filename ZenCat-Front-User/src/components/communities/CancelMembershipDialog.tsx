@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
-  AlertDialogTitle
-} from "@/components/ui/alert-dialog";
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface CancelMembershipDialogProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export function CancelMembershipDialog({
   isOpen,
   onClose,
   onCancel,
-  communityName = ""
+  communityName = '',
 }: CancelMembershipDialogProps) {
   return (
     <AlertDialog open={isOpen}>
@@ -29,12 +29,12 @@ export function CancelMembershipDialog({
               ¿Desea cancelar su membresía?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-black text-center mt-4 leading-relaxed">
-              Si cancela su membresía perderá todos los beneficios asociados a ella, 
-              incluyendo las reservas disponibles y cualquier descuento especial. 
-              Esta acción no puede deshacerse.
+              Si cancela su membresía perderá todos los beneficios asociados a
+              ella, incluyendo las reservas disponibles y cualquier descuento
+              especial. Esta acción no puede deshacerse.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="flex justify-center space-x-4 mt-6">
             <Button
               type="button"
@@ -56,4 +56,4 @@ export function CancelMembershipDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}

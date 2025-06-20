@@ -63,8 +63,10 @@ export const professionalsApi = {
     }
 
     const endpoint = `${API_ENDPOINTS.PROFESSIONALS.BASE}?${params}`;
-    const data = await apiClient.get<{ professionals: Professional[] }>(endpoint);
-    
+    const data = await apiClient.get<{ professionals: Professional[] }>(
+      endpoint,
+    );
+
     if (data && typeof data === 'object' && 'professionals' in data) {
       return data.professionals;
     }
@@ -77,14 +79,19 @@ export const professionalsApi = {
 
   // Get a specific professional by ID
   getProfessional: async (professionalId: string): Promise<Professional> => {
-    return apiClient.get<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId));
+    return apiClient.get<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId),
+    );
   },
 
   // Create a new professional
   createProfessional: async (
     request: CreateProfessionalRequest,
   ): Promise<Professional> => {
-    return apiClient.post<Professional>(API_ENDPOINTS.PROFESSIONALS.BASE, request);
+    return apiClient.post<Professional>(
+      API_ENDPOINTS.PROFESSIONALS.BASE,
+      request,
+    );
   },
 
   // Update a professional
@@ -100,6 +107,8 @@ export const professionalsApi = {
 
   // Delete a professional
   deleteProfessional: async (professionalId: string): Promise<void> => {
-    return apiClient.delete<void>(API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId));
+    return apiClient.delete<void>(
+      API_ENDPOINTS.PROFESSIONALS.BY_ID(professionalId),
+    );
   },
 };

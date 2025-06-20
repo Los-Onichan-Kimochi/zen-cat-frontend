@@ -20,7 +20,7 @@ export const serviceLocalsApi = {
     const data = await apiClient.get<{ service_locals: ServiceLocal[] }>(
       '/service-local/',
     );
-    
+
     let allServiceLocals: ServiceLocal[] = [];
     if (data && typeof data === 'object' && 'service_locals' in data) {
       allServiceLocals = data.service_locals;
@@ -59,7 +59,9 @@ export const serviceLocalsApi = {
     serviceId: string,
     localId: string,
   ): Promise<ServiceLocal> => {
-    return apiClient.get<ServiceLocal>(`/service-local/${serviceId}/${localId}/`);
+    return apiClient.get<ServiceLocal>(
+      `/service-local/${serviceId}/${localId}/`,
+    );
   },
 
   // Create a new service-local association

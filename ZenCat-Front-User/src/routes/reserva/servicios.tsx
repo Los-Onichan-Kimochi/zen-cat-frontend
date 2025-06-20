@@ -46,7 +46,10 @@ function ServiceStepComponent() {
 
   // Actualizar el contexto con el communityId si viene del search param
   useEffect(() => {
-    if (search.communityId && search.communityId !== reservationData.communityId) {
+    if (
+      search.communityId &&
+      search.communityId !== reservationData.communityId
+    ) {
       updateReservation({ communityId: search.communityId });
     }
   }, [search.communityId, reservationData.communityId, updateReservation]);
@@ -60,7 +63,8 @@ function ServiceStepComponent() {
             No se ha seleccionado una comunidad
           </h2>
           <p className="text-gray-600 mb-6">
-            Para ver los servicios disponibles, primero debes seleccionar una comunidad desde "Mis comunidades".
+            Para ver los servicios disponibles, primero debes seleccionar una
+            comunidad desde "Mis comunidades".
           </p>
           <Button
             onClick={() => navigate({ to: '/mis-comunidades' })}

@@ -42,7 +42,7 @@ const ReservationContent: React.FC = () => {
 
   // Encontrar la comunidad actual
   const currentCommunity = communities?.find(
-    (community) => community.id === reservationData.communityId
+    (community) => community.id === reservationData.communityId,
   );
 
   let currentPath = location.pathname;
@@ -62,7 +62,9 @@ const ReservationContent: React.FC = () => {
       <div className="w-full max-w-6xl flex flex-col gap-12">
         {/* Título centrado */}
         <div className="text-center">
-          <h1 className="text-xl md:text-2xl font-bold mb-2">{communityName}</h1>
+          <h1 className="text-xl md:text-2xl font-bold mb-2">
+            {communityName}
+          </h1>
           <h2 className="text-xl md:text-xl font-semibold mb-5">
             Realiza una nueva reserva
           </h2>
