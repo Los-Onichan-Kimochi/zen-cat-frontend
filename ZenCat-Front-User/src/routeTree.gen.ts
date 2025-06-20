@@ -30,16 +30,63 @@ import { Route as ReservaLugarRouteImport } from './routes/reserva/lugar'
 import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
 import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
 import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
+// Import Routes
 
-const PreciosRoute = PreciosRouteImport.update({
+import { Route as rootRoute } from './routes/__root'
+import { Route as PreciosImport } from './routes/precios'
+import { Route as PerfilImport } from './routes/perfil'
+import { Route as MembresiaImport } from './routes/membresia'
+import { Route as ContactoImport } from './routes/contacto'
+import { Route as ComunidadesImport } from './routes/comunidades'
+import { Route as ComoFuncionaImport } from './routes/como-funciona'
+import { Route as SignupRouteImport } from './routes/signup/route'
+import { Route as ReservaRouteImport } from './routes/reserva/route'
+import { Route as LoginRouteImport } from './routes/login/route'
+import { Route as HomeRouteImport } from './routes/home/route'
+import { Route as ForgotRouteImport } from './routes/forgot/route'
+import { Route as IndexImport } from './routes/index'
+import { Route as ReservasIndexImport } from './routes/reservas/index'
+import { Route as ReservaIndexImport } from './routes/reserva/index'
+import { Route as ReservaServiciosImport } from './routes/reserva/servicios'
+import { Route as ReservaLugarImport } from './routes/reserva/lugar'
+import { Route as ReservaHorarioImport } from './routes/reserva/horario'
+import { Route as ReservaConfirmacionImport } from './routes/reserva/confirmacion'
+import { Route as OnboardingMembresiaImport } from './routes/onboarding/membresia'
+
+// Create/Update Routes
+
+import { Route as rootRoute } from './routes/__root'
+import { Route as PreciosImport } from './routes/precios'
+import { Route as PerfilImport } from './routes/perfil'
+import { Route as MembresiaImport } from './routes/membresia'
+import { Route as ContactoImport } from './routes/contacto'
+import { Route as ComunidadesImport } from './routes/comunidades'
+import { Route as ComoFuncionaImport } from './routes/como-funciona'
+import { Route as SignupRouteImport } from './routes/signup/route'
+import { Route as ReservaRouteImport } from './routes/reserva/route'
+import { Route as LoginRouteImport } from './routes/login/route'
+import { Route as HomeRouteImport } from './routes/home/route'
+import { Route as ForgotRouteImport } from './routes/forgot/route'
+import { Route as IndexImport } from './routes/index'
+import { Route as ReservasIndexImport } from './routes/reservas/index'
+import { Route as ReservaIndexImport } from './routes/reserva/index'
+import { Route as ReservaServiciosImport } from './routes/reserva/servicios'
+import { Route as ReservaLugarImport } from './routes/reserva/lugar'
+import { Route as ReservaHorarioImport } from './routes/reserva/horario'
+import { Route as ReservaConfirmacionImport } from './routes/reserva/confirmacion'
+import { Route as OnboardingMembresiaImport } from './routes/onboarding/membresia'
+
+// Create/Update Routes
+
+const PreciosRoute = PreciosRouteRouteImport.update({
   id: '/precios',
   path: '/precios',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImportImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImportImport,
 } as any)
 const MisComunidadesRoute = MisComunidadesRouteImport.update({
   id: '/mis-comunidades',
@@ -47,54 +94,58 @@ const MisComunidadesRoute = MisComunidadesRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembresiaRoute = MembresiaRouteImport.update({
+const MembresiaRoute = MembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const ContactoRoute = ContactoRouteImport.update({
 const ContactoRoute = ContactoRouteImport.update({
   id: '/contacto',
   path: '/contacto',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const SignupRouteRoute = SignupRouteRouteImport.update({
 const SignupRouteRoute = SignupRouteRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const ReservaRouteRoute = ReservaRouteRouteImport.update({
 const ReservaRouteRoute = ReservaRouteRouteImport.update({
   id: '/reserva',
   path: '/reserva',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PinRouteRoute = PinRouteRouteImport.update({
-  id: '/pin',
-  path: '/pin',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const LoginRouteRoute = LoginRouteRouteImport.update({
 const LoginRouteRoute = LoginRouteRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const HomeRouteRoute = HomeRouteRouteImport.update({
 const HomeRouteRoute = HomeRouteRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotRouteRoute = ForgotRouteRouteImport.update({
 const ForgotRouteRoute = ForgotRouteRouteImport.update({
   id: '/forgot',
   path: '/forgot',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChangepasswordRouteRoute = ChangepasswordRouteRouteImport.update({
-  id: '/changepassword',
-  path: '/changepassword',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',

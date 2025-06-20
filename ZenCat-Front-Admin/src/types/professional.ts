@@ -8,7 +8,7 @@ export enum ProfessionalSpecialty {
 export enum ProfessionalType {
   NUTRITIONIST = 'Nutricionista',
   COACH = 'Entrenador',
-  MEDIC = 'MEDIC',
+  MEDIC = 'Médico',
   GYM_TRAINER = 'GYM_TRAINER',
   YOGA_TRAINER = 'YOGA_TRAINER',
 }
@@ -38,3 +38,11 @@ export interface CreateProfessionalPayload {
 }
 
 export type UpdateProfessionalPayload = Partial<CreateProfessionalPayload>;
+
+export interface BulkCreateProfessionalPayload {
+  professionals: CreateProfessionalPayload[];
+}
+
+export interface BulkDeleteProfessionalPayload {
+  professionals: string[]; // array of professional IDs
+}
