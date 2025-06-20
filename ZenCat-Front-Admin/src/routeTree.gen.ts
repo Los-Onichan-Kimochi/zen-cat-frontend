@@ -35,7 +35,7 @@ import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servic
 import { Route as ServiciosAgregarProfesionalesImport } from './routes/servicios/agregar-profesionales'
 import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agregar-locales'
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
-import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
+import { Route as ProfesionalesAgregarImport } from './routes/profesionales/agregar'
 import { Route as PlanesMembresiaVerImport } from './routes/planes-membresia/ver'
 import { Route as PlanesMembresiaAgregarImport } from './routes/planes-membresia/agregar'
 import { Route as LocalesVerImport } from './routes/locales/ver'
@@ -194,9 +194,9 @@ const ProfesionalesVerRoute = ProfesionalesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
-  id: '/profesionales/nuevo',
-  path: '/profesionales/nuevo',
+const ProfesionalesAgregarRoute = ProfesionalesAgregarImport.update({
+  id: '/profesionales/agregar',
+  path: '/profesionales/agregar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -379,11 +379,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanesMembresiaVerImport
       parentRoute: typeof rootRoute
     }
-    '/profesionales/nuevo': {
-      id: '/profesionales/nuevo'
-      path: '/profesionales/nuevo'
-      fullPath: '/profesionales/nuevo'
-      preLoaderRoute: typeof ProfesionalesNuevoImport
+    '/profesionales/agregar': {
+      id: '/profesionales/agregar'
+      path: '/profesionales/agregar'
+      fullPath: '/profesionales/agregar'
+      preLoaderRoute: typeof ProfesionalesAgregarImport
       parentRoute: typeof rootRoute
     }
     '/profesionales/ver': {
@@ -534,7 +534,7 @@ export interface FileRoutesByFullPath {
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
-  '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/agregar': typeof ProfesionalesAgregarRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
@@ -572,7 +572,7 @@ export interface FileRoutesByTo {
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
-  '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/agregar': typeof ProfesionalesAgregarRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
@@ -611,7 +611,7 @@ export interface FileRoutesById {
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
-  '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
+  '/profesionales/agregar': typeof ProfesionalesAgregarRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
   '/servicios/agregar-locales': typeof ServiciosAgregarLocalesRoute
   '/servicios/agregar-profesionales': typeof ServiciosAgregarProfesionalesRoute
@@ -651,7 +651,7 @@ export interface FileRouteTypes {
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
-    | '/profesionales/nuevo'
+    | '/profesionales/agregar'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
@@ -688,7 +688,7 @@ export interface FileRouteTypes {
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
-    | '/profesionales/nuevo'
+    | '/profesionales/agregar'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
@@ -725,7 +725,7 @@ export interface FileRouteTypes {
     | '/locales/ver'
     | '/planes-membresia/agregar'
     | '/planes-membresia/ver'
-    | '/profesionales/nuevo'
+    | '/profesionales/agregar'
     | '/profesionales/ver'
     | '/servicios/agregar-locales'
     | '/servicios/agregar-profesionales'
@@ -764,7 +764,7 @@ export interface RootRouteChildren {
   LocalesVerRoute: typeof LocalesVerRoute
   PlanesMembresiaAgregarRoute: typeof PlanesMembresiaAgregarRoute
   PlanesMembresiaVerRoute: typeof PlanesMembresiaVerRoute
-  ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
+  ProfesionalesAgregarRoute: typeof ProfesionalesAgregarRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
   ServiciosAgregarLocalesRoute: typeof ServiciosAgregarLocalesRoute
   ServiciosAgregarProfesionalesRoute: typeof ServiciosAgregarProfesionalesRoute
@@ -802,7 +802,7 @@ const rootRouteChildren: RootRouteChildren = {
   LocalesVerRoute: LocalesVerRoute,
   PlanesMembresiaAgregarRoute: PlanesMembresiaAgregarRoute,
   PlanesMembresiaVerRoute: PlanesMembresiaVerRoute,
-  ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
+  ProfesionalesAgregarRoute: ProfesionalesAgregarRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
   ServiciosAgregarLocalesRoute: ServiciosAgregarLocalesRoute,
   ServiciosAgregarProfesionalesRoute: ServiciosAgregarProfesionalesRoute,
@@ -849,7 +849,7 @@ export const routeTree = rootRoute
         "/locales/ver",
         "/planes-membresia/agregar",
         "/planes-membresia/ver",
-        "/profesionales/nuevo",
+        "/profesionales/agregar",
         "/profesionales/ver",
         "/servicios/agregar-locales",
         "/servicios/agregar-profesionales",
@@ -918,8 +918,8 @@ export const routeTree = rootRoute
     "/planes-membresia/ver": {
       "filePath": "planes-membresia/ver.tsx"
     },
-    "/profesionales/nuevo": {
-      "filePath": "profesionales/nuevo.tsx"
+    "/profesionales/agregar": {
+      "filePath": "profesionales/agregar.tsx"
     },
     "/profesionales/ver": {
       "filePath": "profesionales/ver.tsx"

@@ -11,7 +11,7 @@ import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Professional } from '@/types/professional';
-import { getProfessionalColumns } from './columns';
+import { getProfessionalColumns } from './professional-columns';
 
 interface ProfessionalsTableProps {
   data: Professional[];
