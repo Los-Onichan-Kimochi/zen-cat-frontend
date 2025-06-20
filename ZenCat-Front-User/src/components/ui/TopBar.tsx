@@ -1,6 +1,13 @@
 import { Link } from '@tanstack/react-router';
-import { PersonIcon, ExitIcon, CalendarIcon } from '@radix-ui/react-icons';
+import { PersonIcon, ExitIcon, CalendarIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 export const TopBar = () => {
   const { user, logout } = useAuth();
   return (
@@ -66,48 +73,96 @@ export const TopBar = () => {
       <div className="flex items-center space-x-4">
         {user ? (
           <div className="flex items-center space-x-3">
-            {/* Enlace al perfil */}
-            <Link
-              to="/perfil"
-              className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-800 transition"
-            >
-              {user.imageUrl ? (
-                <img
-                  src={user.imageUrl}
-                  alt="Avatar"
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              ) : (
-                <PersonIcon className="h-6 w-6 text-white" />
-              )}
-              <span className="text-sm">{user.name || user.email}</span>
-            </Link>
+            {/* Dropdown de usuario para desktop */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-800 transition focus:outline-none">
+                  {user.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="Avatar"
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <PersonIcon className="h-6 w-6 text-white" />
+                  )}
+                  <span className="text-sm">{user.name || user.email}</span>
+                  <ChevronDownIcon className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/perfil" className="flex items-center cursor-pointer">
+                    <PersonIcon className="mr-2 h-4 w-4" />
+                    Mi Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/mis-comunidades" className="flex items-center cursor-pointer">
+                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Mis Comunidades
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <button
+                    onClick={logout}
+                    className="flex items-center w-full cursor-pointer text-red-600 hover:text-red-700"
+                  >
+                    <ExitIcon className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Icono de perfil para móvil */}
-            <Link
-              to="/perfil"
-              className="sm:hidden p-2 rounded-full hover:bg-gray-800 transition"
-              aria-label="Mi perfil"
-            >
-              {user.imageUrl ? (
-                <img
-                  src={user.imageUrl}
-                  alt="Avatar"
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              ) : (
-                <PersonIcon className="h-6 w-6 text-white" />
-              )}
-            </Link>
-
-            {/* Botón de logout */}
-            <button
-              onClick={logout}
-              className="p-2 rounded-full hover:bg-gray-800 transition"
-              aria-label="Cerrar sesión"
-            >
-              <ExitIcon className="h-5 w-5" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="sm:hidden p-2 rounded-full hover:bg-gray-800 transition focus:outline-none"
+                  aria-label="Opciones de usuario"
+                >
+                  {user.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="Avatar"
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <PersonIcon className="h-6 w-6 text-white" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/perfil" className="flex items-center cursor-pointer">
+                    <PersonIcon className="mr-2 h-4 w-4" />
+                    Mi Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/mis-comunidades" className="flex items-center cursor-pointer">
+                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Mis Comunidades
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <button
+                    onClick={logout}
+                    className="flex items-center w-full cursor-pointer text-red-600 hover:text-red-700"
+                  >
+                    <ExitIcon className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ) : (
           <>
