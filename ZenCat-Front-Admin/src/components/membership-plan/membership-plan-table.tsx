@@ -20,6 +20,7 @@ interface MembershipPlanTableProps {
   onBulkDelete: (ids: string[]) => void;
   isBulkDeleting: boolean;
   onDelete: (membershipPlan: MembershipPlan) => void;
+  onView: (membershipPlan: MembershipPlan) => void;
   resetRowSelectionTrigger?: number;
   onRefresh?: () => void;
   isRefreshing?: boolean;
@@ -30,6 +31,7 @@ export function MembershipPlanTable({
   onBulkDelete,
   isBulkDeleting,
   onDelete,
+  onView,
   resetRowSelectionTrigger,
   onRefresh,
   isRefreshing = false,
@@ -49,7 +51,7 @@ export function MembershipPlanTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getMembershipPlanColumns({ onDelete });
+  const columns = getMembershipPlanColumns({ onDelete, onView });
 
   const table = useReactTable({
     data,

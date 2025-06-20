@@ -141,3 +141,8 @@
 .font-montserrat {
   font-family: 'Montserrat';
 }
+
+/* Custom height utility for image upload areas */
+.h-100 {
+  height: 25rem; /* 400px */
+}

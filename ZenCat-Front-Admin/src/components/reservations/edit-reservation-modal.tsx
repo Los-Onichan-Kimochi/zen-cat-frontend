@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { usuariosApi } from '@/api/usuarios/usuarios';
@@ -69,18 +70,28 @@ export function EditReservationModal({
   // Fetch users for the select
   const { data: usersData, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['usuarios'],
-    queryFn: () => usuariosApi.fetchUsuarios(),
+    queryFn: () => usuariosApi.getUsuarios(),
     enabled: isOpen, // Only fetch when modal is open
   });
 
   const { mutate: updateReservation, isPending: isUpdating } = useMutation({
-    mutationFn: (data: UpdateReservationRequest) =>
-      reservationsApi.updateReservation(reservation!.id, data),
+    mutationFn: (data: UpdateReservationRequest) => {
+      // Convert reservation_time to ISO format for backend
+      const updatedData = {
+        ...data,
+        // Only include reservation_time if it's provided and valid
+        ...(data.reservation_time && {
+          reservation_time: new Date(data.reservation_time).toISOString(),
+        }),
+      };
+      return reservationsApi.updateReservation(reservation!.id, updatedData);
+    },
     onSuccess: () => {
       toast.success('Reserva Actualizada', {
         description: 'La reserva ha sido actualizada exitosamente.',
       });
       onSuccess();
+      onClose();
     },
     onError: (err: any) => {
       error('Error al actualizar la reserva', {
@@ -111,39 +122,26 @@ export function EditReservationModal({
 
   if (!reservation) return null;
 
-  const users = usersData?.users || [];
+  const users = usersData || [];
+
+  // Find the current user for display
+  const currentUser = users.find(user => user.id === reservation.user_id);
+  const currentUserDisplay = currentUser ? 
+    `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}` : 
+    'Usuario no encontrado';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle className="text-xl font-bold">
             Editar Reserva
           </DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-6 w-6 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* ID (read-only) */}
-          <div className="space-y-2">
-            <Label htmlFor="id">ID</Label>
-            <Input
-              id="id"
-              value={reservation.id}
-              disabled
-              className="bg-gray-100"
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {/* Name */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="name">Nombre de la Reserva</Label>
             <Input
               id="name"
@@ -153,16 +151,28 @@ export function EditReservationModal({
               }
               placeholder="Ingrese el nombre de la reserva"
               required
+              className="border-gray-200"
+            />
+          </div>
+
+          {/* Current User Display (read-only) */}
+          <div className="space-y-1.5">
+            <Label htmlFor="current-user">Usuario Actual</Label>
+            <Input
+              id="current-user"
+              value={currentUserDisplay}
+              disabled
+              className="bg-gray-50 border-gray-200"
             />
           </div>
 
           {/* User Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="user">Usuario</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="user">Cambiar Usuario</Label>
             {isLoadingUsers ? (
-              <div className="flex items-center gap-2 p-2 border rounded">
+              <div className="flex items-center gap-2 p-2.5 bg-gray-50 border border-gray-200 rounded text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Cargando usuarios...</span>
+                <span>Cargando usuarios...</span>
               </div>
             ) : (
               <Select
@@ -171,7 +181,7 @@ export function EditReservationModal({
                   setFormData({ ...formData, user_id: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200">
                   <SelectValue placeholder="Seleccionar usuario" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +189,7 @@ export function EditReservationModal({
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
                         <span>
-                          {user.name} {user.first_last_name}
+                          {user.name}
                         </span>
                         <span className="text-xs text-gray-500">
                           {user.email}
@@ -193,7 +203,7 @@ export function EditReservationModal({
           </div>
 
           {/* Reservation Time */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="reservation_time">Fecha y Hora de Reserva</Label>
             <Input
               id="reservation_time"
@@ -203,11 +213,12 @@ export function EditReservationModal({
                 setFormData({ ...formData, reservation_time: e.target.value })
               }
               required
+              className="border-gray-200"
             />
           </div>
 
           {/* State */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="state">Estado</Label>
             <Select
               value={formData.state || ReservationState.CONFIRMED}
@@ -215,7 +226,7 @@ export function EditReservationModal({
                 setFormData({ ...formData, state: value as ReservationState })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-gray-200">
                 <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
@@ -235,7 +246,7 @@ export function EditReservationModal({
             </Select>
           </div>
 
-          {/* Actions */}
+          {/* Buttons */}
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar

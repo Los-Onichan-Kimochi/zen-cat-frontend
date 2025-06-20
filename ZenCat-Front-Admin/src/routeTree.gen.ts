@@ -29,7 +29,6 @@ import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membr
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as SesionesVerImport } from './routes/sesiones/ver'
-import { Route as SesionesEditarImport } from './routes/sesiones/editar'
 import { Route as SesionesAgregarImport } from './routes/sesiones/agregar'
 import { Route as ServiciosServicioVerImport } from './routes/servicios/servicio-ver'
 import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servicio-nuevo'
@@ -38,6 +37,7 @@ import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agreg
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as PlanesMembresiaVerImport } from './routes/planes-membresia/ver'
+import { Route as PlanesMembresiaEditarImport } from './routes/planes-membresia/editar'
 import { Route as PlanesMembresiaAgregarImport } from './routes/planes-membresia/agregar'
 import { Route as LocalesVerImport } from './routes/locales/ver'
 import { Route as LocalesEditarImport } from './routes/locales/editar'
@@ -158,12 +158,6 @@ const SesionesVerRoute = SesionesVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const SesionesEditarRoute = SesionesEditarImport.update({
-  id: '/sesiones/editar',
-  path: '/sesiones/editar',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const SesionesAgregarRoute = SesionesAgregarImport.update({
   id: '/sesiones/agregar',
   path: '/sesiones/agregar',
@@ -210,6 +204,12 @@ const ProfesionalesNuevoRoute = ProfesionalesNuevoImport.update({
 const PlanesMembresiaVerRoute = PlanesMembresiaVerImport.update({
   id: '/planes-membresia/ver',
   path: '/planes-membresia/ver',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PlanesMembresiaEditarRoute = PlanesMembresiaEditarImport.update({
+  id: '/planes-membresia/editar',
+  path: '/planes-membresia/editar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -379,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanesMembresiaAgregarImport
       parentRoute: typeof rootRoute
     }
+    '/planes-membresia/editar': {
+      id: '/planes-membresia/editar'
+      path: '/planes-membresia/editar'
+      fullPath: '/planes-membresia/editar'
+      preLoaderRoute: typeof PlanesMembresiaEditarImport
+      parentRoute: typeof rootRoute
+    }
     '/planes-membresia/ver': {
       id: '/planes-membresia/ver'
       path: '/planes-membresia/ver'
@@ -433,13 +440,6 @@ declare module '@tanstack/react-router' {
       path: '/sesiones/agregar'
       fullPath: '/sesiones/agregar'
       preLoaderRoute: typeof SesionesAgregarImport
-      parentRoute: typeof rootRoute
-    }
-    '/sesiones/editar': {
-      id: '/sesiones/editar'
-      path: '/sesiones/editar'
-      fullPath: '/sesiones/editar'
-      preLoaderRoute: typeof SesionesEditarImport
       parentRoute: typeof rootRoute
     }
     '/sesiones/ver': {
@@ -547,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -555,7 +556,6 @@ export interface FileRoutesByFullPath {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -586,6 +586,7 @@ export interface FileRoutesByTo {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -594,7 +595,6 @@ export interface FileRoutesByTo {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -626,6 +626,7 @@ export interface FileRoutesById {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -634,7 +635,6 @@ export interface FileRoutesById {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -667,6 +667,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -675,7 +676,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -705,6 +705,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -713,7 +714,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -743,6 +743,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -751,7 +752,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -783,6 +783,7 @@ export interface RootRouteChildren {
   LocalesEditarRoute: typeof LocalesEditarRoute
   LocalesVerRoute: typeof LocalesVerRoute
   PlanesMembresiaAgregarRoute: typeof PlanesMembresiaAgregarRoute
+  PlanesMembresiaEditarRoute: typeof PlanesMembresiaEditarRoute
   PlanesMembresiaVerRoute: typeof PlanesMembresiaVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
@@ -791,7 +792,6 @@ export interface RootRouteChildren {
   ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
   ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
   SesionesAgregarRoute: typeof SesionesAgregarRoute
-  SesionesEditarRoute: typeof SesionesEditarRoute
   SesionesVerRoute: typeof SesionesVerRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
@@ -822,6 +822,7 @@ const rootRouteChildren: RootRouteChildren = {
   LocalesEditarRoute: LocalesEditarRoute,
   LocalesVerRoute: LocalesVerRoute,
   PlanesMembresiaAgregarRoute: PlanesMembresiaAgregarRoute,
+  PlanesMembresiaEditarRoute: PlanesMembresiaEditarRoute,
   PlanesMembresiaVerRoute: PlanesMembresiaVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
@@ -830,7 +831,6 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
   ServiciosServicioVerRoute: ServiciosServicioVerRoute,
   SesionesAgregarRoute: SesionesAgregarRoute,
-  SesionesEditarRoute: SesionesEditarRoute,
   SesionesVerRoute: SesionesVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
@@ -870,6 +870,7 @@ export const routeTree = rootRoute
         "/locales/editar",
         "/locales/ver",
         "/planes-membresia/agregar",
+        "/planes-membresia/editar",
         "/planes-membresia/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
@@ -878,7 +879,6 @@ export const routeTree = rootRoute
         "/servicios/servicio-nuevo",
         "/servicios/servicio-ver",
         "/sesiones/agregar",
-        "/sesiones/editar",
         "/sesiones/ver",
         "/usuarios/agregar",
         "/usuarios/editar",
@@ -938,6 +938,9 @@ export const routeTree = rootRoute
     "/planes-membresia/agregar": {
       "filePath": "planes-membresia/agregar.tsx"
     },
+    "/planes-membresia/editar": {
+      "filePath": "planes-membresia/editar.tsx"
+    },
     "/planes-membresia/ver": {
       "filePath": "planes-membresia/ver.tsx"
     },
@@ -961,9 +964,6 @@ export const routeTree = rootRoute
     },
     "/sesiones/agregar": {
       "filePath": "sesiones/agregar.tsx"
-    },
-    "/sesiones/editar": {
-      "filePath": "sesiones/editar.tsx"
     },
     "/sesiones/ver": {
       "filePath": "sesiones/ver.tsx"

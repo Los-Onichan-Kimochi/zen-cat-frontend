@@ -3,10 +3,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, User, Calendar, Clock, Mail, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -57,143 +57,55 @@ export function ViewReservationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <DialogContent className="max-w-md">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle className="text-xl font-bold">
             Detalles de la Reserva
           </DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-6 w-6 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-500">ID</div>
-              <div className="text-sm font-mono">{reservation.id}</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-500">Estado</div>
-              <Badge className={getStateColor(reservation.state)}>
-                {getStateLabel(reservation.state)}
-              </Badge>
+        <div className="space-y-4 pt-2">
+          {/* Nombre de la Reserva */}
+          <div className="space-y-1.5">
+            <div className="text-sm font-medium">Nombre de la Reserva</div>
+            <div className="bg-gray-50 border border-gray-200 rounded p-2.5 text-sm">
+              {reservation.name}
             </div>
           </div>
 
-          {/* Reservation Info */}
-          <div className="space-y-4">
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-3">
-                Información de la Reserva
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    Nombre
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span>{reservation.name}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    Fecha de Reserva
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span>
-                      {format(
-                        new Date(reservation.reservation_time),
-                        'dd/MM/yyyy HH:mm',
-                        { locale: es },
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* User Info */}
-            {(reservation.user_name ||
-              reservation.user_email ||
-              reservation.user_phone) && (
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold mb-3">
-                  Información del Usuario
-                </h3>
-                <div className="space-y-3">
-                  {reservation.user_name && (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span>{reservation.user_name}</span>
-                    </div>
-                  )}
-                  {reservation.user_email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <span>{reservation.user_email}</span>
-                    </div>
-                  )}
-                  {reservation.user_phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-gray-400" />
-                      <span>{reservation.user_phone}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Timestamps */}
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-3">
-                Información de Sistema
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    ID de Usuario
-                  </div>
-                  <div className="text-sm font-mono">{reservation.user_id}</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    ID de Sesión
-                  </div>
-                  <div className="text-sm font-mono">
-                    {reservation.session_id}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    Última Modificación
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">
-                      {format(
-                        new Date(reservation.last_modification),
-                        'dd/MM/yyyy HH:mm',
-                        { locale: es },
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {/* Usuario */}
+          <div className="space-y-1.5">
+            <div className="text-sm font-medium">Usuario</div>
+            <div className="bg-gray-50 border border-gray-200 rounded p-2.5 text-sm">
+              {reservation.user_name || 'No especificado'}
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end pt-4 border-t">
-            <Button onClick={onClose}>Cerrar</Button>
+          {/* Fecha y Hora */}
+          <div className="space-y-1.5">
+            <div className="text-sm font-medium">Fecha y Hora de Reserva</div>
+            <div className="bg-gray-50 border border-gray-200 rounded p-2.5 text-sm">
+              {format(
+                new Date(reservation.reservation_time),
+                'dd/MM/yyyy HH:mm',
+                { locale: es }
+              )}
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div className="space-y-1.5">
+            <div className="text-sm font-medium">Estado</div>
+            <Badge className={`${getStateColor(reservation.state)} px-3 py-1.5`}>
+              {getStateLabel(reservation.state)}
+            </Badge>
+          </div>
+
+          {/* Buttons - Solo un botón para cerrar */}
+          <div className="flex justify-end pt-4">
+            <Button variant="outline" onClick={onClose}>
+              Cerrar
+            </Button>
           </div>
         </div>
       </DialogContent>

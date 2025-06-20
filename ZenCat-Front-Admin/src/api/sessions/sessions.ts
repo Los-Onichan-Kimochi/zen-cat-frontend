@@ -109,7 +109,33 @@ export const sessionsApi = {
     id: string,
     payload: UpdateSessionPayload,
   ): Promise<Session> => {
-    return apiClient.patch<Session>(API_ENDPOINTS.SESSIONS.BY_ID(id), payload);
+    console.log('Original update payload:', payload);
+    
+    // Convertir fechas a formato UTC si están presentes
+    const backendPayload: UpdateSessionPayload = {
+      ...payload,
+    };
+    
+    // Convertir las fechas si están presentes
+    if (payload.date) {
+      // Si la fecha no tiene formato ISO completo, asumimos que es solo la fecha
+      if (!payload.date.includes('T')) {
+        backendPayload.date = `${payload.date}T00:00:00Z`;
+      }
+    }
+    
+    // Asegurarnos que las fechas de inicio y fin estén en formato ISO
+    if (payload.start_time && !payload.start_time.endsWith('Z')) {
+      backendPayload.start_time = new Date(payload.start_time).toISOString();
+    }
+    
+    if (payload.end_time && !payload.end_time.endsWith('Z')) {
+      backendPayload.end_time = new Date(payload.end_time).toISOString();
+    }
+    
+    console.log('Processed update payload:', backendPayload);
+    
+    return apiClient.patch<Session>(API_ENDPOINTS.SESSIONS.BY_ID(id), backendPayload);
   },
 
   deleteSession: async (id: string): Promise<void> => {

@@ -26,6 +26,14 @@ export function TimeSlotDisplay({
     );
   }
 
+  if (!professionalId && !localId) {
+    return (
+      <div className="text-sm text-gray-500 p-4 text-center">
+        Selecciona un profesional o local para ver la disponibilidad
+      </div>
+    );
+  }
+
   if (isAvailable) {
     return (
       <div className="text-sm text-green-600 p-4 text-center flex items-center justify-center">
