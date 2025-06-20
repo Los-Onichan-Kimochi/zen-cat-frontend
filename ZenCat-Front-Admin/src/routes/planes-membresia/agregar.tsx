@@ -68,7 +68,7 @@ function AddMembershipPlanPage() {
           Volver
         </Button>
       </div>
-      <Card className="mt-6 flex-grow">
+      
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <MembershipPlanForm mode='add'/>
@@ -91,7 +91,7 @@ function AddMembershipPlanPage() {
             </div>
           </form>
         </FormProvider>
-      </Card>
+      
  
     </div>
   );
