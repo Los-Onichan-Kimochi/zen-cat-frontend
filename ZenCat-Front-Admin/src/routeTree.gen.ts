@@ -29,7 +29,6 @@ import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membr
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar'
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar'
 import { Route as SesionesVerImport } from './routes/sesiones/ver'
-import { Route as SesionesEditarImport } from './routes/sesiones/editar'
 import { Route as SesionesAgregarImport } from './routes/sesiones/agregar'
 import { Route as ServiciosServicioVerImport } from './routes/servicios/servicio-ver'
 import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servicio-nuevo'
@@ -155,12 +154,6 @@ const UsuariosAgregarRoute = UsuariosAgregarImport.update({
 const SesionesVerRoute = SesionesVerImport.update({
   id: '/sesiones/ver',
   path: '/sesiones/ver',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const SesionesEditarRoute = SesionesEditarImport.update({
-  id: '/sesiones/editar',
-  path: '/sesiones/editar',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -435,13 +428,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SesionesAgregarImport
       parentRoute: typeof rootRoute
     }
-    '/sesiones/editar': {
-      id: '/sesiones/editar'
-      path: '/sesiones/editar'
-      fullPath: '/sesiones/editar'
-      preLoaderRoute: typeof SesionesEditarImport
-      parentRoute: typeof rootRoute
-    }
     '/sesiones/ver': {
       id: '/sesiones/ver'
       path: '/sesiones/ver'
@@ -555,7 +541,6 @@ export interface FileRoutesByFullPath {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -594,7 +579,6 @@ export interface FileRoutesByTo {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -634,7 +618,6 @@ export interface FileRoutesById {
   '/servicios/servicio-nuevo': typeof ServiciosServicioNuevoRoute
   '/servicios/servicio-ver': typeof ServiciosServicioVerRoute
   '/sesiones/agregar': typeof SesionesAgregarRoute
-  '/sesiones/editar': typeof SesionesEditarRoute
   '/sesiones/ver': typeof SesionesVerRoute
   '/usuarios/agregar': typeof UsuariosAgregarRoute
   '/usuarios/editar': typeof UsuariosEditarRoute
@@ -675,7 +658,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -713,7 +695,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -751,7 +732,6 @@ export interface FileRouteTypes {
     | '/servicios/servicio-nuevo'
     | '/servicios/servicio-ver'
     | '/sesiones/agregar'
-    | '/sesiones/editar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
     | '/usuarios/editar'
@@ -791,7 +771,6 @@ export interface RootRouteChildren {
   ServiciosServicioNuevoRoute: typeof ServiciosServicioNuevoRoute
   ServiciosServicioVerRoute: typeof ServiciosServicioVerRoute
   SesionesAgregarRoute: typeof SesionesAgregarRoute
-  SesionesEditarRoute: typeof SesionesEditarRoute
   SesionesVerRoute: typeof SesionesVerRoute
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute
   UsuariosEditarRoute: typeof UsuariosEditarRoute
@@ -830,7 +809,6 @@ const rootRouteChildren: RootRouteChildren = {
   ServiciosServicioNuevoRoute: ServiciosServicioNuevoRoute,
   ServiciosServicioVerRoute: ServiciosServicioVerRoute,
   SesionesAgregarRoute: SesionesAgregarRoute,
-  SesionesEditarRoute: SesionesEditarRoute,
   SesionesVerRoute: SesionesVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
   UsuariosEditarRoute: UsuariosEditarRoute,
@@ -878,7 +856,6 @@ export const routeTree = rootRoute
         "/servicios/servicio-nuevo",
         "/servicios/servicio-ver",
         "/sesiones/agregar",
-        "/sesiones/editar",
         "/sesiones/ver",
         "/usuarios/agregar",
         "/usuarios/editar",
@@ -961,9 +938,6 @@ export const routeTree = rootRoute
     },
     "/sesiones/agregar": {
       "filePath": "sesiones/agregar.tsx"
-    },
-    "/sesiones/editar": {
-      "filePath": "sesiones/editar.tsx"
     },
     "/sesiones/ver": {
       "filePath": "sesiones/ver.tsx"

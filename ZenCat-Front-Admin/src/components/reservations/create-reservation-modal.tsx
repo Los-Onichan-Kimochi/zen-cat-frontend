@@ -20,12 +20,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { User } from '@/types/user';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
+import { usuariosApi } from '@/api/usuarios/usuarios';
 
 interface CreateReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
   sessionId: string;
   users: User[];
   sessionName: string;
@@ -34,8 +36,9 @@ interface CreateReservationModalProps {
 export function CreateReservationModal({
   isOpen,
   onClose,
+  onSuccess,
   sessionId,
-  users,
+  users = [],
   sessionName,
 }: CreateReservationModalProps) {
   const [name, setName] = useState('');
@@ -55,6 +58,7 @@ export function CreateReservationModal({
       });
       queryClient.invalidateQueries({ queryKey: ['reservations', sessionId] });
       handleClose();
+      onSuccess();
     },
     onError: (error: any) => {
       error('Error al crear la reserva', {
@@ -82,14 +86,16 @@ export function CreateReservationModal({
     }
 
     const reservationData = {
-      sessionId,
-      userId: selectedUserId,
+      session_id: sessionId,
+      user_id: selectedUserId,
       name: name.trim(),
-      guestCount,
+      guest_count: guestCount,
       notes: notes.trim(),
-      status: 'confirmed',
+      state: 'CONFIRMED',
+      reservation_time: new Date().toISOString(), // Usamos la fecha actual como tiempo de reserva
     };
 
+    console.log('Enviando datos de reserva:', reservationData);
     createReservationMutation.mutate(reservationData);
   };
 
@@ -130,11 +136,17 @@ export function CreateReservationModal({
                   <SelectValue placeholder="Seleccione un usuario" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
+                  {Array.isArray(users) && users.length > 0 ? (
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No hay usuarios disponibles
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
