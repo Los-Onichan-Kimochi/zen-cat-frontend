@@ -60,6 +60,7 @@ function AddCommunityMembershipPlanPageComponent() {
     queryFn: membershipPlansApi.getMembershipPlans,
   });
 
+  // Handler para el botón Cancelar
   const handleCancel = () => {
     navigate({ to: redirectPath });
   };
@@ -156,7 +157,7 @@ function AddCommunityMembershipPlanPageComponent() {
         },
         enableSorting: false,
         enableHiding: false,
-        meta: { className: 'w-[36px]' },
+        meta: { className: 'w-[36px] px-3' },
       },
       {
         accessorKey: 'type',

@@ -33,9 +33,9 @@ export function ForgotForm() {
         throw new Error(errBody?.message || 'Error al crear usuario');
       }
       const json = await response.json();
-      localStorage.setItem("userPIN", json.pin);
+      localStorage.setItem('userPIN', json.pin);
       localStorage.setItem('pendingEmail', email);
-      navigate({ to: "/pin" }); // Redirige si todo va bien
+      navigate({ to: '/pin' }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido al intentar ingresar correo.';
