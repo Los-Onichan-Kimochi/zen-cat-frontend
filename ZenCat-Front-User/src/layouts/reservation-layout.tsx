@@ -7,6 +7,8 @@ import {
   useReservation,
 } from '@/context/reservation-context';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useUserCommunities } from '@/api/users/user-communities';
+import { useAuth } from '@/context/AuthContext';
 
 const steps = [
   'Seleccionar servicio',
@@ -33,6 +35,15 @@ const queryClient = new QueryClient();
 const ReservationContent: React.FC = () => {
   const location = useLocation();
   const { reservationData } = useReservation();
+  const { user } = useAuth();
+
+  // Obtener las comunidades del usuario para conseguir el nombre
+  const { communities } = useUserCommunities(user?.id);
+
+  // Encontrar la comunidad actual
+  const currentCommunity = communities?.find(
+    (community) => community.id === reservationData.communityId,
+  );
 
   let currentPath = location.pathname;
   if (currentPath[currentPath.length - 1] === '/') {
@@ -43,12 +54,17 @@ const ReservationContent: React.FC = () => {
   const servicio =
     reservationData.service?.name || location.search?.servicio || '-';
 
+  // Usar el nombre de la comunidad o un fallback
+  const communityName = currentCommunity?.name || 'Comunidad';
+
   return (
     <div className="w-full flex justify-center px-4 md:px-6 py-10">
       <div className="w-full max-w-6xl flex flex-col gap-12">
         {/* Título centrado */}
         <div className="text-center">
-          <h1 className="text-xl md:text-2xl font-bold mb-2">Runners</h1>
+          <h1 className="text-xl md:text-2xl font-bold mb-2">
+            {communityName}
+          </h1>
           <h2 className="text-xl md:text-xl font-semibold mb-5">
             Realiza una nueva reserva
           </h2>

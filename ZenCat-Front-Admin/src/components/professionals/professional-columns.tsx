@@ -68,7 +68,7 @@ export function getProfessionalColumns({
       ),
       accessorFn: (row) =>
         `${row.first_last_name} ${row.second_last_name || ''}`.trim(),
-      cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+      cell: ({ getValue }) => <div className="text-center">{getValue() as string}</div>,
       meta: {
         displayName: 'Apellidos',
       },
@@ -128,6 +128,37 @@ export function getProfessionalColumns({
         const professional = row.original;
         return (
           <div className="flex items-center justify-center space-x-2">
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(professional);
+              }}
+            >
+              <Eye className="!w-5 !h-5" />
+            </Button>
+
+            <Button
+              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(professional);
+              }}
+              title="Eliminar"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      meta: {
+        displayName: 'Acciones',
+      },
+    },
+  ];
+}
+/*
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -161,24 +192,4 @@ export function getProfessionalColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button
-              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(professional);
-              }}
-              title="Eliminar"
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
-      enableSorting: false,
-      meta: {
-        displayName: 'Acciones',
-      },
-    },
-  ];
-}
+*/

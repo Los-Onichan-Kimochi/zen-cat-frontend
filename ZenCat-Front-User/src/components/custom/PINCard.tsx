@@ -18,31 +18,38 @@ const PINCard: React.FC<PINCardProps> = ({ onComplete }) => {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   const navigate = useNavigate();
-  
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     const value = e.target.value;
     if (/^\d$/.test(value)) {
-
       if (index < length - 1) {
         inputsRef.current[index + 1]?.focus();
       }
 
       setTimeout(() => {
-      const pinArray = inputsRef.current.map((input) => input?.value || '');
+        const pinArray = inputsRef.current.map((input) => input?.value || '');
         console.log(pinArray.length === length);
-      if (pinArray.length === length && pinArray.every((char) => char !== '')) {
-        console.log('Intento de verificacion');
-        const pin= pinArray.join('');
-        verifyPIN(pin);
-      }
+        if (
+          pinArray.length === length &&
+          pinArray.every((char) => char !== '')
+        ) {
+          console.log('Intento de verificacion');
+          const pin = pinArray.join('');
+          verifyPIN(pin);
+        }
       }, 0);
     } else {
       e.target.value = '';
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     if (e.key === 'Backspace' && !e.currentTarget.value && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
