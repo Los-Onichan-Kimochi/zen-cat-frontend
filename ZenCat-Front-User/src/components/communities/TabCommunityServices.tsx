@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/pagination';
 import { SearchInput } from '@/components/communities/SearchInput';
 import { FilterControls } from '@/components/communities/FilterControls';
+import { useNavigate } from '@tanstack/react-router';
 
 interface TabCommunityServicesProps {
   community: Community | null;
@@ -24,6 +25,7 @@ export function TabCommunityServices({
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage] = useState(3);
+  const navigate = useNavigate();
   const safeServices = Array.isArray(services) ? services : [];
 
   // Filtrar servicios por búsqueda
@@ -66,6 +68,23 @@ export function TabCommunityServices({
   const handleNext = () => {
     if (canGoNext) {
       setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handleServiceReservation = (communityId: string, serviceId: string) => {
+    // Encontrar el servicio seleccionado
+    const selectedService = safeServices.find(service => service.id === serviceId);
+
+    if (selectedService) {
+      // Navegar directamente al paso 2 (selección de lugar) pasando tanto el communityId como el servicio
+      navigate({
+        to: '/reserva/lugar',
+        search: {
+          communityId: communityId,
+          servicio: selectedService.name,
+          serviceId: selectedService.id
+        }
+      });
     }
   };
 
@@ -116,9 +135,11 @@ export function TabCommunityServices({
             key={service.id}
             community={community!}
             service={service}
-            onAction={(communityId, action) =>
-              console.log(`Acción: ${action} en la comunidad ${communityId}`)
-            }
+            onAction={(communityId, action) => {
+              if (action === 'reserve') {
+                handleServiceReservation(communityId, service.id);
+              }
+            }}
           />
         ))}
       </div>
