@@ -34,19 +34,21 @@ const ProfileSection: React.FC = () => {
     const {
         data: apiUserData,
         isLoading,
-        isError,
+        isError
     } = useQuery<User, Error>({
         queryKey: ['user', authUser?.id],
         queryFn: async () => {
             if (!authUser?.id) throw new Error('No user ID available');
+            console.log('Fetching user data for ID:', authUser.id);
             const response = await userApi.getUserById(authUser.id);
-
+            console.log('API response:', response);
             return response;
         },
         enabled: isAuthenticated && !!authUser?.id,
         staleTime: Infinity,
         refetchOnWindowFocus: false
     });
+
     // Initialize all state with empty values
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -72,6 +74,7 @@ const ProfileSection: React.FC = () => {
 
     // Initialize form when API data loads
     useEffect(() => {
+        console.log('API User Data:', apiUserData);
         if (apiUserData) {
             // Transform API data to match your frontend interface
             const userData = apiUserData;
@@ -116,27 +119,53 @@ const ProfileSection: React.FC = () => {
         return <div>Error loading profile data</div>;
     }
 
-    const saveChanges = async () => {
+    async function updateProfile(updateData: CreateUserPayload) {
         try {
-            // Update local state first
-            setEmail(currentEmail);
-            setPhone(currentPhone);
-            setGender(currentGender);
-            setCity(currentCity);
-            setAddress(currentAddress);
-            setPostal(currentPostal);
-            setDistrict(currentDistrict);
-
-            // API call to update user info
-            await updateUserProfile();
-
-            // Show success message or handle accordingly
-            console.log('Changes saved successfully!');
+            console.log('Updating profile with:', updateData);
+            console.log('IN:', apiUserData?.id);
+            const userId = authUser?.id; // Replace with actual user ID
+            const updatedUser = await userApi.updateUser(apiUserData?.id, updateData);
+            console.log('Update successful!', updatedUser);
         } catch (error) {
-            console.error('Error saving changes:', error);
-            // Optionally show error to user
-            rollbackChanges(); // Revert changes if API call fails
+            console.error('Update failed:', error);
         }
+    }
+
+    const saveChanges = async () => {
+
+        // Update local state first
+        setEmail(currentEmail);
+        setPhone(currentPhone);
+        setGender(currentGender);
+        setCity(currentCity);
+        setAddress(currentAddress);
+        setPostal(currentPostal);
+        setDistrict(currentDistrict);
+
+        const updateData: CreateUserPayload = {
+            email: currentEmail,
+            name: name,
+            role: 'user',
+            phone: currentPhone,
+            address: currentAddress,
+            district: currentDistrict,
+            password: apiUserData?.password || '',
+            onboarding: {                   // Optional
+                phoneNumber: currentPhone,
+                address: currentAddress,
+                city: currentCity,
+                postalCode: currentPostal,
+                district: currentDistrict,
+            }
+        };
+
+        // API call to update user info
+        await updateProfile(updateData);
+
+        // Show success message or handle accordingly
+        console.log('Changes saved successfully!', updateData);
+
+
     };
 
     const verifyChanges = () => {
@@ -167,19 +196,16 @@ const ProfileSection: React.FC = () => {
         setCPostal(postal);
         setCDistrict(district);
     }
-    const handleSaveChanges = async (e: React.FormEvent) => {
+    const handleSaveChanges = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isChanged) {
-            try {
-                await saveChanges();
-                setIsSaveDialogOpen(false);
-                setisChanged(false);
-                setisOnGray(true);
-            } catch (error) {
-                // Handle error (show toast, etc.)
-                console.error('Error saving changes:', error);
-            }
+
+            saveChanges();
+            setIsSaveDialogOpen(false);
+            setisChanged(false);
+            setisOnGray(true);
+
         }
     };
 
@@ -200,38 +226,8 @@ const ProfileSection: React.FC = () => {
         }
 
     };
-    const updateUserProfile = async () => {
-        if (!authUser?.id) return;
 
-        try {
-            // Prepare the update payload
-            const updatePayload = {
-                name: name, // You might want to make this editable too
-                onboarding: {
-                    phoneNumber: currentPhone,
-                    gender: currentGender,
-                    city: currentCity,
-                    district: currentDistrict,
-                    address: currentAddress,
-                    postalCode: currentPostal,
-                    documentNumber: document,
-                    documentType: documentType,
-                    birthDate: birthDay
-                }
-            };
 
-            console.log('Updating user with payload:', updatePayload);
-
-            // Call the API
-            const updatedUser = await userApi.updateOnboardingByUserId(authUser.id, updatePayload);
-
-            console.log('User updated successfully:', updatedUser);
-            return updatedUser;
-        } catch (error) {
-            console.error('Failed to update user:', error);
-            throw error;
-        }
-    };
     return (
         <section className=" pb-16">
             {/* 1. Encabezado */}
