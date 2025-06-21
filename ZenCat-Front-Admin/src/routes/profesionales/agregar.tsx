@@ -36,7 +36,7 @@ import { useState } from 'react';
 import { Loader2, UploadCloud } from 'lucide-react';
 import '../../index.css';
 
-export const Route = createFileRoute('/profesionales/nuevo')({
+export const Route = createFileRoute('/profesionales/agregar')({
   component: AddProfessionalPageComponent,
 });
 
