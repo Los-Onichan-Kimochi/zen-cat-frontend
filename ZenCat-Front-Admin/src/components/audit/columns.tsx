@@ -17,10 +17,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   {
     accessorKey: 'userEmail',
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        <User size={16} />
-        <span>Usuario</span>
-      </div>
+      <div className="text-center font-bold">Usuario</div>
     ),
     cell: ({ row }) => {
       const user = row.original.user;
@@ -28,7 +25,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
       const userRole = row.original.userRole;
       
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src="" alt="" />
             <AvatarFallback className="text-xs">
@@ -46,8 +43,14 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
             )}
             {userRole && (
               <Badge 
-                variant="secondary" 
-                className="w-fit text-xs mt-1"
+                variant="outline" 
+                className={`text-xs transition-all duration-200 hover:scale-105 ${
+                  userRole === 'ADMINISTRATOR' 
+                    ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                    : userRole === 'GUEST'
+                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                    : 'bg-gray-50 text-gray-700 border-gray-200'
+                }`}
               >
                 {userRole === 'GUEST' ? 'invitado' : 
                  userRole === 'ADMINISTRATOR' ? 'administrador' : 
@@ -65,34 +68,40 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   },
   {
     accessorKey: 'action',
-    header: 'Acción',
+    header: ({ column }) => (
+      <div className="text-center font-bold">Acción</div>
+    ),
     cell: ({ row }) => {
       const action = row.original.action;
       const config = ACTION_CONFIGS[action as AuditAction];
       
       if (!config) {
         return (
-          <Badge variant="secondary" className="text-xs">
-            {action}
-          </Badge>
+          <div className="flex justify-center">
+            <Badge variant="secondary" className="text-xs">
+              {action}
+            </Badge>
+          </div>
         );
       }
       
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge 
-                className={`${config.className} text-xs`}
-              >
-                {config.label}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{config.description || config.label}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex justify-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge 
+                  className={`${config.className} font-medium px-3 py-1 transition-all duration-200 hover:scale-105`}
+                >
+                  {config.label}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{config.description || config.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       );
     },
     meta: {
@@ -101,34 +110,40 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   },
   {
     accessorKey: 'entityType',
-    header: 'Entidad',
+    header: ({ column }) => (
+      <div className="text-center font-bold">Entidad</div>
+    ),
     cell: ({ row }) => {
       const entityType = row.original.entityType;
       const config = ENTITY_CONFIGS[entityType as AuditEntityType];
       
       if (!config) {
         return (
-          <Badge variant="secondary" className="text-xs">
-            {entityType}
-          </Badge>
+          <div className="flex justify-center">
+            <Badge variant="secondary" className="text-xs">
+              {entityType}
+            </Badge>
+          </div>
         );
       }
       
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge 
-                className={`${config.className} text-xs`}
-              >
-                {config.label}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{config.description || config.label}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex justify-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge 
+                  className={`${config.className} px-2 py-1 text-xs transition-all duration-200 hover:scale-105 border-slate-200`}
+                >
+                  {config.label}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{config.description || config.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       );
     },
     meta: {
@@ -138,10 +153,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        <Calendar size={16} />
-        <span>Fecha</span>
-      </div>
+      <div className="text-center font-bold">Fecha</div>
     ),
     cell: ({ row }) => {
       const createdAt = row.original.createdAt;
@@ -149,7 +161,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
       // Validate if createdAt is valid before creating Date object
       if (!createdAt || createdAt === '') {
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center">
             <span className="font-medium text-sm text-gray-500">
               Fecha no disponible
             </span>
@@ -165,7 +177,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
       // Check if the date is valid
       if (isNaN(date.getTime())) {
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center">
             <span className="font-medium text-sm text-red-500">
               Fecha inválida
             </span>
@@ -177,7 +189,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
       }
       
       return (
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center">
           <span className="font-medium text-sm">
             {format(date, 'dd/MM/yyyy', { locale: es })}
           </span>
@@ -194,17 +206,18 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   {
     accessorKey: 'ipAddress',
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        <Globe size={16} />
-        <span>IP</span>
-      </div>
+      <div className="text-center font-bold">IP</div>
     ),
     cell: ({ row }) => {
       const ipAddress = row.original.ipAddress;
+      
       return (
-        <span className="text-sm font-mono">
-          {ipAddress || 'No disponible'}
-        </span>
+        <div className="flex items-center justify-center space-x-1">
+          <Globe className="h-4 w-4 text-gray-400" />
+          <span className="text-sm font-mono">
+            {ipAddress || 'No disponible'}
+          </span>
+        </div>
       );
     },
     meta: {
@@ -214,16 +227,17 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   {
     accessorKey: 'userAgent',
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        <Monitor size={16} />
-        <span>Navegador</span>
-      </div>
+      <div className="text-center font-bold">Navegador</div>
     ),
     cell: ({ row }) => {
       const userAgent = row.original.userAgent;
       
       if (!userAgent) {
-        return <span className="text-sm text-gray-500">No disponible</span>;
+        return (
+          <div className="flex items-center justify-center">
+            <span className="text-sm text-gray-500">No disponible</span>
+          </div>
+        );
       }
       
       // Extraer información básica del user agent
@@ -234,16 +248,21 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
       else if (userAgent.includes('Edge')) browserInfo = 'Edge';
       
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className="text-sm">{browserInfo}</span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs break-words">{userAgent}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center justify-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center space-x-1">
+                  <Monitor className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm font-medium">{browserInfo}</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs break-words">{userAgent}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       );
     },
     meta: {
@@ -252,12 +271,14 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
   },
   {
     id: 'actions',
-    header: 'Acciones',
+    header: ({ column }) => (
+      <div className="text-center font-bold">Acciones</div>
+    ),
     cell: ({ row }) => {
       const log = row.original;
       
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -265,7 +286,7 @@ export const getAuditColumns = ({ onView }: GetAuditColumnsProps): ColumnDef<Aud
                   variant="ghost"
                   size="sm"
                   onClick={() => onView?.(log)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 transition-all duration-200 hover:scale-105"
                 >
                   <Eye size={16} />
                 </Button>

@@ -16,25 +16,13 @@ const getHeaders = () => {
 const mapBackendUserToUser = (backendUser: any): User => {
   console.log('Mapping backend user:', backendUser);
 
-  // Mapear roles del backend al frontend
-  const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
-    switch (backendRole) {
-      case 'ADMINISTRATOR':
-        return 'admin';
-      case 'CLIENT':
-        return 'user';
-      case 'GUEST':
-        return 'guest';
-      default:
-        return 'user'; // Default fallback
-    }
-  };
+  // Mantener el rol original del backend
 
   return {
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
-    role: mapRole(backendUser.rol || backendUser.role || 'CLIENT'),
+    rol: backendUser.rol || backendUser.role || 'CLIENT',
     password: backendUser.password || '',
     isAuthenticated: false,
     permissions: backendUser.permissions || [],
@@ -69,7 +57,7 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
   const backendPayload: any = {
     name: payload.name,
     email: payload.email,
-    rol: payload.role, // Backend usa "rol"
+    rol: payload.rol, // Backend usa "rol"
     password: payload.password,
     image_url: payload.avatar || '',
   };
@@ -109,7 +97,7 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
 
   if (payload.name) backendPayload.name = payload.name;
   if (payload.email) backendPayload.email = payload.email;
-  if (payload.role) backendPayload.rol = payload.role;
+  if (payload.rol) backendPayload.rol = payload.rol;
   if (payload.password) backendPayload.password = payload.password;
   if (payload.avatar !== undefined) backendPayload.image_url = payload.avatar;
 

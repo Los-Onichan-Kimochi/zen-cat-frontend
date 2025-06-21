@@ -26,11 +26,12 @@ import {
 import { ErrorLog, getActionConfig, getEntityConfig } from '@/types/audit';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AuditLog } from '@/types/audit';
 
 interface ErrorDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  errorLog: ErrorLog | null;
+  errorLog: ErrorLog | AuditLog | null;
 }
 
 export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModalProps) {
@@ -156,7 +157,8 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
   };
 
   const formattedDate = formatDate(errorLog.createdAt);
-  const errorExplanation = getErrorExplanation(errorLog?.errorMessage || null, actionConfig.label, entityConfig.label);
+  const errorMessage = 'errorMessage' in errorLog ? errorLog.errorMessage || null : null;
+  const errorExplanation = getErrorExplanation(errorMessage, actionConfig.label, entityConfig.label);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -215,13 +217,13 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
                 <p className="text-amber-700 text-sm">{errorExplanation}</p>
               </div>
 
-              {errorLog.errorMessage && (
+              {errorMessage && (
                 <div className="mt-4 p-3 bg-gray-50 rounded border">
                   <h4 className="font-medium text-gray-700 mb-2 flex items-center">
                     <FileText className="h-4 w-4 mr-2" />
                     Mensaje Técnico:
                   </h4>
-                  <code className="text-xs text-gray-600 break-all">{errorLog.errorMessage}</code>
+                  <code className="text-xs text-gray-600 break-all">{errorMessage}</code>
                 </div>
               )}
             </CardContent>

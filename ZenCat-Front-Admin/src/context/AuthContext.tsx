@@ -15,6 +15,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (userData: User) => void;
   logout: () => Promise<void>;
+  isAdmin: () => boolean;
+  hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,6 +70,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.location.href = '/login';
   };
 
+  const isAdmin = () => {
+    if (!user) return false;
+    // Manejar diferentes formatos de roles que pueden venir del backend
+    const userRole = user.rol?.toLowerCase();
+    return userRole === 'administrator' || userRole === 'admin';
+  };
+
+  const hasRole = (role: string) => {
+    return user?.rol === role;
+  };
+
   // Check both user state and actual token presence
   const hasAccessToken = !!Cookies.get('access_token');
   const isAuthenticated = !!user && hasAccessToken;
@@ -78,6 +91,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     login,
     logout,
+    isAdmin,
+    hasRole,
   };
 
   console.log('AuthProvider: Context value:', {

@@ -15,6 +15,7 @@ export interface User {
   email?: string;
   imageUrl?: string;
   role?: string;
+  rol?: string; // Backend uses 'rol' field
   isAuthenticated?: boolean;
 }
 
@@ -24,6 +25,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (userData: User) => void;
   logout: () => void;
+  isClient: () => boolean;
+  hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,6 +88,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.location.href = '/';
   };
 
+  const isClient = () => {
+    return user?.rol === 'CLIENT' || user?.role === 'CLIENT';
+  };
+
+  const hasRole = (role: string) => {
+    return user?.rol === role || user?.role === role;
+  };
+
   // Check both user state and actual token presence
   const hasAccessToken = !!Cookies.get('access_token');
   const isAuthenticated = !!user?.isAuthenticated && hasAccessToken;
@@ -95,6 +106,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     login,
     logout,
+    isClient,
+    hasRole,
   };
 
   console.log('AuthProvider: Context value:', {
