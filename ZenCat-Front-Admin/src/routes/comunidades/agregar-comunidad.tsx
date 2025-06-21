@@ -106,7 +106,9 @@ function AddCommunityPage() {
           community_id: newCommunity.id,
           service_id: s.id,
         }));
-        await communityServicesApi.bulkCreateCommunityServices(payload);
+        await communityServicesApi.bulkCreateCommunityServices({
+          community_services: payload,
+        });
       }
 
       if (selectedMembershipPlans.length > 0) {
