@@ -20,6 +20,7 @@ import { Route as PinRouteRouteImport } from './routes/pin/route'
 import { Route as LoginRouteRouteImport } from './routes/login/route'
 import { Route as HomeRouteRouteImport } from './routes/home/route'
 import { Route as ForgotRouteRouteImport } from './routes/forgot/route'
+import { Route as ComunidadesRouteRouteImport } from './routes/comunidades/route'
 import { Route as ChangepasswordRouteRouteImport } from './routes/changepassword/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReservasIndexRouteImport } from './routes/reservas/index'
@@ -87,6 +88,11 @@ const ForgotRouteRoute = ForgotRouteRouteImport.update({
   path: '/forgot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComunidadesRouteRoute = ComunidadesRouteRouteImport.update({
+  id: '/comunidades',
+  path: '/comunidades',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChangepasswordRouteRoute = ChangepasswordRouteRouteImport.update({
   id: '/changepassword',
   path: '/changepassword',
@@ -147,6 +153,7 @@ const MisComunidadesCommunityIdReservasHistorialRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/changepassword': typeof ChangepasswordRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/changepassword': typeof ChangepasswordRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/changepassword': typeof ChangepasswordRouteRoute
+  '/comunidades': typeof ComunidadesRouteRoute
   '/forgot': typeof ForgotRouteRoute
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/changepassword'
+    | '/comunidades'
     | '/forgot'
     | '/home'
     | '/login'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/changepassword'
+    | '/comunidades'
     | '/forgot'
     | '/home'
     | '/login'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/changepassword'
+    | '/comunidades'
     | '/forgot'
     | '/home'
     | '/login'
@@ -293,6 +305,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChangepasswordRouteRoute: typeof ChangepasswordRouteRoute
+  ComunidadesRouteRoute: typeof ComunidadesRouteRoute
   ForgotRouteRoute: typeof ForgotRouteRoute
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
@@ -387,6 +400,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot'
       fullPath: '/forgot'
       preLoaderRoute: typeof ForgotRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunidades': {
+      id: '/comunidades'
+      path: '/comunidades'
+      fullPath: '/comunidades'
+      preLoaderRoute: typeof ComunidadesRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changepassword': {
@@ -492,6 +512,7 @@ const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChangepasswordRouteRoute: ChangepasswordRouteRoute,
+  ComunidadesRouteRoute: ComunidadesRouteRoute,
   ForgotRouteRoute: ForgotRouteRoute,
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
