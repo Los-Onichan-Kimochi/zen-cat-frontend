@@ -23,6 +23,7 @@ export const Route = createFileRoute(ReservaServiciosRoute)({
   component: ServiceStepComponent,
   validateSearch: z.object({
     servicio: z.string().optional(), // Permite pasar un query param `servicio`
+    communityId: z.string().optional(), // Permite pasar el ID de la comunidad
   }),
 });
 
@@ -39,8 +40,42 @@ function ServiceStepComponent() {
   const { reservationData, updateReservation } = useReservation();
 
   const selected = search.servicio ?? null;
-  const communityId =
-    reservationData.communityId || 'ade8c5e1-ab82-47e0-b48b-3f8f2324c450';
+
+  // Usar el communityId del search param si está disponible, sino usar el del contexto
+  const communityId = search.communityId || reservationData.communityId;
+
+  // Actualizar el contexto con el communityId si viene del search param
+  useEffect(() => {
+    if (
+      search.communityId &&
+      search.communityId !== reservationData.communityId
+    ) {
+      updateReservation({ communityId: search.communityId });
+    }
+  }, [search.communityId, reservationData.communityId, updateReservation]);
+
+  // Si no hay communityId, mostrar mensaje de error
+  if (!communityId) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            No se ha seleccionado una comunidad
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Para ver los servicios disponibles, primero debes seleccionar una
+            comunidad desde "Mis comunidades".
+          </p>
+          <Button
+            onClick={() => navigate({ to: '/mis-comunidades' })}
+            className="bg-black text-white hover:bg-gray-800"
+          >
+            Ir a Mis Comunidades
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Función para manejar la selección de un servicio
   const handleSelect = (serviceName: string) => {
@@ -186,8 +221,14 @@ function ServiceStepComponent() {
         </div>
       </div>
 
-      {/* Botón siguiente */}
-      <div className="flex justify-end mt-6">
+      {/* Botones de navegación */}
+      <div className="flex justify-between mt-6">
+        <Button
+          onClick={() => navigate({ to: '/mis-comunidades' })}
+          className="px-8 py-2 bg-white text-black border border-gray-300 rounded-md hover:bg-gray-100"
+        >
+          Atrás
+        </Button>
         <Button
           onClick={handleContinue}
           disabled={!selected || !reservationData.service}

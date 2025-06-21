@@ -8,30 +8,30 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
-
-import { Route as rootRoute } from './routes/__root'
-import { Route as PreciosImport } from './routes/precios'
-import { Route as PerfilImport } from './routes/perfil'
-import { Route as MembresiaImport } from './routes/membresia'
-import { Route as ContactoImport } from './routes/contacto'
-import { Route as ComunidadesImport } from './routes/comunidades'
-import { Route as ComoFuncionaImport } from './routes/como-funciona'
-import { Route as SignupRouteImport } from './routes/signup/route'
-import { Route as ReservaRouteImport } from './routes/reserva/route'
-import { Route as LoginRouteImport } from './routes/login/route'
-import { Route as HomeRouteImport } from './routes/home/route'
-import { Route as ForgotRouteImport } from './routes/forgot/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as ReservasIndexImport } from './routes/reservas/index'
-import { Route as ReservaIndexImport } from './routes/reserva/index'
-import { Route as ReservaServiciosImport } from './routes/reserva/servicios'
-import { Route as ReservaLugarImport } from './routes/reserva/lugar'
-import { Route as ReservaHorarioImport } from './routes/reserva/horario'
-import { Route as ReservaConfirmacionImport } from './routes/reserva/confirmacion'
-import { Route as OnboardingMembresiaImport } from './routes/onboarding/membresia'
-
-// Create/Update Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as PreciosRouteImport } from './routes/precios'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as MisComunidadesRouteImport } from './routes/mis-comunidades'
+import { Route as MembresiaRouteImport } from './routes/membresia'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as SignupRouteRouteImport } from './routes/signup/route'
+import { Route as ReservaRouteRouteImport } from './routes/reserva/route'
+import { Route as PinRouteRouteImport } from './routes/pin/route'
+import { Route as LoginRouteRouteImport } from './routes/login/route'
+import { Route as HomeRouteRouteImport } from './routes/home/route'
+import { Route as ForgotRouteRouteImport } from './routes/forgot/route'
+import { Route as ChangepasswordRouteRouteImport } from './routes/changepassword/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReservasIndexRouteImport } from './routes/reservas/index'
+import { Route as ReservaIndexRouteImport } from './routes/reserva/index'
+import { Route as MisComunidadesIndexRouteImport } from './routes/mis-comunidades/index'
+import { Route as ReservaServiciosRouteImport } from './routes/reserva/servicios'
+import { Route as ReservaLugarRouteImport } from './routes/reserva/lugar'
+import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
+import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
+import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
+import { Route as MisComunidadesCommunityIdReservasHistorialRouteImport } from './routes/mis-comunidades/$communityId/reservas/historial'
 
 const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
@@ -43,6 +43,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MisComunidadesRoute = MisComunidadesRouteImport.update({
+  id: '/mis-comunidades',
+  path: '/mis-comunidades',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MembresiaRoute = MembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
@@ -51,14 +56,6 @@ const MembresiaRoute = MembresiaRouteImport.update({
 const ContactoRoute = ContactoRouteImport.update({
   id: '/contacto',
   path: '/contacto',
-  getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComunidadesRoute = ComunidadesRouteImport.update({
-const ComunidadesRoute = ComunidadesRouteImport.update({
-  id: '/comunidades',
-  path: '/comunidades',
-  getParentRoute: () => rootRouteImport,
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
@@ -117,9 +114,9 @@ const ReservaIndexRoute = ReservaIndexRouteImport.update({
   getParentRoute: () => ReservaRouteRoute,
 } as any)
 const MisComunidadesIndexRoute = MisComunidadesIndexRouteImport.update({
-  id: '/mis-comunidades/',
-  path: '/mis-comunidades/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => MisComunidadesRoute,
 } as any)
 const ReservaServiciosRoute = ReservaServiciosRouteImport.update({
   id: '/servicios',
@@ -148,9 +145,9 @@ const OnboardingMembresiaRoute = OnboardingMembresiaRouteImport.update({
 } as any)
 const MisComunidadesCommunityIdReservasHistorialRoute =
   MisComunidadesCommunityIdReservasHistorialRouteImport.update({
-    id: '/mis-comunidades/$communityId/reservas/historial',
-    path: '/mis-comunidades/$communityId/reservas/historial',
-    getParentRoute: () => rootRouteImport,
+    id: '/$communityId/reservas/historial',
+    path: '/$communityId/reservas/historial',
+    getParentRoute: () => MisComunidadesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -165,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
+  '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
@@ -172,7 +170,7 @@ export interface FileRoutesByFullPath {
   '/reserva/horario': typeof ReservaHorarioRoute
   '/reserva/lugar': typeof ReservaLugarRoute
   '/reserva/servicios': typeof ReservaServiciosRoute
-  '/mis-comunidades': typeof MisComunidadesIndexRoute
+  '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
   '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
@@ -213,6 +211,7 @@ export interface FileRoutesById {
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
+  '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
@@ -239,6 +238,7 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/contacto'
     | '/membresia'
+    | '/mis-comunidades'
     | '/perfil'
     | '/precios'
     | '/onboarding/membresia'
@@ -246,7 +246,7 @@ export interface FileRouteTypes {
     | '/reserva/horario'
     | '/reserva/lugar'
     | '/reserva/servicios'
-    | '/mis-comunidades'
+    | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas'
     | '/mis-comunidades/$communityId/reservas/historial'
@@ -286,6 +286,7 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/contacto'
     | '/membresia'
+    | '/mis-comunidades'
     | '/perfil'
     | '/precios'
     | '/onboarding/membresia'
@@ -311,12 +312,213 @@ export interface RootRouteChildren {
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ContactoRoute: typeof ContactoRoute
   MembresiaRoute: typeof MembresiaRoute
+  MisComunidadesRoute: typeof MisComunidadesRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   PreciosRoute: typeof PreciosRoute
   OnboardingMembresiaRoute: typeof OnboardingMembresiaRoute
-  MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
   ReservasIndexRoute: typeof ReservasIndexRoute
 }
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/precios': {
+      id: '/precios'
+      path: '/precios'
+      fullPath: '/precios'
+      preLoaderRoute: typeof PreciosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mis-comunidades': {
+      id: '/mis-comunidades'
+      path: '/mis-comunidades'
+      fullPath: '/mis-comunidades'
+      preLoaderRoute: typeof MisComunidadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membresia': {
+      id: '/membresia'
+      path: '/membresia'
+      fullPath: '/membresia'
+      preLoaderRoute: typeof MembresiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reserva': {
+      id: '/reserva'
+      path: '/reserva'
+      fullPath: '/reserva'
+      preLoaderRoute: typeof ReservaRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pin': {
+      id: '/pin'
+      path: '/pin'
+      fullPath: '/pin'
+      preLoaderRoute: typeof PinRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot': {
+      id: '/forgot'
+      path: '/forgot'
+      fullPath: '/forgot'
+      preLoaderRoute: typeof ForgotRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changepassword': {
+      id: '/changepassword'
+      path: '/changepassword'
+      fullPath: '/changepassword'
+      preLoaderRoute: typeof ChangepasswordRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reservas/': {
+      id: '/reservas/'
+      path: '/reservas'
+      fullPath: '/reservas'
+      preLoaderRoute: typeof ReservasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reserva/': {
+      id: '/reserva/'
+      path: '/'
+      fullPath: '/reserva/'
+      preLoaderRoute: typeof ReservaIndexRouteImport
+      parentRoute: typeof ReservaRouteRoute
+    }
+    '/mis-comunidades/': {
+      id: '/mis-comunidades/'
+      path: '/'
+      fullPath: '/mis-comunidades/'
+      preLoaderRoute: typeof MisComunidadesIndexRouteImport
+      parentRoute: typeof MisComunidadesRoute
+    }
+    '/reserva/servicios': {
+      id: '/reserva/servicios'
+      path: '/servicios'
+      fullPath: '/reserva/servicios'
+      preLoaderRoute: typeof ReservaServiciosRouteImport
+      parentRoute: typeof ReservaRouteRoute
+    }
+    '/reserva/lugar': {
+      id: '/reserva/lugar'
+      path: '/lugar'
+      fullPath: '/reserva/lugar'
+      preLoaderRoute: typeof ReservaLugarRouteImport
+      parentRoute: typeof ReservaRouteRoute
+    }
+    '/reserva/horario': {
+      id: '/reserva/horario'
+      path: '/horario'
+      fullPath: '/reserva/horario'
+      preLoaderRoute: typeof ReservaHorarioRouteImport
+      parentRoute: typeof ReservaRouteRoute
+    }
+    '/reserva/confirmacion': {
+      id: '/reserva/confirmacion'
+      path: '/confirmacion'
+      fullPath: '/reserva/confirmacion'
+      preLoaderRoute: typeof ReservaConfirmacionRouteImport
+      parentRoute: typeof ReservaRouteRoute
+    }
+    '/onboarding/membresia': {
+      id: '/onboarding/membresia'
+      path: '/onboarding/membresia'
+      fullPath: '/onboarding/membresia'
+      preLoaderRoute: typeof OnboardingMembresiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mis-comunidades/$communityId/reservas/historial': {
+      id: '/mis-comunidades/$communityId/reservas/historial'
+      path: '/$communityId/reservas/historial'
+      fullPath: '/mis-comunidades/$communityId/reservas/historial'
+      preLoaderRoute: typeof MisComunidadesCommunityIdReservasHistorialRouteImport
+      parentRoute: typeof MisComunidadesRoute
+    }
+  }
+}
+
+interface ReservaRouteRouteChildren {
+  ReservaConfirmacionRoute: typeof ReservaConfirmacionRoute
+  ReservaHorarioRoute: typeof ReservaHorarioRoute
+  ReservaLugarRoute: typeof ReservaLugarRoute
+  ReservaServiciosRoute: typeof ReservaServiciosRoute
+  ReservaIndexRoute: typeof ReservaIndexRoute
+}
+
+const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
+  ReservaConfirmacionRoute: ReservaConfirmacionRoute,
+  ReservaHorarioRoute: ReservaHorarioRoute,
+  ReservaLugarRoute: ReservaLugarRoute,
+  ReservaServiciosRoute: ReservaServiciosRoute,
+  ReservaIndexRoute: ReservaIndexRoute,
+}
+
+const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
+  ReservaRouteRouteChildren,
+)
+
+interface MisComunidadesRouteChildren {
+  MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
+  MisComunidadesCommunityIdReservasHistorialRoute: typeof MisComunidadesCommunityIdReservasHistorialRoute
+}
+
+const MisComunidadesRouteChildren: MisComunidadesRouteChildren = {
+  MisComunidadesIndexRoute: MisComunidadesIndexRoute,
+  MisComunidadesCommunityIdReservasHistorialRoute:
+    MisComunidadesCommunityIdReservasHistorialRoute,
+}
+
+const MisComunidadesRouteWithChildren = MisComunidadesRoute._addFileChildren(
+  MisComunidadesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -330,13 +532,11 @@ const rootRouteChildren: RootRouteChildren = {
   ComoFuncionaRoute: ComoFuncionaRoute,
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
+  MisComunidadesRoute: MisComunidadesRouteWithChildren,
   PerfilRoute: PerfilRoute,
   PreciosRoute: PreciosRoute,
   OnboardingMembresiaRoute: OnboardingMembresiaRoute,
-  MisComunidadesIndexRoute: MisComunidadesIndexRoute,
   ReservasIndexRoute: ReservasIndexRoute,
-  MisComunidadesCommunityIdReservasHistorialRoute:
-    MisComunidadesCommunityIdReservasHistorialRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

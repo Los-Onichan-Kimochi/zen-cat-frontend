@@ -240,12 +240,15 @@ function EditCommunityPage() {
 
   const bulkDeleteServiceMutation = useMutation({
     mutationFn: (ids: string[]) =>
-      communityServicesApi.bulkDeleteCommunityServices(ids),
+      communityServicesApi.bulkDeleteCommunityServices({
+          community_services: ids,
+      }),
     onSuccess: (_, ids) => {
       toast.success('Servicios Desvinculados', {
         description: `${ids.length} servicios desvinculados exitosamente.`,
       });
       setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+      queryClient.invalidateQueries({ queryKey: ['community-services', id] });
     },
     onError: (err) => {
       toast.error('Error al Desvincular Servicios', { 
@@ -358,6 +361,7 @@ function EditCommunityPage() {
                   JSON.stringify(selectedMembershipPlans),
                 );
                 sessionStorage.setItem('modeAddService', 'editar');
+                sessionStorage.setItem('currentCommunity', id);
                 navigate({ to: '/comunidades/agregar-servicios' }); //
               }}
             >

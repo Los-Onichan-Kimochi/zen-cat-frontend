@@ -10,12 +10,10 @@ export const communityMembershipPlansApi = {
   bulkCreateCommunityMembershipPlans: async (
     payload: BulkCreateCommunityMembershipPlanPayload,
   ): Promise<CommunityMembershipPlan[]> => {
-    console.log('Creating community membership plans:', payload);
     const data = await apiClient.post<any>(
       API_ENDPOINTS.COMMUNITY_PLANS.BULK_CREATE,
       payload
     );
-    console.log('Success response:', data);
     return data.community_plans || data;
   },
 

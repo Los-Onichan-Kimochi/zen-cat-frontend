@@ -30,18 +30,24 @@ export const localFormSchema = z.object({
 
 export type LocalFormData = z.infer<typeof localFormSchema>;
 
-export function useLocalForm() {
+interface UseLocalFormProps {
+  defaultValues?: Partial<LocalFormData>;
+}
+
+export function useLocalForm(props?: UseLocalFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-
-  const {
+  /*
+  {
     register,
     handleSubmit,
     control,
     formState: { errors },
     watch,
     reset,
-  } = useForm<LocalFormData>({
+  }
+  */
+  const form = useForm<LocalFormData>({
     resolver: zodResolver(localFormSchema),
     defaultValues: {
       local_name: '',
@@ -53,6 +59,7 @@ export function useLocalForm() {
       reference: '',
       capacity: 0,
       image_url: '',
+      ...props?.defaultValues,
     },
   });
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,19 +69,16 @@ export function useLocalForm() {
     const draftLocal = sessionStorage.getItem('draftLocal');
     if (draftLocal) {
       const values = JSON.parse(draftLocal);
-      reset(values);
+      form.reset(values);
     }
-  }, [reset]);
+  }, [form]);
 
   return {
-    register,
-    handleSubmit,
-    control,
-    errors,
-    watch,
-    reset,
+    form,
     imageFile,
     imagePreview,
     handleImageChange,
+    setImagePreview,
+    setImageFile,
   };
 }

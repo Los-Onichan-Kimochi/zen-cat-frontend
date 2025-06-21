@@ -44,13 +44,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const savedUser = localStorage.getItem('user');
       const hasAccessToken = !!Cookies.get('access_token');
-      
+
       if (savedUser && hasAccessToken) {
         const userData = JSON.parse(savedUser);
-        console.log('AuthProvider: Found saved user with valid tokens:', userData);
+        console.log(
+          'AuthProvider: Found saved user with valid tokens:',
+          userData,
+        );
         setUser(userData);
       } else if (savedUser && !hasAccessToken) {
-        console.log('AuthProvider: Found saved user but no access token, clearing localStorage');
+        console.log(
+          'AuthProvider: Found saved user but no access token, clearing localStorage',
+        );
         localStorage.removeItem('user');
         setUser(null);
       } else {

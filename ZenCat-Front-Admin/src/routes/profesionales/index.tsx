@@ -24,7 +24,7 @@ import {
 import { professionalsApi } from '@/api/professionals/professionals';
 import { Professional, ProfessionalSpecialty } from '@/types/professional';
 import { useProfessional } from '@/context/ProfesionalesContext';
-import { ProfessionalsTable } from '@/components/professionals/table';
+import { ProfessionalsTable } from '@/components/professionals/professional-table';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 
@@ -131,7 +131,7 @@ function ProfesionalesComponent() {
 
   const handleEdit = (professional: Professional) => {
     setCurrent(professional);
-    navigate({ to: '/profesionales/nuevo' }); // Cambiar a nuevo ya que editar no existe
+    navigate({ to: '/profesionales/agregar' }); // Cambiar a nuevo ya que editar no existe
   };
 
   const handleView = (professional: Professional) => {
@@ -208,7 +208,7 @@ function ProfesionalesComponent() {
         </div>
 
         <ViewToolbar
-          onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
+          onAddClick={() => navigate({ to: '/profesionales/agregar' })}
           onBulkUploadClick={() => setShowUploadDialog(true)}
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"

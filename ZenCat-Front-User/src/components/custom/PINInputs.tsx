@@ -4,7 +4,10 @@ interface PINInputsProps {
   length: number;
   inputsRef: React.MutableRefObject<(HTMLInputElement | null)[]>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, index: number) => void;
+  handleKeyDown: (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => void;
 }
 
 const PINInputs: React.FC<PINInputsProps> = ({
