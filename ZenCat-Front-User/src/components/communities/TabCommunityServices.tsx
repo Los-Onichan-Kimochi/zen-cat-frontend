@@ -2,7 +2,12 @@ import { useState, useMemo } from 'react';
 import { Service } from '@/types/service';
 import { Community } from './CommunityCard';
 import { CommunityServiceCard } from './CommunityServiceCard';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from '@/components/ui/pagination';
 import { SearchInput } from '@/components/communities/SearchInput';
 import { FilterControls } from '@/components/communities/FilterControls';
 
@@ -11,7 +16,10 @@ interface TabCommunityServicesProps {
   services: Service[] | null;
 }
 
-export function TabCommunityServices({ community, services =[] }: TabCommunityServicesProps) {
+export function TabCommunityServices({
+  community,
+  services = [],
+}: TabCommunityServicesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(0);
@@ -24,7 +32,7 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
     const filtered = [...safeServices];
     // Filtrar por búsqueda
     const filteredBySearch = filtered.filter((service) =>
-      service.name.toLowerCase().includes(searchTerm.toLowerCase())
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     // Ordenar servicios
@@ -65,7 +73,9 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
     return (
       <div className="bg-white border border-gray-300 rounded-lg shadow-sm py-6">
         <div className="text-center">
-          <h1 className="text-4xl font-black">¡No hay servicios disponibles!</h1>
+          <h1 className="text-4xl font-black">
+            ¡No hay servicios disponibles!
+          </h1>
         </div>
       </div>
     );
@@ -74,7 +84,9 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
   return (
     <div className="bg-white border border-gray-300 rounded-lg shadow-sm py-6">
       <div className="text-center mb-4">
-        <h1 className="text-2xl font-black">¡Busca el servicio que más te guste!</h1>
+        <h1 className="text-2xl font-black">
+          ¡Busca el servicio que más te guste!
+        </h1>
       </div>
 
       {/* Filtros */}
@@ -91,12 +103,12 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
           showFilter={false}
         />
       </div>
-      
+
       {/* Resultados */}
       <div className="text-center text-sm text-gray-600 mb-2">
         Resultados: {filteredServices.length} servicios
       </div>
-        
+
       {/* Mostrar servicios */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8">
         {currentServices.map((service) => (
@@ -104,7 +116,9 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
             key={service.id}
             community={community!}
             service={service}
-            onAction={(communityId, action) => console.log(`Acción: ${action} en la comunidad ${communityId}`)}
+            onAction={(communityId, action) =>
+              console.log(`Acción: ${action} en la comunidad ${communityId}`)
+            }
           />
         ))}
       </div>
@@ -114,19 +128,19 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <button 
-                onClick={handlePrevious} 
+              <button
+                onClick={handlePrevious}
                 disabled={!canGoPrevious}
                 className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
               >
                 Anterior
               </button>
             </PaginationItem>
-            
+
             {Array.from({ length: totalPages }).map((_, index) => (
               <PaginationItem key={index}>
-                <PaginationLink 
-                  href="#" 
+                <PaginationLink
+                  href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     setCurrentPage(index);
@@ -137,10 +151,10 @@ export function TabCommunityServices({ community, services =[] }: TabCommunitySe
                 </PaginationLink>
               </PaginationItem>
             ))}
-            
+
             <PaginationItem>
-              <button 
-                onClick={handleNext} 
+              <button
+                onClick={handleNext}
                 disabled={!canGoNext}
                 className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
               >

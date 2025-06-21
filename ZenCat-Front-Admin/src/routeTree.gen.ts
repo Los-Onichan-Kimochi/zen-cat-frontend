@@ -37,6 +37,7 @@ import { Route as ServiciosAgregarLocalesImport } from './routes/servicios/agreg
 import { Route as ProfesionalesVerImport } from './routes/profesionales/ver'
 import { Route as ProfesionalesNuevoImport } from './routes/profesionales/nuevo'
 import { Route as PlanesMembresiaVerImport } from './routes/planes-membresia/ver'
+import { Route as PlanesMembresiaEditarImport } from './routes/planes-membresia/editar'
 import { Route as PlanesMembresiaAgregarImport } from './routes/planes-membresia/agregar'
 import { Route as LocalesVerImport } from './routes/locales/ver'
 import { Route as LocalesEditarImport } from './routes/locales/editar'
@@ -206,6 +207,12 @@ const PlanesMembresiaVerRoute = PlanesMembresiaVerImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const PlanesMembresiaEditarRoute = PlanesMembresiaEditarImport.update({
+  id: '/planes-membresia/editar',
+  path: '/planes-membresia/editar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const PlanesMembresiaAgregarRoute = PlanesMembresiaAgregarImport.update({
   id: '/planes-membresia/agregar',
   path: '/planes-membresia/agregar',
@@ -372,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanesMembresiaAgregarImport
       parentRoute: typeof rootRoute
     }
+    '/planes-membresia/editar': {
+      id: '/planes-membresia/editar'
+      path: '/planes-membresia/editar'
+      fullPath: '/planes-membresia/editar'
+      preLoaderRoute: typeof PlanesMembresiaEditarImport
+      parentRoute: typeof rootRoute
+    }
     '/planes-membresia/ver': {
       id: '/planes-membresia/ver'
       path: '/planes-membresia/ver'
@@ -533,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -571,6 +586,7 @@ export interface FileRoutesByTo {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -610,6 +626,7 @@ export interface FileRoutesById {
   '/locales/editar': typeof LocalesEditarRoute
   '/locales/ver': typeof LocalesVerRoute
   '/planes-membresia/agregar': typeof PlanesMembresiaAgregarRoute
+  '/planes-membresia/editar': typeof PlanesMembresiaEditarRoute
   '/planes-membresia/ver': typeof PlanesMembresiaVerRoute
   '/profesionales/nuevo': typeof ProfesionalesNuevoRoute
   '/profesionales/ver': typeof ProfesionalesVerRoute
@@ -650,6 +667,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -687,6 +705,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -724,6 +743,7 @@ export interface FileRouteTypes {
     | '/locales/editar'
     | '/locales/ver'
     | '/planes-membresia/agregar'
+    | '/planes-membresia/editar'
     | '/planes-membresia/ver'
     | '/profesionales/nuevo'
     | '/profesionales/ver'
@@ -763,6 +783,7 @@ export interface RootRouteChildren {
   LocalesEditarRoute: typeof LocalesEditarRoute
   LocalesVerRoute: typeof LocalesVerRoute
   PlanesMembresiaAgregarRoute: typeof PlanesMembresiaAgregarRoute
+  PlanesMembresiaEditarRoute: typeof PlanesMembresiaEditarRoute
   PlanesMembresiaVerRoute: typeof PlanesMembresiaVerRoute
   ProfesionalesNuevoRoute: typeof ProfesionalesNuevoRoute
   ProfesionalesVerRoute: typeof ProfesionalesVerRoute
@@ -801,6 +822,7 @@ const rootRouteChildren: RootRouteChildren = {
   LocalesEditarRoute: LocalesEditarRoute,
   LocalesVerRoute: LocalesVerRoute,
   PlanesMembresiaAgregarRoute: PlanesMembresiaAgregarRoute,
+  PlanesMembresiaEditarRoute: PlanesMembresiaEditarRoute,
   PlanesMembresiaVerRoute: PlanesMembresiaVerRoute,
   ProfesionalesNuevoRoute: ProfesionalesNuevoRoute,
   ProfesionalesVerRoute: ProfesionalesVerRoute,
@@ -848,6 +870,7 @@ export const routeTree = rootRoute
         "/locales/editar",
         "/locales/ver",
         "/planes-membresia/agregar",
+        "/planes-membresia/editar",
         "/planes-membresia/ver",
         "/profesionales/nuevo",
         "/profesionales/ver",
@@ -914,6 +937,9 @@ export const routeTree = rootRoute
     },
     "/planes-membresia/agregar": {
       "filePath": "planes-membresia/agregar.tsx"
+    },
+    "/planes-membresia/editar": {
+      "filePath": "planes-membresia/editar.tsx"
     },
     "/planes-membresia/ver": {
       "filePath": "planes-membresia/ver.tsx"

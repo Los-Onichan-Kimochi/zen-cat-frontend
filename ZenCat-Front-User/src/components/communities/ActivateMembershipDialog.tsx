@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
-  AlertDialogTitle
-} from "@/components/ui/alert-dialog";
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ActivateMembershipDialogProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export function ActivateMembershipDialog({
   isOpen,
   onClose,
   onActivate,
-  communityName = ""
+  communityName = '',
 }: ActivateMembershipDialogProps) {
   return (
     <AlertDialog open={isOpen}>
@@ -29,12 +29,13 @@ export function ActivateMembershipDialog({
               ¿Desea volver a activar su membresía?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-black text-center mt-4 leading-relaxed">
-              Si vuelve a activar su membresía el tiempo que le falta para que esta culmine seguirá 
-              corriendo de manera regular hasta que acabe. Todas las reservas disponibles
-              que tenía al momento de suspeder la membresía se mantienen igual.
+              Si vuelve a activar su membresía el tiempo que le falta para que
+              esta culmine seguirá corriendo de manera regular hasta que acabe.
+              Todas las reservas disponibles que tenía al momento de suspeder la
+              membresía se mantienen igual.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="flex justify-center space-x-4 mt-6">
             <Button
               type="button"
@@ -56,4 +57,4 @@ export function ActivateMembershipDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}

@@ -13,7 +13,6 @@ export function InformationCommunity({
   community,
   services,
 }: InformationCommunityProps) {
-
   if (community == null) {
     // Si no hay comunidad, mostramos solo la imagen de AstroCat dentro de un div estilizado como Card
     return (

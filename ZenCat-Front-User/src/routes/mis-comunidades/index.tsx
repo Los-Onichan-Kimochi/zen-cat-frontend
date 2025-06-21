@@ -5,25 +5,24 @@ import {
   FilterControls,
   CommunitiesGrid,
   InformationCommunity,
-  Community,
+  Community
 } from '@/components/communities';
 import { useUserCommunities } from '@/api/users/user-communities';
 import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { apiClient } from '@/lib/api-client';
+import { API_ENDPOINTS } from '@/config/api';
 import { Service } from '@/types/service';
-import { communityServicesApi } from '@/api/communities/community-services';
 
-export const Route = createFileRoute('/mis-comunidades')({
+export const Route = createFileRoute('/mis-comunidades/')({
   component: ComunidadesComponent,
 });
 
 function ComunidadesComponent() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [filterBy, setFilterBy] = useState('all');
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
-    null,
-  );
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('name')
+  const [filterBy, setFilterBy] = useState('all')
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [services, setServices] = useState<Service[]>([]);
 
   // Obtener el usuario del contexto de autenticación (igual que en perfil.tsx)
@@ -60,16 +59,24 @@ function ComunidadesComponent() {
     );
   }
 
+  // Define getCommunityServices outside of selectCommunity
+  async function getServicesByCommunity(communityId: string): Promise<Service[]> {
+    const response = await apiClient.get<{ services: Service[] }>(
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId)
+    );
+    
+    const services = Array.isArray(response.services) ? response.services : [];
+    return services;
+  }
+
   // Actualizar servicios cuando se selecciona una comunidad
   const selectCommunity = async (communityId: string) => {
     const community = communities.find((c) => c.id == communityId);
     setSelectedCommunity(community || null);
-
+    
     if (community) {
-      const services = await communityServicesApi.getServicesByCommunityId(
-        community.id,
-      );
-      setServices(services); // Guardar los servicios asociados en el estado
+      const services = await getServicesByCommunity(community.id);
+      setServices(services);  // Guardar los servicios asociados en el estado
     }
   };
 
@@ -110,13 +117,13 @@ function ComunidadesComponent() {
                 sortBy={sortBy}
                 filterBy={filterBy}
                 itemsPerPage={4}
-                selectCommunity={selectCommunity}
+                selectCommunity = {selectCommunity}
               />
             </div>
 
             {/* Information Community Box */}
             <div className="mt-8 px-12">
-              <InformationCommunity
+              <InformationCommunity 
                 community={selectedCommunity}
                 services={services}
               />

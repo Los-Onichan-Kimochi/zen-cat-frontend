@@ -13,7 +13,7 @@ export const membershipPlanFormSchema = z.object({
   }),
   reservation_limit: z.number().nullable().optional(), 
 }).superRefine((data, ctx) => {
-  if (data.has_limit && (data.reservation_limit === null || data.reservation_limit === undefined)) {
+  if (data.has_limit === 'true' && (data.reservation_limit === null || data.reservation_limit === undefined)) {
     ctx.addIssue({
       path: ['reservation_limit'],
       code: z.ZodIssueCode.custom,
@@ -21,19 +21,21 @@ export const membershipPlanFormSchema = z.object({
     });
   }
 
-  if (!data.has_limit && data.reservation_limit != null) {
+  if (data.has_limit === 'false' && data.reservation_limit != null) {
     ctx.addIssue({
       path: ['reservation_limit'],
       code: z.ZodIssueCode.custom,
       message: 'No debe establecer un límite si no se ha activado la opción de límite.',
     });
   }
-});
+})
 
 export type MembershipPlanFormData = z.infer<typeof membershipPlanFormSchema>;
-
-export function useMembershipPlanForm() {
-
+interface UserMembershipPlanFormProps {
+  defaultValues?: Partial<MembershipPlanFormData>;
+}
+export function useMembershipPlanForm(props?: UserMembershipPlanFormProps) {
+  /*
   const {
     register,
     handleSubmit,
@@ -47,21 +49,26 @@ export function useMembershipPlanForm() {
       type: '',
     },
   });
-
+  */
+  const form = useForm<MembershipPlanFormData>({
+    resolver: zodResolver(membershipPlanFormSchema),
+    defaultValues: {
+      type: '',
+      fee: 10,
+      has_limit: 'false',
+      reservation_limit: null,
+      ...props?.defaultValues, // Permite pasar valores por defecto desde el componente
+    },
+  });
   useEffect(() => {
     const draftMembershipPlan = sessionStorage.getItem('draftMembershipPlan');
     if (draftMembershipPlan) {
       const values = JSON.parse(draftMembershipPlan);
-      reset(values);
+      form.reset(values);
     }
-  }, [reset]);
+  }, [form]);
 
   return {
-    register,
-    handleSubmit,
-    control,
-    errors,
-    watch,
-    reset,
+    form,
   };
 }

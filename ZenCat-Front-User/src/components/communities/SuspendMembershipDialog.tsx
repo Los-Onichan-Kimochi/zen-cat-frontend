@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
-  AlertDialogTitle
-} from "@/components/ui/alert-dialog";
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface SuspendMembershipDialogProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export function SuspendMembershipDialog({
   isOpen,
   onClose,
   onSuspend,
-  communityName = ""
+  communityName = '',
 }: SuspendMembershipDialogProps) {
   return (
     <AlertDialog open={isOpen}>
@@ -29,12 +29,12 @@ export function SuspendMembershipDialog({
               ¿Desea suspender su membresía?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-black text-center mt-4 leading-relaxed">
-              Si suspende su membresía el tiempo que le falta para que esta culmine se conge-
-              lará junto a sus reservas disponibles hasta que decida volver a activar su membresía
-              otra vez
+              Si suspende su membresía el tiempo que le falta para que esta
+              culmine se conge- lará junto a sus reservas disponibles hasta que
+              decida volver a activar su membresía otra vez
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="flex justify-center space-x-4 mt-6">
             <Button
               type="button"
@@ -56,4 +56,4 @@ export function SuspendMembershipDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-} 
+}
