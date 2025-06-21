@@ -24,15 +24,26 @@ import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { Form, FormProvider, useForm } from 'react-hook-form';
 import { MembershipPlanForm } from '@/components/membership-plan/membership-plan-basic-form'; 
 import { toast } from 'sonner';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-const membershipPlanSearchSchema = z.object({
-  id: z.string(),
-});
-export const Route = createFileRoute('/planes-membresia/ver')({
-  component: SeeMembershipPlanPageComponent,
-});
+export const Route = createFileRoute('/planes-membresia/editar')({
+  component: EditLocalComponent,
+})
 
-export function SeeMembershipPlanPageComponent() {
+function EditLocalComponent() {
   const navigate = useNavigate();
   const id =
     typeof window !== 'undefined' ? localStorage.getItem('currentMembershipPlan') : null;
@@ -53,6 +64,24 @@ export function SeeMembershipPlanPageComponent() {
       form.reset(membershipPlan);
     }
   }, [membershipPlan, form]);
+
+  const updateMembershipPlanMutation = useMutation({
+    mutationFn: (data: any) =>
+      membershipPlansApi.updateMembershipPlan(id!, data),
+    onSuccess: () => {
+      toast.success('Plan de membresía actualizado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['membershipPlan', id]});
+      navigate({ to: '/planes-membresia' });
+    },
+    onError: (error: any) => {
+      toast.error('Error al actualizar plan de membresía', { description: error.message });
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    await updateMembershipPlanMutation.mutateAsync(data);
+  };
+
   if (isLoading) {
     return (
       <div className="p-6 h-full flex items-center justify-center">
@@ -67,24 +96,23 @@ export function SeeMembershipPlanPageComponent() {
         <div className="flex items-center mb-6">
           <Button
             variant="outline"
-            onClick={() => navigate({ to: '/locales' })}
+            onClick={() => navigate({ to: '/planes-membresia' })}
             className="mr-4"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ChevronLeft className="mr-2 h-4 w-4" />
             Volver
           </Button>
         </div>
         <div className="text-center">
-          <p className="text-red-600">Error cargando el plan de membresia</p>
+          <p className="text-red-600">Error cargando el plan de membresía</p>
         </div>
       </div>
     );
   }
-  return (
-    <div className="p-6 space-y-6 font-montserrat">
+  return (<div className="p-6 space-y-6 font-montserrat">
       <HeaderDescriptor
         title="PLANES DE MEMBRESÍA"
-        subtitle="DETALLE DEL PLAN DE MEMBRESÍA"
+        subtitle="EDITAR PLAN DE MEMBRESÍA"
       />
       <div className="mb-4">
         <Button
@@ -97,30 +125,27 @@ export function SeeMembershipPlanPageComponent() {
         </Button>
       </div>
       <FormProvider {...form}>
-        <MembershipPlanForm mode="view" description='Detalles del local seleccionado'/>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <MembershipPlanForm mode="edit" description="Edita los datos del plan de membresía" />
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate({ to: '/planes-membresia' })}
+              className="h-10 w-30 text-base"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+              disabled={updateMembershipPlanMutation.isPending}
+            >
+              Guardar
+            </Button>
+          </div>
+        </form>
       </FormProvider>
-      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => navigate({ to: '/planes-membresia' })}
-          className="h-10 w-30 text-base"
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-                  
-            localStorage.setItem('currentMembershipPlan', id? id : '');
-             navigate({ to: `/planes-membresia/editar`})
-          }}
-          className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
-        >
-
-          Editar
-        </Button>
-      </div>
     </div>
-  )
+  );
 }

@@ -33,24 +33,21 @@ import { Route as OnboardingMembresiaImport } from './routes/onboarding/membresi
 
 // Create/Update Routes
 
-const PreciosRoute = PreciosRouteRouteImport.update({
+const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
   path: '/precios',
-  getParentRoute: () => rootRouteImportImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
-  getParentRoute: () => rootRouteImportImport,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MembresiaRoute = MembresiaRouteImport.update({
 const MembresiaRoute = MembresiaRouteImport.update({
   id: '/membresia',
   path: '/membresia',
   getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
 } as any)
-const ContactoRoute = ContactoRouteImport.update({
 const ContactoRoute = ContactoRouteImport.update({
   id: '/contacto',
   path: '/contacto',
@@ -65,44 +62,44 @@ const ComunidadesRoute = ComunidadesRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
-const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
 } as any)
-const SignupRouteRoute = SignupRouteRouteImport.update({
 const SignupRouteRoute = SignupRouteRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
 } as any)
-const ReservaRouteRoute = ReservaRouteRouteImport.update({
 const ReservaRouteRoute = ReservaRouteRouteImport.update({
   id: '/reserva',
   path: '/reserva',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRouteRoute = LoginRouteRouteImport.update({
+const PinRouteRoute = PinRouteRouteImport.update({
+  id: '/pin',
+  path: '/pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRouteRoute = LoginRouteRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
 } as any)
-const HomeRouteRoute = HomeRouteRouteImport.update({
 const HomeRouteRoute = HomeRouteRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => rootRouteImport,
-  getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotRouteRoute = ForgotRouteRouteImport.update({
 const ForgotRouteRoute = ForgotRouteRouteImport.update({
   id: '/forgot',
   path: '/forgot',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangepasswordRouteRoute = ChangepasswordRouteRouteImport.update({
+  id: '/changepassword',
+  path: '/changepassword',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -118,6 +115,11 @@ const ReservaIndexRoute = ReservaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ReservaRouteRoute,
+} as any)
+const MisComunidadesIndexRoute = MisComunidadesIndexRouteImport.update({
+  id: '/mis-comunidades/',
+  path: '/mis-comunidades/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ReservaServiciosRoute = ReservaServiciosRouteImport.update({
   id: '/servicios',
@@ -144,6 +146,12 @@ const OnboardingMembresiaRoute = OnboardingMembresiaRouteImport.update({
   path: '/onboarding/membresia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MisComunidadesCommunityIdReservasHistorialRoute =
+  MisComunidadesCommunityIdReservasHistorialRouteImport.update({
+    id: '/mis-comunidades/$communityId/reservas/historial',
+    path: '/mis-comunidades/$communityId/reservas/historial',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -155,7 +163,6 @@ export interface FileRoutesByFullPath {
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/perfil': typeof PerfilRoute
@@ -165,8 +172,10 @@ export interface FileRoutesByFullPath {
   '/reserva/horario': typeof ReservaHorarioRoute
   '/reserva/lugar': typeof ReservaLugarRoute
   '/reserva/servicios': typeof ReservaServiciosRoute
+  '/mis-comunidades': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,7 +186,6 @@ export interface FileRoutesByTo {
   '/pin': typeof PinRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/perfil': typeof PerfilRoute
@@ -187,8 +195,10 @@ export interface FileRoutesByTo {
   '/reserva/horario': typeof ReservaHorarioRoute
   '/reserva/lugar': typeof ReservaLugarRoute
   '/reserva/servicios': typeof ReservaServiciosRoute
+  '/mis-comunidades': typeof MisComunidadesIndexRoute
   '/reserva': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -201,7 +211,6 @@ export interface FileRoutesById {
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/comunidades': typeof ComunidadesRoute
   '/contacto': typeof ContactoRoute
   '/membresia': typeof MembresiaRoute
   '/perfil': typeof PerfilRoute
@@ -211,8 +220,10 @@ export interface FileRoutesById {
   '/reserva/horario': typeof ReservaHorarioRoute
   '/reserva/lugar': typeof ReservaLugarRoute
   '/reserva/servicios': typeof ReservaServiciosRoute
+  '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas/': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -226,7 +237,6 @@ export interface FileRouteTypes {
     | '/reserva'
     | '/signup'
     | '/como-funciona'
-    | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/perfil'
@@ -236,8 +246,10 @@ export interface FileRouteTypes {
     | '/reserva/horario'
     | '/reserva/lugar'
     | '/reserva/servicios'
+    | '/mis-comunidades'
     | '/reserva/'
     | '/reservas'
+    | '/mis-comunidades/$communityId/reservas/historial'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -248,7 +260,6 @@ export interface FileRouteTypes {
     | '/pin'
     | '/signup'
     | '/como-funciona'
-    | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/perfil'
@@ -258,8 +269,10 @@ export interface FileRouteTypes {
     | '/reserva/horario'
     | '/reserva/lugar'
     | '/reserva/servicios'
+    | '/mis-comunidades'
     | '/reserva'
     | '/reservas'
+    | '/mis-comunidades/$communityId/reservas/historial'
   id:
     | '__root__'
     | '/'
@@ -271,7 +284,6 @@ export interface FileRouteTypes {
     | '/reserva'
     | '/signup'
     | '/como-funciona'
-    | '/comunidades'
     | '/contacto'
     | '/membresia'
     | '/perfil'
@@ -281,8 +293,10 @@ export interface FileRouteTypes {
     | '/reserva/horario'
     | '/reserva/lugar'
     | '/reserva/servicios'
+    | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas/'
+    | '/mis-comunidades/$communityId/reservas/historial'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -295,12 +309,12 @@ export interface RootRouteChildren {
   ReservaRouteRoute: typeof ReservaRouteRouteWithChildren
   SignupRouteRoute: typeof SignupRouteRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
-  ComunidadesRoute: typeof ComunidadesRoute
   ContactoRoute: typeof ContactoRoute
   MembresiaRoute: typeof MembresiaRoute
   PerfilRoute: typeof PerfilRoute
   PreciosRoute: typeof PreciosRoute
   OnboardingMembresiaRoute: typeof OnboardingMembresiaRoute
+  MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
   ReservasIndexRoute: typeof ReservasIndexRoute
 }
 
@@ -314,13 +328,15 @@ const rootRouteChildren: RootRouteChildren = {
   ReservaRouteRoute: ReservaRouteRouteWithChildren,
   SignupRouteRoute: SignupRouteRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
-  ComunidadesRoute: ComunidadesRoute,
   ContactoRoute: ContactoRoute,
   MembresiaRoute: MembresiaRoute,
   PerfilRoute: PerfilRoute,
   PreciosRoute: PreciosRoute,
   OnboardingMembresiaRoute: OnboardingMembresiaRoute,
+  MisComunidadesIndexRoute: MisComunidadesIndexRoute,
   ReservasIndexRoute: ReservasIndexRoute,
+  MisComunidadesCommunityIdReservasHistorialRoute:
+    MisComunidadesCommunityIdReservasHistorialRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
