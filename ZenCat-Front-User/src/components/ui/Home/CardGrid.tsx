@@ -1,34 +1,33 @@
 import * as React from 'react';
 import Card from './Card';
+import { useEffect, useState } from 'react';
+import { communitiesApi } from '@/api/communities/communities';
+import { Community } from '@/types/community'
 
-import runnersImage from '../../../images/Home/image151(1).png';
-import ciclistasImage from '../../../images/Home/image148.png';
-import musicosImage from '../../../images/Home/image151.png';
-import mamasImage from '../../../images/Home/image150.png';
+
 
 export const CardGrid: React.FC = () => {
-  const cards = [
-    {
-      title: 'Runners',
-      imageUrl: runnersImage, // Use imported image
-      to: '/actividades/runners',
-    },
-    {
-      title: 'Ciclistas',
-      imageUrl: ciclistasImage, // Use imported image
-      to: '/actividades/ciclistas',
-    },
-    {
-      title: 'Músicos',
-      imageUrl: musicosImage, // Use imported image
-      to: '/actividades/musicos',
-    },
-    {
-      title: 'Mamás',
-      imageUrl: mamasImage, // Use imported image
-      to: '/actividades/mamas',
-    },
-  ];
+  const [cards, setCards] = useState<
+    { title: string; imageUrl: string; to: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const data: Community[] = await communitiesApi.getCommunities();
+        const cards = data.map((community) => ({
+          title: community.name,
+          imageUrl: community.image_url,
+          to: `/comunidades/${community.id}`, // FALTA IMPLEMENTAR
+        }));
+        setCards(cards);
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
+    };
+
+    fetchCards();
+  }, []);
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-12">

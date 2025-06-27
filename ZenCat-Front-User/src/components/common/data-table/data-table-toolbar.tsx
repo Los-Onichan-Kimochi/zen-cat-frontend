@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { Table, Column } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
