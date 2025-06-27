@@ -115,7 +115,9 @@ class ApiClient {
     // Handle insufficient privileges (403 Forbidden)
     if (response.status === 403) {
       // User doesn't have the required role for this action
-      throw new Error('No tienes permisos suficientes para realizar esta acción');
+      throw new Error(
+        'No tienes permisos suficientes para realizar esta acción',
+      );
     }
 
     if (!response.ok) {

@@ -1,9 +1,6 @@
 // src/components/CommunitiesReservas/CommunityReservasDataTable.tsx
 
-import {
-  flexRender,
-  Table as ReactTableType,
-} from '@tanstack/react-table';
+import { flexRender, Table as ReactTableType } from '@tanstack/react-table';
 
 import {
   Table,
@@ -19,7 +16,10 @@ interface CommunityReservasDataTableProps<TData> {
   columns: any[]; // ColumnDef<TData>[]
 }
 
-export function CommunityReservasDataTable<TData>({ table, columns }: CommunityReservasDataTableProps<TData>) {
+export function CommunityReservasDataTable<TData>({
+  table,
+  columns,
+}: CommunityReservasDataTableProps<TData>) {
   return (
     <div className="rounded-md border">
       <Table>

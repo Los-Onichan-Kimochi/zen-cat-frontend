@@ -2,9 +2,7 @@ import * as React from 'react';
 import Card from './Card';
 import { useEffect, useState } from 'react';
 import { communitiesApi } from '@/api/communities/communities';
-import { Community } from '@/types/community'
-
-
+import { Community } from '@/types/community';
 
 export const CardGrid: React.FC = () => {
   const [cards, setCards] = useState<
