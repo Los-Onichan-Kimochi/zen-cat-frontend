@@ -4,15 +4,24 @@ import { TopBar } from '@/components/ui/TopBar';
 import { useAuth } from '@/context/AuthContext';
 
 // Páginas públicas que no requieren autenticación
-const publicPages = ['/', '/como-funciona', '/contacto', '/login', '/signup', '/forgot', '/pin'];
+const publicPages = [
+  '/',
+  '/como-funciona',
+  '/contacto',
+  '/login',
+  '/signup',
+  '/forgot',
+  '/pin',
+];
 
 const MainLayout: React.FC = () => {
   const { user, isAuthenticated, isLoading, isClient } = useAuth();
   const location = useLocation();
 
   // Verificar si la página actual es pública
-  const isPublicPage = publicPages.some(page => 
-    location.pathname === page || location.pathname.startsWith(page + '/')
+  const isPublicPage = publicPages.some(
+    (page) =>
+      location.pathname === page || location.pathname.startsWith(page + '/'),
   );
 
   // Mostrar loading mientras se verifica la autenticación
@@ -41,11 +50,13 @@ const MainLayout: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Acceso Restringido</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Restringido
+          </h2>
           <p className="text-gray-600 mb-4">
             Necesitas iniciar sesión para acceder a esta página.
           </p>
-          <a 
+          <a
             href="/login"
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -61,15 +72,21 @@ const MainLayout: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Acceso Denegado</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
           <p className="text-gray-600 mb-4">
             Esta aplicación es solo para clientes registrados.
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            Tu rol actual: {user.rol === 'ADMINISTRATOR' ? 'Administrador' : 
-                          user.rol === 'CLIENT' ? 'Cliente' : 'Invitado'}
+            Tu rol actual:{' '}
+            {user.rol === 'ADMINISTRATOR'
+              ? 'Administrador'
+              : user.rol === 'CLIENT'
+                ? 'Cliente'
+                : 'Invitado'}
           </p>
-          <a 
+          <a
             href="/"
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >

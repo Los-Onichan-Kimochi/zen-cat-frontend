@@ -17,8 +17,12 @@ const CommunitySearchBar: React.FC<CommunitySearchBarProps> = ({
   totalResults,
 }) => {
   return (
-    <section className="mb-8 px-4"> {/* Added px-4 for padding consistent with parent */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">¡Busca la comunidad que más te guste!</h2>
+    <section className="mb-8 px-4">
+      {' '}
+      {/* Added px-4 for padding consistent with parent */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+        ¡Busca la comunidad que más te guste!
+      </h2>
       <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -41,7 +45,9 @@ const CommunitySearchBar: React.FC<CommunitySearchBarProps> = ({
           {/* Add more sorting options as needed */}
         </select>
       </div>
-      <p className="text-sm text-gray-500 mt-2 text-center">Resultados: {totalResults} comunidades</p>
+      <p className="text-sm text-gray-500 mt-2 text-center">
+        Resultados: {totalResults} comunidades
+      </p>
     </section>
   );
 };

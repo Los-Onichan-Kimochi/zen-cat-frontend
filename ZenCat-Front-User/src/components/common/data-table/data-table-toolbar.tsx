@@ -206,7 +206,9 @@ export function DataTableToolbar<TData extends DataWithId>({
                 isRefreshing ? 'bg-blue-50 border-blue-300' : ''
               }`}
             >
-              <RefreshCw className={`h-4 w-4 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+              <RefreshCw
+                className={`h-4 w-4 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`}
+              />
             </Button>
           )}
           {showSortButton && (
@@ -262,7 +264,10 @@ export function DataTableToolbar<TData extends DataWithId>({
               <Filter className="mr-2 h-4 w-4" />
               <span>Filtrar</span>
               {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-blue-100 text-blue-800 text-xs"
+                >
                   •
                 </Badge>
               )}
@@ -283,12 +288,8 @@ export function DataTableToolbar<TData extends DataWithId>({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  Opción A
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Opción B
-                </DropdownMenuItem>
+                <DropdownMenuItem>Opción A</DropdownMenuItem>
+                <DropdownMenuItem>Opción B</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -345,7 +346,6 @@ export function DataTableToolbar<TData extends DataWithId>({
               <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>
           )}
-
         </div>
       </div>
     </>

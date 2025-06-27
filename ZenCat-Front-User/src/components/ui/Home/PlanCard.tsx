@@ -58,8 +58,8 @@ const PlanCard: React.FC<PlanCardProps> = ({
         className="w-full bg-black text-white hover:bg-gray-800 transition cursor-pointer"
         onClick={onClick}
       >
-      <Link to="/comunidades">{buttonLabel}</Link>
-      </Button>   
+        <Link to="/comunidades">{buttonLabel}</Link>
+      </Button>
     </CardFooter>
   </Card>
 );
