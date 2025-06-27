@@ -1,14 +1,14 @@
 import React from 'react';
-import { Activity, CheckCircle, Users } from 'lucide-react';
-import { AuditLogStats } from '@/types/audit';
+import { AlertTriangle, TrendingDown, Users } from 'lucide-react';
+import { ErrorLogStats } from '@/types/error-log';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface AuditStatsProps {
-  stats?: AuditLogStats;
+interface ErrorStatsProps {
+  stats?: ErrorLogStats;
   isLoading?: boolean;
 }
 
-export function AuditStats({ stats, isLoading }: AuditStatsProps) {
+export function ErrorStats({ stats, isLoading }: ErrorStatsProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center space-x-4 mt-2 font-montserrat min-h-[120px] flex-wrap">
@@ -29,30 +29,34 @@ export function AuditStats({ stats, isLoading }: AuditStatsProps) {
     return null;
   }
 
+  const totalErrors = stats.totalEvents || 0;
+  const criticalErrors = stats.failedEvents || 0;
+  const uniqueUsers = stats.uniqueUsers || 0; // Asumiendo que el backend puede proporcionar esto
+
   const statsCards = [
     {
-      title: 'Total de Eventos',
-      value: stats.totalEvents.toLocaleString(),
-      icon: Activity,
-      description: 'Eventos registrados',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      title: 'Total de Errores',
+      value: totalErrors.toLocaleString(),
+      icon: AlertTriangle,
+      description: 'Errores registrados',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100',
     },
     {
-      title: 'Eventos Exitosos',
-      value: stats.successfulEvents.toLocaleString(),
-      icon: CheckCircle,
-      description: 'Operaciones completadas',
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
+      title: 'Errores Críticos',
+      value: criticalErrors.toLocaleString(),
+      icon: TrendingDown,
+      description: 'Errores críticos del sistema',
+      color: 'text-slate-600',
+      bgColor: 'bg-slate-100',
     },
     {
-      title: 'Usuarios Activos',
-      value: stats.activeUsers?.toLocaleString() || '0',
+      title: 'Usuarios Afectados',
+      value: uniqueUsers.toLocaleString(),
       icon: Users,
-      description: 'Usuarios con actividad',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
+      description: 'Usuarios con errores',
+      color: 'text-slate-700',
+      bgColor: 'bg-slate-200',
     },
   ];
 
@@ -81,4 +85,6 @@ export function AuditStats({ stats, isLoading }: AuditStatsProps) {
       })}
     </div>
   );
-} 
+}
+
+export default ErrorStats; 

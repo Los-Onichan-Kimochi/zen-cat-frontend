@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogFilters, AuditLogStats } from '@/types/audit';
+import { AuditLog, AuditLogFilters, AuditLogStats, mapAuditLogFromBackend } from '@/types/audit';
 import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -17,42 +17,20 @@ const buildQueryParams = (filters: AuditLogFilters): string => {
   const params = new URLSearchParams();
   
   if (filters.page !== undefined) params.append('page', filters.page.toString());
-  if (filters.limit !== undefined) params.append('limit', filters.limit.toString());
-  if (filters.user_search) params.append('user_search', filters.user_search);
-  if (filters.action) params.append('action', filters.action);
-  if (filters.entity_type) params.append('entity_type', filters.entity_type);
-  if (filters.user_role) params.append('user_role', filters.user_role);
+  if (filters.limit !== undefined) params.append('pageSize', filters.limit.toString());
+  if (filters.user_search) params.append('userIds', filters.user_search);
+  if (filters.action) params.append('actions', filters.action);
+  if (filters.entity_type) params.append('entityTypes', filters.entity_type);
+  if (filters.user_role) params.append('userRoles', filters.user_role);
   if (filters.success !== undefined) params.append('success', filters.success.toString());
-  if (filters.start_date) params.append('start_date', filters.start_date);
-  if (filters.end_date) params.append('end_date', filters.end_date);
+  if (filters.start_date) params.append('startDate', filters.start_date);
+  if (filters.end_date) params.append('endDate', filters.end_date);
 
   return params.toString();
 };
 
-// Función para mapear los datos del backend
-const mapBackendAuditLogToAuditLog = (backendLog: any): AuditLog => {
-  return {
-    id: backendLog.id,
-    userId: backendLog.user_id,
-    userEmail: backendLog.user_email,
-    userRole: backendLog.user_role,
-    action: backendLog.action,
-    entityType: backendLog.entity_type,
-    entityId: backendLog.entity_id,
-    entityName: backendLog.entity_name,
-    oldValues: backendLog.old_values,
-    newValues: backendLog.new_values,
-    ipAddress: backendLog.ip_address,
-    userAgent: backendLog.user_agent,
-    additionalInfo: backendLog.additional_info,
-    success: backendLog.success,
-    errorMessage: backendLog.error_message,
-    createdAt: backendLog.created_at,
-  };
-};
-
 export const auditoriasApi = {
-  // Obtener logs de auditoría con filtros
+  // Obtener logs de auditoría con filtros (solo eventos exitosos)
   getAuditLogs: async (filters: AuditLogFilters = {}): Promise<{
     logs: AuditLog[];
     total: number;
@@ -61,7 +39,9 @@ export const auditoriasApi = {
     totalPages: number;
   }> => {
     try {
-      const queryParams = buildQueryParams(filters);
+      // Force success=true for audit logs (errors go to error logs)
+      const auditFilters = { ...filters, success: true };
+      const queryParams = buildQueryParams(auditFilters);
       const url = `${API_BASE_URL}/audit-log/${queryParams ? `?${queryParams}` : ''}`;
       
       const response = await fetch(url, {
@@ -80,10 +60,10 @@ export const auditoriasApi = {
       console.log('Raw audit logs data:', data);
 
       return {
-        logs: (data.audit_logs || []).map(mapBackendAuditLogToAuditLog),
-        total: data.total || 0,
+        logs: (data.audit_logs || []).map(mapAuditLogFromBackend),
+        total: data.total_count || 0,
         page: data.page || 1,
-        limit: data.limit || 10,
+        limit: data.page_size || 10,
         totalPages: data.total_pages || 1,
       };
     } catch (error) {
@@ -115,6 +95,7 @@ export const auditoriasApi = {
         successfulEvents: data.success_count || 0,
         failedEvents: data.failure_count || 0,
         successRate: data.total_events > 0 ? ((data.success_count || 0) / data.total_events) * 100 : 0,
+        activeUsers: data.active_users || 0, // Ahora viene del backend
       };
     } catch (error) {
       console.error('Error in getAuditStats:', error);
@@ -140,7 +121,7 @@ export const auditoriasApi = {
       const data = await response.json();
       console.log('Raw audit log data:', data);
 
-      return mapBackendAuditLogToAuditLog(data);
+      return mapAuditLogFromBackend(data);
     } catch (error) {
       console.error('Error in getAuditLogById:', error);
       throw error;

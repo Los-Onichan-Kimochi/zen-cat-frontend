@@ -24,7 +24,7 @@ import {
 import { Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
-import { usuariosApi } from '@/api/usuarios/usuarios';
+import { userService } from '@/api/usuarios/usuarios';
 import {
   Reservation,
   UpdateReservationRequest,
@@ -68,11 +68,13 @@ export function EditReservationModal({
   }, [reservation]);
 
   // Fetch users for the select
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
+  const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['usuarios'],
-    queryFn: () => usuariosApi.getUsuarios(),
+    queryFn: () => userService.getAll(),
     enabled: isOpen, // Only fetch when modal is open
   });
+
+  const usersData = usersResponse?.users || [];
 
   const { mutate: updateReservation, isPending: isUpdating } = useMutation({
     mutationFn: (data: UpdateReservationRequest) => {
@@ -122,10 +124,8 @@ export function EditReservationModal({
 
   if (!reservation) return null;
 
-  const users = usersData || [];
-
   // Find the current user for display
-  const currentUser = users.find(user => user.id === reservation.user_id);
+  const currentUser = usersData.find(user => user.id === reservation.user_id);
   const currentUserDisplay = currentUser ? 
     `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}` : 
     'Usuario no encontrado';
@@ -185,7 +185,7 @@ export function EditReservationModal({
                   <SelectValue placeholder="Seleccionar usuario" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.map((user) => (
+                  {usersData.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
                         <span>

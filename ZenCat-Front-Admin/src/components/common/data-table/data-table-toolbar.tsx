@@ -207,7 +207,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               size="sm"
               onClick={onRefreshClick}
               disabled={isRefreshing}
-              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+              className={`h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95 ${
                 isRefreshing ? 'bg-blue-50 border-blue-300' : ''
               }`}
             >
@@ -220,7 +220,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />
                   Ordenar por
@@ -234,7 +234,9 @@ export function DataTableToolbar<TData extends DataWithId>({
                     (col) =>
                       col.getCanSort() &&
                       col.id !== 'select' &&
-                      col.id !== 'actions',
+                      col.id !== 'actions' &&
+                      col.id !== 'userAgent' &&
+                      col.id !== 'ipAddress'
                   )
                   .map((col) => {
                     const dir = col.getIsSorted();
@@ -260,7 +262,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="outline"
               size="sm"
               onClick={onFilterClick}
-              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+              className={`h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95 ${
                 hasActiveFilters ? 'bg-blue-50 border-blue-300' : ''
               }`}
             >
@@ -279,7 +281,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -302,7 +304,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="outline"
               size="sm"
               onClick={onExportClick}
-              className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+              className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
             >
               <Download className="mr-2 h-4 w-4" />
               <span>Exportar</span>
@@ -314,7 +316,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -343,7 +345,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="destructive"
               size="sm"
               type="button"
-              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
+              className="h-10 bg-red-500 text-white font-bold hover:bg-black hover:text-white transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
               onClick={handleDeleteSelected}
               disabled={!rowsSelected || isBulkDeleting || !isBulkDeleteEnabled}
             >

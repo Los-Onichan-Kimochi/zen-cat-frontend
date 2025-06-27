@@ -8,7 +8,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
-import { usuariosApi } from '@/api/usuarios/usuarios';
+import { userService } from '@/api/usuarios/usuarios';
 import { Reservation } from '@/types/reservation';
 import { User } from '@/types/user';
 
@@ -55,10 +55,12 @@ function SessionReservationsComponent() {
   });
 
   // Fetch users data
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery<User[]>({
+  const { data: usersResponse, isLoading: isLoadingUsers } = useQuery<{ users: User[] }>({
     queryKey: ['usuarios'],
-    queryFn: () => usuariosApi.getUsuarios(),
+    queryFn: () => userService.getAll(),
   });
+
+  const usersData = usersResponse?.users || [];
 
   // Fetch reservations for this session
   const {

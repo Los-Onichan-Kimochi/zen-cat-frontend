@@ -124,14 +124,29 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
 
       // El authService ya guarda los tokens en cookies
       // Ahora guardamos el usuario en el context
+      // Mapear el rol del backend al frontend
+      const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
+        switch (backendRole) {
+          case 'ADMINISTRATOR':
+            return 'admin';
+          case 'CLIENT':
+            return 'user';
+          case 'GUEST':
+            return 'guest';
+          default:
+            return 'user'; // Default fallback
+        }
+      };
+
       const user = {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email,
-        role: 'admin' as const,
+        role: mapRole(response.user.rol),
+        rol: response.user.rol, // Mantener el rol original del backend
         password: '', // No guardamos la contraseña
         isAuthenticated: true,
-        permissions: ['admin'],
+        permissions: response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
         avatar: response.user.image_url || '',
         address: '',
         district: '',

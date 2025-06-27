@@ -22,7 +22,7 @@ import {
 import { User } from '@/types/user';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
-import { usuariosApi } from '@/api/usuarios/usuarios';
+import { userService } from '@/api/usuarios/usuarios';
 
 interface CreateReservationModalProps {
   isOpen: boolean;
