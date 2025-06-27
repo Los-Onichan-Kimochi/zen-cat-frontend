@@ -31,7 +31,6 @@ export const TopBar = () => {
       <div className="hidden md:flex space-x-8">
         <Link
           to="/comunidades"
-          hash="comunidades"
           className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out"
         >
           Comunidades

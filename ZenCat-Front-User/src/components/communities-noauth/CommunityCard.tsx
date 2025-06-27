@@ -29,7 +29,7 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
         </p>
       </div>
       <button
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="mt-4 w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors focus:outline-none cursor-pointer"
         onClick={onViewMore}
       >
         Ver más

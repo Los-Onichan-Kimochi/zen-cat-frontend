@@ -12,7 +12,6 @@ import { Community } from '@/types/community'
 
 // Define the route for '/communities'
 export const Route = createFileRoute('/comunidades')({
-  // *** LOADER DEFINITION ***
   // This is where you fetch your data from the API
   loader: async () => {
     try {
