@@ -21,13 +21,13 @@ import { FormProvider } from 'react-hook-form';
 
 export const Route = createFileRoute('/planes-membresia/agregar')({
   component: AddMembershipPlanPage,
-})
+});
 
 function AddMembershipPlanPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const {form} = useMembershipPlanForm();
+  const { form } = useMembershipPlanForm();
 
   //const has_limit = watch('has_limit');
 
@@ -35,11 +35,12 @@ function AddMembershipPlanPage() {
     mutationFn: (data: CreateMembershipPlanPayload) =>
       membershipPlansApi.createMembershipPlan(data),
     onError: (error) =>
-      toast.error('Error al crear plan de membresía', { description: error.message }),
+      toast.error('Error al crear plan de membresía', {
+        description: error.message,
+      }),
   });
 
   const onSubmit = async (data: any) => {
-
     try {
       const newMembershipPlan = await createMembershipPlanMutation.mutateAsync({
         type: data.type,
@@ -51,13 +52,18 @@ function AddMembershipPlanPage() {
       queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
       navigate({ to: '/planes-membresia' });
     } catch (err: any) {
-      toast.error('Error al crear plan de membresía', { description: err.message });
+      toast.error('Error al crear plan de membresía', {
+        description: err.message,
+      });
     }
   };
 
   return (
     <div className="p-6 space-y-6 font-montserrat">
-      <HeaderDescriptor title="PLANES DE MEMBRESÍA" subtitle="AGREGAR PLAN DE MEMBRESÍA" />
+      <HeaderDescriptor
+        title="PLANES DE MEMBRESÍA"
+        subtitle="AGREGAR PLAN DE MEMBRESÍA"
+      />
       <div className="mb-4">
         <Button
           variant="outline"
@@ -68,31 +74,29 @@ function AddMembershipPlanPage() {
           Volver
         </Button>
       </div>
-      
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <MembershipPlanForm mode='add'/>
-            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => navigate({ to: '/planes-membresia' })}
-                className="h-10 w-30 text-base"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMembershipPlanMutation.isPending}
-                className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
-              >
-                Guardar
-              </Button>
-            </div>
-          </form>
-        </FormProvider>
-      
- 
+
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <MembershipPlanForm mode="add" />
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate({ to: '/planes-membresia' })}
+              className="h-10 w-30 text-base"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMembershipPlanMutation.isPending}
+              className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+            >
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

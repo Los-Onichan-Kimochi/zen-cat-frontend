@@ -193,8 +193,8 @@ function AddSessionComponent() {
     },
     onError: (error) => {
       console.error('Error creating session:', error);
-      toast.error('Error al Crear Sesión', { 
-        description: error.message || 'No se pudo crear la sesión.' 
+      toast.error('Error al Crear Sesión', {
+        description: error.message || 'No se pudo crear la sesión.',
       });
     },
   });
@@ -343,16 +343,13 @@ function AddSessionComponent() {
                         onValueChange={(value) =>
                           setValue('professional_id', value)
                         }
-                        
                       >
                         <SelectTrigger
                           className={`transition-colors 'bg-gray-100 cursor-not-allowed border-blue-300 bg-blue-50'
                           }`}
                         >
                           <SelectValue
-                            placeholder={
-                                'Seleccionar profesional'
-                            }
+                            placeholder={'Seleccionar profesional'}
                           />
                         </SelectTrigger>
                         <SelectContent>
@@ -404,11 +401,7 @@ function AddSessionComponent() {
                           }
                         }}
                       />
-                      <Label
-                        htmlFor="is_virtual"
-                        className={'text-gray-400'
-                        }
-                      >
+                      <Label htmlFor="is_virtual" className={'text-gray-400'}>
                         Sesión virtual
                       </Label>
                     </div>
@@ -441,9 +434,7 @@ function AddSessionComponent() {
                             className={`transition-colors border-blue-300 bg-blue-50 hover:bg-blue-100
                             }`}
                           >
-                            <SelectValue
-                              placeholder={'Seleccionar local'}
-                            />
+                            <SelectValue placeholder={'Seleccionar local'} />
                           </SelectTrigger>
                           <SelectContent>
                             {isLoadingLocals ? (

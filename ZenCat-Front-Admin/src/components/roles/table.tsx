@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,11 +9,11 @@ import {
   getPaginationRowModel,
 } from '@tanstack/react-table';
 import { useDataTable } from '@/hooks/use-data-table';
-import { DataTable } from "@/components/common/data-table/data-table";
-import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar";
-import { DataTablePagination } from "@/components/common/data-table/data-table-pagination";
+import { DataTable } from '@/components/common/data-table/data-table';
+import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
+import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { User } from '@/types/user';
-import { getRoleColumns } from "./columns";
+import { getRoleColumns } from './columns';
 
 interface RoleTableProps {
   data: User[];
@@ -23,12 +23,12 @@ interface RoleTableProps {
   onRefresh: () => void;
 }
 
-export function RoleTable({ 
-  data, 
-  isLoading, 
-  onRoleChange, 
+export function RoleTable({
+  data,
+  isLoading,
+  onRoleChange,
   isChangingRole,
-  onRefresh 
+  onRefresh,
 }: RoleTableProps) {
   const {
     sorting,

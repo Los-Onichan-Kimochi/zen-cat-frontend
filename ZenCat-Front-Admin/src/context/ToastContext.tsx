@@ -3,10 +3,22 @@ import { useCustomToast } from '@/hooks/use-custom-toast';
 import { ToastContainer } from '@/components/ui/toast-container';
 
 export interface ToastContextType {
-  success: (title: string, options?: { description?: string; duration?: number }) => string;
-  error: (title: string, options?: { description?: string; duration?: number }) => string;
-  info: (title: string, options?: { description?: string; duration?: number }) => string;
-  warning: (title: string, options?: { description?: string; duration?: number }) => string;
+  success: (
+    title: string,
+    options?: { description?: string; duration?: number },
+  ) => string;
+  error: (
+    title: string,
+    options?: { description?: string; duration?: number },
+  ) => string;
+  info: (
+    title: string,
+    options?: { description?: string; duration?: number },
+  ) => string;
+  warning: (
+    title: string,
+    options?: { description?: string; duration?: number },
+  ) => string;
   clearAll: () => void;
 }
 
@@ -17,15 +29,8 @@ interface ToastProviderProps {
 }
 
 export function ToastProvider({ children }: ToastProviderProps) {
-  const {
-    toasts,
-    success,
-    error,
-    info,
-    warning,
-    removeToast,
-    clearAll,
-  } = useCustomToast();
+  const { toasts, success, error, info, warning, removeToast, clearAll } =
+    useCustomToast();
 
   const contextValue = {
     success,
@@ -49,4 +54,4 @@ export function useToast() {
     throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
-} 
+}

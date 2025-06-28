@@ -81,9 +81,10 @@ export function CommunityForm({
             onImageChange={handleImageChange}
             label="Logo"
             disabled={!isEditing}
-            inputProps={{...register('profileImageFile')}}
+            inputProps={{ ...register('profileImageFile') }}
             errorMessage={
-              errors.profileImageFile && typeof errors.profileImageFile.message === 'string'
+              errors.profileImageFile &&
+              typeof errors.profileImageFile.message === 'string'
                 ? errors.profileImageFile.message
                 : undefined
             }

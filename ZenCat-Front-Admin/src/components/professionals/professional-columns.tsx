@@ -68,7 +68,9 @@ export function getProfessionalColumns({
       ),
       accessorFn: (row) =>
         `${row.first_last_name} ${row.second_last_name || ''}`.trim(),
-      cell: ({ getValue }) => <div className="text-center">{getValue() as string}</div>,
+      cell: ({ getValue }) => (
+        <div className="text-center">{getValue() as string}</div>
+      ),
       meta: {
         displayName: 'Apellidos',
       },

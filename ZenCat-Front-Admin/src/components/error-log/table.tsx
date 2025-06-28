@@ -56,75 +56,78 @@ export function ErrorTable({
   const columns = getErrorColumns({ onView });
 
   // Función de filtro global personalizada que incluye búsqueda en badges
-  const globalFilterFn = useCallback((row: any, columnIds: string[], filterValue: string) => {
-    if (!filterValue) return true;
-    
-    const searchValue = filterValue.toLowerCase();
-    const rowData = row.original;
+  const globalFilterFn = useCallback(
+    (row: any, columnIds: string[], filterValue: string) => {
+      if (!filterValue) return true;
 
-    // Lista de todas las posibles coincidencias
-    const searchableValues = [
-      // Campos básicos
-      rowData.userEmail,
-      rowData.ipAddress,
-      rowData.userAgent,
-      rowData.entityName,
-      rowData.errorMessage,
-      
-      // Action labels específicos
-      'fallo de autenticación',
-      'fallo al crear',
-      'fallo al actualizar', 
-      'fallo al eliminar',
-      'inicio de sesión',
-      'crear registro',
-      'actualizar datos',
-      'eliminar registro',
-      
-      // Entity labels específicos
-      'usuario del sistema',
-      'comunidad',
-      'profesional',
-      'local',
-      'servicio',
-      'sesión',
-      'reserva',
-      
-      // Error descriptions específicos  
-      'credenciales incorrectas',
-      'error al crear usuario del sistema',
-      'error al crear',
-      'error al actualizar',
-      'error al eliminar',
-      'error del sistema',
-      'sin autorización',
-      'datos inválidos',
-      'registro no encontrado'
-    ].filter(Boolean);
+      const searchValue = filterValue.toLowerCase();
+      const rowData = row.original;
 
-    // Buscar en todos los valores
-    for (const value of searchableValues) {
-      if (value && value.toString().toLowerCase().includes(searchValue)) {
-        return true;
-      }
-    }
+      // Lista de todas las posibles coincidencias
+      const searchableValues = [
+        // Campos básicos
+        rowData.userEmail,
+        rowData.ipAddress,
+        rowData.userAgent,
+        rowData.entityName,
+        rowData.errorMessage,
 
-    // Buscar en fecha formateada
-    if (rowData.createdAt) {
-      try {
-        const date = new Date(rowData.createdAt);
-        const dateStr = date.toLocaleDateString('es-ES');
-        const timeStr = date.toLocaleTimeString('es-ES');
-        if (dateStr.includes(searchValue) || timeStr.includes(searchValue)) {
+        // Action labels específicos
+        'fallo de autenticación',
+        'fallo al crear',
+        'fallo al actualizar',
+        'fallo al eliminar',
+        'inicio de sesión',
+        'crear registro',
+        'actualizar datos',
+        'eliminar registro',
+
+        // Entity labels específicos
+        'usuario del sistema',
+        'comunidad',
+        'profesional',
+        'local',
+        'servicio',
+        'sesión',
+        'reserva',
+
+        // Error descriptions específicos
+        'credenciales incorrectas',
+        'error al crear usuario del sistema',
+        'error al crear',
+        'error al actualizar',
+        'error al eliminar',
+        'error del sistema',
+        'sin autorización',
+        'datos inválidos',
+        'registro no encontrado',
+      ].filter(Boolean);
+
+      // Buscar en todos los valores
+      for (const value of searchableValues) {
+        if (value && value.toString().toLowerCase().includes(searchValue)) {
           return true;
         }
-      } catch (error) {
-        // Ignorar errores de fecha
       }
-    }
 
-    return false;
-  }, []);
+      // Buscar en fecha formateada
+      if (rowData.createdAt) {
+        try {
+          const date = new Date(rowData.createdAt);
+          const dateStr = date.toLocaleDateString('es-ES');
+          const timeStr = date.toLocaleTimeString('es-ES');
+          if (dateStr.includes(searchValue) || timeStr.includes(searchValue)) {
+            return true;
+          }
+        } catch (error) {
+          // Ignorar errores de fecha
+        }
+      }
+
+      return false;
+    },
+    [],
+  );
 
   const table = useReactTable({
     data,
@@ -176,11 +179,15 @@ export function ErrorTable({
         exportFileName="error-logs"
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+        <DataTable
+          table={table}
+          columns={columns}
+          isRefreshing={isRefreshing}
+        />
       </div>
       <DataTablePagination table={table} showRowSelection={false} />
     </div>
   );
 }
 
-export default ErrorTable; 
+export default ErrorTable;

@@ -64,14 +64,14 @@ function SesionesComponent() {
   >({
     mutationFn: (id) => sessionsApi.deleteSession(id),
     onSuccess: (_, id) => {
-      toast.success('Sesión Eliminada', { 
-        description: 'La sesión ha sido eliminada exitosamente.' 
+      toast.success('Sesión Eliminada', {
+        description: 'La sesión ha sido eliminada exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar la sesión.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar la sesión.',
       });
     },
   });
@@ -87,8 +87,8 @@ function SesionesComponent() {
         queryClient.invalidateQueries({ queryKey: ['sessions'] });
       },
       onError: (err) => {
-        toast.error('Error al Eliminar Sesiones', { 
-          description: err.message || 'No se pudieron eliminar las sesiones.' 
+        toast.error('Error al Eliminar Sesiones', {
+          description: err.message || 'No se pudieron eliminar las sesiones.',
         });
       },
     },
@@ -136,20 +136,20 @@ function SesionesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const [sessionsResult, countsResult] = await Promise.all([
       refetchSessions(),
-      refetchCounts()
+      refetchCounts(),
     ]);
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return { sessionsResult, countsResult };
   };
 
@@ -222,16 +222,16 @@ function SesionesComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-                  <SessionsTable
-          data={sessionsData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-          onRefresh={handleRefresh}
-          isRefreshing={isFetchingSessions}
-        />
+          <SessionsTable
+            data={sessionsData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingSessions}
+          />
         )}
       </div>
 

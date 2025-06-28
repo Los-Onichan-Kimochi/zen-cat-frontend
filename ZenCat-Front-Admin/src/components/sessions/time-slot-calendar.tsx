@@ -59,14 +59,20 @@ export function TimeSlotCalendar({
           const occupiedStart = occupied.start;
           const occupiedEnd = occupied.end;
           // Un slot está ocupado si se superpone con cualquier parte de un slot ocupado
-          return (time >= occupiedStart && time < occupiedEnd) || 
-                 (occupiedStart >= time && occupiedStart < `${nextHour.toString().padStart(2, '0')}:${adjustedMinute.toString().padStart(2, '0')}`);
+          return (
+            (time >= occupiedStart && time < occupiedEnd) ||
+            (occupiedStart >= time &&
+              occupiedStart <
+                `${nextHour.toString().padStart(2, '0')}:${adjustedMinute.toString().padStart(2, '0')}`)
+          );
         });
 
         const occupiedSlot = occupiedSlots.find(
-          (occupied) => 
-            (time >= occupied.start && time < occupied.end) || 
-            (occupied.start >= time && occupied.start < `${nextHour.toString().padStart(2, '0')}:${adjustedMinute.toString().padStart(2, '0')}`)
+          (occupied) =>
+            (time >= occupied.start && time < occupied.end) ||
+            (occupied.start >= time &&
+              occupied.start <
+                `${nextHour.toString().padStart(2, '0')}:${adjustedMinute.toString().padStart(2, '0')}`),
         );
 
         slots.push({

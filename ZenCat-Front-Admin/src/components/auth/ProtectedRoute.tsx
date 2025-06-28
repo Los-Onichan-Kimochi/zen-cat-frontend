@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ 
-  children, 
+export function ProtectedRoute({
+  children,
   requireAdmin = false,
-  allowedRoles = []
+  allowedRoles = [],
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user, isAdmin, hasRole } = useAuth();
 
@@ -32,13 +32,19 @@ export function ProtectedRoute({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Acceso Denegado</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
           <p className="text-gray-600 mb-4">
             No tienes permisos de administrador para acceder a esta página.
           </p>
           <p className="text-sm text-gray-500">
-            Tu rol actual: {user?.rol === 'ADMINISTRATOR' ? 'Administrador' : 
-                          user?.rol === 'CLIENT' ? 'Cliente' : 'Invitado'}
+            Tu rol actual:{' '}
+            {user?.rol === 'ADMINISTRATOR'
+              ? 'Administrador'
+              : user?.rol === 'CLIENT'
+                ? 'Cliente'
+                : 'Invitado'}
           </p>
         </div>
       </div>
@@ -46,17 +52,23 @@ export function ProtectedRoute({
   }
 
   // Check if specific roles are allowed
-  if (allowedRoles.length > 0 && !allowedRoles.some(role => hasRole(role))) {
+  if (allowedRoles.length > 0 && !allowedRoles.some((role) => hasRole(role))) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Acceso Denegado</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
           <p className="text-gray-600 mb-4">
             No tienes el rol necesario para acceder a esta página.
           </p>
           <p className="text-sm text-gray-500">
-            Tu rol actual: {user?.rol === 'ADMINISTRATOR' ? 'Administrador' : 
-                          user?.rol === 'CLIENT' ? 'Cliente' : 'Invitado'}
+            Tu rol actual:{' '}
+            {user?.rol === 'ADMINISTRATOR'
+              ? 'Administrador'
+              : user?.rol === 'CLIENT'
+                ? 'Cliente'
+                : 'Invitado'}
           </p>
           <p className="text-sm text-gray-500">
             Roles permitidos: {allowedRoles.join(', ')}

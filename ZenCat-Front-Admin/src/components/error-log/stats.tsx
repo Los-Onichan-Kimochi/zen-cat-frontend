@@ -13,7 +13,10 @@ export function ErrorStats({ stats, isLoading }: ErrorStatsProps) {
     return (
       <div className="flex items-center justify-center space-x-4 mt-2 font-montserrat min-h-[120px] flex-wrap">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-3xl shadow-xl p-6 flex items-center space-x-6 min-w-[350px]">
+          <div
+            key={i}
+            className="bg-white rounded-3xl shadow-xl p-6 flex items-center space-x-6 min-w-[350px]"
+          >
             <Skeleton className="w-16 h-16 rounded-full" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-24" />
@@ -65,18 +68,24 @@ export function ErrorStats({ stats, isLoading }: ErrorStatsProps) {
       {statsCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="bg-white rounded-3xl shadow-xl p-6 flex items-center space-x-6 min-w-[350px] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
           >
-            <div className={`p-4 rounded-full ${stat.bgColor} transition-colors duration-200 hover:scale-110`}>
-              <Icon className={`w-8 h-8 ${stat.color} transition-transform duration-200`} />
+            <div
+              className={`p-4 rounded-full ${stat.bgColor} transition-colors duration-200 hover:scale-110`}
+            >
+              <Icon
+                className={`w-8 h-8 ${stat.color} transition-transform duration-200`}
+              />
             </div>
             <div>
               <p className="text-gray-500 text-sm font-medium transition-colors duration-200">
                 {stat.title}
               </p>
-              <p className={`text-2xl font-semibold ${stat.color} transition-colors duration-200`}>
+              <p
+                className={`text-2xl font-semibold ${stat.color} transition-colors duration-200`}
+              >
                 {stat.value}
               </p>
             </div>
@@ -87,4 +96,4 @@ export function ErrorStats({ stats, isLoading }: ErrorStatsProps) {
   );
 }
 
-export default ErrorStats; 
+export default ErrorStats;

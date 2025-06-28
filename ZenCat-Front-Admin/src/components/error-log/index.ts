@@ -12,4 +12,4 @@ export { default as ErrorFiltersModalDefault } from './filters-modal';
 export { default as ErrorDetailModalDefault } from './error-detail-modal';
 
 // Re-export types from unified audit types
-export type { ErrorLog, ErrorLogFilters, ErrorLogStats } from '@/types/audit'; 
+export type { ErrorLog, ErrorLogFilters, ErrorLogStats } from '@/types/audit';

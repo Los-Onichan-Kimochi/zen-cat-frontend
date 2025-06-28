@@ -1,4 +1,10 @@
-import { ErrorLog, ErrorLogFilters, ErrorLogStats, AuditLogFilters, mapAuditLogFromBackend } from '@/types/audit';
+import {
+  ErrorLog,
+  ErrorLogFilters,
+  ErrorLogStats,
+  AuditLogFilters,
+  mapAuditLogFromBackend,
+} from '@/types/audit';
 import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -15,9 +21,11 @@ const getHeaders = () => {
 // Función para construir query parameters
 const buildQueryParams = (filters: ErrorLogFilters): string => {
   const params = new URLSearchParams();
-  
-  if (filters.page !== undefined) params.append('page', filters.page.toString());
-  if (filters.limit !== undefined) params.append('pageSize', filters.limit.toString());
+
+  if (filters.page !== undefined)
+    params.append('page', filters.page.toString());
+  if (filters.limit !== undefined)
+    params.append('pageSize', filters.limit.toString());
   if (filters.user_search) params.append('userIds', filters.user_search);
   if (filters.action) params.append('actions', filters.action);
   if (filters.entity_type) params.append('entityTypes', filters.entity_type);
@@ -30,7 +38,9 @@ const buildQueryParams = (filters: ErrorLogFilters): string => {
 
 export const errorLogApi = {
   // Obtener logs de errores con filtros (solo eventos fallidos)
-  getErrorLogs: async (filters: ErrorLogFilters = {}): Promise<{
+  getErrorLogs: async (
+    filters: ErrorLogFilters = {},
+  ): Promise<{
     logs: ErrorLog[];
     total: number;
     page: number;
@@ -42,7 +52,7 @@ export const errorLogApi = {
       const errorFilters = { ...filters, success: false };
       const queryParams = buildQueryParams(errorFilters);
       const url = `${API_BASE_URL}/error-log/${queryParams ? `?${queryParams}` : ''}`;
-      
+
       const response = await fetch(url, {
         headers: getHeaders(),
       });
@@ -60,9 +70,11 @@ export const errorLogApi = {
 
       // Use the unified mapping function
       const mappedLogs = (data.audit_logs || []).map(mapAuditLogFromBackend);
-      
+
       // Ensure all logs are actually error logs (success: false)
-      const errorLogs = mappedLogs.filter((log): log is ErrorLog => !log.success);
+      const errorLogs = mappedLogs.filter(
+        (log): log is ErrorLog => !log.success,
+      );
 
       return {
         logs: errorLogs,
@@ -81,9 +93,12 @@ export const errorLogApi = {
   getErrorStats: async (): Promise<ErrorLogStats> => {
     try {
       // Obtener estadísticas totales de auditoría para calcular el verdadero nivel de fallas
-      const auditStatsResponse = await fetch(`${API_BASE_URL}/audit-log/stats/`, {
-        headers: getHeaders(),
-      });
+      const auditStatsResponse = await fetch(
+        `${API_BASE_URL}/audit-log/stats/`,
+        {
+          headers: getHeaders(),
+        },
+      );
 
       if (!auditStatsResponse.ok) {
         const errorData = await auditStatsResponse.json().catch(() => null);
@@ -94,23 +109,29 @@ export const errorLogApi = {
       }
 
       const auditStatsData = await auditStatsResponse.json();
-      console.log('Raw audit stats data for error calculations:', auditStatsData);
+      console.log(
+        'Raw audit stats data for error calculations:',
+        auditStatsData,
+      );
 
       // Calcular estadísticas reales
       const totalEvents = auditStatsData.total_events || 0;
       const successfulEvents = auditStatsData.success_count || 0;
       const failedEvents = auditStatsData.failure_count || 0;
-      
+
       // Calcular usuarios únicos afectados por errores
-      const errorLogsResponse = await fetch(`${API_BASE_URL}/error-log/?pageSize=500`, {
-        headers: getHeaders(),
-      });
+      const errorLogsResponse = await fetch(
+        `${API_BASE_URL}/error-log/?pageSize=500`,
+        {
+          headers: getHeaders(),
+        },
+      );
 
       let uniqueUsers = 0;
       if (errorLogsResponse.ok) {
         const errorLogsData = await errorLogsResponse.json();
         const errorLogs = errorLogsData.audit_logs || [];
-        
+
         // Calcular usuarios únicos afectados por errores
         const uniqueUserEmails = new Set();
         const uniqueUserIds = new Set();
@@ -123,7 +144,10 @@ export const errorLogApi = {
             if (log.user_email && log.user_email !== 'sin autenticar') {
               uniqueUserEmails.add(log.user_email);
             }
-            if (log.user_id && log.user_id !== '00000000-0000-0000-0000-000000000000') {
+            if (
+              log.user_id &&
+              log.user_id !== '00000000-0000-0000-0000-000000000000'
+            ) {
               uniqueUserIds.add(log.user_id);
             }
           }
@@ -153,11 +177,11 @@ export const errorLogApi = {
       // Use the error-log endpoint once it's available, fallback to audit-log for now
       const response = await fetch(`${API_BASE_URL}/error-log/${id}/`, {
         headers: getHeaders(),
-      }).catch(() => 
+      }).catch(() =>
         // Fallback to audit-log endpoint if error-log endpoint doesn't exist yet
         fetch(`${API_BASE_URL}/audit-log/${id}/`, {
           headers: getHeaders(),
-        })
+        }),
       );
 
       if (!response.ok) {
@@ -184,4 +208,4 @@ export const errorLogApi = {
       throw error;
     }
   },
-}; 
+};

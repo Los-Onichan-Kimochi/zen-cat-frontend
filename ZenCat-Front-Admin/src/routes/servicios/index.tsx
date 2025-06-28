@@ -95,15 +95,15 @@ function ServiciosComponent() {
   >({
     mutationFn: (id) => servicesApi.deleteService(id),
     onSuccess: (_, id) => {
-      toast.success('Servicio Eliminado', { 
-        description: 'El servicio ha sido eliminado exitosamente.' 
+      toast.success('Servicio Eliminado', {
+        description: 'El servicio ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar el servicio.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el servicio.',
       });
     },
   });
@@ -152,20 +152,20 @@ function ServiciosComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const [servicesResult, countsResult] = await Promise.all([
       refetchServices(),
-      refetchCounts()
+      refetchCounts(),
     ]);
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return { servicesResult, countsResult };
   };
 
@@ -294,7 +294,7 @@ function ServiciosComponent() {
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
-      
+
       {/* Statistics Section */}
       <div className="flex-shrink-0">
         <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
@@ -323,7 +323,7 @@ function ServiciosComponent() {
             <p>No hay datos de servicios para mostrar conteos.</p>
           )}
         </div>
-        
+
         <ViewToolbar
           onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
           onBulkUploadClick={() => {}}
@@ -339,16 +339,16 @@ function ServiciosComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-                  <ServicesTable
-          data={servicesData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-          onRefresh={handleRefresh}
-          isRefreshing={isFetchingServices}
-        />
+          <ServicesTable
+            data={servicesData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingServices}
+          />
         )}
       </div>
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

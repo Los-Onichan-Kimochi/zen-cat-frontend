@@ -19,7 +19,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, X, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AuditLogFilters, AuditAction, AuditEntityType, ACTION_CONFIGS, ENTITY_CONFIGS } from '@/types/audit';
+import {
+  AuditLogFilters,
+  AuditAction,
+  AuditEntityType,
+  ACTION_CONFIGS,
+  ENTITY_CONFIGS,
+} from '@/types/audit';
 
 interface FiltersProps {
   filters: AuditLogFilters;
@@ -36,8 +42,12 @@ export const AuditFilters = React.memo(function AuditFilters({
 }: FiltersProps) {
   // Memoizar el contador de filtros activos
   const activeFiltersCount = useMemo(() => {
-    return Object.entries(filters).filter(([key, value]) => 
-      key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
+    return Object.entries(filters).filter(
+      ([key, value]) =>
+        key !== 'page' &&
+        key !== 'limit' &&
+        value !== undefined &&
+        value !== '',
     ).length;
   }, [filters]);
 
@@ -64,8 +74,12 @@ export const AuditFilters = React.memo(function AuditFilters({
   // Memoizar los filtros activos
   const activeFilters = useMemo(() => {
     return Object.entries(filters)
-      .filter(([key, value]) => 
-        key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
+      .filter(
+        ([key, value]) =>
+          key !== 'page' &&
+          key !== 'limit' &&
+          value !== undefined &&
+          value !== '',
       )
       .map(([key, value]) => ({
         key,
@@ -82,9 +96,9 @@ export const AuditFilters = React.memo(function AuditFilters({
           <span className="text-sm text-gray-500">Sin filtros aplicados</span>
         </div>
         {onOpenFilters && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onOpenFilters}
             className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
           >
@@ -102,14 +116,15 @@ export const AuditFilters = React.memo(function AuditFilters({
         <div className="flex items-center gap-2">
           <Filter size={16} />
           <span className="text-sm font-medium">
-            {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} aplicado{activeFiltersCount !== 1 ? 's' : ''}
+            {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''}{' '}
+            aplicado{activeFiltersCount !== 1 ? 's' : ''}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {onOpenFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onOpenFilters}
               className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
             >
@@ -118,9 +133,9 @@ export const AuditFilters = React.memo(function AuditFilters({
             </Button>
           )}
           {onClearFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onClearFilters}
               className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
             >
@@ -130,7 +145,7 @@ export const AuditFilters = React.memo(function AuditFilters({
           )}
         </div>
       </div>
-      
+
       <div className="flex flex-wrap gap-2">
         {activeFilters.map(({ key, label }) => (
           <Badge key={key} variant="secondary" className="text-xs">
@@ -140,4 +155,4 @@ export const AuditFilters = React.memo(function AuditFilters({
       </div>
     </div>
   );
-}); 
+});

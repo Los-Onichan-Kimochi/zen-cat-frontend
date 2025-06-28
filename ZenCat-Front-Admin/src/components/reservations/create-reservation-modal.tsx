@@ -177,11 +177,13 @@ export function CreateReservationModal({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createReservationMutation.isPending}
               >
-                {createReservationMutation.isPending ? 'Creando...' : 'Crear Reserva'}
+                {createReservationMutation.isPending
+                  ? 'Creando...'
+                  : 'Crear Reserva'}
               </Button>
             </DialogFooter>
           </form>

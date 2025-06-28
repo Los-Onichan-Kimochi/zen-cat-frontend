@@ -21,7 +21,13 @@ import { CalendarIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { AuditLogFilters, ACTION_CONFIGS, ENTITY_CONFIGS, AuditAction, AuditEntityType } from '@/types/audit';
+import {
+  AuditLogFilters,
+  ACTION_CONFIGS,
+  ENTITY_CONFIGS,
+  AuditAction,
+  AuditEntityType,
+} from '@/types/audit';
 
 interface FiltersModalProps {
   isOpen: boolean;
@@ -52,12 +58,12 @@ const USER_ROLE_OPTIONS = [
 ];
 
 // Simple select component that doesn't use portals or complex focus management
-function SimpleSelect({ 
-  value, 
-  onValueChange, 
-  placeholder, 
+function SimpleSelect({
+  value,
+  onValueChange,
+  placeholder,
   options,
-  className 
+  className,
 }: {
   value: string;
   onValueChange: (value: string) => void;
@@ -70,11 +76,13 @@ function SimpleSelect({
       value={value}
       onChange={(e) => onValueChange(e.target.value)}
       className={cn(
-        "w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none",
-        className
+        'w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none',
+        className,
       )}
     >
-      <option value="" disabled hidden>{placeholder}</option>
+      <option value="" disabled hidden>
+        {placeholder}
+      </option>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -111,17 +119,24 @@ export function AuditFiltersModal({
 
   // Memoizar contador de filtros activos
   const activeFiltersCount = useMemo(() => {
-    return Object.entries(localFilters).filter(([key, value]) => 
-      key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
+    return Object.entries(localFilters).filter(
+      ([key, value]) =>
+        key !== 'page' &&
+        key !== 'limit' &&
+        value !== undefined &&
+        value !== '',
     ).length;
   }, [localFilters]);
 
-  const updateLocalFilter = useCallback((key: keyof AuditLogFilters, value: any) => {
-    setLocalFilters(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, []);
+  const updateLocalFilter = useCallback(
+    (key: keyof AuditLogFilters, value: any) => {
+      setLocalFilters((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [],
+  );
 
   const handleClearFilters = useCallback(() => {
     const clearedFilters = {
@@ -146,182 +161,220 @@ export function AuditFiltersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Filter size={20} />
-              Filtros de Auditoría
-              {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} activo{activeFiltersCount !== 1 ? 's' : ''}
-                </Badge>
-              )}
-            </DialogTitle>
-          </DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Filter size={20} />
+            Filtros de Auditoría
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''}{' '}
+                activo{activeFiltersCount !== 1 ? 's' : ''}
+              </Badge>
+            )}
+          </DialogTitle>
+        </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* Búsqueda de Usuario */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="user_search" className="text-right">
-                Usuario
-              </Label>
-              <Input
-                id="user_search"
-                placeholder="Buscar por email o ID..."
-                value={localFilters.user_search || ''}
-                onChange={(e) => updateLocalFilter('user_search', e.target.value)}
-                className="col-span-3"
-              />
-            </div>
+        <div className="grid gap-4 py-4">
+          {/* Búsqueda de Usuario */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="user_search" className="text-right">
+              Usuario
+            </Label>
+            <Input
+              id="user_search"
+              placeholder="Buscar por email o ID..."
+              value={localFilters.user_search || ''}
+              onChange={(e) => updateLocalFilter('user_search', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
 
-            {/* Acción */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="action" className="text-right">
-                Acción
-              </Label>
-                          <div className="col-span-3">
+          {/* Acción */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="action" className="text-right">
+              Acción
+            </Label>
+            <div className="col-span-3">
               <SimpleSelect
                 value={localFilters.action || 'all_actions'}
-                onValueChange={(value) => updateLocalFilter('action', value === 'all_actions' ? undefined : value)}
+                onValueChange={(value) =>
+                  updateLocalFilter(
+                    'action',
+                    value === 'all_actions' ? undefined : value,
+                  )
+                }
                 placeholder="Seleccionar acción..."
                 options={[
                   { value: 'all_actions', label: 'Todas las acciones' },
-                  ...ACTION_OPTIONS
+                  ...ACTION_OPTIONS,
                 ]}
               />
-            </div>
-            </div>
-
-            {/* Tipo de Entidad */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="entity_type" className="text-right">
-                Entidad
-              </Label>
-                          <div className="col-span-3">
-              <SimpleSelect
-                value={localFilters.entity_type || 'all_entities'}
-                onValueChange={(value) => updateLocalFilter('entity_type', value === 'all_entities' ? undefined : value)}
-                placeholder="Seleccionar entidad..."
-                options={[
-                  { value: 'all_entities', label: 'Todas las entidades' },
-                  ...ENTITY_OPTIONS
-                ]}
-              />
-            </div>
-            </div>
-
-            {/* Rol de Usuario */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="user_role" className="text-right">
-                Rol
-              </Label>
-                          <div className="col-span-3">
-              <SimpleSelect
-                value={localFilters.user_role || 'all_roles'}
-                onValueChange={(value) => updateLocalFilter('user_role', value === 'all_roles' ? undefined : value)}
-                placeholder="Seleccionar rol..."
-                options={[
-                  { value: 'all_roles', label: 'Todos los roles' },
-                  ...USER_ROLE_OPTIONS
-                ]}
-              />
-            </div>
-            </div>
-
-            {/* Fecha de Inicio */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Desde</Label>
-              <div className="col-span-3">
-                <Popover open={startDateOpen && isOpen} onOpenChange={setStartDateOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !localFilters.start_date && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {localFilters.start_date ? (
-                        format(new Date(localFilters.start_date), 'PPP', { locale: es })
-                      ) : (
-                        'Fecha inicio'
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={localFilters.start_date ? new Date(localFilters.start_date) : undefined}
-                      onSelect={(date) => {
-                        updateLocalFilter('start_date', date ? formatDate(date) : undefined);
-                        setStartDateOpen(false);
-                      }}
-                      disabled={(date) => date > new Date()}
-                      locale={es}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* Fecha de Fin */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Hasta</Label>
-              <div className="col-span-3">
-                <Popover open={endDateOpen && isOpen} onOpenChange={setEndDateOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !localFilters.end_date && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {localFilters.end_date ? (
-                        format(new Date(localFilters.end_date), 'PPP', { locale: es })
-                      ) : (
-                        'Fecha fin'
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={localFilters.end_date ? new Date(localFilters.end_date) : undefined}
-                      onSelect={(date) => {
-                        updateLocalFilter('end_date', date ? formatDate(date) : undefined);
-                        setEndDateOpen(false);
-                      }}
-                      disabled={(date) => {
-                        const minDate = localFilters.start_date ? new Date(localFilters.start_date) : undefined;
-                        return date > new Date() || (minDate && date < minDate);
-                      }}
-                      locale={es}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={handleClearFilters}
-              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
-            >
-              Limpiar Filtros
-            </Button>
-            <Button 
-              onClick={handleApplyFilters}
-              className="transition-all duration-200 hover:bg-black hover:text-white"
-            >
-              Aplicar Filtros
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  } 
+          {/* Tipo de Entidad */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="entity_type" className="text-right">
+              Entidad
+            </Label>
+            <div className="col-span-3">
+              <SimpleSelect
+                value={localFilters.entity_type || 'all_entities'}
+                onValueChange={(value) =>
+                  updateLocalFilter(
+                    'entity_type',
+                    value === 'all_entities' ? undefined : value,
+                  )
+                }
+                placeholder="Seleccionar entidad..."
+                options={[
+                  { value: 'all_entities', label: 'Todas las entidades' },
+                  ...ENTITY_OPTIONS,
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Rol de Usuario */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="user_role" className="text-right">
+              Rol
+            </Label>
+            <div className="col-span-3">
+              <SimpleSelect
+                value={localFilters.user_role || 'all_roles'}
+                onValueChange={(value) =>
+                  updateLocalFilter(
+                    'user_role',
+                    value === 'all_roles' ? undefined : value,
+                  )
+                }
+                placeholder="Seleccionar rol..."
+                options={[
+                  { value: 'all_roles', label: 'Todos los roles' },
+                  ...USER_ROLE_OPTIONS,
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Fecha de Inicio */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Desde</Label>
+            <div className="col-span-3">
+              <Popover
+                open={startDateOpen && isOpen}
+                onOpenChange={setStartDateOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !localFilters.start_date && 'text-muted-foreground',
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localFilters.start_date
+                      ? format(new Date(localFilters.start_date), 'PPP', {
+                          locale: es,
+                        })
+                      : 'Fecha inicio'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      localFilters.start_date
+                        ? new Date(localFilters.start_date)
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      updateLocalFilter(
+                        'start_date',
+                        date ? formatDate(date) : undefined,
+                      );
+                      setStartDateOpen(false);
+                    }}
+                    disabled={(date) => date > new Date()}
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Fecha de Fin */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Hasta</Label>
+            <div className="col-span-3">
+              <Popover
+                open={endDateOpen && isOpen}
+                onOpenChange={setEndDateOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !localFilters.end_date && 'text-muted-foreground',
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localFilters.end_date
+                      ? format(new Date(localFilters.end_date), 'PPP', {
+                          locale: es,
+                        })
+                      : 'Fecha fin'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      localFilters.end_date
+                        ? new Date(localFilters.end_date)
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      updateLocalFilter(
+                        'end_date',
+                        date ? formatDate(date) : undefined,
+                      );
+                      setEndDateOpen(false);
+                    }}
+                    disabled={(date) => {
+                      const minDate = localFilters.start_date
+                        ? new Date(localFilters.start_date)
+                        : undefined;
+                      return date > new Date() || (minDate && date < minDate);
+                    }}
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+          >
+            Limpiar Filtros
+          </Button>
+          <Button
+            onClick={handleApplyFilters}
+            className="transition-all duration-200 hover:bg-black hover:text-white"
+          >
+            Aplicar Filtros
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
