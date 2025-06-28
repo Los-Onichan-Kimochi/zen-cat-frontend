@@ -47,7 +47,7 @@ function AddCommunityServicePageComponent() {
     sessionStorage.getItem('draftSelectedServices') ?? '[]',
   ).map((service: Service) => service.id);
   const currentCommunityId = sessionStorage.getItem('currentCommunity'); // guardado previamente
-  
+
   const redirectPath =
     mode === 'editar' ? '/comunidades/ver' : '/comunidades/agregar-comunidad';
 
@@ -141,9 +141,7 @@ function AddCommunityServicePageComponent() {
         cell: ({ row }) => {
           const serviceId = row.original.id;
 
-          const asociated = servicesAsociated.includes(
-            serviceId.toString()
-          );
+          const asociated = servicesAsociated.includes(serviceId.toString());
           return (
             <Checkbox
               checked={row.getIsSelected() || asociated}

@@ -8,7 +8,20 @@ import { routeTree } from './routeTree.gen';
 
 const router = createRouter({ routeTree });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 declare module '@tanstack/react-router' {
   interface Register {

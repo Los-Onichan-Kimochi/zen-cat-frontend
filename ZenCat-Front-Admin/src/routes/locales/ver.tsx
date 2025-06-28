@@ -53,7 +53,7 @@ export function SeeLocalPageComponent() {
     queryFn: () => localsApi.getLocalById(id!),
   });
   const [isEditing, setIsEditing] = useState(false);
-// 1. Siempre inicializa el formulario, aunque local sea undefined
+  // 1. Siempre inicializa el formulario, aunque local sea undefined
   const localForm = useLocalForm({
     defaultValues: local || {},
   });
@@ -72,7 +72,7 @@ export function SeeLocalPageComponent() {
       toast.success('Local Actualizado', {
         description: 'El local ha sido actualizado exitosamente.',
       });
-      queryClient.invalidateQueries({ queryKey: ['locals',id] });
+      queryClient.invalidateQueries({ queryKey: ['locals', id] });
       navigate({ to: '/locales' });
     },
     onError: (error) => {
@@ -82,9 +82,9 @@ export function SeeLocalPageComponent() {
     },
   });
   const handleSave = async (data: any) => {
-     //console.log('handleSave ejecutado', data);
-     //updateLocalMutation.mutate(data);
-     setIsEditing(false);
+    //console.log('handleSave ejecutado', data);
+    //updateLocalMutation.mutate(data);
+    setIsEditing(false);
   };
   if (isLoading) {
     return (
@@ -114,24 +114,29 @@ export function SeeLocalPageComponent() {
     );
   }
   return (
-        <div className="p-6 h-full flex flex-col font-montserrat">
-      <HeaderDescriptor title="LOCALES" subtitle={!isEditing ? "Visualización del local" : "Editar local"} />
+    <div className="p-6 h-full flex flex-col font-montserrat">
+      <HeaderDescriptor
+        title="LOCALES"
+        subtitle={!isEditing ? 'Visualización del local' : 'Editar local'}
+      />
       <FormProvider {...localForm.form}>
         <form
-          onSubmit={isEditing
-            ? localForm.form.handleSubmit(handleSave)
-            : (e) => e.preventDefault()}
+          onSubmit={
+            isEditing
+              ? localForm.form.handleSubmit(handleSave)
+              : (e) => e.preventDefault()
+          }
           className="mb-4"
         >
-          
           <LocalForm
             imagePreview={local.image_url}
             handleImageChange={() => {}}
             isReadOnly={!isEditing}
             description={
-              !isEditing 
-              ? "Detalles del local seleccionado" 
-              : "Edite los datos del local y guarde los cambios"}
+              !isEditing
+                ? 'Detalles del local seleccionado'
+                : 'Edite los datos del local y guarde los cambios'
+            }
           />
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
             <Button
@@ -147,23 +152,23 @@ export function SeeLocalPageComponent() {
                 type="button"
                 onClick={() => {
                   console.log('Click en Editar , entre ');
-                  setIsEditing(true)
-                  
-                  localStorage.setItem('currentLocal', id? id : '');
-                  navigate({ to: `/locales/editar`})
+                  setIsEditing(true);
+
+                  localStorage.setItem('currentLocal', id ? id : '');
+                  navigate({ to: `/locales/editar` });
                 }}
                 className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
               >
                 Editar
               </Button>
-              ) : (
-                <Button
-                  type='submit'
-                  className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
-                >
-                  Guardar
-                </Button>
-              )}
+            ) : (
+              <Button
+                type="submit"
+                className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
+              >
+                Guardar
+              </Button>
+            )}
           </div>
         </form>
       </FormProvider>

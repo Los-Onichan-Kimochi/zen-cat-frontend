@@ -45,17 +45,17 @@ const IMAGE_TOAST_MESSAGES = {
 /**
  * Funciones para mostrar toasts de procesamiento de imágenes
  */
-export const showImageUploadProcessing = (toast: ToastContextType) => 
+export const showImageUploadProcessing = (toast: ToastContextType) =>
   toast.info(IMAGE_TOAST_MESSAGES.UPLOAD_PROCESSING.title, {
     description: IMAGE_TOAST_MESSAGES.UPLOAD_PROCESSING.description,
   });
 
-export const showImageUpdateProcessing = (toast: ToastContextType) => 
+export const showImageUpdateProcessing = (toast: ToastContextType) =>
   toast.info(IMAGE_TOAST_MESSAGES.UPDATE_PROCESSING.title, {
     description: IMAGE_TOAST_MESSAGES.UPDATE_PROCESSING.description,
   });
 
-export const showImageDeleteProcessing = (toast: ToastContextType) => 
+export const showImageDeleteProcessing = (toast: ToastContextType) =>
   toast.info(IMAGE_TOAST_MESSAGES.DELETE_PROCESSING.title, {
     description: IMAGE_TOAST_MESSAGES.DELETE_PROCESSING.description,
   });
@@ -63,17 +63,17 @@ export const showImageDeleteProcessing = (toast: ToastContextType) =>
 /**
  * Funciones para mostrar toasts de éxito
  */
-export const showImageUploadSuccess = (toast: ToastContextType) => 
+export const showImageUploadSuccess = (toast: ToastContextType) =>
   toast.success(IMAGE_TOAST_MESSAGES.UPLOAD_SUCCESS.title, {
     description: IMAGE_TOAST_MESSAGES.UPLOAD_SUCCESS.description,
   });
 
-export const showImageUpdateSuccess = (toast: ToastContextType) => 
+export const showImageUpdateSuccess = (toast: ToastContextType) =>
   toast.success(IMAGE_TOAST_MESSAGES.UPDATE_SUCCESS.title, {
     description: IMAGE_TOAST_MESSAGES.UPDATE_SUCCESS.description,
   });
 
-export const showImageDeleteSuccess = (toast: ToastContextType) => 
+export const showImageDeleteSuccess = (toast: ToastContextType) =>
   toast.success(IMAGE_TOAST_MESSAGES.DELETE_SUCCESS.title, {
     description: IMAGE_TOAST_MESSAGES.DELETE_SUCCESS.description,
   });
@@ -81,17 +81,17 @@ export const showImageDeleteSuccess = (toast: ToastContextType) =>
 /**
  * Funciones para mostrar toasts de error
  */
-export const showImageUploadError = (toast: ToastContextType) => 
+export const showImageUploadError = (toast: ToastContextType) =>
   toast.error(IMAGE_TOAST_MESSAGES.UPLOAD_ERROR.title, {
     description: IMAGE_TOAST_MESSAGES.UPLOAD_ERROR.description,
   });
 
-export const showImageUpdateError = (toast: ToastContextType) => 
+export const showImageUpdateError = (toast: ToastContextType) =>
   toast.error(IMAGE_TOAST_MESSAGES.UPDATE_ERROR.title, {
     description: IMAGE_TOAST_MESSAGES.UPDATE_ERROR.description,
   });
 
-export const showImageDeleteError = (toast: ToastContextType) => 
+export const showImageDeleteError = (toast: ToastContextType) =>
   toast.error(IMAGE_TOAST_MESSAGES.DELETE_ERROR.title, {
     description: IMAGE_TOAST_MESSAGES.DELETE_ERROR.description,
-  }); 
+  });

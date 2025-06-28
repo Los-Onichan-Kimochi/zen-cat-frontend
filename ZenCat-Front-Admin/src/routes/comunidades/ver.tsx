@@ -67,10 +67,7 @@ function EditCommunityPage() {
   });
 
   // Separate query for community with image when needed
-  const {
-    data: communityWithImage,
-    isLoading: isLoadingImage,
-  } = useQuery({
+  const { data: communityWithImage, isLoading: isLoadingImage } = useQuery({
     queryKey: ['community-with-image', id],
     queryFn: () => communitiesApi.getCommunityWithImage(id),
     enabled: !!id, // Load image data whenever we have an ID
@@ -120,14 +117,20 @@ function EditCommunityPage() {
   useEffect(() => {
     // Only update preview from S3 if no new image has been selected
     if (!imageFile) {
-      if (communityWithImage?.image_bytes && communityWithImage.image_bytes.length > 0) {
+      if (
+        communityWithImage?.image_bytes &&
+        communityWithImage.image_bytes.length > 0
+      ) {
         try {
           const imageUrl = base64ToImageUrl(communityWithImage.image_bytes);
           setImagePreview(imageUrl);
         } catch (error) {
           console.error('Error al convertir Base64 a URL:', error);
         }
-      } else if (community?.image_url && community.image_url !== 'default-community-image.jpg') {
+      } else if (
+        community?.image_url &&
+        community.image_url !== 'default-community-image.jpg'
+      ) {
         // Fallback to image_url if no bytes available
         setImagePreview(community.image_url);
       }
@@ -177,21 +180,21 @@ function EditCommunityPage() {
       // navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
-      toast.error('Error al Actualizar', { 
-        description: err.message || 'No se pudo actualizar la comunidad.' 
+      toast.error('Error al Actualizar', {
+        description: err.message || 'No se pudo actualizar la comunidad.',
       });
     },
   });
 
   const onSubmit = async (data: any) => {
     let imageUrl = community?.image_url || 'default-community-image.jpg';
-    
+
     // Generate new filename if image was changed
     if (imageFile) {
       const timestamp = Date.now();
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
       imageUrl = `community-${timestamp}.${fileExtension}`;
-      
+
       showImageUpdateProcessing(toast);
     }
 
@@ -232,8 +235,8 @@ function EditCommunityPage() {
       );
     },
     onError: (err) => {
-      toast.error('Error al Desvincular', { 
-        description: err.message || 'No se pudo desvincular el servicio.' 
+      toast.error('Error al Desvincular', {
+        description: err.message || 'No se pudo desvincular el servicio.',
       });
     },
   });
@@ -241,7 +244,7 @@ function EditCommunityPage() {
   const bulkDeleteServiceMutation = useMutation({
     mutationFn: (ids: string[]) =>
       communityServicesApi.bulkDeleteCommunityServices({
-          community_services: ids,
+        community_services: ids,
       }),
     onSuccess: (_, ids) => {
       toast.success('Servicios Desvinculados', {
@@ -251,8 +254,8 @@ function EditCommunityPage() {
       queryClient.invalidateQueries({ queryKey: ['community-services', id] });
     },
     onError: (err) => {
-      toast.error('Error al Desvincular Servicios', { 
-        description: err.message || 'No se pudieron desvincular los servicios.' 
+      toast.error('Error al Desvincular Servicios', {
+        description: err.message || 'No se pudieron desvincular los servicios.',
       });
     },
   });
@@ -278,8 +281,8 @@ function EditCommunityPage() {
       );
     },
     onError: (err) => {
-      toast.error('Error al Desvincular Plan', { 
-        description: err.message || 'No se pudo desvincular el plan.' 
+      toast.error('Error al Desvincular Plan', {
+        description: err.message || 'No se pudo desvincular el plan.',
       });
     },
   });
@@ -449,7 +452,9 @@ function EditCommunityPage() {
                 // Force reload of S3 image after clearing states
                 setTimeout(() => {
                   if (communityWithImage?.image_bytes) {
-                    const imageUrl = base64ToImageUrl(communityWithImage.image_bytes);
+                    const imageUrl = base64ToImageUrl(
+                      communityWithImage.image_bytes,
+                    );
                     setImagePreview(imageUrl);
                   }
                 }, 100);

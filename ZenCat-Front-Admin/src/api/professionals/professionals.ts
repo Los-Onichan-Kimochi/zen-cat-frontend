@@ -52,7 +52,9 @@ export const professionalsApi = {
     return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BY_ID(id));
   },
 
-  bulkDeleteProfessionals: async (payload: BulkDeleteProfessionalPayload): Promise<void> => {
+  bulkDeleteProfessionals: async (
+    payload: BulkDeleteProfessionalPayload,
+  ): Promise<void> => {
     return apiClient.delete(API_ENDPOINTS.PROFESSIONALS.BULK_DELETE, payload);
   },
 

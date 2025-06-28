@@ -17,17 +17,25 @@ import {
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  showRowSelection?: boolean;
 }
 
 export function DataTablePagination<TData>({
   table,
+  showRowSelection = true,
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-2 py-4">
       {/* Left side: Row selection info */}
       <div className="flex-1 text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} de{' '}
-        {table.getFilteredRowModel().rows.length} fila(s) seleccionada(s).
+        {showRowSelection ? (
+          <>
+            {table.getFilteredSelectedRowModel().rows.length} de{' '}
+            {table.getFilteredRowModel().rows.length} fila(s) seleccionada(s).
+          </>
+        ) : (
+          <span>&nbsp;</span>
+        )}
       </div>
       {/* Right side: Pagination controls */}
       <div className="flex items-center space-x-6 lg:space-x-8">

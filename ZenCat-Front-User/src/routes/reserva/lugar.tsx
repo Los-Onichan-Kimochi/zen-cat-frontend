@@ -39,26 +39,42 @@ function LocationStepComponent() {
 
   // Actualizar el contexto de reservación si se pasan parámetros desde la navegación
   useEffect(() => {
-    if (search.communityId && search.communityId !== reservationData.communityId) {
+    if (
+      search.communityId &&
+      search.communityId !== reservationData.communityId
+    ) {
       updateReservation({ communityId: search.communityId });
     }
 
     // Si se pasa un serviceId, buscar y cargar el servicio
-    if (search.serviceId && (!reservationData.service || reservationData.service.id !== search.serviceId)) {
-      servicesApi.getServiceById(search.serviceId).then(service => {
-        updateReservation({
-          service: {
-            id: service.id,
-            name: service.name,
-            description: service.description,
-            image_url: service.image_url,
-          }
+    if (
+      search.serviceId &&
+      (!reservationData.service ||
+        reservationData.service.id !== search.serviceId)
+    ) {
+      servicesApi
+        .getServiceById(search.serviceId)
+        .then((service) => {
+          updateReservation({
+            service: {
+              id: service.id,
+              name: service.name,
+              description: service.description,
+              image_url: service.image_url,
+            },
+          });
+        })
+        .catch((error) => {
+          console.error('Error loading service:', error);
         });
-      }).catch(error => {
-        console.error('Error loading service:', error);
-      });
     }
-  }, [search.communityId, search.serviceId, reservationData.communityId, reservationData.service, updateReservation]);
+  }, [
+    search.communityId,
+    search.serviceId,
+    reservationData.communityId,
+    reservationData.service,
+    updateReservation,
+  ]);
 
   // Fetch service-local associations if a service is selected
   const {
@@ -273,8 +289,9 @@ function LocationStepComponent() {
                   {filteredLocations.map((location) => (
                     <tr
                       key={location.id}
-                      className={`hover:bg-gray-50 cursor-pointer ${selectedLocationId === location.id ? 'bg-blue-50' : ''
-                        }`}
+                      className={`hover:bg-gray-50 cursor-pointer ${
+                        selectedLocationId === location.id ? 'bg-blue-50' : ''
+                      }`}
                       onClick={() => handleLocationSelect(location)}
                     >
                       <td className="border p-3 text-center">

@@ -102,7 +102,11 @@ export function UsersTable({
         isBulkDeleteEnabled={true}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+        <DataTable
+          table={table}
+          columns={columns}
+          isRefreshing={isRefreshing}
+        />
       </div>
       <DataTablePagination table={table} />
     </div>

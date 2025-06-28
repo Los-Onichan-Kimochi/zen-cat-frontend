@@ -1,63 +1,77 @@
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { ReactNode } from 'react';
+import { Navigate } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'user' | 'guest';
-  fallback?: ReactNode;
+  requireAdmin?: boolean;
+  allowedRoles?: string[];
 }
 
 export function ProtectedRoute({
   children,
-  requiredRole,
-  fallback,
+  requireAdmin = false,
+  allowedRoles = [],
 }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, isLoading, user, isAdmin, hasRole } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/login' });
-    }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
-      fallback || (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-        </div>
-      )
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Cargando...</div>
+      </div>
     );
   }
 
-  // Don't render if not authenticated (navigation will happen in useEffect)
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  // Check if admin role is required
+  if (requireAdmin && !isAdmin()) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            Sesión Expirada
-          </h1>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
           <p className="text-gray-600 mb-4">
-            Tu sesión ha expirado. Serás redirigido al login.
+            No tienes permisos de administrador para acceder a esta página.
           </p>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="text-sm text-gray-500">
+            Tu rol actual:{' '}
+            {user?.rol === 'ADMINISTRATOR'
+              ? 'Administrador'
+              : user?.rol === 'CLIENT'
+                ? 'Cliente'
+                : 'Invitado'}
+          </p>
         </div>
       </div>
     );
   }
 
-  // Check role-based access if required
-  if (requiredRole && user.role !== requiredRole) {
+  // Check if specific roles are allowed
+  if (allowedRoles.length > 0 && !allowedRoles.some((role) => hasRole(role))) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Acceso Denegado</h1>
-          <p className="text-gray-600 mt-2">
-            No tienes permisos para acceder a esta página.
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
+          <p className="text-gray-600 mb-4">
+            No tienes el rol necesario para acceder a esta página.
+          </p>
+          <p className="text-sm text-gray-500">
+            Tu rol actual:{' '}
+            {user?.rol === 'ADMINISTRATOR'
+              ? 'Administrador'
+              : user?.rol === 'CLIENT'
+                ? 'Cliente'
+                : 'Invitado'}
+          </p>
+          <p className="text-sm text-gray-500">
+            Roles permitidos: {allowedRoles.join(', ')}
           </p>
         </div>
       </div>

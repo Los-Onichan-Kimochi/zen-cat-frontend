@@ -1,7 +1,10 @@
 import { SuccessModal } from './success-modal';
 import { ErrorModal } from './error-modal';
 import { InfoModal } from './info-modal';
-import { useModalNotifications, ModalType } from '@/hooks/use-modal-notifications';
+import {
+  useModalNotifications,
+  ModalType,
+} from '@/hooks/use-modal-notifications';
 
 interface ModalNotificationsProps {
   modal: {
@@ -13,7 +16,10 @@ interface ModalNotificationsProps {
   onClose: () => void;
 }
 
-export function ModalNotifications({ modal, onClose }: ModalNotificationsProps) {
+export function ModalNotifications({
+  modal,
+  onClose,
+}: ModalNotificationsProps) {
   const { isOpen, type, title, description } = modal;
 
   switch (type) {
@@ -47,4 +53,4 @@ export function ModalNotifications({ modal, onClose }: ModalNotificationsProps) 
     default:
       return null;
   }
-} 
+}

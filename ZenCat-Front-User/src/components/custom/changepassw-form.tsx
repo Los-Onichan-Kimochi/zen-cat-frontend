@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import { useNavigate } from '@tanstack/react-router';
+import { API_CONFIG } from '@/config/api';
 
 export function ChangePasswordForm() {
   const [password, setPassword] = useState('');
@@ -35,7 +36,7 @@ export function ChangePasswordForm() {
     const email = localStorage.getItem('userEmail');
     try {
       const response = await fetch(
-        'http://localhost:8098/user/change-password/',
+        API_CONFIG.BASE_URL + '/user/change-password/',
         {
           method: 'POST',
           headers: {

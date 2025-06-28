@@ -33,7 +33,7 @@ export function CustomToast({
     // Barra de progreso
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const newProgress = prev - (100 / (duration / 100));
+        const newProgress = prev - 100 / (duration / 100);
         if (newProgress <= 0) {
           clearInterval(interval);
           handleRemove();
@@ -52,8 +52,9 @@ export function CustomToast({
   };
 
   const getToastStyles = () => {
-    const baseStyles = "relative overflow-hidden bg-white border-l-4 shadow-lg rounded-lg min-w-[320px] max-w-[420px]";
-    
+    const baseStyles =
+      'relative overflow-hidden bg-white border-l-4 shadow-lg rounded-lg min-w-[320px] max-w-[420px]';
+
     switch (type) {
       case 'success':
         return `${baseStyles} border-l-green-500`;
@@ -69,8 +70,8 @@ export function CustomToast({
   };
 
   const getIcon = () => {
-    const iconStyles = "w-5 h-5 flex-shrink-0";
-    
+    const iconStyles = 'w-5 h-5 flex-shrink-0';
+
     switch (type) {
       case 'success':
         return <CheckCircle className={`${iconStyles} text-green-600`} />;
@@ -138,4 +139,4 @@ export function CustomToast({
       </div>
     </div>
   );
-} 
+}

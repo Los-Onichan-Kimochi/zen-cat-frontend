@@ -41,37 +41,51 @@ export function base64ToImageUrl(base64String: string): string {
   try {
     // Convert base64 to binary string
     const binaryString = atob(base64String);
-    
+
     // Convert binary string to Uint8Array
     const uint8Array = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       uint8Array[i] = binaryString.charCodeAt(i);
     }
-    
+
     // Try to detect image type from first few bytes
     let mimeType = 'image/jpeg'; // default
     if (uint8Array.length >= 4) {
       // Check for PNG signature
-      if (uint8Array[0] === 0x89 && uint8Array[1] === 0x50 && uint8Array[2] === 0x4E && uint8Array[3] === 0x47) {
+      if (
+        uint8Array[0] === 0x89 &&
+        uint8Array[1] === 0x50 &&
+        uint8Array[2] === 0x4e &&
+        uint8Array[3] === 0x47
+      ) {
         mimeType = 'image/png';
       }
       // Check for JPEG signature
-      else if (uint8Array[0] === 0xFF && uint8Array[1] === 0xD8) {
+      else if (uint8Array[0] === 0xff && uint8Array[1] === 0xd8) {
         mimeType = 'image/jpeg';
       }
       // Check for GIF signature
-      else if (uint8Array[0] === 0x47 && uint8Array[1] === 0x49 && uint8Array[2] === 0x46) {
+      else if (
+        uint8Array[0] === 0x47 &&
+        uint8Array[1] === 0x49 &&
+        uint8Array[2] === 0x46
+      ) {
         mimeType = 'image/gif';
       }
       // Check for WebP signature
-      else if (uint8Array[0] === 0x52 && uint8Array[1] === 0x49 && uint8Array[2] === 0x46 && uint8Array[3] === 0x46) {
+      else if (
+        uint8Array[0] === 0x52 &&
+        uint8Array[1] === 0x49 &&
+        uint8Array[2] === 0x46 &&
+        uint8Array[3] === 0x46
+      ) {
         mimeType = 'image/webp';
       }
     }
-    
+
     const blob = new Blob([uint8Array], { type: mimeType });
     const url = URL.createObjectURL(blob);
-    
+
     return url;
   } catch (error) {
     console.error('Error al procesar Base64:', error);
@@ -102,8 +116,6 @@ export function handleImageFileWithBytes(
 
   // Convert to byte array if callback provided
   if (setImageBytes) {
-    fileToByteArray(file)
-      .then(setImageBytes)
-      .catch(console.error);
+    fileToByteArray(file).then(setImageBytes).catch(console.error);
   }
 }

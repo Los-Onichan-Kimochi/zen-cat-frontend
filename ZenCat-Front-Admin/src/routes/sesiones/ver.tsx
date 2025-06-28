@@ -49,10 +49,10 @@ function SessionDetailComponent() {
   const { id } = Route.useSearch();
   const queryClient = useQueryClient();
   const toast = useToast();
-  
+
   // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Form state for editing
   const [formData, setFormData] = useState({
     title: '',
@@ -81,10 +81,10 @@ function SessionDetailComponent() {
   // Initialize form data when session data is loaded
   useEffect(() => {
     if (session) {
-      console.log("Session data loaded:", session);
+      console.log('Session data loaded:', session);
       setFormData({
         title: session.title,
-        date: format(new Date(session.date), "yyyy-MM-dd"),
+        date: format(new Date(session.date), 'yyyy-MM-dd'),
         capacity: session.capacity,
         professional_id: session.professional_id,
         is_virtual: !session.local_id,
@@ -114,40 +114,47 @@ function SessionDetailComponent() {
   // Find professional and local details - use useMemo to update when formData changes in edit mode
   const professional = useMemo(() => {
     if (!professionals) return null;
-    return isEditing 
-      ? professionals.find(p => p.id === formData.professional_id)
-      : professionals.find(p => p.id === session?.professional_id);
-  }, [professionals, session?.professional_id, formData.professional_id, isEditing]);
+    return isEditing
+      ? professionals.find((p) => p.id === formData.professional_id)
+      : professionals.find((p) => p.id === session?.professional_id);
+  }, [
+    professionals,
+    session?.professional_id,
+    formData.professional_id,
+    isEditing,
+  ]);
 
   const local = useMemo(() => {
     if (!locals) return null;
     return isEditing
-      ? locals.find(l => l.id === formData.local_id)
-      : locals.find(l => l.id === session?.local_id);
+      ? locals.find((l) => l.id === formData.local_id)
+      : locals.find((l) => l.id === session?.local_id);
   }, [locals, session?.local_id, formData.local_id, isEditing]);
 
   // Check if session is virtual - use formData when in edit mode
-  const isVirtual = isEditing ? formData.is_virtual : (session && !session.local_id);
+  const isVirtual = isEditing
+    ? formData.is_virtual
+    : session && !session.local_id;
 
   // Update session mutation
   const updateSessionMutation = useMutation({
     mutationFn: (updatedSession: UpdateSessionPayload) => {
-      console.log("Sending update request with data:", updatedSession);
+      console.log('Sending update request with data:', updatedSession);
       return sessionsApi.updateSession(id, updatedSession);
     },
     onSuccess: (data) => {
-      console.log("Update successful. Response:", data);
+      console.log('Update successful. Response:', data);
       queryClient.invalidateQueries({ queryKey: ['session', id] });
       refetch(); // Refetch the session data to ensure we have the latest
       setIsEditing(false);
-      toast.success("Sesión actualizada", {
-        description: "Los cambios han sido guardados correctamente.",
+      toast.success('Sesión actualizada', {
+        description: 'Los cambios han sido guardados correctamente.',
       });
     },
     onError: (error) => {
-      console.error("Error updating session:", error);
-      toast.error("Error", {
-        description: "No se pudo actualizar la sesión. Inténtalo de nuevo.",
+      console.error('Error updating session:', error);
+      toast.error('Error', {
+        description: 'No se pudo actualizar la sesión. Inténtalo de nuevo.',
       });
     },
   });
@@ -167,66 +174,80 @@ function SessionDetailComponent() {
       ...formData,
       [name]: value,
     });
-    
+
     // If changing to virtual session, clear local_id
     if (name === 'is_virtual' && value === true) {
-      setFormData(prev => ({ ...prev, local_id: '' }));
+      setFormData((prev) => ({ ...prev, local_id: '' }));
     }
     // If changing to in-person session, clear session_link
     else if (name === 'is_virtual' && value === false) {
-      setFormData(prev => ({ ...prev, session_link: '' }));
+      setFormData((prev) => ({ ...prev, session_link: '' }));
     }
   };
 
   // Validate form data
   const validateForm = (): boolean => {
     if (!formData.title.trim()) {
-      toast.error("Error de validación", { description: "El título de la sesión es obligatorio." });
+      toast.error('Error de validación', {
+        description: 'El título de la sesión es obligatorio.',
+      });
       return false;
     }
-    
+
     if (!formData.date) {
-      toast.error("Error de validación", { description: "La fecha de la sesión es obligatoria." });
+      toast.error('Error de validación', {
+        description: 'La fecha de la sesión es obligatoria.',
+      });
       return false;
     }
-    
+
     if (!formData.professional_id) {
-      toast.error("Error de validación", { description: "Debe seleccionar un profesional." });
+      toast.error('Error de validación', {
+        description: 'Debe seleccionar un profesional.',
+      });
       return false;
     }
-    
+
     if (!formData.is_virtual && !formData.local_id) {
-      toast.error("Error de validación", { description: "Debe seleccionar un local para sesiones presenciales." });
+      toast.error('Error de validación', {
+        description: 'Debe seleccionar un local para sesiones presenciales.',
+      });
       return false;
     }
-    
+
     if (formData.is_virtual && !formData.session_link) {
-      toast.error("Error de validación", { description: "El enlace es obligatorio para sesiones virtuales." });
+      toast.error('Error de validación', {
+        description: 'El enlace es obligatorio para sesiones virtuales.',
+      });
       return false;
     }
-    
+
     if (!formData.start_time || !formData.end_time) {
-      toast.error("Error de validación", { description: "La hora de inicio y fin son obligatorias." });
+      toast.error('Error de validación', {
+        description: 'La hora de inicio y fin son obligatorias.',
+      });
       return false;
     }
-    
+
     if (!formData.state) {
-      toast.error("Error de validación", { description: "Debe seleccionar un estado para la sesión." });
+      toast.error('Error de validación', {
+        description: 'Debe seleccionar un estado para la sesión.',
+      });
       return false;
     }
-    
+
     return true;
   };
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       // Format the data for API
       const updatedSession: UpdateSessionPayload = {
@@ -240,30 +261,31 @@ function SessionDetailComponent() {
         end_time: `${formData.date}T${formData.end_time}:00`,
         state: formData.state as SessionState,
       };
-      
-      console.log("Form data before submission:", formData);
-      console.log("Prepared update payload:", updatedSession);
-      
+
+      console.log('Form data before submission:', formData);
+      console.log('Prepared update payload:', updatedSession);
+
       updateSessionMutation.mutate(updatedSession);
     } catch (error) {
-      console.error("Error preparing session data:", error);
-      toast.error("Error", {
-        description: "Error al preparar los datos de la sesión. Verifique los campos e intente nuevamente.",
+      console.error('Error preparing session data:', error);
+      toast.error('Error', {
+        description:
+          'Error al preparar los datos de la sesión. Verifique los campos e intente nuevamente.',
       });
     }
   };
 
   // Format date and times for display
-  const formattedDate = session?.date 
-    ? format(new Date(session.date), "yyyy-MM-dd")
+  const formattedDate = session?.date
+    ? format(new Date(session.date), 'yyyy-MM-dd')
     : '';
-  
-  const formattedStartTime = session?.start_time 
-    ? format(new Date(session.start_time), 'HH:mm') 
+
+  const formattedStartTime = session?.start_time
+    ? format(new Date(session.start_time), 'HH:mm')
     : '';
-  
-  const formattedEndTime = session?.end_time 
-    ? format(new Date(session.end_time), 'HH:mm') 
+
+  const formattedEndTime = session?.end_time
+    ? format(new Date(session.end_time), 'HH:mm')
     : '';
 
   if (isLoading) {
@@ -332,7 +354,7 @@ function SessionDetailComponent() {
                         value={isEditing ? formData.title : session.title}
                         onChange={handleInputChange}
                         disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
+                        className={!isEditing ? 'bg-gray-50' : ''}
                       />
                     </div>
 
@@ -346,7 +368,7 @@ function SessionDetailComponent() {
                           value={isEditing ? formData.date : formattedDate}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className={!isEditing ? "bg-gray-50" : ""}
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         />
                       </div>
 
@@ -356,10 +378,12 @@ function SessionDetailComponent() {
                           id="capacity"
                           name="capacity"
                           type="number"
-                          value={isEditing ? formData.capacity : session.capacity}
+                          value={
+                            isEditing ? formData.capacity : session.capacity
+                          }
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className={!isEditing ? "bg-gray-50" : ""}
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         />
                       </div>
                     </div>
@@ -375,14 +399,22 @@ function SessionDetailComponent() {
                     </h3>
                     <div>
                       <Label>Profesional</Label>
-                      <Select 
-                        disabled={!isEditing} 
-                        value={isEditing ? formData.professional_id : session.professional_id}
-                        onValueChange={(value) => handleSelectChange('professional_id', value)}
+                      <Select
+                        disabled={!isEditing}
+                        value={
+                          isEditing
+                            ? formData.professional_id
+                            : session.professional_id
+                        }
+                        onValueChange={(value) =>
+                          handleSelectChange('professional_id', value)
+                        }
                       >
-                        <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
+                        <SelectTrigger
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                        >
                           <SelectValue>
-                            {professional 
+                            {professional
                               ? `${professional.name} ${professional.first_last_name || ''}`
                               : 'Profesional no encontrado'}
                           </SelectValue>
@@ -411,12 +443,12 @@ function SessionDetailComponent() {
                         id="is_virtual"
                         name="is_virtual"
                         checked={isEditing ? formData.is_virtual : isVirtual}
-                        onCheckedChange={(checked) => handleSelectChange('is_virtual', !!checked)}
+                        onCheckedChange={(checked) =>
+                          handleSelectChange('is_virtual', !!checked)
+                        }
                         disabled={!isEditing}
                       />
-                      <Label htmlFor="is_virtual">
-                        Sesión virtual
-                      </Label>
+                      <Label htmlFor="is_virtual">Sesión virtual</Label>
                     </div>
 
                     {(isEditing ? formData.is_virtual : isVirtual) ? (
@@ -427,23 +459,35 @@ function SessionDetailComponent() {
                         <Input
                           id="session_link"
                           name="session_link"
-                          value={isEditing ? formData.session_link : (session.session_link || '')}
+                          value={
+                            isEditing
+                              ? formData.session_link
+                              : session.session_link || ''
+                          }
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className={!isEditing ? "bg-gray-50" : ""}
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         />
                       </div>
                     ) : (
                       <div>
                         <Label>Local</Label>
-                        <Select 
-                          disabled={!isEditing} 
-                          value={isEditing ? formData.local_id : (session.local_id || '')}
-                          onValueChange={(value) => handleSelectChange('local_id', value)}
+                        <Select
+                          disabled={!isEditing}
+                          value={
+                            isEditing
+                              ? formData.local_id
+                              : session.local_id || ''
+                          }
+                          onValueChange={(value) =>
+                            handleSelectChange('local_id', value)
+                          }
                         >
-                          <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
+                          <SelectTrigger
+                            className={!isEditing ? 'bg-gray-50' : ''}
+                          >
                             <SelectValue>
-                              {local 
+                              {local
                                 ? `${local.local_name} - ${local.street_name} ${local.building_number}`
                                 : 'Seleccione un local'}
                             </SelectValue>
@@ -475,10 +519,12 @@ function SessionDetailComponent() {
                           id="start_time"
                           name="start_time"
                           type="time"
-                          value={isEditing ? formData.start_time : formattedStartTime}
+                          value={
+                            isEditing ? formData.start_time : formattedStartTime
+                          }
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className={!isEditing ? "bg-gray-50" : ""}
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         />
                       </div>
 
@@ -488,10 +534,12 @@ function SessionDetailComponent() {
                           id="end_time"
                           name="end_time"
                           type="time"
-                          value={isEditing ? formData.end_time : formattedEndTime}
+                          value={
+                            isEditing ? formData.end_time : formattedEndTime
+                          }
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className={!isEditing ? "bg-gray-50" : ""}
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         />
                       </div>
                     </div>
@@ -506,34 +554,58 @@ function SessionDetailComponent() {
                       Estado de la Sesión
                     </h3>
                     {isEditing ? (
-                      <Select 
-                        value={formData.state} 
-                        onValueChange={(value) => handleSelectChange('state', value)}
+                      <Select
+                        value={formData.state}
+                        onValueChange={(value) =>
+                          handleSelectChange('state', value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un estado" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={SessionState.SCHEDULED}>Programada</SelectItem>
-                          <SelectItem value={SessionState.ONGOING}>En curso</SelectItem>
-                          <SelectItem value={SessionState.COMPLETED}>Completada</SelectItem>
-                          <SelectItem value={SessionState.CANCELLED}>Cancelada</SelectItem>
-                          <SelectItem value={SessionState.RESCHEDULED}>Reprogramada</SelectItem>
+                          <SelectItem value={SessionState.SCHEDULED}>
+                            Programada
+                          </SelectItem>
+                          <SelectItem value={SessionState.ONGOING}>
+                            En curso
+                          </SelectItem>
+                          <SelectItem value={SessionState.COMPLETED}>
+                            Completada
+                          </SelectItem>
+                          <SelectItem value={SessionState.CANCELLED}>
+                            Cancelada
+                          </SelectItem>
+                          <SelectItem value={SessionState.RESCHEDULED}>
+                            Reprogramada
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
                       <div className="flex items-center">
-                        <div className={`px-3 py-1 rounded-full text-sm font-medium border 
-                          ${session.state === SessionState.SCHEDULED ? 'bg-blue-100 text-blue-800 border-blue-200' : 
-                            session.state === SessionState.ONGOING ? 'bg-green-100 text-green-800 border-green-200' : 
-                            session.state === SessionState.COMPLETED ? 'bg-gray-100 text-gray-800 border-gray-200' : 
-                            session.state === SessionState.CANCELLED ? 'bg-red-100 text-red-800 border-red-200' : 
-                            'bg-yellow-100 text-yellow-800 border-yellow-200'}`}>
-                          {session.state === SessionState.SCHEDULED ? 'Programada' : 
-                            session.state === SessionState.ONGOING ? 'En curso' : 
-                            session.state === SessionState.COMPLETED ? 'Completada' : 
-                            session.state === SessionState.CANCELLED ? 'Cancelada' : 
-                            'Reprogramada'}
+                        <div
+                          className={`px-3 py-1 rounded-full text-sm font-medium border 
+                          ${
+                            session.state === SessionState.SCHEDULED
+                              ? 'bg-blue-100 text-blue-800 border-blue-200'
+                              : session.state === SessionState.ONGOING
+                                ? 'bg-green-100 text-green-800 border-green-200'
+                                : session.state === SessionState.COMPLETED
+                                  ? 'bg-gray-100 text-gray-800 border-gray-200'
+                                  : session.state === SessionState.CANCELLED
+                                    ? 'bg-red-100 text-red-800 border-red-200'
+                                    : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                          }`}
+                        >
+                          {session.state === SessionState.SCHEDULED
+                            ? 'Programada'
+                            : session.state === SessionState.ONGOING
+                              ? 'En curso'
+                              : session.state === SessionState.COMPLETED
+                                ? 'Completada'
+                                : session.state === SessionState.CANCELLED
+                                  ? 'Cancelada'
+                                  : 'Reprogramada'}
                         </div>
                       </div>
                     )}
@@ -567,7 +639,7 @@ function SessionDetailComponent() {
                           : session.registered_count / session.capacity >= 0.7
                             ? 'bg-yellow-400'
                             : 'bg-green-400'
-              }`}
+                      }`}
                       style={{
                         width: `${Math.min((session.registered_count / session.capacity) * 100, 100)}%`,
                       }}
@@ -577,10 +649,12 @@ function SessionDetailComponent() {
 
                 <div className="mt-6">
                   <Button
-                    onClick={() => navigate({
-                      to: '/sesiones/reservas/$sessionId',
-                      params: { sessionId: session.id },
-                    })}
+                    onClick={() =>
+                      navigate({
+                        to: '/sesiones/reservas/$sessionId',
+                        params: { sessionId: session.id },
+                      })
+                    }
                     className="w-full bg-black text-white hover:bg-gray-800"
                   >
                     Ver Reservas
@@ -667,7 +741,7 @@ function SessionDetailComponent() {
                 )}
               </CardContent>
             </Card>
-            
+
             {/* Botón de editar fuera de cualquier tarjeta */}
             {isEditing ? (
               <div className="flex space-x-2 mt-6">

@@ -18,7 +18,7 @@ export const serviceLocalApi = {
 
     const endpoint = `${API_ENDPOINTS.SERVICE_LOCALS.BASE}?${query.toString()}`;
     const data = await apiClient.get<any>(endpoint);
-    
+
     if (data && Array.isArray(data.service_locals)) {
       return data.service_locals;
     } else if (Array.isArray(data)) {
@@ -33,7 +33,7 @@ export const serviceLocalApi = {
     localId: string,
   ): Promise<ServiceLocal> => {
     return apiClient.get<ServiceLocal>(
-      API_ENDPOINTS.SERVICE_LOCALS.BY_IDS(serviceId, localId)
+      API_ENDPOINTS.SERVICE_LOCALS.BY_IDS(serviceId, localId),
     );
   },
 
@@ -43,7 +43,7 @@ export const serviceLocalApi = {
   ): Promise<ServiceLocal> => {
     return apiClient.post<ServiceLocal>(
       API_ENDPOINTS.SERVICE_LOCALS.BASE,
-      payload
+      payload,
     );
   },
 
@@ -53,7 +53,7 @@ export const serviceLocalApi = {
   }): Promise<ServiceLocal[]> => {
     const data = await apiClient.post<any>(
       API_ENDPOINTS.SERVICE_LOCALS.BULK,
-      payload
+      payload,
     );
     return data.service_locals;
   },
@@ -64,7 +64,7 @@ export const serviceLocalApi = {
     localId: string,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.SERVICE_LOCALS.BY_IDS(serviceId, localId)
+      API_ENDPOINTS.SERVICE_LOCALS.BY_IDS(serviceId, localId),
     );
   },
 
@@ -72,9 +72,6 @@ export const serviceLocalApi = {
   bulkDeleteServiceLocals: async (payload: {
     service_locals: DeleteServiceLocalRequest[];
   }): Promise<void> => {
-    return apiClient.delete<void>(
-      API_ENDPOINTS.SERVICE_LOCALS.BULK,
-      payload
-    );
+    return apiClient.delete<void>(API_ENDPOINTS.SERVICE_LOCALS.BULK, payload);
   },
 };

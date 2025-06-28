@@ -122,7 +122,7 @@ function EditLocalComponent() {
    */
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-    useEffect(() => {
+  useEffect(() => {
     if (local) {
       form.reset({
         local_name: local.local_name || '',
@@ -141,7 +141,7 @@ function EditLocalComponent() {
     mutationFn: async (
       data: UpdateLocalPayload & { imageFile?: File | null },
     ) => {
-      let imageUrl = data.imageFile
+      const imageUrl = data.imageFile
         ? URL.createObjectURL(data.imageFile)
         : local?.image_url || 'https://via.placeholder.com/150';
       return localsApi.updateLocal(id!, {
@@ -200,37 +200,37 @@ function EditLocalComponent() {
     <div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="LOCALES" subtitle="Editar el local" />
       <FormProvider {...form}>
-            <form
-              className="space-y-2"
-              onSubmit={form.handleSubmit((data) => {
-                updateMutation.mutate({ ...data, imageFile });
-              })}
+        <form
+          className="space-y-2"
+          onSubmit={form.handleSubmit((data) => {
+            updateMutation.mutate({ ...data, imageFile });
+          })}
+        >
+          <LocalForm
+            imagePreview={local.image_url}
+            handleImageChange={() => {}}
+            isReadOnly={false}
+            description="Edite los datos del local y guarde los cambios"
+          />
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate({ to: '/locales' })}
+              className="h-10 w-30 text-base"
             >
-              <LocalForm
-                imagePreview={local.image_url}
-                handleImageChange={() => {}}
-                isReadOnly={false}
-                description="Edite los datos del local y guarde los cambios"
-              />
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => navigate({ to: '/locales' })}
-                  className="h-10 w-30 text-base"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
-                  disabled={updateMutation.isPending}
-                >
-                  Guardar
-                </Button>
-              </div>
-            </form>
-          </FormProvider>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
+              disabled={updateMutation.isPending}
+            >
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

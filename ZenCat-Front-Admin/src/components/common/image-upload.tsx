@@ -56,10 +56,8 @@ export function ImageUpload({
         />
       </div>
       {errorMessage && (
-        <p className="text-red-500 text-sm mt-1">
-          {errorMessage}
-        </p>
+        <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
       )}
     </div>
   );
-} 
+}

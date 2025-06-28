@@ -78,14 +78,30 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
       // El authService ya guarda los tokens en cookies
       // Ahora guardamos el usuario en el context
+      // Mapear el rol del backend al frontend
+      const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
+        switch (backendRole) {
+          case 'ADMINISTRATOR':
+            return 'admin';
+          case 'CLIENT':
+            return 'user';
+          case 'GUEST':
+            return 'guest';
+          default:
+            return 'user'; // Default fallback
+        }
+      };
+
       const user = {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email,
-        role: 'admin' as const,
+        role: mapRole(response.user.rol),
+        rol: response.user.rol, // Mantener el rol original del backend
         password: '', // No guardamos la contraseña
         isAuthenticated: true,
-        permissions: ['admin'],
+        permissions:
+          response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
         avatar: response.user.image_url || '',
         address: '',
         district: '',
@@ -95,9 +111,12 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       console.log('LoginForm: Setting user in context:', user);
       login(user);
 
-      toast.success('Inicio de Sesión Exitoso', {
-        description: `Bienvenido, ${user.name}!`,
-      });
+      // Solo mostrar toast de éxito si el usuario es administrador
+      if (response.user.rol === 'ADMINISTRATOR') {
+        toast.success('Inicio de Sesión Exitoso', {
+          description: `Bienvenido, ${user.name}!`,
+        });
+      }
 
       onLoginSuccess?.();
       navigate({ to: '/' });
@@ -111,19 +130,27 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       if (err.message) {
         if (err.message.includes('500')) {
           errorTitle = 'Error del servidor';
-          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+          errorMessage =
+            'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
         } else if (err.message.includes('401')) {
           errorTitle = 'Credenciales incorrectas';
-          errorMessage = 'El email o contraseña son incorrectos. Por favor verifique sus datos.';
+          errorMessage =
+            'El email o contraseña son incorrectos. Por favor verifique sus datos.';
         } else if (err.message.includes('403')) {
           errorTitle = 'Acceso denegado';
-          errorMessage = 'Su cuenta no tiene permisos para acceder al panel de administración.';
-        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorMessage =
+            'Su cuenta no tiene permisos para acceder al panel de administración.';
+        } else if (
+          err.message.includes('Network') ||
+          err.message.includes('fetch')
+        ) {
           errorTitle = 'Error de conexión';
-          errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+          errorMessage =
+            'No se pudo conectar con el servidor. Verifique su conexión a internet.';
         } else if (err.message.includes('timeout')) {
           errorTitle = 'Tiempo de espera agotado';
-          errorMessage = 'La conexión tardó demasiado tiempo. Intente nuevamente.';
+          errorMessage =
+            'La conexión tardó demasiado tiempo. Intente nuevamente.';
         } else {
           errorMessage = err.message;
         }
@@ -190,4 +217,3 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     </>
   );
 }
-

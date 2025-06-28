@@ -47,14 +47,14 @@ function ComunidadesComponent() {
   const deleteCommunityMutation = useMutation({
     mutationFn: (id: string) => communitiesApi.deleteCommunity(id),
     onSuccess: (_, id) => {
-      toast.success('Comunidad Eliminada', { 
-        description: 'La comunidad ha sido eliminada exitosamente.' 
+      toast.success('Comunidad Eliminada', {
+        description: 'La comunidad ha sido eliminada exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar la comunidad.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar la comunidad.',
       });
     },
   });
@@ -89,17 +89,17 @@ function ComunidadesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchCommunities();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 

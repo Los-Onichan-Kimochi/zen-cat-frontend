@@ -62,18 +62,19 @@ export function LocalForm({
   imagePreview,
   handleImageChange,
   isReadOnly = false,
-  description = "Complete la información para agregar un nuevo local.",
+  description = 'Complete la información para agregar un nuevo local.',
   //handleSubmit,
 }: LocalFormProps) {
-  const { control, register, formState: { errors }, getValues, watch} = useFormContext();
+  const {
+    control,
+    register,
+    formState: { errors },
+    getValues,
+    watch,
+  } = useFormContext();
 
-  
-  const department = regiones.find(
-    (region) => region.name === watch('region'),
-  );
-  const provincia = provincias.find(
-    (prov) => prov.name === watch('province'),
-  );
+  const department = regiones.find((region) => region.name === watch('region'));
+  const provincia = provincias.find((prov) => prov.name === watch('province'));
   const provinciasFiltradas = provincias.filter(
     (prov) => prov.department_id === department?.id,
   );
@@ -87,183 +88,199 @@ export function LocalForm({
     <Card>
       <CardHeader>
         <CardTitle>Datos del local</CardTitle>
-        <CardDescription>
-          {description}
-        </CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-        
-          {/* Columna Izquierda */}
-          <div className="grid grid-cols-1 gap-y-6">
+        {/* Columna Izquierda */}
+        <div className="grid grid-cols-1 gap-y-6">
+          <FormField
+            control={control}
+            name="local_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del local</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={isReadOnly}
+                    placeholder="Ingrese el nombre del local"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="street_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Calle</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={isReadOnly}
+                    placeholder="Ingrese la calle"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="building_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número de edificio</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={isReadOnly}
+                    placeholder="Ingrese el número de edificio"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex gap-2">
             <FormField
               control={control}
-              name="local_name"
+              name="region"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del local</FormLabel>
+                <FormItem className="flex-1">
+                  <FormLabel>Región</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isReadOnly} placeholder="Ingrese el nombre del local" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="street_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Calle</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled={isReadOnly} placeholder="Ingrese la calle" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="building_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Número de edificio</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled={isReadOnly} placeholder="Ingrese el número de edificio" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex gap-2">
-              <FormField
-                control={control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Región</FormLabel>
-                    <FormControl>
-                      <Select
-                        disabled={isReadOnly}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        //onValueChange={(value) => {
-                        //  field.onChange(value);
-                        //  setValue('province', '');
-                        //  setValue('district', '');
-                        //}}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione región" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {regiones.map((region) => (
-                            <SelectItem key={region.name} value={region.name}>
-                              {region.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name="province"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Provincia</FormLabel>
-                    <FormControl>
-                      <Select
-                        disabled={isReadOnly || !getValues('region')}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        //onValueChange={(value) => {
-                        //  field.onChange(value);
-                        //  setValue('district', '');
-                        //}}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione provincia" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {provinciasFiltradas.map((prov) => (
-                            <SelectItem key={prov.name} value={prov.name}>
-                              {prov.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name="district"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Distrito</FormLabel>
-                    <FormControl>
-                      <Select
-                        disabled={isReadOnly || !getValues('province')}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione distrito" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {distritosFiltrados.map((dist) => (
-                            <SelectItem key={dist.name} value={dist.name}>
-                              {dist.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={control}
-              name="reference"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Referencia</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled={isReadOnly} placeholder="Ingrese la referencia" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="capacity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Capacidad</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
+                    <Select
                       disabled={isReadOnly}
-                      placeholder="Ingrese la capacidad"
-                      onChange={e => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                    />
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      //onValueChange={(value) => {
+                      //  field.onChange(value);
+                      //  setValue('province', '');
+                      //  setValue('district', '');
+                      //}}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione región" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regiones.map((region) => (
+                          <SelectItem key={region.name} value={region.name}>
+                            {region.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="province"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Provincia</FormLabel>
+                  <FormControl>
+                    <Select
+                      disabled={isReadOnly || !getValues('region')}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      //onValueChange={(value) => {
+                      //  field.onChange(value);
+                      //  setValue('district', '');
+                      //}}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione provincia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {provinciasFiltradas.map((prov) => (
+                          <SelectItem key={prov.name} value={prov.name}>
+                            {prov.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="district"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Distrito</FormLabel>
+                  <FormControl>
+                    <Select
+                      disabled={isReadOnly || !getValues('province')}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione distrito" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {distritosFiltrados.map((dist) => (
+                          <SelectItem key={dist.name} value={dist.name}>
+                            {dist.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-        
- 
+          <FormField
+            control={control}
+            name="reference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Referencia</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={isReadOnly}
+                    placeholder="Ingrese la referencia"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="capacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Capacidad</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="number"
+                    disabled={isReadOnly}
+                    placeholder="Ingrese la capacidad"
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === '' ? '' : Number(e.target.value),
+                      )
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Columna Derecha */}
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col">

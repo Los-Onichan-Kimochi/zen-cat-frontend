@@ -70,13 +70,13 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
           }
           onCheckedChange={(value) => {
             if (value) {
-                if (table.getFilteredSelectedRowModel().rows.length > 0) {
-                    table.toggleAllPageRowsSelected(false);
-                } else {
-                    table.toggleAllPageRowsSelected(true);
-                }
-            } else {
+              if (table.getFilteredSelectedRowModel().rows.length > 0) {
                 table.toggleAllPageRowsSelected(false);
+              } else {
+                table.toggleAllPageRowsSelected(true);
+              }
+            } else {
+              table.toggleAllPageRowsSelected(false);
             }
           }}
           aria-label="Seleccionar todo"
@@ -87,10 +87,10 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => {
             if (value) {
-                table.resetRowSelection();
-                row.toggleSelected(true);
+              table.resetRowSelection();
+              row.toggleSelected(true);
             } else {
-                row.toggleSelected(false);
+              row.toggleSelected(false);
             }
           }}
           aria-label="Seleccionar fila"
@@ -126,7 +126,8 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
         const endTime = new Date(reservationTime.getTime() + 60 * 60 * 1000);
         return (
           <div className="text-sm">
-            {format(reservationTime, 'HH:mm', { locale: es })} h - {format(endTime, 'HH:mm', { locale: es })} h
+            {format(reservationTime, 'HH:mm', { locale: es })} h -{' '}
+            {format(endTime, 'HH:mm', { locale: es })} h
           </div>
         );
       },
@@ -137,9 +138,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       header: 'Lugar',
       cell: ({ row }) => {
         const place = row.original.place;
-        return (
-          <div className="text-sm">{place || 'N/A'}</div>
-        );
+        return <div className="text-sm">{place || 'N/A'}</div>;
       },
       enableSorting: false,
     },
@@ -148,9 +147,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       header: 'Profesor',
       cell: ({ row }) => {
         const teacher = row.original.teacher;
-        return (
-          <div className="text-sm">{teacher || 'N/A'}</div>
-        );
+        return <div className="text-sm">{teacher || 'N/A'}</div>;
       },
       enableSorting: false,
     },
@@ -191,19 +188,22 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: (updater) => {
-        const newSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
-        const selectedKeys = Object.keys(newSelection);
+      const newSelection =
+        typeof updater === 'function' ? updater(rowSelection) : updater;
+      const selectedKeys = Object.keys(newSelection);
 
-        if (selectedKeys.length > 1) {
-            const latestSelectedKey = selectedKeys.find(key => !rowSelection[key]);
-            if (latestSelectedKey) {
-                setRowSelection({ [latestSelectedKey]: true });
-            } else {
-                setRowSelection({});
-            }
+      if (selectedKeys.length > 1) {
+        const latestSelectedKey = selectedKeys.find(
+          (key) => !rowSelection[key],
+        );
+        if (latestSelectedKey) {
+          setRowSelection({ [latestSelectedKey]: true });
         } else {
-            setRowSelection(newSelection);
+          setRowSelection({});
         }
+      } else {
+        setRowSelection(newSelection);
+      }
     },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -223,7 +223,9 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       {/* Contenedor principal para la paginación y el botón "Ver más" */}
       <div className="flex flex-col items-center justify-center mt-6">
         {/* Controles de paginación centrados */}
-        <div className="flex items-center space-x-2 mb-4"> {/* Añadido mb-4 para separar del botón Ver más */}
+        <div className="flex items-center space-x-2 mb-4">
+          {' '}
+          {/* Añadido mb-4 para separar del botón Ver más */}
           <Button
             variant="ghost"
             onClick={() => table.previousPage()}
@@ -238,7 +240,11 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
                 key={i}
                 size="sm"
                 onClick={() => table.setPageIndex(i)}
-                className={table.getState().pagination.pageIndex === i ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
+                className={
+                  table.getState().pagination.pageIndex === i
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }
               >
                 {i + 1}
               </Button>
@@ -255,7 +261,9 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
         </div>
 
         {/* Botón "Ver más" - Se activa si solo una fila está seleccionada */}
-        <div className="flex justify-center"> {/* Este div ya estaba bien, mantiene el botón centrado */}
+        <div className="flex justify-center">
+          {' '}
+          {/* Este div ya estaba bien, mantiene el botón centrado */}
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
             disabled={table.getFilteredSelectedRowModel().rows.length !== 1}

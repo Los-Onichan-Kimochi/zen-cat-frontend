@@ -86,7 +86,7 @@ export function getCommunityColumns({
         return (
           <div className="flex items-center justify-center space-x-2">
             <Button
-              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-black hover:text-white hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(communiy);
@@ -96,7 +96,7 @@ export function getCommunityColumns({
             </Button>
 
             <Button
-              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
+              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-black hover:text-white hover:border-black hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(communiy);

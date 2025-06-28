@@ -2,13 +2,14 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user' | 'guest';
+  rol: 'admin' | 'user' | 'guest' | 'ADMINISTRATOR' | 'CLIENT' | 'GUEST';
   password: string;
   isAuthenticated: boolean;
   permissions?: string[];
   avatar?: string;
   address?: string;
   district?: string;
+  city?: string;
   phone?: string;
   // Onboarding data fields
   onboarding?: {
@@ -30,7 +31,7 @@ export interface User {
 export interface CreateUserPayload {
   email: string;
   name: string;
-  role: 'admin' | 'user' | 'guest';
+  rol: 'admin' | 'user' | 'guest' | 'ADMINISTRATOR' | 'CLIENT' | 'GUEST';
   password: string;
   permissions?: string[];
   avatar?: string;

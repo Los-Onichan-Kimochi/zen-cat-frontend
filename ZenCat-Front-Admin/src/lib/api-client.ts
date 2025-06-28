@@ -29,7 +29,7 @@ class ApiClient {
     // For development, set access token to expire in 2 hours (0.083 days)
     // The expires_in from backend is in nanoseconds (Go time.Duration), not seconds
     const accessTokenExpiry = 2 / 24; // 2 hours in days
-    
+
     Cookies.set('access_token', tokens.access_token, {
       expires: accessTokenExpiry,
       secure: window.location.protocol === 'https:',
@@ -113,6 +113,14 @@ class ApiClient {
         window.location.href = '/login';
         throw new Error('Authentication failed');
       }
+    }
+
+    // Handle insufficient privileges (403 Forbidden)
+    if (response.status === 403) {
+      // User doesn't have the required role for this action
+      throw new Error(
+        'No tienes permisos suficientes para realizar esta acción',
+      );
     }
 
     if (!response.ok) {

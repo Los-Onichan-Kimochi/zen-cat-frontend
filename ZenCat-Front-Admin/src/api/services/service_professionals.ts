@@ -19,7 +19,7 @@ export const serviceProfessionalApi = {
 
     const endpoint = `${API_ENDPOINTS.SERVICE_PROFESSIONALS.BASE}?${query.toString()}`;
     const data = await apiClient.get<any>(endpoint);
-    
+
     if (data && Array.isArray(data.service_professionals)) {
       return data.service_professionals;
     } else if (Array.isArray(data)) {
@@ -34,7 +34,7 @@ export const serviceProfessionalApi = {
     professionalId: string,
   ): Promise<ServiceProfessional> => {
     return apiClient.get<ServiceProfessional>(
-      API_ENDPOINTS.SERVICE_PROFESSIONALS.BY_IDS(serviceId, professionalId)
+      API_ENDPOINTS.SERVICE_PROFESSIONALS.BY_IDS(serviceId, professionalId),
     );
   },
 
@@ -44,7 +44,7 @@ export const serviceProfessionalApi = {
   ): Promise<ServiceProfessional> => {
     return apiClient.post<ServiceProfessional>(
       API_ENDPOINTS.SERVICE_PROFESSIONALS.BASE,
-      payload
+      payload,
     );
   },
 
@@ -54,7 +54,7 @@ export const serviceProfessionalApi = {
   }): Promise<ServiceProfessional[]> => {
     const data = await apiClient.post<any>(
       API_ENDPOINTS.SERVICE_PROFESSIONALS.BULK,
-      payload
+      payload,
     );
     return data.service_professionals;
   },
@@ -65,7 +65,7 @@ export const serviceProfessionalApi = {
     professionalId: string,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.SERVICE_PROFESSIONALS.BY_IDS(serviceId, professionalId)
+      API_ENDPOINTS.SERVICE_PROFESSIONALS.BY_IDS(serviceId, professionalId),
     );
   },
 
@@ -75,7 +75,7 @@ export const serviceProfessionalApi = {
   }): Promise<void> => {
     return apiClient.delete<void>(
       API_ENDPOINTS.SERVICE_PROFESSIONALS.BULK,
-      payload
+      payload,
     );
   },
 };

@@ -23,7 +23,6 @@ import {
 
 import { Local, CreateLocalPayload } from '@/types/local';
 
-
 import { Plus, ChevronLeft } from 'lucide-react';
 import { Form, FormProvider, useForm } from 'react-hook-form';
 import '../../index.css';
@@ -35,12 +34,7 @@ export const Route = createFileRoute('/locales/agregar')({
 function AddLocalPageComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const {
-      form,
-      imageFile,
-      imagePreview,
-      handleImageChange,
-  } = useLocalForm();
+  const { form, imageFile, imagePreview, handleImageChange } = useLocalForm();
   //const form = useForm<LocalFormData>({ ... });
   const createLocalMutation = useMutation({
     mutationFn: async (data: CreateLocalPayload) => localsApi.createLocal(data),
@@ -59,12 +53,12 @@ function AddLocalPageComponent() {
   });
 
   const onSubmit = async (data: any) => {
-    let imageUrl = 'https://via.placeholder.com/150';
+    const imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.info('Subida simulada de imagen completada');
     }
-    try{
+    try {
       const newLocal = await createLocalMutation.mutateAsync({
         local_name: data.local_name,
         street_name: data.street_name,
@@ -75,11 +69,11 @@ function AddLocalPageComponent() {
         reference: data.reference,
         capacity: data.capacity,
         image_url: data.image_url,
-      })
+      });
       toast.success('Local creado correctamente');
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       navigate({ to: '/locales' });
-    }catch(err: any){
+    } catch (err: any) {
       toast.error('Error al crear local', { description: err.message });
     }
     //createLocalMutation.mutate(payload);
@@ -99,29 +93,29 @@ function AddLocalPageComponent() {
       </div>
       <Card className="mt-6 flex-grow">
         <FormProvider {...form}>
-           <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <LocalForm
               imagePreview={imagePreview}
               handleImageChange={handleImageChange}
             />
             <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-             <Button
-               variant="outline"
-               type="button"
-               onClick={() => navigate({ to: '/locales' })}
-               className="h-10 w-30 text-base"
-             >
-               Cancelar
-             </Button>
-             <Button
-               type="submit"
-               disabled={createLocalMutation.isPending}
-               className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
-             >
-               Guardar
-             </Button>
-           </div>
-         </form>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => navigate({ to: '/locales' })}
+                className="h-10 w-30 text-base"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={createLocalMutation.isPending}
+                className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+              >
+                Guardar
+              </Button>
+            </div>
+          </form>
         </FormProvider>
       </Card>
     </div>

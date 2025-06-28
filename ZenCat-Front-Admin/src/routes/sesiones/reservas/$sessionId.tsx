@@ -8,7 +8,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
-import { usuariosApi } from '@/api/usuarios/usuarios';
+import { userService } from '@/api/usuarios/usuarios';
 import { Reservation } from '@/types/reservation';
 import { User } from '@/types/user';
 
@@ -55,10 +55,14 @@ function SessionReservationsComponent() {
   });
 
   // Fetch users data
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery<User[]>({
+  const { data: usersResponse, isLoading: isLoadingUsers } = useQuery<{
+    users: User[];
+  }>({
     queryKey: ['usuarios'],
-    queryFn: () => usuariosApi.getUsuarios(),
+    queryFn: () => userService.getAll(),
   });
+
+  const usersData = usersResponse?.users || [];
 
   // Fetch reservations for this session
   const {
@@ -69,9 +73,12 @@ function SessionReservationsComponent() {
     queryKey: ['reservations', 'session', sessionId],
     queryFn: async () => {
       try {
-        const response = await reservationsApi.getReservationsBySession(sessionId);
+        const response =
+          await reservationsApi.getReservationsBySession(sessionId);
         return {
-          reservations: Array.isArray(response) ? response : response?.reservations || []
+          reservations: Array.isArray(response)
+            ? response
+            : response?.reservations || [],
         };
       } catch (error) {
         console.error('Error fetching reservations:', error);
@@ -115,7 +122,7 @@ function SessionReservationsComponent() {
     const user = (usersData || []).find((u) => u.id === reservation.user_id);
     const enrichedReservation = {
       ...reservation,
-      user_name: user ? user.name : 'Usuario desconocido'
+      user_name: user ? user.name : 'Usuario desconocido',
     };
     setSelectedReservation(enrichedReservation);
     setIsViewModalOpen(true);
@@ -126,7 +133,7 @@ function SessionReservationsComponent() {
     const user = (usersData || []).find((u) => u.id === reservation.user_id);
     const enrichedReservation = {
       ...reservation,
-      user_name: user ? user.name : 'Usuario desconocido'
+      user_name: user ? user.name : 'Usuario desconocido',
     };
     setSelectedReservation(enrichedReservation);
     setIsEditModalOpen(true);
@@ -174,18 +181,18 @@ function SessionReservationsComponent() {
     );
   }
 
-  const reservations = Array.isArray(reservationsData?.reservations) 
-    ? reservationsData.reservations 
+  const reservations = Array.isArray(reservationsData?.reservations)
+    ? reservationsData.reservations
     : [];
   const session = sessionData;
   const users = usersData || [];
 
   // Enriquecer los datos de reserva con la información del usuario
-  const enrichedReservations = reservations.map(reservation => {
+  const enrichedReservations = reservations.map((reservation) => {
     const user = (usersData || []).find((u) => u.id === reservation.user_id);
     return {
       ...reservation,
-      user_name: user ? user.name : 'Usuario desconocido'
+      user_name: user ? user.name : 'Usuario desconocido',
     };
   });
 
@@ -193,12 +200,12 @@ function SessionReservationsComponent() {
     raw: reservationsData,
     processed: reservations,
     enriched: enrichedReservations,
-    error: reservationsError
+    error: reservationsError,
   });
 
   console.log('Users Data:', {
     count: users.length,
-    users
+    users,
   });
 
   return (

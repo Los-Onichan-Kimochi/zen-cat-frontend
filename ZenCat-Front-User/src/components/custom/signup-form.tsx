@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import { useNavigate } from '@tanstack/react-router';
+import { API_CONFIG } from '@/config/api';
 
 export function SignupForm() {
   const [name, setName] = useState('');
@@ -37,7 +38,7 @@ export function SignupForm() {
       lastNameParts.length > 1 ? lastNameParts.slice(1).join(' ') : null;
 
     try {
-      const response = await fetch('http://localhost:8098/register/', {
+      const response = await fetch(API_CONFIG.BASE_URL + '/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

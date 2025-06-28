@@ -63,28 +63,25 @@ function ProfesionalesComponent() {
     queryFn: professionalsApi.getProfessionals,
   });
 
-  const { mutate: deleteProfessional } = useMutation<
-    void,
-    Error,
-    string
-  >({
+  const { mutate: deleteProfessional } = useMutation<void, Error, string>({
     mutationFn: (id) => professionalsApi.deleteProfessional(id),
     onSuccess: () => {
       toast.success('Profesional Eliminado', {
-        description: 'El profesional ha sido eliminado exitosamente.'
+        description: 'El profesional ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['professionals'] });
     },
     onError: (err) => {
       toast.error('Error al Eliminar', {
-        description: err.message || 'No se pudo eliminar el profesional.'
+        description: err.message || 'No se pudo eliminar el profesional.',
       });
     },
   });
 
   const { handleBulkDelete, isBulkDeleting } = useBulkDelete<Professional>({
     queryKey: ['professionals'],
-    deleteFn: (ids: string[]) => professionalsApi.bulkDeleteProfessionals({ professionals: ids }),
+    deleteFn: (ids: string[]) =>
+      professionalsApi.bulkDeleteProfessionals({ professionals: ids }),
     entityName: 'profesional',
     entityNamePlural: 'profesionales',
     getId: (professional) => professional.id,
@@ -154,7 +151,7 @@ function ProfesionalesComponent() {
     const remainingTime = Math.max(0, 1000 - elapsedTime);
 
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
 
     return professionalsResult;

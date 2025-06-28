@@ -22,7 +22,7 @@ import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { Form, FormProvider, useForm } from 'react-hook-form';
-import { MembershipPlanForm } from '@/components/membership-plan/membership-plan-basic-form'; 
+import { MembershipPlanForm } from '@/components/membership-plan/membership-plan-basic-form';
 import { toast } from 'sonner';
 
 const membershipPlanSearchSchema = z.object({
@@ -35,12 +35,18 @@ export const Route = createFileRoute('/planes-membresia/ver')({
 export function SeeMembershipPlanPageComponent() {
   const navigate = useNavigate();
   const id =
-    typeof window !== 'undefined' ? localStorage.getItem('currentMembershipPlan') : null;
+    typeof window !== 'undefined'
+      ? localStorage.getItem('currentMembershipPlan')
+      : null;
   const queryClient = useQueryClient();
   if (!id) {
     navigate({ to: '/planes-membresia' });
   }
-  const { data: membershipPlan, isLoading, error } = useQuery({
+  const {
+    data: membershipPlan,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['membershipPlan', id],
     queryFn: () => membershipPlansApi.getMembershipPlanById(id!),
     enabled: !!id,
@@ -97,7 +103,10 @@ export function SeeMembershipPlanPageComponent() {
         </Button>
       </div>
       <FormProvider {...form}>
-        <MembershipPlanForm mode="view" description='Detalles del local seleccionado'/>
+        <MembershipPlanForm
+          mode="view"
+          description="Detalles del local seleccionado"
+        />
       </FormProvider>
       <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
         <Button
@@ -111,16 +120,14 @@ export function SeeMembershipPlanPageComponent() {
         <Button
           type="button"
           onClick={() => {
-                  
-            localStorage.setItem('currentMembershipPlan', id? id : '');
-             navigate({ to: `/planes-membresia/editar`})
+            localStorage.setItem('currentMembershipPlan', id ? id : '');
+            navigate({ to: `/planes-membresia/editar` });
           }}
           className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
         >
-
           Editar
         </Button>
       </div>
     </div>
-  )
+  );
 }

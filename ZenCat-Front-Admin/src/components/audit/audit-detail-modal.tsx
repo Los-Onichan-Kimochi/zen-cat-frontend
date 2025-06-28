@@ -39,17 +39,36 @@ export function AuditDetailModal({
 }: AuditDetailModalProps) {
   if (!auditLog) return null;
 
-  const actionConfig = ACTION_CONFIGS[auditLog.action] || { 
-    label: auditLog.action, 
-    className: 'bg-gray-100 text-gray-800' 
+  const actionConfig = ACTION_CONFIGS[auditLog.action] || {
+    label: auditLog.action,
+    className: 'bg-gray-100 text-gray-800',
   };
-  const entityConfig = ENTITY_CONFIGS[auditLog.entityType] || { 
-    label: auditLog.entityType, 
-    className: 'bg-gray-100 text-gray-800' 
+  const entityConfig = ENTITY_CONFIGS[auditLog.entityType] || {
+    label: auditLog.entityType,
+    className: 'bg-gray-100 text-gray-800',
   };
 
   const formatDate = (dateString: string) => {
+    // Validate if dateString is valid before creating Date object
+    if (!dateString || dateString === '') {
+      return {
+        date: 'Fecha no disponible',
+        time: 'Hora no disponible',
+        full: 'Fecha y hora no disponibles',
+      };
+    }
+
     const date = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return {
+        date: 'Fecha inválida',
+        time: 'Hora inválida',
+        full: 'Fecha y hora inválidas',
+      };
+    }
+
     return {
       date: format(date, 'dd/MM/yyyy', { locale: es }),
       time: format(date, 'HH:mm:ss', { locale: es }),
@@ -93,7 +112,9 @@ export function AuditDetailModal({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-full ${auditLog.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <div
+                    className={`p-2 rounded-full ${auditLog.success ? 'bg-green-100' : 'bg-red-100'}`}
+                  >
                     {auditLog.success ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
@@ -102,7 +123,9 @@ export function AuditDetailModal({
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Estado</p>
-                    <p className={`font-medium ${auditLog.success ? 'text-green-600' : 'text-red-600'}`}>
+                    <p
+                      className={`font-medium ${auditLog.success ? 'text-green-600' : 'text-red-600'}`}
+                    >
                       {auditLog.success ? 'Exitoso' : 'Con errores'}
                     </p>
                   </div>
@@ -129,7 +152,9 @@ export function AuditDetailModal({
                         {entityConfig.label}
                       </Badge>
                       {auditLog.entityName && (
-                        <span className="text-sm text-gray-600">({auditLog.entityName})</span>
+                        <span className="text-sm text-gray-600">
+                          ({auditLog.entityName})
+                        </span>
                       )}
                     </div>
                   </div>
@@ -168,15 +193,17 @@ export function AuditDetailModal({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{auditLog.userEmail || 'Sistema'}</p>
+                      <p className="font-medium">
+                        {auditLog.userEmail || 'Sistema'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Rol</p>
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`${
-                          auditLog.userRole === 'admin' 
-                            ? 'bg-red-50 text-red-700 border-red-200' 
+                          auditLog.userRole === 'admin'
+                            ? 'bg-red-50 text-red-700 border-red-200'
                             : 'bg-gray-50 text-gray-700 border-gray-200'
                         }`}
                       >
@@ -209,7 +236,9 @@ export function AuditDetailModal({
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Dirección IP</p>
-                    <p className="font-mono text-sm">{auditLog.ipAddress || 'No disponible'}</p>
+                    <p className="font-mono text-sm">
+                      {auditLog.ipAddress || 'No disponible'}
+                    </p>
                   </div>
                 </div>
 
@@ -243,7 +272,9 @@ export function AuditDetailModal({
                       <Info className="h-4 w-4 text-orange-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-500">Información Adicional</p>
+                      <p className="text-sm text-gray-500">
+                        Información Adicional
+                      </p>
                       <p className="text-sm">{auditLog.additionalInfo}</p>
                     </div>
                   </div>
@@ -263,7 +294,9 @@ export function AuditDetailModal({
               </CardHeader>
               <CardContent>
                 <div className="bg-red-100 p-4 rounded-lg">
-                  <p className="text-red-800 font-mono text-sm">{auditLog.errorMessage}</p>
+                  <p className="text-red-800 font-mono text-sm">
+                    {auditLog.errorMessage}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -281,7 +314,9 @@ export function AuditDetailModal({
               <CardContent className="space-y-4">
                 {auditLog.oldValues && (
                   <div>
-                    <h4 className="font-medium text-gray-700 mb-2">Valores Anteriores:</h4>
+                    <h4 className="font-medium text-gray-700 mb-2">
+                      Valores Anteriores:
+                    </h4>
                     <div className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-sm text-gray-800 whitespace-pre-wrap">
                         {formatJsonData(auditLog.oldValues)}
@@ -292,7 +327,9 @@ export function AuditDetailModal({
 
                 {auditLog.newValues && (
                   <div>
-                    <h4 className="font-medium text-gray-700 mb-2">Valores Nuevos:</h4>
+                    <h4 className="font-medium text-gray-700 mb-2">
+                      Valores Nuevos:
+                    </h4>
                     <div className="bg-green-100 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-sm text-gray-800 whitespace-pre-wrap">
                         {formatJsonData(auditLog.newValues)}
@@ -307,4 +344,4 @@ export function AuditDetailModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

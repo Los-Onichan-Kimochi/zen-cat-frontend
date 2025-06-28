@@ -24,16 +24,23 @@ export function useBulkDelete<T>({
   const { mutate: bulkDelete, isPending: isBulkDeleting } = useMutation({
     mutationFn: (items: T[]) => deleteFn(items.map(getId)),
     onSuccess: (_, items) => {
-      toast.success(`${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)} Eliminados`, {
-        description: `Los ${entityNamePlural} seleccionados han sido eliminados exitosamente.`,
-      });
+      toast.success(
+        `${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)} Eliminados`,
+        {
+          description: `Los ${entityNamePlural} seleccionados han sido eliminados exitosamente.`,
+        },
+      );
       queryClient.invalidateQueries({ queryKey });
       onSuccess?.(items);
     },
     onError: (err: any) => {
-      toast.error(`Error al Eliminar ${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)}`, {
-        description: err.message || `No se pudieron eliminar los ${entityNamePlural}.`,
-      });
+      toast.error(
+        `Error al Eliminar ${entityNamePlural.charAt(0).toUpperCase() + entityNamePlural.slice(1)}`,
+        {
+          description:
+            err.message || `No se pudieron eliminar los ${entityNamePlural}.`,
+        },
+      );
     },
   });
 
