@@ -79,14 +79,14 @@ function LocalesComponent() {
   const deleteLocalMutation = useMutation({
     mutationFn: (id: string) => localsApi.deleteLocal(id),
     onSuccess: async (_, id) => {
-      toast.success('Local Eliminado', { 
-        description: 'El local ha sido eliminado exitosamente.' 
+      toast.success('Local Eliminado', {
+        description: 'El local ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar el local.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el local.',
       });
     },
   });
@@ -161,17 +161,17 @@ function LocalesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchLocals();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 
@@ -180,7 +180,7 @@ function LocalesComponent() {
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
-      
+
       {/* Statistics Section */}
       <div className="flex-shrink-0">
         <div className="mb-6 flex items-center gap-4">
@@ -203,7 +203,7 @@ function LocalesComponent() {
             isLoading={isFetchingLocals}
           />
         </div>
-        
+
         <ViewToolbar
           onAddClick={() => navigate({ to: '/locales/agregar' })}
           onBulkUploadClick={() => setShowUploadDialog(true)}

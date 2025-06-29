@@ -56,71 +56,74 @@ export const AuditTable = memo(function AuditTable({
     return getAuditColumns({ onView });
   }, [onView]);
 
-  const globalFilterFn = useCallback((row: any, columnIds: string[], filterValue: string) => {
-    if (!filterValue) return true;
-    
-    const searchValue = filterValue.toLowerCase();
-    const rowData = row.original;
+  const globalFilterFn = useCallback(
+    (row: any, columnIds: string[], filterValue: string) => {
+      if (!filterValue) return true;
 
-    const searchableValues = [
-      rowData.userEmail,
-      rowData.ipAddress,
-      rowData.userAgent,
-      rowData.entityName,
-      rowData.errorMessage,
-      
-      'inicio de sesión',
-      'crear registro',
-      'actualizar datos',
-      'eliminar registro',
-      'creación masiva',
-      'eliminación masiva',
-      'registro de usuario',
-      'suscripción',
-      'cancelar suscripción',
-      'nueva reserva',
-      'cancelar reserva',
-      'actualizar perfil',
-      
-      'usuario del sistema',
-      'comunidad',
-      'profesional',
-      'local',
-      'sede',
-      'plan de membresía',
-      'servicio',
-      'sesión',
-      'clase',
-      'reserva',
-      'membresía',
-      'proceso de registro',
-      'plan de comunidad',
-      'servicio comunitario',
-      'asignación servicio-local',
-      'asignación servicio-profesional'
-    ].filter(Boolean);
+      const searchValue = filterValue.toLowerCase();
+      const rowData = row.original;
 
-    for (const value of searchableValues) {
-      if (value && value.toString().toLowerCase().includes(searchValue)) {
-        return true;
-      }
-    }
+      const searchableValues = [
+        rowData.userEmail,
+        rowData.ipAddress,
+        rowData.userAgent,
+        rowData.entityName,
+        rowData.errorMessage,
 
-    if (rowData.createdAt) {
-      try {
-        const date = new Date(rowData.createdAt);
-        const dateStr = date.toLocaleDateString('es-ES');
-        const timeStr = date.toLocaleTimeString('es-ES');
-        if (dateStr.includes(searchValue) || timeStr.includes(searchValue)) {
+        'inicio de sesión',
+        'crear registro',
+        'actualizar datos',
+        'eliminar registro',
+        'creación masiva',
+        'eliminación masiva',
+        'registro de usuario',
+        'suscripción',
+        'cancelar suscripción',
+        'nueva reserva',
+        'cancelar reserva',
+        'actualizar perfil',
+
+        'usuario del sistema',
+        'comunidad',
+        'profesional',
+        'local',
+        'sede',
+        'plan de membresía',
+        'servicio',
+        'sesión',
+        'clase',
+        'reserva',
+        'membresía',
+        'proceso de registro',
+        'plan de comunidad',
+        'servicio comunitario',
+        'asignación servicio-local',
+        'asignación servicio-profesional',
+      ].filter(Boolean);
+
+      for (const value of searchableValues) {
+        if (value && value.toString().toLowerCase().includes(searchValue)) {
           return true;
         }
-      } catch (error) {
-        // Ignorar errores de fecha
       }
-    }
 
-    return false;
-  }, []);
+      if (rowData.createdAt) {
+        try {
+          const date = new Date(rowData.createdAt);
+          const dateStr = date.toLocaleDateString('es-ES');
+          const timeStr = date.toLocaleTimeString('es-ES');
+          if (dateStr.includes(searchValue) || timeStr.includes(searchValue)) {
+            return true;
+          }
+        } catch (error) {
+          // Ignorar errores de fecha
+        }
+      }
+
+      return false;
+    },
+    [],
+  );
 
   const table = useReactTable({
     data,
@@ -172,9 +175,13 @@ export const AuditTable = memo(function AuditTable({
         exportFileName="audit-logs"
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
-        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+        <DataTable
+          table={table}
+          columns={columns}
+          isRefreshing={isRefreshing}
+        />
       </div>
       <DataTablePagination table={table} showRowSelection={false} />
     </div>
   );
-}); 
+});

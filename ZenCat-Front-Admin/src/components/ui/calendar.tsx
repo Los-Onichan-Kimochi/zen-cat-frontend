@@ -16,8 +16,18 @@ export interface CalendarProps {
 }
 
 const MONTHS_ES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
 ];
 
 const DAYS_ES = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
@@ -40,14 +50,14 @@ function Calendar({
   // Obtener primer día del mes (0 = domingo, 1 = lunes, etc.)
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
-  
+
   // Ajustar para que lunes sea 0 (en lugar de domingo)
   const startDay = (firstDayOfMonth.getDay() + 6) % 7;
   const daysInMonth = lastDayOfMonth.getDate();
 
   // Generar días del calendario
   const calendarDays = [];
-  
+
   // Días del mes anterior
   const prevMonth = new Date(year, month - 1, 0);
   for (let i = startDay - 1; i >= 0; i--) {
@@ -64,7 +74,7 @@ function Calendar({
   const today = new Date();
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
-    const isToday = 
+    const isToday =
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear();
@@ -122,11 +132,11 @@ function Calendar({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        
+
         <div className="text-sm font-medium">
           {MONTHS_ES[month]} {year}
         </div>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -162,10 +172,13 @@ function Calendar({
               size="sm"
               className={cn(
                 'h-9 w-9 p-0 font-normal',
-                !calendarDay.isCurrentMonth && 'text-muted-foreground opacity-50',
+                !calendarDay.isCurrentMonth &&
+                  'text-muted-foreground opacity-50',
                 calendarDay.isToday && 'bg-accent text-accent-foreground',
-                isSelectedDay && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
-                isDisabled && 'text-muted-foreground opacity-50 cursor-not-allowed'
+                isSelectedDay &&
+                  'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
+                isDisabled &&
+                  'text-muted-foreground opacity-50 cursor-not-allowed',
               )}
               onClick={() => !isDisabled && handleDayClick(calendarDay.date)}
               disabled={isDisabled}

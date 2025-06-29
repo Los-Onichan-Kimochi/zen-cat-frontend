@@ -72,7 +72,7 @@ export const reservationsApi = {
       API_ENDPOINTS.RESERVATIONS.BY_ID(reservationId),
     );
   },
-    
+
   // Bulk delete reservations
   bulkDeleteReservations: async (
     payload: BulkDeleteReservationPayload,

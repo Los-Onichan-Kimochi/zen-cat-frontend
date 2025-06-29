@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -9,11 +9,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  AlertTriangle, 
-  User, 
-  Clock, 
-  Globe, 
+import {
+  AlertTriangle,
+  User,
+  Clock,
+  Globe,
   Monitor,
   FileText,
   Info,
@@ -21,7 +21,7 @@ import {
   CheckCircle,
   Activity,
   Database,
-  Bug
+  Bug,
 } from 'lucide-react';
 import { ErrorLog, getActionConfig, getEntityConfig } from '@/types/audit';
 import { format } from 'date-fns';
@@ -34,8 +34,14 @@ interface ErrorDetailModalProps {
   errorLog: ErrorLog | AuditLog | null;
 }
 
-export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModalProps) {
-  const [copiedFields, setCopiedFields] = React.useState<Set<string>>(new Set());
+export function ErrorDetailModal({
+  isOpen,
+  onClose,
+  errorLog,
+}: ErrorDetailModalProps) {
+  const [copiedFields, setCopiedFields] = React.useState<Set<string>>(
+    new Set(),
+  );
 
   if (!errorLog) return null;
 
@@ -54,9 +60,9 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedFields(prev => new Set([...prev, fieldName]));
+      setCopiedFields((prev) => new Set([...prev, fieldName]));
       setTimeout(() => {
-        setCopiedFields(prev => {
+        setCopiedFields((prev) => {
           const newSet = new Set(prev);
           newSet.delete(fieldName);
           return newSet;
@@ -67,7 +73,11 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
     }
   };
 
-  const renderJsonData = (data: Record<string, any> | undefined, title: string, fieldName: string) => {
+  const renderJsonData = (
+    data: Record<string, any> | undefined,
+    title: string,
+    fieldName: string,
+  ) => {
     if (!data || Object.keys(data).length === 0) return null;
 
     const jsonString = JSON.stringify(data, null, 2);
@@ -110,21 +120,37 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
   };
 
   // Function to get a user-friendly error explanation
-  const getErrorExplanation = (errorMessage: string | null, action: string, entityType: string) => {
+  const getErrorExplanation = (
+    errorMessage: string | null,
+    action: string,
+    entityType: string,
+  ) => {
     if (errorMessage) {
       const message = errorMessage.toLowerCase();
       const actionLabel = action.toLowerCase();
       const entityLabel = entityType.toLowerCase();
-      
-      if (message.includes('record not found') || message.includes('not found')) {
+
+      if (
+        message.includes('record not found') ||
+        message.includes('not found')
+      ) {
         return `No se pudo encontrar ${entityLabel} solicitado para ${actionLabel}. Es posible que el registro haya sido eliminado o no exista.`;
-      } else if (message.includes('unauthorized') || message.includes('authentication')) {
+      } else if (
+        message.includes('unauthorized') ||
+        message.includes('authentication')
+      ) {
         return `Las credenciales proporcionadas no son válidas o han expirado. Verifique los datos de acceso.`;
-      } else if (message.includes('validation') || message.includes('invalid')) {
+      } else if (
+        message.includes('validation') ||
+        message.includes('invalid')
+      ) {
         return `Los datos proporcionados no cumplen con los requisitos necesarios para ${actionLabel} ${entityLabel}.`;
       } else if (message.includes('duplicate') || message.includes('exists')) {
         return `Ya existe un registro similar. No se puede ${actionLabel} ${entityLabel} duplicado.`;
-      } else if (message.includes('timeout') || message.includes('connection')) {
+      } else if (
+        message.includes('timeout') ||
+        message.includes('connection')
+      ) {
         return `Se produjo un problema de conexión al intentar ${actionLabel} ${entityLabel}. Intente nuevamente.`;
       } else {
         return `Ocurrió un error técnico al intentar ${actionLabel} ${entityLabel}. Contacte al administrador si el problema persiste.`;
@@ -133,7 +159,7 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
       // If no error message, try to infer from action and entity (same logic as column)
       const actionLabel = action.toLowerCase();
       const entityLabel = entityType.toLowerCase();
-      
+
       if (action === 'LOGIN') {
         return 'Las credenciales proporcionadas son incorrectas. Verifique el email y contraseña.';
       } else if (action === 'CREATE') {
@@ -150,15 +176,23 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
 
   const formatAdditionalInfo = (additionalInfo: Record<string, any> | null) => {
     if (!additionalInfo) return null;
-    
+
     // Extract useful information from additionalInfo
-    const info = typeof additionalInfo === 'string' ? additionalInfo : JSON.stringify(additionalInfo, null, 2);
+    const info =
+      typeof additionalInfo === 'string'
+        ? additionalInfo
+        : JSON.stringify(additionalInfo, null, 2);
     return info;
   };
 
   const formattedDate = formatDate(errorLog.createdAt);
-  const errorMessage = 'errorMessage' in errorLog ? errorLog.errorMessage || null : null;
-  const errorExplanation = getErrorExplanation(errorMessage, actionConfig.label, entityConfig.label);
+  const errorMessage =
+    'errorMessage' in errorLog ? errorLog.errorMessage || null : null;
+  const errorExplanation = getErrorExplanation(
+    errorMessage,
+    actionConfig.label,
+    entityConfig.label,
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -190,7 +224,9 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Código de Estado</p>
-                    <p className="font-medium text-gray-900">Error del Sistema</p>
+                    <p className="font-medium text-gray-900">
+                      Error del Sistema
+                    </p>
                   </div>
                 </div>
 
@@ -205,7 +241,9 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
                         {entityConfig.label}
                       </Badge>
                       {errorLog.entityName && (
-                        <span className="text-sm text-gray-600">({errorLog.entityName})</span>
+                        <span className="text-sm text-gray-600">
+                          ({errorLog.entityName})
+                        </span>
                       )}
                     </div>
                   </div>
@@ -213,7 +251,9 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
               </div>
 
               <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                <h4 className="font-medium text-amber-800 mb-2">Explicación del Error:</h4>
+                <h4 className="font-medium text-amber-800 mb-2">
+                  Explicación del Error:
+                </h4>
                 <p className="text-amber-700 text-sm">{errorExplanation}</p>
               </div>
 
@@ -223,7 +263,9 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
                     <FileText className="h-4 w-4 mr-2" />
                     Mensaje Técnico:
                   </h4>
-                  <code className="text-xs text-gray-600 break-all">{errorMessage}</code>
+                  <code className="text-xs text-gray-600 break-all">
+                    {errorMessage}
+                  </code>
                 </div>
               )}
             </CardContent>
@@ -370,9 +412,17 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
 
           {/* Additional Data */}
           <div className="space-y-4">
-            {renderJsonData(errorLog.oldValues, 'Valores Anteriores', 'oldValues')}
+            {renderJsonData(
+              errorLog.oldValues,
+              'Valores Anteriores',
+              'oldValues',
+            )}
             {renderJsonData(errorLog.newValues, 'Valores Nuevos', 'newValues')}
-            {renderJsonData(errorLog.additionalInfo, 'Información Adicional', 'additionalInfo')}
+            {renderJsonData(
+              errorLog.additionalInfo,
+              'Información Adicional',
+              'additionalInfo',
+            )}
           </div>
         </div>
 
@@ -386,4 +436,4 @@ export function ErrorDetailModal({ isOpen, onClose, errorLog }: ErrorDetailModal
   );
 }
 
-export default ErrorDetailModal; 
+export default ErrorDetailModal;

@@ -81,14 +81,16 @@ export const API_ENDPOINTS = {
   SERVICE_PROFESSIONALS: {
     BASE: '/service-professional/',
     BULK: '/service-professional/bulk/',
-    BY_IDS: (serviceId: string, professionalId: string) => `/service-professional/${serviceId}/${professionalId}/`,
+    BY_IDS: (serviceId: string, professionalId: string) =>
+      `/service-professional/${serviceId}/${professionalId}/`,
   },
 
   // Service-Local association endpoints
   SERVICE_LOCALS: {
     BASE: '/service-local/',
     BULK: '/service-local/bulk/',
-    BY_IDS: (serviceId: string, localId: string) => `/service-local/${serviceId}/${localId}/`,
+    BY_IDS: (serviceId: string, localId: string) =>
+      `/service-local/${serviceId}/${localId}/`,
   },
 
   // Community-Service association endpoints
@@ -96,7 +98,8 @@ export const API_ENDPOINTS = {
     BASE: '/community-service/',
     BULK_CREATE: '/community-service/bulk-create/',
     BULK_DELETE: '/community-service/bulk-delete/',
-    BY_IDS: (communityId: string, serviceId: string) => `/community-service/${communityId}/${serviceId}/`,
+    BY_IDS: (communityId: string, serviceId: string) =>
+      `/community-service/${communityId}/${serviceId}/`,
   },
 
   // Community-Plan association endpoints
@@ -104,7 +107,8 @@ export const API_ENDPOINTS = {
     BASE: '/community-plan/',
     BULK_CREATE: '/community-plan/bulk-create/',
     BULK_DELETE: '/community-plan/bulk-delete/',
-    BY_IDS: (communityId: string, planId: string) => `/community-plan/${communityId}/${planId}/`,
+    BY_IDS: (communityId: string, planId: string) =>
+      `/community-plan/${communityId}/${planId}/`,
   },
 } as const;
 

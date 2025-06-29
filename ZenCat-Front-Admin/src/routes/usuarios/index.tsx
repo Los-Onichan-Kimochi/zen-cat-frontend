@@ -111,17 +111,17 @@ function UsuariosComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchUsers();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 
@@ -172,7 +172,7 @@ function UsuariosComponent() {
                 Total: {usersData?.length || 0} usuarios
               </p>
             </div>
-            
+
             {usersData && usersData.length > 0 ? (
               <div className="space-y-2">
                 {usersData.slice(0, 10).map((user) => (
@@ -183,18 +183,31 @@ function UsuariosComponent() {
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-600">
-                          {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                          {(user.name || user.email || 'U')
+                            .charAt(0)
+                            .toUpperCase()}
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium">{user.name || 'Sin nombre'}</p>
+                        <p className="font-medium">
+                          {user.name || 'Sin nombre'}
+                        </p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                         <p className="text-xs text-gray-400">
-                          Rol: {user.rol === 'admin' ? 'Administrador' : user.rol === 'user' ? 'Cliente' : user.rol === 'ADMINISTRATOR' ? 'Administrador' : user.rol === 'CLIENT' ? 'Cliente' : 'Invitado'}
+                          Rol:{' '}
+                          {user.rol === 'admin'
+                            ? 'Administrador'
+                            : user.rol === 'user'
+                              ? 'Cliente'
+                              : user.rol === 'ADMINISTRATOR'
+                                ? 'Administrador'
+                                : user.rol === 'CLIENT'
+                                  ? 'Cliente'
+                                  : 'Invitado'}
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex space-x-2">
                       <Button
                         size="sm"
@@ -216,7 +229,7 @@ function UsuariosComponent() {
                     </div>
                   </div>
                 ))}
-                
+
                 {usersData.length > 10 && (
                   <div className="text-center py-4 text-gray-500">
                     Mostrando 10 de {usersData.length} usuarios

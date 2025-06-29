@@ -73,7 +73,9 @@ export function TabCommunityServices({
 
   const handleServiceReservation = (communityId: string, serviceId: string) => {
     // Encontrar el servicio seleccionado
-    const selectedService = safeServices.find(service => service.id === serviceId);
+    const selectedService = safeServices.find(
+      (service) => service.id === serviceId,
+    );
 
     if (selectedService) {
       // Navegar directamente al paso 2 (selección de lugar) pasando tanto el communityId como el servicio
@@ -82,8 +84,8 @@ export function TabCommunityServices({
         search: {
           communityId: communityId,
           servicio: selectedService.name,
-          serviceId: selectedService.id
-        }
+          serviceId: selectedService.id,
+        },
       });
     }
   };

@@ -12,7 +12,7 @@ export const communityMembershipPlansApi = {
   ): Promise<CommunityMembershipPlan[]> => {
     const data = await apiClient.post<any>(
       API_ENDPOINTS.COMMUNITY_PLANS.BULK_CREATE,
-      payload
+      payload,
     );
     return data.community_plans || data;
   },
@@ -22,7 +22,7 @@ export const communityMembershipPlansApi = {
     planId: string,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.COMMUNITY_PLANS.BY_IDS(communityId, planId)
+      API_ENDPOINTS.COMMUNITY_PLANS.BY_IDS(communityId, planId),
     );
   },
 
@@ -31,7 +31,7 @@ export const communityMembershipPlansApi = {
   ): Promise<void> => {
     return apiClient.delete<void>(
       API_ENDPOINTS.COMMUNITY_PLANS.BULK_DELETE,
-      payload
+      payload,
     );
   },
 
