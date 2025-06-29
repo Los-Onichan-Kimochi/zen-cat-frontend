@@ -49,14 +49,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (savedUser && hasAccessToken) {
         const userData = JSON.parse(savedUser);
         // Verificar que no sea administrador
-        if (userData.rol === 'ADMINISTRATOR' || userData.role === 'ADMINISTRATOR') {
+        if (
+          userData.rol === 'ADMINISTRATOR' ||
+          userData.role === 'ADMINISTRATOR'
+        ) {
           console.log('AuthProvider: Administrator detected, clearing session');
           localStorage.removeItem('user');
           Cookies.remove('access_token');
           Cookies.remove('refresh_token');
           setUser(null);
         } else {
-          console.log('AuthProvider: Found saved user with valid tokens:', userData);
+          console.log(
+            'AuthProvider: Found saved user with valid tokens:',
+            userData,
+          );
           setUser(userData);
         }
       } else if (savedUser && !hasAccessToken) {
@@ -83,7 +89,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Verificar que no sea administrador antes de hacer login
     if (userData.rol === 'ADMINISTRATOR' || userData.role === 'ADMINISTRATOR') {
       console.error('AuthProvider: Administrator cannot login to client app');
-      throw new Error('Los administradores no pueden acceder a la aplicación de clientes');
+      throw new Error(
+        'Los administradores no pueden acceder a la aplicación de clientes',
+      );
     }
     const userWithAuth = { ...userData, isAuthenticated: true };
     setUser(userWithAuth);

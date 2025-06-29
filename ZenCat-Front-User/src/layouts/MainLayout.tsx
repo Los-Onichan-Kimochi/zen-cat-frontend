@@ -67,11 +67,17 @@ const MainLayout: React.FC = () => {
     );
   }
   // Verificar que el usuario NO sea administrador
-  if (isAuthenticated && user && (user.rol === 'ADMINISTRATOR' || user.role === 'ADMINISTRATOR')) {
+  if (
+    isAuthenticated &&
+    user &&
+    (user.rol === 'ADMINISTRATOR' || user.role === 'ADMINISTRATOR')
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Acceso Denegado</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
           <p className="text-gray-600 mb-4">
             Los administradores no pueden acceder a la aplicación de clientes.
           </p>
@@ -79,13 +85,13 @@ const MainLayout: React.FC = () => {
             Por favor, utiliza el panel de administración correspondiente.
           </p>
           <div className="space-x-4">
-            <button 
+            <button
               onClick={logout}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
             >
               Cerrar Sesión
             </button>
-            <a 
+            <a
               href="/"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 inline-block"
             >
