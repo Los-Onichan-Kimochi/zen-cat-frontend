@@ -15,7 +15,7 @@ const publicPages = [
 ];
 
 const MainLayout: React.FC = () => {
-  const { user, isAuthenticated, isLoading, isClient } = useAuth();
+  const { user, isAuthenticated, isLoading, isClient, logout } = useAuth();
   const location = useLocation();
 
   // Verificar si la página actual es pública
@@ -66,7 +66,42 @@ const MainLayout: React.FC = () => {
       </div>
     );
   }
-
+  // Verificar que el usuario NO sea administrador
+  if (
+    isAuthenticated &&
+    user &&
+    (user.rol === 'ADMINISTRATOR' || user.role === 'ADMINISTRATOR')
+  ) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Acceso Denegado
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Los administradores no pueden acceder a la aplicación de clientes.
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Por favor, utiliza el panel de administración correspondiente.
+          </p>
+          <div className="space-x-4">
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Cerrar Sesión
+            </button>
+            <a
+              href="/"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 inline-block"
+            >
+              Volver al Inicio
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
   // Verificar que el usuario tenga rol de cliente para páginas protegidas
   if (isAuthenticated && user && !isClient()) {
     return (
@@ -79,12 +114,7 @@ const MainLayout: React.FC = () => {
             Esta aplicación es solo para clientes registrados.
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            Tu rol actual:{' '}
-            {user.rol === 'ADMINISTRATOR'
-              ? 'Administrador'
-              : user.rol === 'CLIENT'
-                ? 'Cliente'
-                : 'Invitado'}
+            Tu rol actual: {user.rol || user.role || 'Sin rol definido'}
           </p>
           <a
             href="/"
