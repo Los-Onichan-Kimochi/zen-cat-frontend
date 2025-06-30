@@ -134,7 +134,14 @@ export const auditoriasApi = {
       const data = await response.json();
       console.log('Raw audit log data:', data);
 
-      return mapAuditLogFromBackend(data);
+      const mappedLog = mapAuditLogFromBackend(data);
+
+      // Ensure we only return successful audit logs
+      if (!mappedLog.success) {
+        throw new Error('Requested log is not a successful audit log');
+      }
+
+      return mappedLog;
     } catch (error) {
       console.error('Error in getAuditLogById:', error);
       throw error;

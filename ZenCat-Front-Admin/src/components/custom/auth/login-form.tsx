@@ -78,14 +78,22 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
       // El authService ya guarda los tokens en cookies
       // Ahora guardamos el usuario en el context
-      // Mapear el rol del backend al frontend
-      const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
+      // Mapear el rol del backend al frontend (mantener valores originales también)
+      const mapRole = (
+        backendRole: string,
+      ): 'admin' | 'user' | 'guest' | 'ADMINISTRATOR' | 'CLIENT' | 'GUEST' => {
         switch (backendRole) {
           case 'ADMINISTRATOR':
-            return 'admin';
+            return 'ADMINISTRATOR';
           case 'CLIENT':
-            return 'user';
+            return 'CLIENT';
           case 'GUEST':
+            return 'GUEST';
+          case 'admin':
+            return 'admin';
+          case 'user':
+            return 'user';
+          case 'guest':
             return 'guest';
           default:
             return 'user'; // Default fallback
@@ -96,8 +104,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email,
-        role: mapRole(response.user.rol),
-        rol: response.user.rol, // Mantener el rol original del backend
+        rol: mapRole(response.user.rol), // Mapear el rol al formato esperado
         password: '', // No guardamos la contraseña
         isAuthenticated: true,
         permissions:

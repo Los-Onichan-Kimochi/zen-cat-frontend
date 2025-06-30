@@ -6,6 +6,7 @@ export interface BaseAuditLog {
   userId?: string;
   userEmail?: string;
   userRole?: 'admin' | 'user' | 'guest';
+  user?: string; // User name/identifier for display
   action: AuditAction;
   entityType: AuditEntityType;
   entityId?: string;
@@ -105,6 +106,8 @@ export interface ActionBadgeConfig {
   variant: 'default' | 'secondary' | 'destructive' | 'outline';
   className: string;
   label: string;
+  description?: string; // Optional description
+  color?: string; // Optional color
   errorClassName?: string; // Override for error styling
   errorLabel?: string; // Override for error text
 }
@@ -112,6 +115,8 @@ export interface ActionBadgeConfig {
 export interface EntityBadgeConfig {
   className: string;
   label: string;
+  description?: string; // Optional description
+  color?: string; // Optional color
   errorClassName?: string; // Override for error styling
 }
 
@@ -336,7 +341,9 @@ export const toCamelCase = (obj: any): any => {
 };
 
 // Utility function to map backend audit log to frontend format
-export const mapAuditLogFromBackend = (backendLog: any): AuditLog => {
+export const mapAuditLogFromBackend = (
+  backendLog: any,
+): AuditLog | FailedAuditLog => {
   const converted = toCamelCase(backendLog);
 
   // Mapear roles del backend al frontend
@@ -353,11 +360,12 @@ export const mapAuditLogFromBackend = (backendLog: any): AuditLog => {
     }
   };
 
-  return {
+  const baseLog = {
     id: converted.id,
     userId: converted.userId,
     userEmail: converted.userEmail,
     userRole: converted.userRole ? mapRole(converted.userRole) : undefined,
+    user: converted.userEmail || converted.userId, // Use email or userId as display name
     action: converted.action,
     entityType: converted.entityType,
     entityId: converted.entityId,
@@ -367,8 +375,20 @@ export const mapAuditLogFromBackend = (backendLog: any): AuditLog => {
     ipAddress: converted.ipAddress,
     userAgent: converted.userAgent,
     additionalInfo: converted.additionalInfo,
-    success: converted.success,
-    errorMessage: converted.errorMessage,
     createdAt: converted.createdAt,
-  } as AuditLog;
+  };
+
+  // Return the appropriate type based on success value
+  if (converted.success === false) {
+    return {
+      ...baseLog,
+      success: false,
+      errorMessage: converted.errorMessage,
+    } as FailedAuditLog;
+  } else {
+    return {
+      ...baseLog,
+      success: true,
+    } as AuditLog;
+  }
 };

@@ -211,12 +211,13 @@ function ProfesionalesComponent() {
       ) : (
         <div className="-mx-4 flex-1 overflow-auto px-4 py-2">
           <DataTableToolbar
-            table={table}
+            table={table as any}
             filterPlaceholder="Buscar servicios..."
             showSortButton={true}
             showFilterButton={true}
             onFilterClick={() => {}}
-            enableDeleteButton={false}
+            showBulkDeleteButton={false}
+            isBulkDeleting={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
             <DataTable table={table} columns={columns} />

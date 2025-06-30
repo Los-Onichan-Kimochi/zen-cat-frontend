@@ -9,6 +9,7 @@ import { ErrorDetailModal } from '@/components/error-log/error-detail-modal';
 import { ErrorTable } from '@/components/error-log/table';
 import { errorLogApi } from '@/api/error-log/error-log';
 import { AuditLogFilters, AuditLog } from '@/types/audit';
+import { ErrorLog } from '@/types/error-log';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/context/ToastContext';
 
@@ -23,7 +24,9 @@ function LogErroresComponent() {
     limit: 25,
   });
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | ErrorLog | null>(
+    null,
+  );
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Query para obtener logs de errores
@@ -82,7 +85,7 @@ function LogErroresComponent() {
   }, [isDetailModalOpen]);
 
   const handleViewLog = useCallback(
-    (log: AuditLog) => {
+    (log: ErrorLog) => {
       // Close filters modal if open to prevent focus conflicts
       if (isFiltersModalOpen) {
         setIsFiltersModalOpen(false);

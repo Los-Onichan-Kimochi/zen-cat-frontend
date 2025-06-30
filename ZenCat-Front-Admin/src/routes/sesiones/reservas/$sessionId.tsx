@@ -59,7 +59,10 @@ function SessionReservationsComponent() {
     users: User[];
   }>({
     queryKey: ['usuarios'],
-    queryFn: () => userService.getAll(),
+    queryFn: async () => {
+      const users = await userService.getUsuarios();
+      return { users };
+    },
   });
 
   const usersData = usersResponse?.users || [];

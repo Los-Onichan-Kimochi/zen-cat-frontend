@@ -14,8 +14,20 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   const { user } = useAuth();
 
+  // Map frontend role types to backend role checking
+  const requireAdmin = requiredRole === 'admin';
+  const allowedRoles = requiredRole
+    ? [
+        requiredRole === 'admin'
+          ? 'ADMINISTRATOR'
+          : requiredRole === 'user'
+            ? 'CLIENT'
+            : 'GUEST',
+      ]
+    : [];
+
   return (
-    <ProtectedRoute requiredRole={requiredRole}>
+    <ProtectedRoute requireAdmin={requireAdmin} allowedRoles={allowedRoles}>
       {user && <MainLayout user={user}>{children}</MainLayout>}
     </ProtectedRoute>
   );

@@ -65,7 +65,7 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
   // Solo agregar campos de onboarding si están presentes
   if (payload.onboarding) {
     // Formatear la fecha de nacimiento al formato ISO si existe
-    let formattedBirthDate = null;
+    let formattedBirthDate: string | null = null;
     if (payload.onboarding.birthDate) {
       // Convertir fecha de formato YYYY-MM-DD a formato ISO completo
       const date = new Date(payload.onboarding.birthDate);
@@ -104,7 +104,7 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
   // Solo agregar campos de onboarding si están presentes
   if (payload.onboarding) {
     // Formatear la fecha de nacimiento al formato ISO si existe
-    let formattedBirthDate = null;
+    let formattedBirthDate: string | null = null;
     if (payload.onboarding.birthDate) {
       // Convertir fecha de formato YYYY-MM-DD a formato ISO completo
       const date = new Date(payload.onboarding.birthDate);
@@ -418,3 +418,6 @@ export const usuariosApi = {
     }
   },
 };
+
+// Export alias for backward compatibility
+export const userService = usuariosApi;

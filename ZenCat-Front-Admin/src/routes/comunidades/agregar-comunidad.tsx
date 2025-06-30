@@ -102,10 +102,12 @@ function AddCommunityPage() {
       const newCommunity = await createCommunityMutation.mutateAsync(payload);
 
       if (selectedServices.length > 0) {
-        const payload = selectedServices.map((s) => ({
-          community_id: newCommunity.id,
-          service_id: s.id,
-        }));
+        const payload = {
+          community_services: selectedServices.map((s) => ({
+            community_id: newCommunity.id,
+            service_id: s.id,
+          })),
+        };
         await communityServicesApi.bulkCreateCommunityServices(payload);
       }
 

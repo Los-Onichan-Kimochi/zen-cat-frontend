@@ -67,14 +67,20 @@ export function TopBar({ user }: TopBarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate({ to: '/perfil' })}
+              onClick={() => {
+                // TODO: Implement profile route
+                console.log('Profile navigation not implemented');
+              }}
               className="cursor-pointer"
             >
               <UserIcon className="mr-2 h-4 w-4" />
               Mi Perfil
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigate({ to: '/mis-comunidades' })}
+              onClick={() => {
+                // TODO: Implement communities route
+                console.log('Communities navigation not implemented');
+              }}
               className="cursor-pointer"
             >
               <svg

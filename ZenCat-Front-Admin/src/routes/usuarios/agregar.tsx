@@ -85,9 +85,9 @@ function AgregarUsuario() {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       navigate({ to: '/usuarios' });
     },
-    onError: (error) => {
+    onError: (err) => {
       error('Error al crear usuario', {
-        description: error.message || 'No se pudo crear el usuario.',
+        description: err.message || 'No se pudo crear el usuario.',
       });
     },
   });
@@ -163,7 +163,7 @@ function AgregarUsuario() {
     const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
-      role: 'user',
+      rol: 'user',
       password: '123456', // Contraseña por defecto
       permissions: ['read'],
       avatar: '',

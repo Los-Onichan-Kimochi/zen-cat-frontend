@@ -56,7 +56,12 @@ function Calendar({
   const daysInMonth = lastDayOfMonth.getDate();
 
   // Generar días del calendario
-  const calendarDays = [];
+  const calendarDays: Array<{
+    day: number;
+    date: Date;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+  }> = [];
 
   // Días del mes anterior
   const prevMonth = new Date(year, month - 1, 0);

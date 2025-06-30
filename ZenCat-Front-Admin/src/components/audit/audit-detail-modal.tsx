@@ -22,14 +22,19 @@ import {
   Info,
   Clock,
 } from 'lucide-react';
-import { AuditLog, ACTION_CONFIGS, ENTITY_CONFIGS } from '@/types/audit';
+import {
+  AuditLog,
+  FailedAuditLog,
+  ACTION_CONFIGS,
+  ENTITY_CONFIGS,
+} from '@/types/audit';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface AuditDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  auditLog: AuditLog | null;
+  auditLog: AuditLog | FailedAuditLog | null;
 }
 
 export function AuditDetailModal({
@@ -275,7 +280,9 @@ export function AuditDetailModal({
                       <p className="text-sm text-gray-500">
                         Información Adicional
                       </p>
-                      <p className="text-sm">{auditLog.additionalInfo}</p>
+                      <p className="text-sm">
+                        {JSON.stringify(auditLog.additionalInfo, null, 2)}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -284,23 +291,27 @@ export function AuditDetailModal({
           </Card>
 
           {/* Error Information */}
-          {!auditLog.success && auditLog.errorMessage && (
-            <Card className="border-l-4 border-l-red-500 bg-red-50">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center space-x-2 text-lg text-red-700">
-                  <AlertCircle className="h-5 w-5" />
-                  <span>Información del Error</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-red-100 p-4 rounded-lg">
-                  <p className="text-red-800 font-mono text-sm">
-                    {auditLog.errorMessage}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {!auditLog.success &&
+            'errorMessage' in auditLog &&
+            auditLog.errorMessage && (
+              <Card className="border-l-4 border-l-red-500 bg-red-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center space-x-2 text-lg text-red-700">
+                    <AlertCircle className="h-5 w-5" />
+                    <span>Información del Error</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-red-100 p-4 rounded-lg">
+                    <p className="text-red-800 font-mono text-sm">
+                      {'errorMessage' in auditLog
+                        ? auditLog.errorMessage
+                        : 'Error sin mensaje'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Data Changes */}
           {(auditLog.oldValues || auditLog.newValues) && (
@@ -319,7 +330,7 @@ export function AuditDetailModal({
                     </h4>
                     <div className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                        {formatJsonData(auditLog.oldValues)}
+                        {JSON.stringify(auditLog.oldValues, null, 2)}
                       </pre>
                     </div>
                   </div>
@@ -332,7 +343,7 @@ export function AuditDetailModal({
                     </h4>
                     <div className="bg-green-100 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                        {formatJsonData(auditLog.newValues)}
+                        {JSON.stringify(auditLog.newValues, null, 2)}
                       </pre>
                     </div>
                   </div>

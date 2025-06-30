@@ -42,12 +42,12 @@ export const getAuditColumns = ({
           <Avatar className="h-8 w-8">
             <AvatarImage src="" alt="" />
             <AvatarFallback className="text-xs">
-              {user?.name?.charAt(0) || userEmail?.charAt(0) || '?'}
+              {user?.charAt(0) || userEmail?.charAt(0) || '?'}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-sm">
-              {user?.name || userEmail || 'Usuario desconocido'}
+              {user || userEmail || 'Usuario desconocido'}
             </span>
             {userEmail && (
               <span className="text-xs text-gray-500 truncate max-w-[150px]">
@@ -58,18 +58,18 @@ export const getAuditColumns = ({
               <Badge
                 variant="outline"
                 className={`text-xs transition-all duration-200 hover:scale-105 ${
-                  userRole === 'ADMINISTRATOR'
+                  userRole === 'admin'
                     ? 'bg-amber-50 text-amber-700 border-amber-200'
-                    : userRole === 'GUEST'
+                    : userRole === 'guest'
                       ? 'bg-blue-50 text-blue-700 border-blue-200'
                       : 'bg-gray-50 text-gray-700 border-gray-200'
                 }`}
               >
-                {userRole === 'GUEST'
+                {userRole === 'guest'
                   ? 'invitado'
-                  : userRole === 'ADMINISTRATOR'
+                  : userRole === 'admin'
                     ? 'administrador'
-                    : userRole === 'CLIENT'
+                    : userRole === 'user'
                       ? 'cliente'
                       : userRole}
               </Badge>

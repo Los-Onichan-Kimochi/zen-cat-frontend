@@ -59,18 +59,18 @@ export function getErrorColumns({
                 <Badge
                   variant="outline"
                   className={`text-xs transition-all duration-200 hover:scale-105 ${
-                    log.userRole === 'ADMINISTRATOR'
+                    log.userRole === 'admin'
                       ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : log.userRole === 'GUEST'
+                      : log.userRole === 'guest'
                         ? 'bg-blue-50 text-blue-700 border-blue-200'
                         : 'bg-gray-50 text-gray-700 border-gray-200'
                   }`}
                 >
-                  {log.userRole === 'GUEST'
+                  {log.userRole === 'guest'
                     ? 'invitado'
-                    : log.userRole === 'ADMINISTRATOR'
+                    : log.userRole === 'admin'
                       ? 'administrador'
-                      : log.userRole === 'CLIENT'
+                      : log.userRole === 'user'
                         ? 'cliente'
                         : log.userRole}
                 </Badge>

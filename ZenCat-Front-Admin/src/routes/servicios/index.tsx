@@ -137,7 +137,8 @@ function ServiciosComponent() {
   const isLoadingCounts = isLoadingServices;
 
   const handleEdit = (service: Service) => {
-    navigate({ to: '/servicios/servicio-editar', search: { id: service.id } });
+    localStorage.setItem('currentService', service.id);
+    navigate({ to: '/servicios/servicio-ver' });
   };
 
   const handleView = (service: Service) => {
@@ -153,9 +154,9 @@ function ServiciosComponent() {
   const handleRefresh = async () => {
     const startTime = Date.now();
 
-    const [servicesResult, countsResult] = await Promise.all([
+    const [servicesResult] = await Promise.all([
       refetchServices(),
-      refetchCounts(),
+      // refetchCounts(), // TODO: implement refetchCounts function
     ]);
 
     // Asegurar que pase al menos 1 segundo
@@ -166,7 +167,7 @@ function ServiciosComponent() {
       await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
 
-    return { servicesResult, countsResult };
+    return { servicesResult };
   };
 
   const columns = useMemo<ColumnDef<Service>[]>(

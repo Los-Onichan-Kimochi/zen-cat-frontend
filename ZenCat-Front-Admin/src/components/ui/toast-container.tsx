@@ -1,6 +1,9 @@
 import React from 'react';
 import { CustomToast, ToastType } from './custom-toast';
 
+// Re-export ToastType for use in other components
+export type { ToastType };
+
 export interface Toast {
   id: string;
   type: ToastType;

@@ -70,11 +70,11 @@ export function EditReservationModal({
   // Fetch users for the select
   const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['usuarios'],
-    queryFn: () => userService.getAll(),
+    queryFn: () => userService.getUsuarios(),
     enabled: isOpen, // Only fetch when modal is open
   });
 
-  const usersData = usersResponse?.users || [];
+  const usersData = usersResponse || [];
 
   const { mutate: updateReservation, isPending: isUpdating } = useMutation({
     mutationFn: (data: UpdateReservationRequest) => {

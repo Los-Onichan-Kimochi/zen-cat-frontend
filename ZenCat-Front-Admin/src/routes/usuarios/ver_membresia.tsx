@@ -31,15 +31,21 @@ function VerMembresia() {
   const [openFilter, setOpenFilter] = useState(false);
 
   // Cierra el dropdown si haces click fuera
-  const orderRef = useRef(null);
-  const filterRef = useRef(null);
+  const orderRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (orderRef.current && !orderRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        orderRef.current &&
+        !orderRef.current.contains(event.target as Node)
+      ) {
         setOpenOrder(false);
       }
-      if (filterRef.current && !filterRef.current.contains(event.target)) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
         setOpenFilter(false);
       }
     }

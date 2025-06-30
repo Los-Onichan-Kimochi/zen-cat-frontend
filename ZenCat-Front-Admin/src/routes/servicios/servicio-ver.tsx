@@ -592,7 +592,7 @@ export function SeeServicePageComponent() {
                   });
                   setInitialValues({
                     description: description,
-                    isVirtual: isVirtual === 'Sí',
+                    isVirtual: isVirtual,
                     image_url: imageFile
                       ? URL.createObjectURL(imageFile)
                       : initialValues.image,

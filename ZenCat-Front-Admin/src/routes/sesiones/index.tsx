@@ -122,7 +122,7 @@ function SesionesComponent() {
   }, [sessionsData]);
 
   const handleEdit = (session: Session) => {
-    navigate({ to: '/sesiones/editar', search: { id: session.id } });
+    navigate({ to: '/sesiones/ver', search: { id: session.id } });
   };
 
   const handleView = (session: Session) => {
@@ -137,9 +137,9 @@ function SesionesComponent() {
   const handleRefresh = async () => {
     const startTime = Date.now();
 
-    const [sessionsResult, countsResult] = await Promise.all([
+    const [sessionsResult] = await Promise.all([
       refetchSessions(),
-      refetchCounts(),
+      // refetchCounts(), // TODO: implement refetchCounts function
     ]);
 
     // Asegurar que pase al menos 1 segundo
@@ -150,7 +150,7 @@ function SesionesComponent() {
       await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
 
-    return { sessionsResult, countsResult };
+    return { sessionsResult };
   };
 
   const handleBulkDelete = (sessions: Session[]) => {
