@@ -32,7 +32,7 @@ function ComunidadesComponent() {
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
-
+// modificacion 2 en index desde el useQuery
   const {
     data: communitiesData = [],
     isLoading,
@@ -162,15 +162,25 @@ function ComunidadesComponent() {
         title="Carga Masiva de Comunidades"
         expectedExcelColumns={['Nombre', 'Propósito', 'Logo']}
         dbFieldNames={['name', 'purpose', 'image_url']}
+        //solo para q no se repitan, EN caso de comunidad
+        
+        existingNames={communitiesData.map((c) => c.name)} //
+        validateUniqueNames={true}
+
         onParsedData={async (data) => {
           try {
-            await communitiesApi.bulkCreateCommunities({ communities: data });
-            toast.success('Comunidades Creadas', {
-              description: `${data.length} comunidades creadas exitosamente.`,
-            });
+            await communitiesApi.bulkCreateCommunities({communities: data});
+            queryClient.invalidateQueries({ queryKey: ['communities'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
-            queryClient.invalidateQueries({ queryKey: ['communities'] });
+            //MODELO 1
+            //queryClient.invalidateQueries({ queryKey: ['communities'] });
+            // MODELO 2
+            
+            //queryClient.setQueryData(['communities'], (old: Community[] = []) => [
+             // ...old,
+              //...data,
+            //]);
           } catch (error) {
             console.error(error);
             toast.error('Error en Carga Masiva', {

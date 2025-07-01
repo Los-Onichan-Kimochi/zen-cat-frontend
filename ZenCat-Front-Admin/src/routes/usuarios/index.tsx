@@ -6,6 +6,8 @@ import { ViewToolbar } from '@/components/common/view-toolbar';
 
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { CreateUserPayload } from '@/types/user';
 import { Gem } from 'lucide-react';
 import HomeCard from '@/components/common/home-card';
 import {
@@ -36,6 +38,9 @@ function UsuariosComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Query para obtener usuarios
   const {
@@ -277,8 +282,41 @@ function UsuariosComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Usuarios"
+        expectedExcelColumns={[
+          'Correo electrónico', 'Nombres', 'Primer apellido', 'Segundo apellido', 'Foto'
+        ]}
+        dbFieldNames={[
+          'email', 'name', 'firstLastName', 'secondLastName', 'avatar'
+        ]}
+        onParsedData={async (data) => {
+          try {
+            const transformed = data.map((item) => ({
+              email: item.email?.toString().trim(),
+              name: item.name?.toString().trim(),
+              password: '12345678', // Password fijo para todos (puedes personalizarlo)
+              role: 'user',
+              avatar: item.avatar?.toString().trim(),
+              onboarding: {}, // Se deja vacío si no se usa
+              first_last_name: item.firstLastName?.toString().trim(),
+              second_last_name: item.secondLastName?.toString().trim(),
+            }));
 
-      <ModalNotifications modal={modal} onClose={closeModal} />
+            await usuariosApi.bulkCreateUsuarios({ users: transformed });
+            toast.success('Usuarios cargados exitosamente');
+            queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+          } catch (error: any) {
+            toast.error('Error durante la carga masiva', {
+              description: error.message,
+            });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import {
+  BulkCreateProfessionalPayload,
   Professional,
   CreateProfessionalPayload,
   UpdateProfessionalPayload,
-  BulkCreateProfessionalPayload,
   BulkDeleteProfessionalPayload,
 } from '@/types/professional';
 import { apiClient } from '@/lib/api-client';

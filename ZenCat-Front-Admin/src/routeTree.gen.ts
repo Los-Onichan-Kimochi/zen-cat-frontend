@@ -29,6 +29,7 @@ import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membr
 import { Route as UsuariosEditarImport } from './routes/usuarios/editar';
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar';
 import { Route as SesionesVerImport } from './routes/sesiones/ver';
+import { Route as SesionesEditarImport } from './routes/sesiones/editar';
 import { Route as SesionesAgregarImport } from './routes/sesiones/agregar';
 import { Route as ServiciosServicioVerImport } from './routes/servicios/servicio-ver';
 import { Route as ServiciosServicioNuevoImport } from './routes/servicios/servicio-nuevo';

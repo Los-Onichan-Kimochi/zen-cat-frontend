@@ -10,7 +10,7 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
 // Función para convertir hora de Lima (UTC-5) a UTC
-const convertLimaToUTC = (limaDateTimeString: string): string => {
+export const convertLimaToUTC = (limaDateTimeString: string): string => {
   // Interpretar la fecha como hora de Lima (UTC-5)
   // Si en Lima son las 08:00, en UTC son las 13:00 (08:00 + 5 horas)
   const [datePart, timePart] = limaDateTimeString.split('T');

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import * as XLSX from 'xlsx';
-import { Upload, Trash } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import * as XLSX from 'xlsx'; // Librería para leer archivos .xlsx
+import { Upload, Trash } from 'lucide-react'; // Íconos de carga y eliminar
+import { Button } from '@/components/ui/button'; // Componente de botón
 import {
   Dialog,
   DialogContent,
@@ -13,14 +13,18 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import ErrorDialog from '@/components/common/error-dialog';
+import { toast } from 'sonner';
 
 interface BulkCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title?: string;
-  expectedExcelColumns: string[];
-  dbFieldNames: string[];
+  expectedExcelColumns: string[]; // Columnas esperadas en el archivo Excel
+  dbFieldNames: string[]; // Nombres de los campos como se usan en la BD
   onParsedData: (data: any[]) => void;
+  existingNames?: string[]; // Lista de nombres ya existentes para validar duplicados
+  validateUniqueNames?: boolean; // Si se deben validar los nombres como únicos
+  children?: React.ReactNode, //para sesiones
 }
 
 export function BulkCreateDialog({
@@ -30,9 +34,12 @@ export function BulkCreateDialog({
   onParsedData,
   expectedExcelColumns,
   dbFieldNames,
+  existingNames = [],
+  validateUniqueNames = false,
+  children,
 }: BulkCreateDialogProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null); // Referencia al input de archivo oculto
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);// Archivo seleccionado
   const [error, setError] = useState<string | null>(null);
   const [showColumnErrorDialog, setShowColumnErrorDialog] = useState(false);
   const [columnErrorMessage, setColumnErrorMessage] = useState('');
@@ -45,20 +52,20 @@ export function BulkCreateDialog({
     }
   }, [open]);
 
-  const isValidXLSX = (file: File) => file.name.toLowerCase().endsWith('.xlsx');
+  const isValidXLSX = (file: File) => file.name.toLowerCase().endsWith('.xlsx'); // Verifica si el archivo es .xlsx
 
   const handleFile = (file: File) => {
     if (isValidXLSX(file)) {
-      setSelectedFile(file);
+      setSelectedFile(file); // Guardar archivo
       setError(null);
     } else {
-      setError('Solo se permiten archivos con extensión .xlsx');
+      setError('Solo se permiten archivos con extensión .xlsx'); // Mostrar error si no es .xlsx
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) handleFile(file); // Llama al validador
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -71,8 +78,8 @@ export function BulkCreateDialog({
     return data.map((item) => {
       const mappedObject: Record<string, any> = {};
       expectedExcelColumns.forEach((excelCol, idx) => {
-        const dbCol = dbFieldNames[idx];
-        mappedObject[dbCol] = item[excelCol] ?? '';
+        const dbCol = dbFieldNames[idx]; // Mapea columnas del Excel a campos de BD
+        mappedObject[dbCol] = item[excelCol] ?? ''; // Si no existe el campo, se pone vacío
       });
       return mappedObject;
     });
@@ -84,22 +91,19 @@ export function BulkCreateDialog({
       return;
     }
 
-    const reader = new FileReader();
+    const reader = new FileReader(); // Lector de archivos
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
+        const workbook = XLSX.read(data, { type: 'array' });  // Leer Excel
+        const sheetName = workbook.SheetNames[0]; // Primera hoja
         const worksheet = workbook.Sheets[sheetName];
         const headers = XLSX.utils.sheet_to_json(worksheet, {
           header: 1,
         })[0] as string[];
 
         function normalizeText(text: string): string {
-          return text
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+          return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); // Normaliza acentos
         }
 
         const normalizedHeaders = headers.map(normalizeText);
@@ -111,36 +115,90 @@ export function BulkCreateDialog({
 
         if (!headersAreValid) {
           setColumnErrorMessage(
-            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`,
+            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`
           );
-          setShowColumnErrorDialog(true);
+          setShowColumnErrorDialog(true); // Mostrar modal de error por columnas inválidas
           return;
         }
 
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' }); // Leer todos los datos
+        const finalData = mapDataWithColumns(rawData); // Convertir formato
 
-        const finalData = mapDataWithColumns(rawData);
+        // Validar duplicados contra nombres existentes si se habilita
+        const combinedErrors: string[] = [];
 
-        if (!finalData || finalData.length === 0) {
-          setError('El archivo está vacío o mal estructurado.');
+        if (validateUniqueNames) {
+          // 1. Validar duplicados internos del Excel
+          const internalNameCounts = new Map<string, number>();
+          finalData.forEach((row) => {
+            const name = row.name?.toString().trim().toLowerCase();
+            if (!name) return;
+            internalNameCounts.set(name, (internalNameCounts.get(name) || 0) + 1);
+          });
+          const internalDuplicates = Array.from(internalNameCounts.entries())
+            .filter(([_, count]) => count > 1)
+            .map(([name]) => name);
+
+          if (internalDuplicates.length > 0) {
+            combinedErrors.push(
+              `El archivo contiene nombres de comunidad repetidos: ${internalDuplicates.join(', ')}`
+            );
+          }
+
+          // 2. Validar duplicados contra los nombres ya existentes
+          const namesFromExcel = finalData.map((row) =>
+            row.name?.toString().trim().toLowerCase()
+          );
+          const existingLowerNames = existingNames.map((name) =>
+            name.trim().toLowerCase()
+          );
+          const conflicts = namesFromExcel.filter((name) =>
+            existingLowerNames.includes(name)
+          );
+          if (conflicts.length > 0) {
+            combinedErrors.push(
+              `Ya existen comunidades con estos nombres: ${[...new Set(conflicts)].join(', ')}`
+            );
+          }
+        }
+
+        // Validación de filas incompletas
+        const invalidRowIndices: number[] = [];
+        finalData.forEach((row, index) => {
+          const isComplete = dbFieldNames.every((field) => {
+            const value = row[field];
+            return typeof value === 'string' ? value.trim() !== '' : Boolean(value);
+          });
+          if (!isComplete) {
+            invalidRowIndices.push(index + 2);// +2 porque comienza en fila 2 (sin contar encabezado)
+          }
+        });
+
+        if (invalidRowIndices.length > 0) {
+          combinedErrors.push(`Las siguientes filas tienen campos incompletos: ${invalidRowIndices.join(', ')}`);
+        }
+
+        // Si hay errores, mostrar todos juntos
+        if (combinedErrors.length > 0) {
+          setError(combinedErrors.join('\n')); // Mostrar todos los errores encontrados
           return;
         }
 
-        onParsedData(finalData);
+        onParsedData(finalData);  // Enviar datos limpios al padre
         setSelectedFile(null);
         setError(null);
         onOpenChange(false);
       } catch (err) {
-        setError('Error al procesar el archivo.');
+        setError('Ocurrió un error inesperado procesando el archivo.');
         console.error(err);
       }
     };
-    reader.readAsArrayBuffer(selectedFile);
+    reader.readAsArrayBuffer(selectedFile); // Leer archivo como buffer
   };
 
   const handleDelete = () => {
     setSelectedFile(null);
-    if (inputRef.current) inputRef.current.value = '';
+    if (inputRef.current) inputRef.current.value = '';// Limpiar input oculto
   };
 
   return (
@@ -150,8 +208,8 @@ export function BulkCreateDialog({
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
+          {children}
 
-          {/* Zona para soltar archivo */}
           <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
@@ -163,7 +221,6 @@ export function BulkCreateDialog({
             </h2>
           </div>
 
-          {/* Área de selección por clic */}
           <div
             onClick={() => inputRef.current?.click()}
             className="flex items-center justify-between border rounded px-4 py-2 w-full bg-white shadow-sm cursor-pointer hover:bg-gray-50 mt-4 transition"
