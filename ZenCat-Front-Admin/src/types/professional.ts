@@ -43,4 +43,3 @@ export type UpdateProfessionalPayload = Partial<CreateProfessionalPayload>;
 export interface BulkCreateProfessionalPayload {
   professionals: CreateProfessionalPayload[];
 }
-

@@ -417,8 +417,10 @@ export const usuariosApi = {
       throw error;
     }
   },
-//carga masiva
-  bulkCreateUsuarios: async (payload: { users: CreateUserPayload[] }): Promise<void> => {
+  //carga masiva
+  bulkCreateUsuarios: async (payload: {
+    users: CreateUserPayload[];
+  }): Promise<void> => {
     try {
       const transformedUsers = payload.users.map(transformPayloadToBackend);
 
@@ -431,7 +433,7 @@ export const usuariosApi = {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
-          `Error creando usuarios en masa: ${response.status} ${response.statusText}`
+          `Error creando usuarios en masa: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -440,6 +442,5 @@ export const usuariosApi = {
       console.error('Error en bulkCreateUsuarios:', error);
       throw error;
     }
-  }
-
+  },
 };

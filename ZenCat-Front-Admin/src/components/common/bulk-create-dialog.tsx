@@ -24,7 +24,7 @@ interface BulkCreateDialogProps {
   onParsedData: (data: any[]) => void;
   existingNames?: string[]; // Lista de nombres ya existentes para validar duplicados
   validateUniqueNames?: boolean; // Si se deben validar los nombres como únicos
-  children?: React.ReactNode, //para sesiones
+  children?: React.ReactNode; //para sesiones
 }
 
 export function BulkCreateDialog({
@@ -39,7 +39,7 @@ export function BulkCreateDialog({
   children,
 }: BulkCreateDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null); // Referencia al input de archivo oculto
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);// Archivo seleccionado
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Archivo seleccionado
   const [error, setError] = useState<string | null>(null);
   const [showColumnErrorDialog, setShowColumnErrorDialog] = useState(false);
   const [columnErrorMessage, setColumnErrorMessage] = useState('');
@@ -95,7 +95,7 @@ export function BulkCreateDialog({
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });  // Leer Excel
+        const workbook = XLSX.read(data, { type: 'array' }); // Leer Excel
         const sheetName = workbook.SheetNames[0]; // Primera hoja
         const worksheet = workbook.Sheets[sheetName];
         const headers = XLSX.utils.sheet_to_json(worksheet, {
@@ -115,7 +115,7 @@ export function BulkCreateDialog({
 
         if (!headersAreValid) {
           setColumnErrorMessage(
-            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`
+            `El archivo debe contener las siguientes columnas: ${expectedExcelColumns.join(', ')}`,
           );
           setShowColumnErrorDialog(true); // Mostrar modal de error por columnas inválidas
           return;
@@ -133,7 +133,10 @@ export function BulkCreateDialog({
           finalData.forEach((row) => {
             const name = row.name?.toString().trim().toLowerCase();
             if (!name) return;
-            internalNameCounts.set(name, (internalNameCounts.get(name) || 0) + 1);
+            internalNameCounts.set(
+              name,
+              (internalNameCounts.get(name) || 0) + 1,
+            );
           });
           const internalDuplicates = Array.from(internalNameCounts.entries())
             .filter(([_, count]) => count > 1)
@@ -141,23 +144,23 @@ export function BulkCreateDialog({
 
           if (internalDuplicates.length > 0) {
             combinedErrors.push(
-              `El archivo contiene nombres de comunidad repetidos: ${internalDuplicates.join(', ')}`
+              `El archivo contiene nombres de comunidad repetidos: ${internalDuplicates.join(', ')}`,
             );
           }
 
           // 2. Validar duplicados contra los nombres ya existentes
           const namesFromExcel = finalData.map((row) =>
-            row.name?.toString().trim().toLowerCase()
+            row.name?.toString().trim().toLowerCase(),
           );
           const existingLowerNames = existingNames.map((name) =>
-            name.trim().toLowerCase()
+            name.trim().toLowerCase(),
           );
           const conflicts = namesFromExcel.filter((name) =>
-            existingLowerNames.includes(name)
+            existingLowerNames.includes(name),
           );
           if (conflicts.length > 0) {
             combinedErrors.push(
-              `Ya existen comunidades con estos nombres: ${[...new Set(conflicts)].join(', ')}`
+              `Ya existen comunidades con estos nombres: ${[...new Set(conflicts)].join(', ')}`,
             );
           }
         }
@@ -167,15 +170,19 @@ export function BulkCreateDialog({
         finalData.forEach((row, index) => {
           const isComplete = dbFieldNames.every((field) => {
             const value = row[field];
-            return typeof value === 'string' ? value.trim() !== '' : Boolean(value);
+            return typeof value === 'string'
+              ? value.trim() !== ''
+              : Boolean(value);
           });
           if (!isComplete) {
-            invalidRowIndices.push(index + 2);// +2 porque comienza en fila 2 (sin contar encabezado)
+            invalidRowIndices.push(index + 2); // +2 porque comienza en fila 2 (sin contar encabezado)
           }
         });
 
         if (invalidRowIndices.length > 0) {
-          combinedErrors.push(`Las siguientes filas tienen campos incompletos: ${invalidRowIndices.join(', ')}`);
+          combinedErrors.push(
+            `Las siguientes filas tienen campos incompletos: ${invalidRowIndices.join(', ')}`,
+          );
         }
 
         // Si hay errores, mostrar todos juntos
@@ -184,7 +191,7 @@ export function BulkCreateDialog({
           return;
         }
 
-        onParsedData(finalData);  // Enviar datos limpios al padre
+        onParsedData(finalData); // Enviar datos limpios al padre
         setSelectedFile(null);
         setError(null);
         onOpenChange(false);
@@ -198,7 +205,7 @@ export function BulkCreateDialog({
 
   const handleDelete = () => {
     setSelectedFile(null);
-    if (inputRef.current) inputRef.current.value = '';// Limpiar input oculto
+    if (inputRef.current) inputRef.current.value = ''; // Limpiar input oculto
   };
 
   return (

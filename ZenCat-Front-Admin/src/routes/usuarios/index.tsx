@@ -287,10 +287,18 @@ function UsuariosComponent() {
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Usuarios"
         expectedExcelColumns={[
-          'Correo electrónico', 'Nombres', 'Primer apellido', 'Segundo apellido', 'Foto'
+          'Correo electrónico',
+          'Nombres',
+          'Primer apellido',
+          'Segundo apellido',
+          'Foto',
         ]}
         dbFieldNames={[
-          'email', 'name', 'firstLastName', 'secondLastName', 'avatar'
+          'email',
+          'name',
+          'firstLastName',
+          'secondLastName',
+          'avatar',
         ]}
         onParsedData={async (data) => {
           try {

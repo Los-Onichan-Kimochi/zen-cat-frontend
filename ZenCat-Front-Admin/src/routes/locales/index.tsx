@@ -12,7 +12,10 @@ import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
 import { BulkCreateLocalPayload } from '@/types/local'; //adicionar
 import { LocalsTable } from '@/components/locals/local-table';
-import { ConfirmDeleteSingleDialog, ConfirmDeleteBulkDialog } from '@/components/common/confirm-delete-dialogs';
+import {
+  ConfirmDeleteSingleDialog,
+  ConfirmDeleteBulkDialog,
+} from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { Button } from '@/components/ui/button';
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
@@ -28,11 +31,20 @@ import {
 } from '@/components/ui/alert-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
 
-import { Locate, Loader2, ArrowUpDown, MoreHorizontal, Plus, Upload, Trash, MapPin, CheckCircle } from 'lucide-react';
+import {
+  Locate,
+  Loader2,
+  ArrowUpDown,
+  MoreHorizontal,
+  Plus,
+  Upload,
+  Trash,
+  MapPin,
+  CheckCircle,
+} from 'lucide-react';
 
 import { toast } from 'sonner';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import { useToast } from '@/context/ToastContext';
 
@@ -231,12 +243,26 @@ function LocalesComponent() {
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Locales"
         expectedExcelColumns={[
-          'Nombre del Local', 'Nombre de la Calle', 'Número de Edificio', 'Distrito',
-          'Provincia', 'Región', 'Referencia', 'Capacidad', 'URL de Imagen'
+          'Nombre del Local',
+          'Nombre de la Calle',
+          'Número de Edificio',
+          'Distrito',
+          'Provincia',
+          'Región',
+          'Referencia',
+          'Capacidad',
+          'URL de Imagen',
         ]}
         dbFieldNames={[
-          'local_name', 'street_name', 'building_number', 'district',
-          'province', 'region', 'reference', 'capacity', 'image_url'
+          'local_name',
+          'street_name',
+          'building_number',
+          'district',
+          'province',
+          'region',
+          'reference',
+          'capacity',
+          'image_url',
         ]}
         onParsedData={async (data) => {
           try {
@@ -253,30 +279,35 @@ function LocalesComponent() {
             }));
 
             // Validación básica
-            const isValid = transformedData.every((item) =>
-              item.local_name &&
-              item.street_name &&
-              item.building_number &&
-              item.district &&
-              item.province &&
-              item.region &&
-              item.reference &&
-              !isNaN(item.capacity) &&
-              item.image_url
+            const isValid = transformedData.every(
+              (item) =>
+                item.local_name &&
+                item.street_name &&
+                item.building_number &&
+                item.district &&
+                item.province &&
+                item.region &&
+                item.reference &&
+                !isNaN(item.capacity) &&
+                item.image_url,
             );
 
             if (!isValid) {
-              toast.error('Algunos registros tienen campos vacíos o inválidos.');
+              toast.error(
+                'Algunos registros tienen campos vacíos o inválidos.',
+              );
               console.error('Datos inválidos:', transformedData);
               return;
             }
 
-            console.log('Request final:', JSON.stringify({ locals: transformedData }, null, 2));
+            console.log(
+              'Request final:',
+              JSON.stringify({ locals: transformedData }, null, 2),
+            );
             await localsApi.bulkCreateLocals({ locals: transformedData });
             queryClient.invalidateQueries({ queryKey: ['locals'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
-
           } catch (error: any) {
             if (error instanceof Error) {
               toast.error('Error durante la carga masiva', {
@@ -288,9 +319,7 @@ function LocalesComponent() {
             console.error('Detalle del error:', error);
           }
         }}
-
       />
-
 
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}

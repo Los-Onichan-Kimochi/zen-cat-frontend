@@ -359,26 +359,25 @@ function ServiciosComponent() {
           />
         )}
       </div>
-      
 
       <BulkCreateDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Servicios"
-        expectedExcelColumns={['Nombre', 'Descripción','Tipo', 'Foto']}
-        dbFieldNames={['name', 'description','is_virtual', 'image_url']}        
+        expectedExcelColumns={['Nombre', 'Descripción', 'Tipo', 'Foto']}
+        dbFieldNames={['name', 'description', 'is_virtual', 'image_url']}
         // Se necesita implementacion de POST /service/bulk-create/
         //onParsedData={async (data) => {
-          //try {
-            //console.log('Servicios procesados para enviar:', data);
-            //await servicesApi.bulkCreateServices(data);// mismo formato que community
-            //queryClient.invalidateQueries({ queryKey: ['services'] });
-            //setShowUploadDialog(false);
-            //setShowSuccess(true);
-          //} catch (error) {
-            //console.error(error);
-            //toast.error('Error durante la carga masiva de servicios');
-          //}
+        //try {
+        //console.log('Servicios procesados para enviar:', data);
+        //await servicesApi.bulkCreateServices(data);// mismo formato que community
+        //queryClient.invalidateQueries({ queryKey: ['services'] });
+        //setShowUploadDialog(false);
+        //setShowSuccess(true);
+        //} catch (error) {
+        //console.error(error);
+        //toast.error('Error durante la carga masiva de servicios');
+        //}
         //}}
         onParsedData={async (processed) => {
           try {
@@ -386,7 +385,11 @@ function ServiciosComponent() {
               const tipo = item.is_virtual?.toString().toLowerCase().trim();
               const payload = {
                 ...item,
-                is_virtual: tipo === 'virtual' || tipo === 'sí' || tipo === 'si' || tipo === '1',
+                is_virtual:
+                  tipo === 'virtual' ||
+                  tipo === 'sí' ||
+                  tipo === 'si' ||
+                  tipo === '1',
               };
               await servicesApi.createService(payload);
             }
@@ -409,7 +412,6 @@ function ServiciosComponent() {
         buttonText="Cerrar"
       />
 
-      
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

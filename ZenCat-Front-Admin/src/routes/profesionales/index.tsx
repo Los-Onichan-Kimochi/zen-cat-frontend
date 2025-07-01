@@ -50,10 +50,9 @@ function ProfesionalesComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [profToDelete, setProfToDelete] = useState<Professional | null>(null);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);//carga masiva
+  const [showUploadDialog, setShowUploadDialog] = useState(false); //carga masiva
 
-
-  const [showSuccess, setShowSuccess] = useState(false);//carga masiva
+  const [showSuccess, setShowSuccess] = useState(false); //carga masiva
 
   const {
     data: professionalsData,
@@ -242,24 +241,39 @@ function ProfesionalesComponent() {
         onOpenChange={setShowUploadDialog}
         title="Carga Masiva de Profesionales"
         expectedExcelColumns={[
-          'Nombres', 'Primer apellido', 'Segundo apellido',
-          'Especialidad', 'Correo electrónico', 'Número de celular',
-          'Tipo', 'Foto de perfil',
+          'Nombres',
+          'Primer apellido',
+          'Segundo apellido',
+          'Especialidad',
+          'Correo electrónico',
+          'Número de celular',
+          'Tipo',
+          'Foto de perfil',
         ]}
         dbFieldNames={[
-          'name', 'first_last_name', 'second_last_name',
-          'specialty', 'email', 'phone_number', 'type', 'image_url',
+          'name',
+          'first_last_name',
+          'second_last_name',
+          'specialty',
+          'email',
+          'phone_number',
+          'type',
+          'image_url',
         ]}
-
         onParsedData={async (data) => {
           try {
             const validTypes = ['MEDIC', 'GYM_TRAINER', 'YOGA_TRAINER'];
-            const validSpecialties = ['Profesor de Yoga', 'Profesor de Gimnasio', 'Médico'];
+            const validSpecialties = [
+              'Profesor de Yoga',
+              'Profesor de Gimnasio',
+              'Médico',
+            ];
 
             const transformedData = data.map((item) => ({
               name: item.name?.toString().trim(),
               first_last_name: item.first_last_name?.toString().trim(),
-              second_last_name: item.second_last_name?.toString().trim() || null,
+              second_last_name:
+                item.second_last_name?.toString().trim() || null,
               specialty: item.specialty?.toString().trim(),
               email: item.email?.toString().trim(),
               phone_number: item.phone_number?.toString().trim(),
@@ -267,38 +281,44 @@ function ProfesionalesComponent() {
               image_url: item.image_url?.toString().trim(),
             }));
 
-            const isValid = transformedData.every((item) =>
-              item.name &&
-              item.first_last_name &&
-              item.specialty &&
-              validSpecialties.includes(item.specialty) &&
-              item.email &&
-              item.phone_number &&
-              validTypes.includes(item.type) &&
-              item.image_url
+            const isValid = transformedData.every(
+              (item) =>
+                item.name &&
+                item.first_last_name &&
+                item.specialty &&
+                validSpecialties.includes(item.specialty) &&
+                item.email &&
+                item.phone_number &&
+                validTypes.includes(item.type) &&
+                item.image_url,
             );
 
             if (!isValid) {
-              toast.error('Error: Algunos registros tienen campos inválidos, tipo o especialidad no válidos.');
+              toast.error(
+                'Error: Algunos registros tienen campos inválidos, tipo o especialidad no válidos.',
+              );
               console.error('Registros inválidos:', transformedData);
               return;
             }
 
-            console.log('Body final:', JSON.stringify({ professionals: transformedData }, null, 2));
-            await professionalsApi.bulkCreateProfessionals({ professionals: transformedData });
+            console.log(
+              'Body final:',
+              JSON.stringify({ professionals: transformedData }, null, 2),
+            );
+            await professionalsApi.bulkCreateProfessionals({
+              professionals: transformedData,
+            });
             queryClient.invalidateQueries({ queryKey: ['professionals'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
-
           } catch (error: any) {
             toast.error('Error durante la carga masiva', {
-              description: error instanceof Error ? error.message : 'Error desconocido',
+              description:
+                error instanceof Error ? error.message : 'Error desconocido',
             });
             console.error('Detalle del error:', error);
           }
         }}
-
-
       />
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

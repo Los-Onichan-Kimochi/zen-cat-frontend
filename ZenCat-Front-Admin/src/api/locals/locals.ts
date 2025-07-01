@@ -1,8 +1,8 @@
 import {
-  BulkCreateLocalPayload,  
-  BulkDeleteLocalPayload, 
-  Local, 
-  CreateLocalPayload, 
+  BulkCreateLocalPayload,
+  BulkDeleteLocalPayload,
+  Local,
+  CreateLocalPayload,
   UpdateLocalPayload,
 } from '@/types/local';
 
@@ -44,8 +44,10 @@ export const localsApi = {
   bulkDeleteLocals: async (payload: BulkDeleteLocalPayload): Promise<void> => {
     return apiClient.delete(API_ENDPOINTS.LOCALS.BULK_DELETE, payload);
   },
-  
-  bulkCreateLocals: async (payload: BulkCreateLocalPayload): Promise<Local[]> => {
+
+  bulkCreateLocals: async (
+    payload: BulkCreateLocalPayload,
+  ): Promise<Local[]> => {
     const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
       method: 'POST',
       headers: {

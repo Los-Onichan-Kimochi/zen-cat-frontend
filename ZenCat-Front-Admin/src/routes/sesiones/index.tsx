@@ -25,9 +25,15 @@ import {
 import { SessionsTable } from '@/components/sessions/table';
 import { getSessionCurrentState } from '@/utils/session-status';
 //adicionales
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { professionalsApi } from "@/api/professionals/professionals"; // ajusta el path si es diferente
-import { Professional } from "@/types/professional";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+import { professionalsApi } from '@/api/professionals/professionals'; // ajusta el path si es diferente
+import { Professional } from '@/types/professional';
 import { Label } from '@/components/ui/label';
 //fin
 
@@ -80,7 +86,9 @@ function SesionesComponent() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   //adicion -------------------------------------------------------------
-  const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<
+    string | null
+  >(null);
   const { data: professionals = [] } = useQuery<Professional[]>({
     queryKey: ['professionals'],
     queryFn: professionalsApi.getProfessionals,
@@ -198,7 +206,6 @@ function SesionesComponent() {
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
   };
-
 
   if (errorSessions)
     return <p>Error cargando sesiones: {errorSessions.message}</p>;
@@ -348,10 +355,14 @@ function SesionesComponent() {
                   dateString = rawDate.toISOString().split('T')[0];
                 } else if (typeof rawDate === 'number') {
                   const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-                  const date = new Date(excelEpoch.getTime() + rawDate * 86400000);
+                  const date = new Date(
+                    excelEpoch.getTime() + rawDate * 86400000,
+                  );
                   dateString = date.toISOString().split('T')[0];
                 } else if (typeof rawDate === 'string') {
-                  const parts = rawDate.includes('/') ? rawDate.split('/') : rawDate.split('-');
+                  const parts = rawDate.includes('/')
+                    ? rawDate.split('/')
+                    : rawDate.split('-');
                   if (parts.length === 3) {
                     if (parts[0].length === 4) {
                       dateString = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
@@ -362,20 +373,33 @@ function SesionesComponent() {
                     throw new Error(`Formato de fecha inválido: ${rawDate}`);
                   }
                 } else {
-                  throw new Error(`Tipo de dato de fecha no soportado: ${rawDate}`);
+                  throw new Error(
+                    `Tipo de dato de fecha no soportado: ${rawDate}`,
+                  );
                 }
 
-                const startTimeStr = String(item.start_time).padStart(5, '0').trim();
-                const endTimeStr = String(item.end_time).padStart(5, '0').trim();
+                const startTimeStr = String(item.start_time)
+                  .padStart(5, '0')
+                  .trim();
+                const endTimeStr = String(item.end_time)
+                  .padStart(5, '0')
+                  .trim();
 
-                if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTimeStr) || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(endTimeStr)) {
-                  throw new Error(`Formato de hora inválido en fila ${index + 2}`);
+                if (
+                  !/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTimeStr) ||
+                  !/^([01]\d|2[0-3]):([0-5]\d)$/.test(endTimeStr)
+                ) {
+                  throw new Error(
+                    `Formato de hora inválido en fila ${index + 2}`,
+                  );
                 }
 
                 return {
                   title: item.title,
                   date: convertLimaToUTC(`${dateString}T00:00:00`),
-                  start_time: convertLimaToUTC(`${dateString}T${startTimeStr}:00`),
+                  start_time: convertLimaToUTC(
+                    `${dateString}T${startTimeStr}:00`,
+                  ),
                   end_time: convertLimaToUTC(`${dateString}T${endTimeStr}:00`),
                   capacity: Number(item.capacity),
                   session_link: item.session_link || null,
@@ -395,8 +419,13 @@ function SesionesComponent() {
           }}
         >
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Selecciona un profesional</label>
-            <Select value={selectedProfessionalId || ''} onValueChange={setSelectedProfessionalId}>
+            <label className="block text-sm font-medium mb-1">
+              Selecciona un profesional
+            </label>
+            <Select
+              value={selectedProfessionalId || ''}
+              onValueChange={setSelectedProfessionalId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Profesional" />
               </SelectTrigger>

@@ -1,5 +1,5 @@
 import {
-  BulkCreateServicePayload,//para carga masiva
+  BulkCreateServicePayload, //para carga masiva
   Service,
   CreateServicePayload,
   UpdateServicePayload,
@@ -8,7 +8,9 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
 export const servicesApi = {
-  bulkCreateServices: async (payload: BulkCreateServicePayload) : Promise<Service[]> => {
+  bulkCreateServices: async (
+    payload: BulkCreateServicePayload,
+  ): Promise<Service[]> => {
     console.log('Payload enviado a /service/bulk-create:', payload);
 
     const response = await fetch(`${API_BASE_URL}/service/bulk-create/`, {
