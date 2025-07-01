@@ -214,13 +214,6 @@ function ProfesionalesComponent() {
         />
       </div>
 
-      <ViewToolbar
-        onAddClick={() => navigate({ to: '/profesionales/nuevo' })}
-        onBulkUploadClick={() => setShowUploadDialog(true)} //activar carga
-        addButtonText="Agregar"
-        bulkUploadButtonText="Carga Masiva"
-      />
-
       {isLoadingProfessionals ? (
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
@@ -353,39 +346,7 @@ function ProfesionalesComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk Create Dialog */}
-      <BulkCreateDialog
-        open={showUploadDialog}
-        onOpenChange={setShowUploadDialog}
-        title="Carga Masiva de Profesionales"
-        expectedExcelColumns={[
-          'Nombre',
-          'Primer Apellido',
-          'Segundo Apellido',
-          'Especialidad',
-          'Email',
-          'Teléfono',
-          'Tipo',
-          'URL de Imagen',
-        ]}
-        dbFieldNames={[
-          'name',
-          'first_last_name',
-          'second_last_name',
-          'specialty',
-          'email',
-          'phone_number',
-          'type',
-          'image_url',
-        ]}
-        onParsedData={async (data) => {
-          try {
-            bulkCreateProfessionals({ professionals: data });
-          } catch (error) {
-            console.error(error);
-          }
-        }}
-      />
+      
     </div>
   );
 }

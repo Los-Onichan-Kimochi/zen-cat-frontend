@@ -334,7 +334,7 @@ function ServiciosComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />

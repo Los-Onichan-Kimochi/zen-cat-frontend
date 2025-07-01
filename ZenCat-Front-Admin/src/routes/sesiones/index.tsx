@@ -259,7 +259,7 @@ function SesionesComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/sesiones/agregar' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />

@@ -444,3 +444,6 @@ export const usuariosApi = {
     }
   },
 };
+
+// Export alias for backward compatibility
+export const userService = usuariosApi;

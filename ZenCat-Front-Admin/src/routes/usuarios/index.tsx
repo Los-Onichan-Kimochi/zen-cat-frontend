@@ -157,7 +157,7 @@ function UsuariosComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/usuarios/agregar' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
