@@ -34,7 +34,6 @@ function ComunidadesComponent() {
   // Fetch user communities usando el ID del usuario autenticado
   const { communities, loading, error } = useUserCommunities(user?.id);
 
- 
   // Si hay error al cargar las comunidades
   if (error) {
     return (
