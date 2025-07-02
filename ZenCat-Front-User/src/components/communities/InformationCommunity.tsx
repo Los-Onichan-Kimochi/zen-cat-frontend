@@ -52,7 +52,7 @@ export function InformationCommunity({
 
         {/* Contenido de las pestañas */}
         <TabsContent value="general" className="mt-2">
-          <TabCommunityGeneral community={community}/>
+          <TabCommunityGeneral community={community} />
         </TabsContent>
 
         <TabsContent value="servicios" className="mt-2">
