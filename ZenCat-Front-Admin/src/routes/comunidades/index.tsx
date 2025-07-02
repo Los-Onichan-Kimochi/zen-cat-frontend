@@ -32,7 +32,7 @@ function ComunidadesComponent() {
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
-
+  // modificacion 2 en index desde el useQuery
   const {
     data: communitiesData = [],
     isLoading,
@@ -47,14 +47,14 @@ function ComunidadesComponent() {
   const deleteCommunityMutation = useMutation({
     mutationFn: (id: string) => communitiesApi.deleteCommunity(id),
     onSuccess: (_, id) => {
-      toast.success('Comunidad Eliminada', { 
-        description: 'La comunidad ha sido eliminada exitosamente.' 
+      toast.success('Comunidad Eliminada', {
+        description: 'La comunidad ha sido eliminada exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar la comunidad.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar la comunidad.',
       });
     },
   });
@@ -89,17 +89,17 @@ function ComunidadesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchCommunities();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 
@@ -162,15 +162,24 @@ function ComunidadesComponent() {
         title="Carga Masiva de Comunidades"
         expectedExcelColumns={['Nombre', 'Propósito', 'Logo']}
         dbFieldNames={['name', 'purpose', 'image_url']}
+        //solo para q no se repitan, EN caso de comunidad
+
+        existingNames={communitiesData.map((c) => c.name)} //
+        validateUniqueNames={true}
         onParsedData={async (data) => {
           try {
             await communitiesApi.bulkCreateCommunities({ communities: data });
-            toast.success('Comunidades Creadas', {
-              description: `${data.length} comunidades creadas exitosamente.`,
-            });
+            queryClient.invalidateQueries({ queryKey: ['communities'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
-            queryClient.invalidateQueries({ queryKey: ['communities'] });
+            //MODELO 1
+            //queryClient.invalidateQueries({ queryKey: ['communities'] });
+            // MODELO 2
+
+            //queryClient.setQueryData(['communities'], (old: Community[] = []) => [
+            // ...old,
+            //...data,
+            //]);
           } catch (error) {
             console.error(error);
             toast.error('Error en Carga Masiva', {

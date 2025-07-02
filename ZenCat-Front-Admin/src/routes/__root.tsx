@@ -22,7 +22,11 @@ function RootComponent() {
   // TODOS LOS HOOKS DEBEN IR AL PRINCIPIO - ANTES DE CUALQUIER RETURN
   // Si no está autenticado, redirigir a login
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !authPages.includes(location.pathname)) {
+    if (
+      !isLoading &&
+      !isAuthenticated &&
+      !authPages.includes(location.pathname)
+    ) {
       navigate({ to: '/login' });
     }
   }, [isLoading, isAuthenticated, location.pathname, navigate]);
@@ -33,7 +37,7 @@ function RootComponent() {
     isAuthenticated,
     isLoading,
     isAdmin: isAdmin(),
-    pathname: location.pathname
+    pathname: location.pathname,
   });
 
   // Función para manejar el logout completo
@@ -87,51 +91,58 @@ function RootComponent() {
             <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
               <Shield className="w-10 h-10 text-red-500" />
             </div>
-            
+
             {/* Título */}
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Acceso Restringido
             </h1>
-            
+
             {/* Descripción */}
             <p className="text-gray-600 mb-6 leading-relaxed">
-              Esta aplicación está diseñada exclusivamente para administradores. 
+              Esta aplicación está diseñada exclusivamente para administradores.
               Tu cuenta no tiene los permisos necesarios para acceder.
             </p>
-            
+
             {/* Información del usuario */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-center mb-2">
                 <User className="w-5 h-5 text-gray-500 mr-2" />
-                <span className="text-sm font-medium text-gray-700">Información de tu cuenta</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Información de tu cuenta
+                </span>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">Email:</span> {user.email}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Rol:</span> {
-                    user.rol === 'ADMINISTRATOR' ? 'Administrador' : 
-                    user.rol === 'CLIENT' ? 'Cliente' : 
-                    user.rol === 'admin' ? 'Administrador' :
-                    user.rol === 'user' ? 'Cliente' : 'Invitado'
-                  }
+                  <span className="font-medium">Rol:</span>{' '}
+                  {user.rol === 'ADMINISTRATOR'
+                    ? 'Administrador'
+                    : user.rol === 'CLIENT'
+                      ? 'Cliente'
+                      : user.rol === 'admin'
+                        ? 'Administrador'
+                        : user.rol === 'user'
+                          ? 'Cliente'
+                          : 'Invitado'}
                 </p>
               </div>
             </div>
-            
+
             {/* Botones de acción */}
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={handleLogoutAndRedirect}
                 className="w-full flex items-center justify-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors duration-200 font-medium"
               >
                 <LogOut className="w-5 h-5 mr-2" />
                 Cerrar Sesión y Volver
               </button>
-              
+
               <p className="text-xs text-gray-500 mt-4">
-                Si crees que esto es un error, contacta al administrador del sistema
+                Si crees que esto es un error, contacta al administrador del
+                sistema
               </p>
             </div>
           </div>

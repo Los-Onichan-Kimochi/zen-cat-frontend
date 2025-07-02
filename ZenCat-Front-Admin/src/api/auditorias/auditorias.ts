@@ -1,4 +1,9 @@
-import { AuditLog, AuditLogFilters, AuditLogStats, mapAuditLogFromBackend } from '@/types/audit';
+import {
+  AuditLog,
+  AuditLogFilters,
+  AuditLogStats,
+  mapAuditLogFromBackend,
+} from '@/types/audit';
 import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -15,14 +20,17 @@ const getHeaders = () => {
 // Función para construir query parameters
 const buildQueryParams = (filters: AuditLogFilters): string => {
   const params = new URLSearchParams();
-  
-  if (filters.page !== undefined) params.append('page', filters.page.toString());
-  if (filters.limit !== undefined) params.append('pageSize', filters.limit.toString());
+
+  if (filters.page !== undefined)
+    params.append('page', filters.page.toString());
+  if (filters.limit !== undefined)
+    params.append('pageSize', filters.limit.toString());
   if (filters.user_search) params.append('userIds', filters.user_search);
   if (filters.action) params.append('actions', filters.action);
   if (filters.entity_type) params.append('entityTypes', filters.entity_type);
   if (filters.user_role) params.append('userRoles', filters.user_role);
-  if (filters.success !== undefined) params.append('success', filters.success.toString());
+  if (filters.success !== undefined)
+    params.append('success', filters.success.toString());
   if (filters.start_date) params.append('startDate', filters.start_date);
   if (filters.end_date) params.append('endDate', filters.end_date);
 
@@ -31,7 +39,9 @@ const buildQueryParams = (filters: AuditLogFilters): string => {
 
 export const auditoriasApi = {
   // Obtener logs de auditoría con filtros (solo eventos exitosos)
-  getAuditLogs: async (filters: AuditLogFilters = {}): Promise<{
+  getAuditLogs: async (
+    filters: AuditLogFilters = {},
+  ): Promise<{
     logs: AuditLog[];
     total: number;
     page: number;
@@ -43,7 +53,7 @@ export const auditoriasApi = {
       const auditFilters = { ...filters, success: true };
       const queryParams = buildQueryParams(auditFilters);
       const url = `${API_BASE_URL}/audit-log/${queryParams ? `?${queryParams}` : ''}`;
-      
+
       const response = await fetch(url, {
         headers: getHeaders(),
       });
@@ -94,7 +104,10 @@ export const auditoriasApi = {
         totalEvents: data.total_events || 0,
         successfulEvents: data.success_count || 0,
         failedEvents: data.failure_count || 0,
-        successRate: data.total_events > 0 ? ((data.success_count || 0) / data.total_events) * 100 : 0,
+        successRate:
+          data.total_events > 0
+            ? ((data.success_count || 0) / data.total_events) * 100
+            : 0,
         activeUsers: data.active_users || 0, // Ahora viene del backend
       };
     } catch (error) {
@@ -129,12 +142,17 @@ export const auditoriasApi = {
   },
 
   // Eliminar logs antiguos
-  cleanupOldLogs: async (daysToKeep: number = 30): Promise<{ deletedCount: number }> => {
+  cleanupOldLogs: async (
+    daysToKeep: number = 30,
+  ): Promise<{ deletedCount: number }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/audit-log/cleanup/?days=${daysToKeep}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/audit-log/cleanup/?days=${daysToKeep}`,
+        {
+          method: 'DELETE',
+          headers: getHeaders(),
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -155,4 +173,4 @@ export const auditoriasApi = {
       throw error;
     }
   },
-}; 
+};

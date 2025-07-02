@@ -125,10 +125,10 @@ export function EditReservationModal({
   if (!reservation) return null;
 
   // Find the current user for display
-  const currentUser = usersData.find(user => user.id === reservation.user_id);
-  const currentUserDisplay = currentUser ? 
-    `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}` : 
-    'Usuario no encontrado';
+  const currentUser = usersData.find((user) => user.id === reservation.user_id);
+  const currentUserDisplay = currentUser
+    ? `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}`
+    : 'Usuario no encontrado';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -188,9 +188,7 @@ export function EditReservationModal({
                   {usersData.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex flex-col">
-                        <span>
-                          {user.name}
-                        </span>
+                        <span>{user.name}</span>
                         <span className="text-xs text-gray-500">
                           {user.email}
                         </span>
@@ -264,7 +262,7 @@ export function EditReservationModal({
           </div>
         </form>
       </DialogContent>
-      
+
       <ModalNotifications modal={modal} onClose={closeModal} />
     </Dialog>
   );

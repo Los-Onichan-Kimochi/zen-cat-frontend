@@ -39,7 +39,7 @@ export function useModalNotifications() {
   };
 
   const closeModal = () => {
-    setModal(prev => ({ ...prev, isOpen: false }));
+    setModal((prev) => ({ ...prev, isOpen: false }));
   };
 
   return {
@@ -49,4 +49,4 @@ export function useModalNotifications() {
     info,
     closeModal,
   };
-} 
+}

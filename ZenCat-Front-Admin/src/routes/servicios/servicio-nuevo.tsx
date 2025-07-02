@@ -165,7 +165,7 @@ function AddServicePageComponent() {
   }, []);
 
   const onSubmit = async (data: ServiceFormData) => {
-    let imageUrl = 'https://via.placeholder.com/150';
+    const imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.info('Imagen Procesada', {
@@ -196,7 +196,8 @@ function AddServicePageComponent() {
           bulkPayload,
         );
         toast.success('Profesionales Asociados', {
-          description: 'Servicio y profesionales asociados creados correctamente.',
+          description:
+            'Servicio y profesionales asociados creados correctamente.',
         });
       }
 
@@ -217,7 +218,9 @@ function AddServicePageComponent() {
       navigate({ to: '/servicios' });
     } catch (error: any) {
       toast.error('Error al Crear Servicio', {
-        description: error.message || 'No se pudo crear el servicio o asociar profesionales.',
+        description:
+          error.message ||
+          'No se pudo crear el servicio o asociar profesionales.',
       });
     }
   };

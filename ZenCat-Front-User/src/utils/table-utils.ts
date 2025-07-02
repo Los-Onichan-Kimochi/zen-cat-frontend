@@ -14,7 +14,7 @@ export const getColumnLabel = (columnKey: string): string => {
     place: 'Lugar', // Nuevo campo para lugar
     teacher: 'Profesor', // Nuevo campo para profesor
     last_modification: 'Última Modificación',
-    
+
     // Default TanStack Table IDs (common for checkbox selection and actions dropdown)
     select: 'Seleccionar',
     actions: 'Acciones',
@@ -78,7 +78,14 @@ export const getColumnLabel = (columnKey: string): string => {
 // Aunque en tu ReservationsTable actual las columnas se definen directamente,
 // esta utilidad es útil si tienes un sistema más genérico para configurar columnas.
 export const getSortableColumns = (
-  tableType: 'sessions' | 'professionals' | 'services' | 'locals' | 'users' | 'reservations' | 'audit',
+  tableType:
+    | 'sessions'
+    | 'professionals'
+    | 'services'
+    | 'locals'
+    | 'users'
+    | 'reservations'
+    | 'audit',
 ): Array<{ key: string; label: string }> => {
   const sessionsColumns = [
     { key: 'title', label: getColumnLabel('title') },
@@ -140,7 +147,6 @@ export const getSortableColumns = (
     // 'time_range', 'place', 'teacher' no suelen ser ordenables directamente como strings simples
     // Si quieres ordenarlos, necesitarías una lógica de ordenación personalizada o si los datos son simples strings.
   ];
-
 
   switch (tableType) {
     case 'sessions':

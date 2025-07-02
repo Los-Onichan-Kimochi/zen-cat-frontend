@@ -71,8 +71,8 @@ function AddCommunityPage() {
     mutationFn: (data: CreateCommunityPayload) =>
       communitiesApi.createCommunity(data),
     onError: (error) =>
-      toast.error('Error al Crear Comunidad', { 
-        description: error.message || 'No se pudo crear la comunidad.' 
+      toast.error('Error al Crear Comunidad', {
+        description: error.message || 'No se pudo crear la comunidad.',
       }),
   });
 
@@ -83,7 +83,7 @@ function AddCommunityPage() {
       const timestamp = Date.now();
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
       imageUrl = `community-${timestamp}.${fileExtension}`;
-      
+
       showImageUploadProcessing(toast);
     }
 
@@ -126,7 +126,8 @@ function AddCommunityPage() {
       navigate({ to: '/comunidades' });
     } catch (err: any) {
       toast.error('Error al Asociar Servicios', {
-        description: err.message || 'No se pudieron asociar los servicios o planes.',
+        description:
+          err.message || 'No se pudieron asociar los servicios o planes.',
       });
     }
   };

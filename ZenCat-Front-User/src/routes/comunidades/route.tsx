@@ -1,6 +1,10 @@
 // src/routes/communities.tsx (This would be your route.tsx file)
 import { useState } from 'react';
-import { useNavigate,useLoaderData,createFileRoute } from '@tanstack/react-router';
+import {
+  useNavigate,
+  useLoaderData,
+  createFileRoute,
+} from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { communitiesApi } from '@/api/communities/communities';
 
@@ -8,14 +12,14 @@ import { communitiesApi } from '@/api/communities/communities';
 import CommunitySearchBar from '@/components/communities-noauth/CommunitySearchBar';
 import CommunityGrid from '@/components/communities-noauth/CommunityGrid';
 import Pagination from '@/components/communities-noauth/Pagination';
-import { Community } from '@/types/community'
+import { Community } from '@/types/community';
 
 // Define the route for '/communities'
 export const Route = createFileRoute('/comunidades')({
   // This is where you fetch your data from the API
   loader: async () => {
     try {
-      const data: Community[] = await communitiesApi.getCommunities();  
+      const data: Community[] = await communitiesApi.getCommunities();
       return { communities: data }; // Return the fetched data
     } catch (error) {
       console.error('Error fetching communities:', error);
@@ -27,7 +31,7 @@ export const Route = createFileRoute('/comunidades')({
 });
 
 function CommunitiesPage() {
-// Access data from the loader. The `{}` is correct here.
+  // Access data from the loader. The `{}` is correct here.
   const { communities } = useLoaderData<typeof Route.loader>({});
   const navigate = useNavigate();
 
@@ -37,24 +41,29 @@ function CommunitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const communitiesPerPage = 6;
 
-  const filteredCommunities = communities.filter(community => {
-    // Add nullish coalescing or type guards if 'title' or 'description' could be optional
-    const communityTitle = community.name || '';
-    const communityDescription = community.purpose || '';
-    return (
-      communityTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      communityDescription.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }).sort((a, b) => {
-    // Placeholder sorting logic
-    return 0;
-  });
+  const filteredCommunities = communities
+    .filter((community) => {
+      // Add nullish coalescing or type guards if 'title' or 'description' could be optional
+      const communityTitle = community.name || '';
+      const communityDescription = community.purpose || '';
+      return (
+        communityTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        communityDescription.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    })
+    .sort((a, b) => {
+      // Placeholder sorting logic
+      return 0;
+    });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredCommunities.length / communitiesPerPage);
   const indexOfLastCommunity = currentPage * communitiesPerPage;
   const indexOfFirstCommunity = indexOfLastCommunity - communitiesPerPage;
-  const currentCommunities = filteredCommunities.slice(indexOfFirstCommunity, indexOfLastCommunity);
+  const currentCommunities = filteredCommunities.slice(
+    indexOfFirstCommunity,
+    indexOfLastCommunity,
+  );
 
   const handleGoBack = () => {
     navigate({ to: `/` });
@@ -76,14 +85,20 @@ function CommunitiesPage() {
       {/* Header Section */}
       <div className="w-full bg-white py-5 shadow-sm flex flex-col items-center">
         <div className="self-start ml-5 md:ml-10">
-        <Button onClick={handleGoBack} className="text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
-          &lt; Retroceder
-        </Button>
+          <Button
+            onClick={handleGoBack}
+            className="text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+          >
+            &lt; Retroceder
+          </Button>
         </div>
         <div className="text-center mt-5 px-4">
-          <h1 className="text-4xl font-extrabold text-gray-800 mb-3 sm:text-5xl">Explora nuestras comunidades</h1>
+          <h1 className="text-4xl font-extrabold text-gray-800 mb-3 sm:text-5xl">
+            Explora nuestras comunidades
+          </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed sm:text-xl">
-            Conéctate con personas que comparten tus intereses y accede a servicios pensados para tu bienestar
+            Conéctate con personas que comparten tus intereses y accede a
+            servicios pensados para tu bienestar
           </p>
         </div>
       </div>

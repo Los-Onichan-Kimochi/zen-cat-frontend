@@ -10,7 +10,7 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
 // Función para convertir hora de Lima (UTC-5) a UTC
-const convertLimaToUTC = (limaDateTimeString: string): string => {
+export const convertLimaToUTC = (limaDateTimeString: string): string => {
   // Interpretar la fecha como hora de Lima (UTC-5)
   // Si en Lima son las 08:00, en UTC son las 13:00 (08:00 + 5 horas)
   const [datePart, timePart] = limaDateTimeString.split('T');
@@ -110,12 +110,12 @@ export const sessionsApi = {
     payload: UpdateSessionPayload,
   ): Promise<Session> => {
     console.log('Original update payload:', payload);
-    
+
     // Convertir fechas a formato UTC si están presentes
     const backendPayload: UpdateSessionPayload = {
       ...payload,
     };
-    
+
     // Convertir las fechas si están presentes
     if (payload.date) {
       // Si la fecha no tiene formato ISO completo, asumimos que es solo la fecha
@@ -123,19 +123,22 @@ export const sessionsApi = {
         backendPayload.date = `${payload.date}T00:00:00Z`;
       }
     }
-    
+
     // Asegurarnos que las fechas de inicio y fin estén en formato ISO
     if (payload.start_time && !payload.start_time.endsWith('Z')) {
       backendPayload.start_time = new Date(payload.start_time).toISOString();
     }
-    
+
     if (payload.end_time && !payload.end_time.endsWith('Z')) {
       backendPayload.end_time = new Date(payload.end_time).toISOString();
     }
-    
+
     console.log('Processed update payload:', backendPayload);
-    
-    return apiClient.patch<Session>(API_ENDPOINTS.SESSIONS.BY_ID(id), backendPayload);
+
+    return apiClient.patch<Session>(
+      API_ENDPOINTS.SESSIONS.BY_ID(id),
+      backendPayload,
+    );
   },
 
   deleteSession: async (id: string): Promise<void> => {

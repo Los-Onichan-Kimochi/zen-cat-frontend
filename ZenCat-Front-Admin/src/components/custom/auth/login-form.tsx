@@ -100,7 +100,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         rol: response.user.rol, // Mantener el rol original del backend
         password: '', // No guardamos la contraseña
         isAuthenticated: true,
-        permissions: response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
+        permissions:
+          response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
         avatar: response.user.image_url || '',
         address: '',
         district: '',
@@ -129,19 +130,27 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       if (err.message) {
         if (err.message.includes('500')) {
           errorTitle = 'Error del servidor';
-          errorMessage = 'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
+          errorMessage =
+            'Credenciales incorrectas - Usuario no encontrado o contraseña inválida';
         } else if (err.message.includes('401')) {
           errorTitle = 'Credenciales incorrectas';
-          errorMessage = 'El email o contraseña son incorrectos. Por favor verifique sus datos.';
+          errorMessage =
+            'El email o contraseña son incorrectos. Por favor verifique sus datos.';
         } else if (err.message.includes('403')) {
           errorTitle = 'Acceso denegado';
-          errorMessage = 'Su cuenta no tiene permisos para acceder al panel de administración.';
-        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorMessage =
+            'Su cuenta no tiene permisos para acceder al panel de administración.';
+        } else if (
+          err.message.includes('Network') ||
+          err.message.includes('fetch')
+        ) {
           errorTitle = 'Error de conexión';
-          errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+          errorMessage =
+            'No se pudo conectar con el servidor. Verifique su conexión a internet.';
         } else if (err.message.includes('timeout')) {
           errorTitle = 'Tiempo de espera agotado';
-          errorMessage = 'La conexión tardó demasiado tiempo. Intente nuevamente.';
+          errorMessage =
+            'La conexión tardó demasiado tiempo. Intente nuevamente.';
         } else {
           errorMessage = err.message;
         }
@@ -208,4 +217,3 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     </>
   );
 }
-

@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { localsApi } from '@/api/locals/locals';
 import { Local } from '@/types/local';
+import { BulkCreateLocalPayload } from '@/types/local'; //adicionar
 import { LocalsTable } from '@/components/locals/local-table';
 import {
   ConfirmDeleteSingleDialog,
@@ -39,7 +40,11 @@ import {
   Upload,
   Trash,
   MapPin,
+  CheckCircle,
 } from 'lucide-react';
+
+import { toast } from 'sonner';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import { useToast } from '@/context/ToastContext';
 
@@ -79,14 +84,14 @@ function LocalesComponent() {
   const deleteLocalMutation = useMutation({
     mutationFn: (id: string) => localsApi.deleteLocal(id),
     onSuccess: async (_, id) => {
-      toast.success('Local Eliminado', { 
-        description: 'El local ha sido eliminado exitosamente.' 
+      toast.success('Local Eliminado', {
+        description: 'El local ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['locals'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar el local.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el local.',
       });
     },
   });
@@ -103,24 +108,25 @@ function LocalesComponent() {
       setResetSelectionTrigger((prev) => prev + 1);
     },
   });
-
-  const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation({
-    mutationFn: localsApi.bulkCreateLocals,
-    onSuccess: async () => {
-      toast.success('Locales Creados', {
-        description: 'Los locales han sido creados exitosamente.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['locals'] });
-      setShowUploadDialog(false);
-      setShowSuccess(true);
-    },
-    onError: (error: Error) => {
-      toast.error('Error en Carga Masiva', {
-        description: error.message || 'No se pudieron crear los locales.',
-      });
-    },
-  });
-
+  /** 
+    const { mutate: bulkCreateLocals, isPending: isBulkCreating } = useMutation<
+      Local[],                          // Tipo de dato que devuelve el servidor
+      Error,                            // Tipo de error
+      BulkCreateLocalPayload            // Tipo de dato que se le pasa (¡la clave!)
+    >({
+      mutationFn: localsApi.bulkCreateLocals,
+      onSuccess: async () => {
+        toast.success('Locales creados exitosamente');
+        await refetchLocals();
+        queryClient.invalidateQueries({ queryKey: ['locals'] });
+        setShowUploadDialog(false);
+        setShowSuccess(true);
+      },
+      onError: (error: Error) => {
+        toast.error('Error durante la carga masiva', { description: error.message });
+      },
+    });
+  */
   const { maxRegion, maxCount } = useMemo(() => {
     const regionCounts = localsData?.reduce(
       (acc, local) => {
@@ -161,17 +167,17 @@ function LocalesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchLocals();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 
@@ -180,7 +186,7 @@ function LocalesComponent() {
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="LOCALES" subtitle="LISTADO DE LOCALES" />
-      
+
       {/* Statistics Section */}
       <div className="flex-shrink-0">
         <div className="mb-6 flex items-center gap-4">
@@ -203,7 +209,7 @@ function LocalesComponent() {
             isLoading={isFetchingLocals}
           />
         </div>
-        
+
         <ViewToolbar
           onAddClick={() => navigate({ to: '/locales/agregar' })}
           onBulkUploadClick={() => setShowUploadDialog(true)}
@@ -260,12 +266,61 @@ function LocalesComponent() {
         ]}
         onParsedData={async (data) => {
           try {
-            bulkCreateLocals({ locals: data });
-          } catch (error) {
-            console.error(error);
+            const transformedData = data.map((item) => ({
+              local_name: item.local_name?.toString().trim(),
+              street_name: item.street_name?.toString().trim(),
+              building_number: item.building_number?.toString().trim(),
+              district: item.district?.toString().trim(),
+              province: item.province?.toString().trim(),
+              region: item.region?.toString().trim(),
+              reference: item.reference?.toString().trim(),
+              capacity: Number(item.capacity),
+              image_url: item.image_url?.toString().trim(),
+            }));
+
+            // Validación básica
+            const isValid = transformedData.every(
+              (item) =>
+                item.local_name &&
+                item.street_name &&
+                item.building_number &&
+                item.district &&
+                item.province &&
+                item.region &&
+                item.reference &&
+                !isNaN(item.capacity) &&
+                item.image_url,
+            );
+
+            if (!isValid) {
+              toast.error(
+                'Algunos registros tienen campos vacíos o inválidos.',
+              );
+              console.error('Datos inválidos:', transformedData);
+              return;
+            }
+
+            console.log(
+              'Request final:',
+              JSON.stringify({ locals: transformedData }, null, 2),
+            );
+            await localsApi.bulkCreateLocals({ locals: transformedData });
+            queryClient.invalidateQueries({ queryKey: ['locals'] });
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+          } catch (error: any) {
+            if (error instanceof Error) {
+              toast.error('Error durante la carga masiva', {
+                description: error.message,
+              });
+            } else {
+              toast.error('Error desconocido durante la carga masiva');
+            }
+            console.error('Detalle del error:', error);
           }
         }}
       />
+
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}

@@ -22,7 +22,7 @@ import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { Form, FormProvider, useForm } from 'react-hook-form';
-import { MembershipPlanForm } from '@/components/membership-plan/membership-plan-basic-form'; 
+import { MembershipPlanForm } from '@/components/membership-plan/membership-plan-basic-form';
 import { toast } from 'sonner';
 import {
   FormControl,
@@ -41,17 +41,23 @@ import {
 
 export const Route = createFileRoute('/planes-membresia/editar')({
   component: EditLocalComponent,
-})
+});
 
 function EditLocalComponent() {
   const navigate = useNavigate();
   const id =
-    typeof window !== 'undefined' ? localStorage.getItem('currentMembershipPlan') : null;
+    typeof window !== 'undefined'
+      ? localStorage.getItem('currentMembershipPlan')
+      : null;
   const queryClient = useQueryClient();
   if (!id) {
     navigate({ to: '/planes-membresia' });
   }
-  const { data: membershipPlan, isLoading, error } = useQuery({
+  const {
+    data: membershipPlan,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['membershipPlan', id],
     queryFn: () => membershipPlansApi.getMembershipPlanById(id!),
     enabled: !!id,
@@ -70,11 +76,13 @@ function EditLocalComponent() {
       membershipPlansApi.updateMembershipPlan(id!, data),
     onSuccess: () => {
       toast.success('Plan de membresía actualizado correctamente');
-      queryClient.invalidateQueries({ queryKey: ['membershipPlan', id]});
+      queryClient.invalidateQueries({ queryKey: ['membershipPlan', id] });
       navigate({ to: '/planes-membresia' });
     },
     onError: (error: any) => {
-      toast.error('Error al actualizar plan de membresía', { description: error.message });
+      toast.error('Error al actualizar plan de membresía', {
+        description: error.message,
+      });
     },
   });
 
@@ -109,7 +117,8 @@ function EditLocalComponent() {
       </div>
     );
   }
-  return (<div className="p-6 space-y-6 font-montserrat">
+  return (
+    <div className="p-6 space-y-6 font-montserrat">
       <HeaderDescriptor
         title="PLANES DE MEMBRESÍA"
         subtitle="EDITAR PLAN DE MEMBRESÍA"
@@ -126,7 +135,10 @@ function EditLocalComponent() {
       </div>
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <MembershipPlanForm mode="edit" description="Edita los datos del plan de membresía" />
+          <MembershipPlanForm
+            mode="edit"
+            description="Edita los datos del plan de membresía"
+          />
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
             <Button
               variant="outline"

@@ -33,6 +33,7 @@ import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
 import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
 import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
 import { Route as HistorialReservasCommunityIdRouteImport } from './routes/historial-reservas/$communityId'
+import { Route as MisComunidadesCommunityIdReservasHistorialRouteImport } from './routes/mis-comunidades/$communityId/reservas/historial'
 
 const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
@@ -155,6 +156,12 @@ const HistorialReservasCommunityIdRoute =
     path: '/historial-reservas/$communityId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MisComunidadesCommunityIdReservasHistorialRoute =
+  MisComunidadesCommunityIdReservasHistorialRouteImport.update({
+    id: '/$communityId/reservas/historial',
+    path: '/$communityId/reservas/historial',
+    getParentRoute: () => MisComunidadesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -205,6 +213,7 @@ export interface FileRoutesByTo {
   '/mis-comunidades': typeof MisComunidadesIndexRoute
   '/reserva': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas/': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas'
+    | '/mis-comunidades/$communityId/reservas/historial'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/reserva'
     | '/reservas'
+    | '/mis-comunidades/$communityId/reservas/historial'
   id:
     | '__root__'
     | '/'
@@ -310,6 +322,7 @@ export interface FileRouteTypes {
     | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas/'
+    | '/mis-comunidades/$communityId/reservas/historial'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -503,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistorialReservasCommunityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mis-comunidades/$communityId/reservas/historial': {
+      id: '/mis-comunidades/$communityId/reservas/historial'
+      path: '/$communityId/reservas/historial'
+      fullPath: '/mis-comunidades/$communityId/reservas/historial'
+      preLoaderRoute: typeof MisComunidadesCommunityIdReservasHistorialRouteImport
+      parentRoute: typeof MisComunidadesRoute
+    }
   }
 }
 
@@ -528,10 +548,13 @@ const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
 
 interface MisComunidadesRouteChildren {
   MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
+  MisComunidadesCommunityIdReservasHistorialRoute: typeof MisComunidadesCommunityIdReservasHistorialRoute
 }
 
 const MisComunidadesRouteChildren: MisComunidadesRouteChildren = {
   MisComunidadesIndexRoute: MisComunidadesIndexRoute,
+  MisComunidadesCommunityIdReservasHistorialRoute:
+    MisComunidadesCommunityIdReservasHistorialRoute,
 }
 
 const MisComunidadesRouteWithChildren = MisComunidadesRoute._addFileChildren(
