@@ -32,7 +32,9 @@ import { Route as ReservaLugarRouteImport } from './routes/reserva/lugar'
 import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
 import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
 import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
-import { Route as HistorialReservasCommunityIdRouteImport } from './routes/historial-reservas/$communityId'
+import { Route as MisComunidadesCommunityIdLayoutRouteImport } from './routes/mis-comunidades/$communityId/layout'
+import { Route as MisComunidadesCommunityIdReservasLayoutRouteImport } from './routes/mis-comunidades/$communityId/reservas/layout'
+import { Route as MisComunidadesCommunityIdReservasHistorialIndexRouteImport } from './routes/mis-comunidades/$communityId/reservas/historial/index'
 
 const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
@@ -149,11 +151,23 @@ const OnboardingMembresiaRoute = OnboardingMembresiaRouteImport.update({
   path: '/onboarding/membresia',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HistorialReservasCommunityIdRoute =
-  HistorialReservasCommunityIdRouteImport.update({
-    id: '/historial-reservas/$communityId',
-    path: '/historial-reservas/$communityId',
-    getParentRoute: () => rootRouteImport,
+const MisComunidadesCommunityIdLayoutRoute =
+  MisComunidadesCommunityIdLayoutRouteImport.update({
+    id: '/$communityId/layout',
+    path: '/$communityId/layout',
+    getParentRoute: () => MisComunidadesRoute,
+  } as any)
+const MisComunidadesCommunityIdReservasLayoutRoute =
+  MisComunidadesCommunityIdReservasLayoutRouteImport.update({
+    id: '/$communityId/reservas/layout',
+    path: '/$communityId/reservas/layout',
+    getParentRoute: () => MisComunidadesRoute,
+  } as any)
+const MisComunidadesCommunityIdReservasHistorialIndexRoute =
+  MisComunidadesCommunityIdReservasHistorialIndexRouteImport.update({
+    id: '/$communityId/reservas/historial/',
+    path: '/$communityId/reservas/historial/',
+    getParentRoute: () => MisComunidadesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -172,7 +186,6 @@ export interface FileRoutesByFullPath {
   '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
-  '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
   '/reserva/horario': typeof ReservaHorarioRoute
@@ -181,6 +194,9 @@ export interface FileRoutesByFullPath {
   '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/layout': typeof MisComunidadesCommunityIdLayoutRoute
+  '/mis-comunidades/$communityId/reservas/layout': typeof MisComunidadesCommunityIdReservasLayoutRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -196,7 +212,6 @@ export interface FileRoutesByTo {
   '/membresia': typeof MembresiaRoute
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
-  '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
   '/reserva/horario': typeof ReservaHorarioRoute
@@ -205,6 +220,9 @@ export interface FileRoutesByTo {
   '/mis-comunidades': typeof MisComunidadesIndexRoute
   '/reserva': typeof ReservaIndexRoute
   '/reservas': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/layout': typeof MisComunidadesCommunityIdLayoutRoute
+  '/mis-comunidades/$communityId/reservas/layout': typeof MisComunidadesCommunityIdReservasLayoutRoute
+  '/mis-comunidades/$communityId/reservas/historial': typeof MisComunidadesCommunityIdReservasHistorialIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -223,7 +241,6 @@ export interface FileRoutesById {
   '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
-  '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
   '/reserva/horario': typeof ReservaHorarioRoute
@@ -232,6 +249,9 @@ export interface FileRoutesById {
   '/mis-comunidades/': typeof MisComunidadesIndexRoute
   '/reserva/': typeof ReservaIndexRoute
   '/reservas/': typeof ReservasIndexRoute
+  '/mis-comunidades/$communityId/layout': typeof MisComunidadesCommunityIdLayoutRoute
+  '/mis-comunidades/$communityId/reservas/layout': typeof MisComunidadesCommunityIdReservasLayoutRoute
+  '/mis-comunidades/$communityId/reservas/historial/': typeof MisComunidadesCommunityIdReservasHistorialIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,7 +271,6 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/perfil'
     | '/precios'
-    | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
     | '/reserva/horario'
@@ -260,6 +279,9 @@ export interface FileRouteTypes {
     | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas'
+    | '/mis-comunidades/$communityId/layout'
+    | '/mis-comunidades/$communityId/reservas/layout'
+    | '/mis-comunidades/$communityId/reservas/historial'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -275,7 +297,6 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/perfil'
     | '/precios'
-    | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
     | '/reserva/horario'
@@ -284,6 +305,9 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/reserva'
     | '/reservas'
+    | '/mis-comunidades/$communityId/layout'
+    | '/mis-comunidades/$communityId/reservas/layout'
+    | '/mis-comunidades/$communityId/reservas/historial'
   id:
     | '__root__'
     | '/'
@@ -301,7 +325,6 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/perfil'
     | '/precios'
-    | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
     | '/reserva/horario'
@@ -310,6 +333,9 @@ export interface FileRouteTypes {
     | '/mis-comunidades/'
     | '/reserva/'
     | '/reservas/'
+    | '/mis-comunidades/$communityId/layout'
+    | '/mis-comunidades/$communityId/reservas/layout'
+    | '/mis-comunidades/$communityId/reservas/historial/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -328,7 +354,6 @@ export interface RootRouteChildren {
   MisComunidadesRoute: typeof MisComunidadesRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   PreciosRoute: typeof PreciosRoute
-  HistorialReservasCommunityIdRoute: typeof HistorialReservasCommunityIdRoute
   OnboardingMembresiaRoute: typeof OnboardingMembresiaRoute
   ReservasIndexRoute: typeof ReservasIndexRoute
 }
@@ -496,12 +521,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingMembresiaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/historial-reservas/$communityId': {
-      id: '/historial-reservas/$communityId'
-      path: '/historial-reservas/$communityId'
-      fullPath: '/historial-reservas/$communityId'
-      preLoaderRoute: typeof HistorialReservasCommunityIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/mis-comunidades/$communityId/layout': {
+      id: '/mis-comunidades/$communityId/layout'
+      path: '/$communityId/layout'
+      fullPath: '/mis-comunidades/$communityId/layout'
+      preLoaderRoute: typeof MisComunidadesCommunityIdLayoutRouteImport
+      parentRoute: typeof MisComunidadesRoute
+    }
+    '/mis-comunidades/$communityId/reservas/layout': {
+      id: '/mis-comunidades/$communityId/reservas/layout'
+      path: '/$communityId/reservas/layout'
+      fullPath: '/mis-comunidades/$communityId/reservas/layout'
+      preLoaderRoute: typeof MisComunidadesCommunityIdReservasLayoutRouteImport
+      parentRoute: typeof MisComunidadesRoute
+    }
+    '/mis-comunidades/$communityId/reservas/historial/': {
+      id: '/mis-comunidades/$communityId/reservas/historial/'
+      path: '/$communityId/reservas/historial'
+      fullPath: '/mis-comunidades/$communityId/reservas/historial'
+      preLoaderRoute: typeof MisComunidadesCommunityIdReservasHistorialIndexRouteImport
+      parentRoute: typeof MisComunidadesRoute
     }
   }
 }
@@ -528,10 +567,18 @@ const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
 
 interface MisComunidadesRouteChildren {
   MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
+  MisComunidadesCommunityIdLayoutRoute: typeof MisComunidadesCommunityIdLayoutRoute
+  MisComunidadesCommunityIdReservasLayoutRoute: typeof MisComunidadesCommunityIdReservasLayoutRoute
+  MisComunidadesCommunityIdReservasHistorialIndexRoute: typeof MisComunidadesCommunityIdReservasHistorialIndexRoute
 }
 
 const MisComunidadesRouteChildren: MisComunidadesRouteChildren = {
   MisComunidadesIndexRoute: MisComunidadesIndexRoute,
+  MisComunidadesCommunityIdLayoutRoute: MisComunidadesCommunityIdLayoutRoute,
+  MisComunidadesCommunityIdReservasLayoutRoute:
+    MisComunidadesCommunityIdReservasLayoutRoute,
+  MisComunidadesCommunityIdReservasHistorialIndexRoute:
+    MisComunidadesCommunityIdReservasHistorialIndexRoute,
 }
 
 const MisComunidadesRouteWithChildren = MisComunidadesRoute._addFileChildren(
@@ -554,7 +601,6 @@ const rootRouteChildren: RootRouteChildren = {
   MisComunidadesRoute: MisComunidadesRouteWithChildren,
   PerfilRoute: PerfilRoute,
   PreciosRoute: PreciosRoute,
-  HistorialReservasCommunityIdRoute: HistorialReservasCommunityIdRoute,
   OnboardingMembresiaRoute: OnboardingMembresiaRoute,
   ReservasIndexRoute: ReservasIndexRoute,
 }
