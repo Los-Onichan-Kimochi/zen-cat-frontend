@@ -91,8 +91,10 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
             >
               Nueva reserva
             </Button>
-            <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
-            onClick={handleViewReservation}>
+            <Button
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              onClick={handleViewReservation}
+            >
               Ver reservas
             </Button>
             <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
