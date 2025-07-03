@@ -2,15 +2,15 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   MembershipOnboardingState,
   MembershipPlan,
-  OnboardingData,
   PaymentData,
   Community,
 } from '@/types/membership';
+import { CreateOnboardingRequest } from '@/types/onboarding';
 
 interface MembershipOnboardingContextType {
   state: MembershipOnboardingState;
   setSelectedPlan: (plan: MembershipPlan) => void;
-  setOnboardingData: (data: OnboardingData) => void;
+  setOnboardingData: (data: CreateOnboardingRequest) => void;
   setPaymentData: (data: PaymentData) => void;
   setCommunity: (community: Community) => void;
   nextStep: () => void;
@@ -38,7 +38,7 @@ export function MembershipOnboardingProvider({
     setState((prev) => ({ ...prev, selectedPlan: plan }));
   };
 
-  const setOnboardingData = (data: OnboardingData) => {
+  const setOnboardingData = (data: CreateOnboardingRequest) => {
     setState((prev) => ({ ...prev, onboardingData: data }));
   };
 

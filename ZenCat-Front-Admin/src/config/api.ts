@@ -110,6 +110,12 @@ export const API_ENDPOINTS = {
     BY_IDS: (communityId: string, planId: string) =>
       `/community-plan/${communityId}/${planId}/`,
   },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
+  },
 } as const;
 
 // HTTP Status Codes

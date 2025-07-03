@@ -39,6 +39,8 @@ const mapBackendUserToUser = (backendUser: any): User => {
           phoneNumber: backendUser.onboarding.phone_number,
           birthDate: backendUser.onboarding.birth_date,
           gender: backendUser.onboarding.gender,
+          region: backendUser.onboarding.region,
+          province: backendUser.onboarding.province,
           city: backendUser.onboarding.city,
           postalCode: backendUser.onboarding.postal_code,
           district: backendUser.onboarding.district,
@@ -78,6 +80,8 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
       phone_number: payload.onboarding.phoneNumber,
       birth_date: formattedBirthDate,
       gender: payload.onboarding.gender,
+      region: payload.onboarding.region,
+      province: payload.onboarding.province,
       city: payload.onboarding.city,
       postal_code: payload.onboarding.postalCode,
       district: payload.onboarding.district,
@@ -117,6 +121,8 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
       phone_number: payload.onboarding.phoneNumber,
       birth_date: formattedBirthDate,
       gender: payload.onboarding.gender,
+      region: payload.onboarding.region,
+      province: payload.onboarding.province,
       city: payload.onboarding.city,
       postal_code: payload.onboarding.postalCode,
       district: payload.onboarding.district,
@@ -151,6 +157,12 @@ const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
   }
   if (onboardingData.gender) {
     backendPayload.gender = onboardingData.gender;
+  }
+  if (onboardingData.region) {
+    backendPayload.region = onboardingData.region;
+  }
+  if (onboardingData.province) {
+    backendPayload.province = onboardingData.province;
   }
   if (onboardingData.city) {
     backendPayload.city = onboardingData.city;
