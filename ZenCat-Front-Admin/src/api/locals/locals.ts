@@ -62,5 +62,6 @@ export const localsApi = {
       throw new Error(text);
     }
     return response.json();
-  },
+  }
+
 };
