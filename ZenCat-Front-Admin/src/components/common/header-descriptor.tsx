@@ -11,7 +11,7 @@ const HeaderDescriptor: React.FC<HeaderDescriptorProps> = ({
   subtitle,
 }) => {
   return (
-    <div className="mb-8 relative inline-block">
+    <div className="mb-2 relative inline-block">
       <h1 className="font-montserrat text-5xl font-black text-black m-0 p-0 pb-2.5 inline-block tracking-wide">
         {title}
       </h1>
@@ -19,7 +19,7 @@ const HeaderDescriptor: React.FC<HeaderDescriptorProps> = ({
       <div className="my-2 w-[40%] h-[5px] bg-black"></div>
 
       {subtitle && (
-        <p className="font-montserrat text-xl font-extrabold text-black mt-3 tracking-wider">
+        <p className="font-montserrat text-xl font-extrabold text-black tracking-wider">
           {subtitle}
         </p>
       )}

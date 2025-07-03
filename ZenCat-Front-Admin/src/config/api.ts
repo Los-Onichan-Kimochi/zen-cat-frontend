@@ -110,6 +110,12 @@ export const API_ENDPOINTS = {
     BY_IDS: (communityId: string, planId: string) =>
       `/community-plan/${communityId}/${planId}/`,
   },
+
+  // Report endpoints
+  REPORTS: {
+    SERVICES: '/reports/services',
+    // Aquí podemos agregar mas si da el tiempo :c
+  },
 } as const;
 
 // HTTP Status Codes
