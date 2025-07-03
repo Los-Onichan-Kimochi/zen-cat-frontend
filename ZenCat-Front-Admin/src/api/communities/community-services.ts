@@ -31,7 +31,7 @@ export const communityServicesApi = {
     payload: BulkDeleteCommunityServicePayload,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.COMMUNITY_PLANS.BULK_DELETE,
+      API_ENDPOINTS.COMMUNITY_SERVICES.BULK_DELETE,
       payload,
     );
   },

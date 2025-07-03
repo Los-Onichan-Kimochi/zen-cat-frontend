@@ -190,15 +190,22 @@ function EditCommunityPage() {
   });
 
   const bulkDeleteServiceMutation = useMutation({
-    mutationFn: (ids: string[]) =>
-      communityServicesApi.bulkDeleteCommunityServices({
-        community_services: ids,
-      }),
-    onSuccess: (_, ids) => {
+    mutationFn: (serviceIds: string[]) => {
+      const payload = {
+        community_services: serviceIds.map((serviceId) => ({
+          community_id: id,
+          service_id: serviceId,
+        })),
+      };
+      return communityServicesApi.bulkDeleteCommunityServices(payload);
+    },
+    onSuccess: (_, serviceIds) => {
       toast.success('Servicios Desvinculados', {
-        description: `${ids.length} servicios desvinculados exitosamente.`,
+        description: `${serviceIds.length} servicios desvinculados exitosamente.`,
       });
-      setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedServices((prev) =>
+        prev.filter((s) => !serviceIds.includes(s.id)),
+      );
       queryClient.invalidateQueries({ queryKey: ['community-services', id] });
     },
     onError: (err) => {
