@@ -160,6 +160,7 @@ function EditLocalComponent() {
       toast.success('Local Actualizado', {
         description: 'El local ha sido actualizado exitosamente.',
       });
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
       queryClient.invalidateQueries({ queryKey: ['local', id] });
       //setIsEditing(false);
       navigate({ to: '/locales' });
