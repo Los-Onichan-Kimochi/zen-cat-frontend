@@ -236,16 +236,23 @@ function EditCommunityPage() {
   });
 
   const bulkDeleteMembershipPlanMutation = useMutation({
-    mutationFn: (ids: string[]) =>
-      communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({
-        community_plans: ids,
-      }),
-    onSuccess: (_, ids) => {
+    mutationFn: (planIds: string[]) => {
+      const payload = {
+        community_plans: planIds.map((planId) => ({
+          community_id: id,
+          plan_id: planId,
+        })),
+      };
+      return communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans(
+        payload,
+      );
+    },
+    onSuccess: (_, planIds) => {
       toast.success('Planes Desvinculados', {
-        description: `${ids.length} planes desvinculados exitosamente.`,
+        description: `${planIds.length} planes desvinculados exitosamente.`,
       });
       setSelectedMembershipPlans((prev) =>
-        prev.filter((p) => !ids.includes(p.id)),
+        prev.filter((p) => !planIds.includes(p.id)),
       );
       queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
     },
