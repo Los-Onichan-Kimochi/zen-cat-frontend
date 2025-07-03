@@ -213,11 +213,7 @@ function AddCommunityServicePageComponent() {
       <HeaderDescriptor title="COMUNIDADES" subtitle="AGREGAR SERVICIOS" />
 
       <div className="mb-4">
-        <Button
-          variant="outline"
-          size="default"
-          onClick={handleCancel}
-        >
+        <Button variant="outline" size="default" onClick={handleCancel}>
           <ChevronLeft className="w-5 h-5" />
           Volver
         </Button>

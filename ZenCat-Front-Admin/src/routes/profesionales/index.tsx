@@ -345,8 +345,6 @@ function ProfesionalesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      
     </div>
   );
 }

@@ -137,8 +137,8 @@ function EditCommunityPage() {
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
-      toast.error('Error al Actualizar', { 
-        description: err.message || 'No se pudo actualizar la comunidad.' 
+      toast.error('Error al Actualizar', {
+        description: err.message || 'No se pudo actualizar la comunidad.',
       });
     },
   });

@@ -97,7 +97,8 @@ export const API_ENDPOINTS = {
     BASE: '/community-service/',
     BULK_CREATE: '/community-service/bulk-create/',
     BULK_DELETE: '/community-service/bulk-delete/',
-    BY_COMMUNITY_ID: (communityId: string) => `/community-service/${communityId}/`,
+    BY_COMMUNITY_ID: (communityId: string) =>
+      `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
   },

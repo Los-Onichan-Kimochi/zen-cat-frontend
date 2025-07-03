@@ -56,7 +56,8 @@ export const communityServicesApi = {
   },
 
   getServicesByCommunityId: async (communityId: string): Promise<Service[]> => {
-    const endpoint = API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId);
+    const endpoint =
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId);
     const data = await apiClient.get<any>(endpoint);
 
     if (data && Array.isArray(data.services)) {
@@ -64,6 +65,8 @@ export const communityServicesApi = {
     } else if (Array.isArray(data)) {
       return data;
     }
-    throw new Error('Unexpected data structure from services by community ID API');
+    throw new Error(
+      'Unexpected data structure from services by community ID API',
+    );
   },
 };

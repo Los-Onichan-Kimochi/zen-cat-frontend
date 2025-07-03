@@ -85,49 +85,58 @@ export const serviceProfessionalApi = {
   fetchFilteredProfessionals: async (
     serviceId: string,
     isVirtual: boolean,
-    professionalApi = professionalsApi
+    professionalApi = professionalsApi,
   ): Promise<Professional[]> => {
     try {
-      console.log(`Fetching filtered professionals for service ${serviceId}, isVirtual: ${isVirtual}`);
+      console.log(
+        `Fetching filtered professionals for service ${serviceId}, isVirtual: ${isVirtual}`,
+      );
       const professionals: Professional[] = [];
       // 1. Get service-professional associations
-      if( isVirtual ) {
-        const serviceProfessionals = await serviceProfessionalApi.fetchServiceProfessionals({
-          serviceId: serviceId
-        });
-        
+      if (isVirtual) {
+        const serviceProfessionals =
+          await serviceProfessionalApi.fetchServiceProfessionals({
+            serviceId: serviceId,
+          });
+
         // 2. Extract professional IDs
-        const professionalIds = serviceProfessionals.map(sp => sp.professional_id);
-        console.log(`Found ${professionalIds.length} professionals associated with service`);
-        
+        const professionalIds = serviceProfessionals.map(
+          (sp) => sp.professional_id,
+        );
+        console.log(
+          `Found ${professionalIds.length} professionals associated with service`,
+        );
+
         if (professionalIds.length === 0) {
           return [];
         }
-        
+
         // 3. Get detailed professional information
-        
+
         const filteredOutProfessionals: Professional[] = [];
-        
+
         for (const id of professionalIds) {
           try {
             const professional = await professionalApi.getProfessionalById(id);
-            
+
             // 4. For non-virtual services, filter out MEDIC type professionals
-            if ( professional.type == 'MEDIC') {
+            if (professional.type == 'MEDIC') {
               professionals.push(professional);
             } else {
               filteredOutProfessionals.push(professional);
-              console.log(`Filtered out professional ${professional.name} (${professional.id}) of type ${professional.type} for non-virtual service`);
+              console.log(
+                `Filtered out professional ${professional.name} (${professional.id}) of type ${professional.type} for non-virtual service`,
+              );
             }
           } catch (error) {
             console.error(`Error fetching professional ${id}:`, error);
           }
         }
-        
-        console.log(`Returning ${professionals.length} professionals, filtered out ${filteredOutProfessionals.length} MEDIC professionals`);
-        
-      }
-      else {
+
+        console.log(
+          `Returning ${professionals.length} professionals, filtered out ${filteredOutProfessionals.length} MEDIC professionals`,
+        );
+      } else {
         // For non-virtual services, fetch all professionals
         const allProfessionals = await professionalApi.getProfessionals();
         console.log(`Fetched ${allProfessionals.length} total professionals`);
@@ -137,17 +146,21 @@ export const serviceProfessionalApi = {
           if (professional.type !== 'MEDIC') {
             professionals.push(professional);
           } else {
-            console.log(`Filtered out professional ${professional.name} (${professional.id}) of type ${professional.type}`);
+            console.log(
+              `Filtered out professional ${professional.name} (${professional.id}) of type ${professional.type}`,
+            );
           }
         }
-        
-        console.log(`Returning ${professionals.length} professionals after filtering`);
+
+        console.log(
+          `Returning ${professionals.length} professionals after filtering`,
+        );
       }
 
       return professionals;
     } catch (error) {
-      console.error("Error fetching filtered professionals:", error);
+      console.error('Error fetching filtered professionals:', error);
       return [];
     }
-  }
+  },
 };
