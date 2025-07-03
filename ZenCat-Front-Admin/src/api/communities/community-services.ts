@@ -3,6 +3,7 @@ import {
   BulkCreateCommunityServicePayload,
   BulkDeleteCommunityServicePayload,
 } from '@/types/community-service';
+import { Service } from '@/types/service';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
@@ -52,5 +53,17 @@ export const communityServicesApi = {
       return data;
     }
     throw new Error('Unexpected data structure from community-service API');
+  },
+
+  getServicesByCommunityId: async (communityId: string): Promise<Service[]> => {
+    const endpoint = API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId);
+    const data = await apiClient.get<any>(endpoint);
+
+    if (data && Array.isArray(data.services)) {
+      return data.services;
+    } else if (Array.isArray(data)) {
+      return data;
+    }
+    throw new Error('Unexpected data structure from services by community ID API');
   },
 };

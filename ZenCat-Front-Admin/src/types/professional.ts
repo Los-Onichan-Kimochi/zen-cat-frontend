@@ -6,9 +6,7 @@ export enum ProfessionalSpecialty {
 
 // Nuevo enum para el campo 'type'
 export enum ProfessionalType {
-  NUTRITIONIST = 'Nutricionista',
-  COACH = 'Entrenador',
-  MEDIC = 'Médico',
+  MEDIC = 'MEDIC',
   GYM_TRAINER = 'GYM_TRAINER',
   YOGA_TRAINER = 'YOGA_TRAINER',
 }
