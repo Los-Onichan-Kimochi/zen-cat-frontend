@@ -12,7 +12,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { UploadCloud } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocalForm } from '@/hooks/use-local-basic-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,8 +49,8 @@ export function SeeLocalPageComponent() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['local', id],
-    queryFn: () => localsApi.getLocalById(id!),
+    queryKey: ['local', id, 'withImage'],
+    queryFn: () => localsApi.getLocalWithImage(id!),
   });
   const [isEditing, setIsEditing] = useState(false);
   // 1. Siempre inicializa el formulario, aunque local sea undefined
@@ -64,6 +64,13 @@ export function SeeLocalPageComponent() {
       localForm.form.reset(local);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [local]);
+
+  const imagePreviewUrl = useMemo(() => {
+    if (local && local.image_bytes) {
+      return `data:image/jpeg;base64,${local.image_bytes}`;
+    }
+    return null;
   }, [local]);
 
   const updateLocalMutation = useMutation({
@@ -129,7 +136,7 @@ export function SeeLocalPageComponent() {
           className="mb-4"
         >
           <LocalForm
-            imagePreview={local.image_url}
+            imagePreview={imagePreviewUrl}
             handleImageChange={() => {}}
             isReadOnly={!isEditing}
             description={

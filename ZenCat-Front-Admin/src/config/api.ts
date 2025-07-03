@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/local/${id}/`,
     BULK_CREATE: '/local/bulk-create/',
     BULK_DELETE: '/local/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/local/${id}/image/`,
   },
 
   // Plan endpoints
