@@ -8,8 +8,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Calendar, Clock, Users, Activity } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { sessionsApi } from '@/api/sessions/sessions';
+import { convertLimaToUTC } from '@/api/sessions/sessions';
 import { Session, SessionState } from '@/types/session';
 import { Button } from '@/components/ui/button';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { SessionsTable } from '@/components/sessions/table';
 import { getSessionCurrentState } from '@/utils/session-status';
+//adicionales
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+import { professionalsApi } from '@/api/professionals/professionals'; // ajusta el path si es diferente
+import { Professional } from '@/types/professional';
+import { Label } from '@/components/ui/label';
+//fin
 
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
@@ -35,6 +49,31 @@ interface CalculatedCounts {
   [SessionState.RESCHEDULED]: number;
   total: number;
 }
+// Funciones auxiliares – van fuera del componente
+function parseExcelDate(input: any): string | null {
+  if (!input) return null;
+
+  if (!isNaN(input) && typeof input !== 'string') {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+    const date = new Date(excelEpoch.getTime() + input * 86400000);
+    return date.toISOString().split('T')[0];
+  }
+
+  if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
+    return input;
+  }
+
+  if (typeof input === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [day, month, year] = input.split('/');
+    return `${year}-${month}-${day}`;
+  }
+
+  return null;
+}
+
+function isValidTime(time: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+}
 
 function SesionesComponent() {
   const navigate = useNavigate();
@@ -44,6 +83,17 @@ function SesionesComponent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
 
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  //adicion -------------------------------------------------------------
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<
+    string | null
+  >(null);
+  const { data: professionals = [] } = useQuery<Professional[]>({
+    queryKey: ['professionals'],
+    queryFn: professionalsApi.getProfessionals,
+  });
+  //fin ---------------------------------------------------------------
   const {
     data: sessionsData,
     isLoading: isLoadingSessions,
@@ -64,14 +114,14 @@ function SesionesComponent() {
   >({
     mutationFn: (id) => sessionsApi.deleteSession(id),
     onSuccess: (_, id) => {
-      toast.success('Sesión Eliminada', { 
-        description: 'La sesión ha sido eliminada exitosamente.' 
+      toast.success('Sesión Eliminada', {
+        description: 'La sesión ha sido eliminada exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar la sesión.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar la sesión.',
       });
     },
   });
@@ -87,8 +137,8 @@ function SesionesComponent() {
         queryClient.invalidateQueries({ queryKey: ['sessions'] });
       },
       onError: (err) => {
-        toast.error('Error al Eliminar Sesiones', { 
-          description: err.message || 'No se pudieron eliminar las sesiones.' 
+        toast.error('Error al Eliminar Sesiones', {
+          description: err.message || 'No se pudieron eliminar las sesiones.',
         });
       },
     },
@@ -136,20 +186,20 @@ function SesionesComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const [sessionsResult, countsResult] = await Promise.all([
       refetchSessions(),
-      refetchCounts()
+      refetchCounts(),
     ]);
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return { sessionsResult, countsResult };
   };
 
@@ -209,7 +259,7 @@ function SesionesComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/sesiones/agregar' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
@@ -222,16 +272,16 @@ function SesionesComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-                  <SessionsTable
-          data={sessionsData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-          onRefresh={handleRefresh}
-          isRefreshing={isFetchingSessions}
-        />
+          <SessionsTable
+            data={sessionsData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingSessions}
+          />
         )}
       </div>
 
@@ -267,6 +317,129 @@ function SesionesComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <>
+        <BulkCreateDialog
+          open={showUploadDialog}
+          onOpenChange={setShowUploadDialog}
+          title="Carga Masiva de Sesiones"
+          expectedExcelColumns={[
+            'Título',
+            'Fecha',
+            'Hora de inicio',
+            'Hora de fin',
+            'Capacidad',
+            'Enlace de sesión',
+          ]}
+          dbFieldNames={[
+            'title',
+            'date',
+            'start_time',
+            'end_time',
+            'capacity',
+            'session_link',
+          ]}
+          onParsedData={async (data) => {
+            if (!selectedProfessionalId) {
+              toast.error('Selecciona un profesional antes de cargar.');
+              return;
+            }
+
+            try {
+              const sessions = data.map((item: any, index: number) => {
+                const rawDate = item.date;
+                let dateString = '';
+
+                // Soporte a Date, string, o número Excel
+                if (rawDate instanceof Date) {
+                  dateString = rawDate.toISOString().split('T')[0];
+                } else if (typeof rawDate === 'number') {
+                  const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                  const date = new Date(
+                    excelEpoch.getTime() + rawDate * 86400000,
+                  );
+                  dateString = date.toISOString().split('T')[0];
+                } else if (typeof rawDate === 'string') {
+                  const parts = rawDate.includes('/')
+                    ? rawDate.split('/')
+                    : rawDate.split('-');
+                  if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                      dateString = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                    } else {
+                      dateString = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                    }
+                  } else {
+                    throw new Error(`Formato de fecha inválido: ${rawDate}`);
+                  }
+                } else {
+                  throw new Error(
+                    `Tipo de dato de fecha no soportado: ${rawDate}`,
+                  );
+                }
+
+                const startTimeStr = String(item.start_time)
+                  .padStart(5, '0')
+                  .trim();
+                const endTimeStr = String(item.end_time)
+                  .padStart(5, '0')
+                  .trim();
+
+                if (
+                  !/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTimeStr) ||
+                  !/^([01]\d|2[0-3]):([0-5]\d)$/.test(endTimeStr)
+                ) {
+                  throw new Error(
+                    `Formato de hora inválido en fila ${index + 2}`,
+                  );
+                }
+
+                return {
+                  title: item.title,
+                  date: convertLimaToUTC(`${dateString}T00:00:00`),
+                  start_time: convertLimaToUTC(
+                    `${dateString}T${startTimeStr}:00`,
+                  ),
+                  end_time: convertLimaToUTC(`${dateString}T${endTimeStr}:00`),
+                  capacity: Number(item.capacity),
+                  session_link: item.session_link || null,
+                  professional_id: selectedProfessionalId,
+                };
+              });
+
+              await sessionsApi.bulkCreateSessions({ sessions });
+              toast.success('Sesiones creadas correctamente');
+              queryClient.invalidateQueries({ queryKey: ['sessions'] });
+            } catch (err: any) {
+              console.error('Detalles del error bulk:', err);
+              toast.error('Error al crear sesiones', {
+                description: err.message || 'Error bulk creating sessions',
+              });
+            }
+          }}
+        >
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Selecciona un profesional
+            </label>
+            <Select
+              value={selectedProfessionalId || ''}
+              onValueChange={setSelectedProfessionalId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Profesional" />
+              </SelectTrigger>
+              <SelectContent>
+                {professionals.map((pro) => (
+                  <SelectItem key={pro.id} value={pro.id}>
+                    {pro.name} {pro.first_last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </BulkCreateDialog>
+      </>
     </div>
   );
 }

@@ -130,7 +130,8 @@ export function SeeServicePageComponent() {
         professionalId,
       );
       toast.success('Profesional Desvinculado', {
-        description: 'El profesional ha sido desvinculado del servicio exitosamente.',
+        description:
+          'El profesional ha sido desvinculado del servicio exitosamente.',
       });
       queryClient.invalidateQueries({
         queryKey: ['service-professionals', id],

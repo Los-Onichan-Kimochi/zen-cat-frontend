@@ -119,8 +119,6 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       email: decodedToken.email,
       imageUrl: decodedToken.picture,
     });
-    
-
 
     navigate({ to: '/' });
   };

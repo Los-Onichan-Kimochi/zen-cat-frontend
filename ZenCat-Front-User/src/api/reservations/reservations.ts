@@ -2,7 +2,6 @@ import {
   Reservation,
   CreateReservationRequest,
   UpdateReservationRequest,
-  BulkDeleteReservationPayload,
 } from '@/types/reservation';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
@@ -41,14 +40,19 @@ export const reservationsApi = {
 
   // Get a specific reservation by ID
   getReservation: async (reservationId: string): Promise<Reservation> => {
-    return apiClient.get<Reservation>(API_ENDPOINTS.RESERVATIONS.BY_ID(reservationId));
+    return apiClient.get<Reservation>(
+      API_ENDPOINTS.RESERVATIONS.BY_ID(reservationId),
+    );
   },
 
   // Create a new reservation
   createReservation: async (
     request: CreateReservationRequest,
   ): Promise<Reservation> => {
-    return apiClient.post<Reservation>(API_ENDPOINTS.RESERVATIONS.BASE, request);
+    return apiClient.post<Reservation>(
+      API_ENDPOINTS.RESERVATIONS.BASE,
+      request,
+    );
   },
 
   // Update a reservation
@@ -64,13 +68,18 @@ export const reservationsApi = {
 
   // Delete a reservation
   deleteReservation: async (reservationId: string): Promise<void> => {
-    return apiClient.delete<void>(API_ENDPOINTS.RESERVATIONS.BY_ID(reservationId));
+    return apiClient.delete<void>(
+      API_ENDPOINTS.RESERVATIONS.BY_ID(reservationId),
+    );
   },
 
   // Bulk delete reservations
   bulkDeleteReservations: async (
     payload: BulkDeleteReservationPayload,
   ): Promise<void> => {
-    return apiClient.delete<void>(API_ENDPOINTS.RESERVATIONS.BULK_DELETE, payload);
+    return apiClient.delete<void>(
+      API_ENDPOINTS.RESERVATIONS.BULK_DELETE,
+      payload,
+    );
   },
 };

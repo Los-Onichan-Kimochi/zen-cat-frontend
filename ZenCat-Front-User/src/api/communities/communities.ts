@@ -8,6 +8,7 @@ export const communitiesApi = {
       API_ENDPOINTS.COMMUNITIES.BASE,
     );
     if (data && Array.isArray(data.communities)) {
+      console.log('Data from API (communities array):', data.communities); // <-- ADD THIS LOG
       return data.communities;
     } else if (Array.isArray(data)) {
       return data;

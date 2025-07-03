@@ -76,7 +76,10 @@ export const sessionsApi = {
   getAvailability: async (
     request: AvailabilityRequest,
   ): Promise<AvailabilityResult> => {
-    return apiClient.post<AvailabilityResult>('/session/availability/', request);
+    return apiClient.post<AvailabilityResult>(
+      '/session/availability/',
+      request,
+    );
   },
 
   // Check for conflicts

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
 import { useNavigate } from '@tanstack/react-router';
+import { API_CONFIG } from '@/config/api';
 
 export function ForgotForm() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ export function ForgotForm() {
     setError(null);
     setIsModalOpen(false);
     try {
-      const response = await fetch('http://localhost:8098/forgot-password/', {
+      const response = await fetch(API_CONFIG.BASE_URL + '/forgot-password/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,9 +34,9 @@ export function ForgotForm() {
         throw new Error(errBody?.message || 'Error al crear usuario');
       }
       const json = await response.json();
-      localStorage.setItem("userPIN", json.pin);
+      localStorage.setItem('userPIN', json.pin);
       localStorage.setItem('pendingEmail', email);
-      navigate({ to: "/pin" }); // Redirige si todo va bien
+      navigate({ to: '/pin' }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido al intentar ingresar correo.';

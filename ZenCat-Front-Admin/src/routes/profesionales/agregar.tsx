@@ -36,7 +36,7 @@ import { useState } from 'react';
 import { Loader2, UploadCloud } from 'lucide-react';
 import '../../index.css';
 
-export const Route = createFileRoute('/profesionales/nuevo')({
+export const Route = createFileRoute('/profesionales/agregar')({
   component: AddProfessionalPageComponent,
 });
 
@@ -114,7 +114,7 @@ function AddProfessionalPageComponent() {
   };
 
   const onSubmit = async (data: ProfessionalFormData) => {
-    let imageUrl = 'https://via.placeholder.com/150';
+    const imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.info('Imagen (simulada)', {

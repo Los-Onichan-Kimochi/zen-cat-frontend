@@ -12,7 +12,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { UploadCloud } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocalForm } from '@/hooks/use-local-basic-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,9 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { localsApi } from '@/api/locals/locals';
-
+import { Form, FormProvider, useForm } from 'react-hook-form';
+import { LocalForm } from '@/components/locals/local-basic-form';
+import { toast } from 'sonner';
 const localSearchSchema = z.object({
   id: z.string(),
 });
@@ -38,6 +40,7 @@ export function SeeLocalPageComponent() {
   //const { id } = Route.useSearch(); //as z.infer<typeof localSearchSchema>;
   const id =
     typeof window !== 'undefined' ? localStorage.getItem('currentLocal') : null;
+  const queryClient = useQueryClient();
   if (!id) {
     navigate({ to: '/locales' });
   }
@@ -49,6 +52,40 @@ export function SeeLocalPageComponent() {
     queryKey: ['local', id],
     queryFn: () => localsApi.getLocalById(id!),
   });
+  const [isEditing, setIsEditing] = useState(false);
+  // 1. Siempre inicializa el formulario, aunque local sea undefined
+  const localForm = useLocalForm({
+    defaultValues: local || {},
+  });
+
+  // 2. Cuando llega la data, resetea el formulario
+  useEffect(() => {
+    if (local) {
+      localForm.form.reset(local);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [local]);
+
+  const updateLocalMutation = useMutation({
+    mutationFn: (data: any) => localsApi.updateLocal(id!, data),
+    onSuccess: () => {
+      toast.success('Local Actualizado', {
+        description: 'El local ha sido actualizado exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['locals', id] });
+      navigate({ to: '/locales' });
+    },
+    onError: (error) => {
+      toast.error('Error al actualizar local', {
+        description: error.message || 'No se pudo actualizar el local.',
+      });
+    },
+  });
+  const handleSave = async (data: any) => {
+    //console.log('handleSave ejecutado', data);
+    //updateLocalMutation.mutate(data);
+    setIsEditing(false);
+  };
   if (isLoading) {
     return (
       <div className="p-6 h-full flex items-center justify-center">
@@ -56,6 +93,7 @@ export function SeeLocalPageComponent() {
       </div>
     );
   }
+
   if (error || !local) {
     return (
       <div className="p-6 h-full">
@@ -75,10 +113,73 @@ export function SeeLocalPageComponent() {
       </div>
     );
   }
-
-  const isVirtual = !local.id;
   return (
     <div className="p-6 h-full flex flex-col font-montserrat">
+      <HeaderDescriptor
+        title="LOCALES"
+        subtitle={!isEditing ? 'Visualización del local' : 'Editar local'}
+      />
+      <FormProvider {...localForm.form}>
+        <form
+          onSubmit={
+            isEditing
+              ? localForm.form.handleSubmit(handleSave)
+              : (e) => e.preventDefault()
+          }
+          className="mb-4"
+        >
+          <LocalForm
+            imagePreview={local.image_url}
+            handleImageChange={() => {}}
+            isReadOnly={!isEditing}
+            description={
+              !isEditing
+                ? 'Detalles del local seleccionado'
+                : 'Edite los datos del local y guarde los cambios'
+            }
+          />
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate({ to: '/locales' })}
+              className="h-10 w-30 text-base"
+            >
+              Cancelar
+            </Button>
+            {!isEditing ? (
+              <Button
+                type="button"
+                onClick={() => {
+                  console.log('Click en Editar , entre ');
+                  setIsEditing(true);
+
+                  localStorage.setItem('currentLocal', id ? id : '');
+                  navigate({ to: `/locales/editar` });
+                }}
+                className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+              >
+                Editar
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                className="h-10 w-30 bg-green-600 text-white text-base hover:bg-green-700"
+              >
+                Guardar
+              </Button>
+            )}
+          </div>
+        </form>
+      </FormProvider>
+    </div>
+  );
+}
+/*
+<Pencil className="w-4 h-4 mr-2" />
+<!--<Save className="w-4 h-4 mr-2" />-->
+<Pencil className="w-4 h-4 mr-2" />
+<div className="p-6 h-full flex flex-col font-montserrat">
       <HeaderDescriptor title="LOCALES" subtitle="Visualización del local" />
       <Card>
         <CardHeader>
@@ -86,7 +187,7 @@ export function SeeLocalPageComponent() {
           <CardDescription>Detalles del local seleccionado</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {/* Columna Izquierda */}
+          
           <div className="grid grid-cols-1 gap-y-6">
             <div>
               <Label htmlFor="local_name" className="mb-2">
@@ -145,7 +246,7 @@ export function SeeLocalPageComponent() {
               <p className="border p-2 rounded bg-gray-100">{local.capacity}</p>
             </div>
           </div>
-          {/* Columna Derecha */}
+          
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col">
               <Label htmlFor="profileImageFile" className="mb-2 self-start">
@@ -170,5 +271,4 @@ export function SeeLocalPageComponent() {
         </CardContent>
       </Card>
     </div>
-  );
-}
+*/

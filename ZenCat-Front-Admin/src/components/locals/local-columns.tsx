@@ -139,6 +139,35 @@ export function getLocalColumns({
         const local = row.original;
         return (
           <div className="flex items-center justify-center space-x-2">
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(local);
+              }}
+            >
+              <Eye className="!w-5 !h-5" />
+            </Button>
+
+            <Button
+              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(local);
+              }}
+              title="Eliminar"
+            >
+              <Trash className="!w-5 !h-5" />
+            </Button>
+          </div>
+        );
+      },
+      enableSorting: false,
+      meta: { className: 'w-[100px]' },
+    },
+  ];
+}
+/*
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -172,22 +201,4 @@ export function getLocalColumns({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button
-              className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(local);
-              }}
-              title="Eliminar"
-            >
-              <Trash className="!w-5 !h-5" />
-            </Button>
-          </div>
-        );
-      },
-      enableSorting: false,
-      meta: { className: 'w-[100px]' },
-    },
-  ];
-}
+*/

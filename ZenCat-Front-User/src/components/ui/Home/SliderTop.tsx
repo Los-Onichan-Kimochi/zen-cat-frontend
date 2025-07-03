@@ -18,7 +18,7 @@ export const Hero = () => {
           Yoga, entrenamientos, servicios médicos y más… elige cómo cuidarte
         </p>
         <Link
-          to="/signup"
+          to="/comunidades"
           className="inline-block bg-black text-white text-center font-black px-6 py-3 rounded-md hover:bg-white hover:text-black transition duration-300 ease-in-out mb-4"
         >
           Comienza ahora →

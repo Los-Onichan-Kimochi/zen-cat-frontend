@@ -1,9 +1,10 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ErrorModal } from '@/components/custom/common/error-modal';
-import { useNavigate} from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
+import { API_CONFIG } from '@/config/api';
 
 export function ChangePasswordForm() {
   const [password, setPassword] = useState('');
@@ -13,13 +14,13 @@ export function ChangePasswordForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
-  
-    useEffect(() => {
+
+  useEffect(() => {
     const email = localStorage.getItem('userEmail');
     if (!email) {
-        navigate({ to: '/login' });
+      navigate({ to: '/login' });
     }
-    }, []);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,28 +28,31 @@ export function ChangePasswordForm() {
     setError(null);
     setIsModalOpen(false);
     if (password !== confirmPassword) {
-    setError('Las contraseñas no coinciden');
-    setIsModalOpen(true);
-    setLoading(false);
-    return;
+      setError('Las contraseñas no coinciden');
+      setIsModalOpen(true);
+      setLoading(false);
+      return;
     }
     const email = localStorage.getItem('userEmail');
     try {
-      const response = await fetch('http://localhost:8098/user/change-password/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await fetch(
+        API_CONFIG.BASE_URL + '/user/change-password/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             email: email,
             new_password: password,
-        }),
-      });
+          }),
+        },
+      );
       if (!response.ok) {
         const errBody = await response.json();
         throw new Error(errBody?.message || 'Error al crear usuario');
       }
-      navigate({ to: "/login" }); // Redirige si todo va bien
+      navigate({ to: '/login' }); // Redirige si todo va bien
     } catch (err: any) {
       const errorMessage =
         err.message || 'Error desconocido al cambiar contraseña.';
@@ -70,9 +74,7 @@ export function ChangePasswordForm() {
           <div className="bg-blue-100 rounded-full p-2 mb-1">
             <img src="/ico-astrocat.svg" alt="logo" className="w-20 h-20" />
           </div>
-          <h2 className="text-2xl font-bold text-center">
-            Cambiar Contraseña
-          </h2>
+          <h2 className="text-2xl font-bold text-center">Cambiar Contraseña</h2>
           <p className="text-gray-500 text-sm text-center">
             Elija una nueva contraseña
           </p>
@@ -80,35 +82,35 @@ export function ChangePasswordForm() {
         <CardContent className="flex flex-col gap-4">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-1">
-                <label className="block text-gray-700 text-sm">Contraseña</label>
-                <Input
+              <label className="block text-gray-700 text-sm">Contraseña</label>
+              <Input
                 type="password"
                 placeholder="Ingrese su contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                />
+              />
             </div>
             <div className="grid gap-1">
-                <label className="block text-gray-700 text-sm">
+              <label className="block text-gray-700 text-sm">
                 Confirmar su contraseña
-                </label>
-                <Input
+              </label>
+              <Input
                 type="password"
                 placeholder="Ingrese su contraseña otra vez"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
-                />
+              />
             </div>
             <Button
               type="submit"
               className="w-full cursor-pointer"
               disabled={loading}
             >
-            Confirmar
+              Confirmar
             </Button>
           </form>
         </CardContent>

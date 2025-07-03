@@ -1,17 +1,18 @@
 import {
   CommunityService,
-  CreateCommunityServicePayload,
+  BulkCreateCommunityServicePayload,
+  BulkDeleteCommunityServicePayload,
 } from '@/types/community-service';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
 export const communityServicesApi = {
   bulkCreateCommunityServices: async (
-    communityServices: CreateCommunityServicePayload[],
+    payload: BulkCreateCommunityServicePayload,
   ): Promise<CommunityService[]> => {
     const data = await apiClient.post<any>(
       API_ENDPOINTS.COMMUNITY_SERVICES.BULK_CREATE,
-      { community_services: communityServices }
+      payload,
     );
     return data.community_services || data;
   },
@@ -21,14 +22,16 @@ export const communityServicesApi = {
     serviceId: string,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.COMMUNITY_SERVICES.BY_IDS(communityId, serviceId)
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_IDS(communityId, serviceId),
     );
   },
 
-  bulkDeleteCommunityServices: async (ids: string[]): Promise<void> => {
+  bulkDeleteCommunityServices: async (
+    payload: BulkDeleteCommunityServicePayload,
+  ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.COMMUNITY_SERVICES.BULK_DELETE,
-      { communityServices: ids }
+      API_ENDPOINTS.COMMUNITY_PLANS.BULK_DELETE,
+      payload,
     );
   },
 

@@ -22,7 +22,7 @@ import {
 import { User } from '@/types/user';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
-import { usuariosApi } from '@/api/usuarios/usuarios';
+import { userService } from '@/api/usuarios/usuarios';
 
 interface CreateReservationModalProps {
   isOpen: boolean;
@@ -162,11 +162,13 @@ export function CreateReservationModal({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createReservationMutation.isPending}
               >
-                {createReservationMutation.isPending ? 'Creando...' : 'Crear Reserva'}
+                {createReservationMutation.isPending
+                  ? 'Creando...'
+                  : 'Crear Reserva'}
               </Button>
             </DialogFooter>
           </form>

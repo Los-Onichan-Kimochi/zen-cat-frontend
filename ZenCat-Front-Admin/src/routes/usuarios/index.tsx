@@ -6,6 +6,8 @@ import { ViewToolbar } from '@/components/common/view-toolbar';
 
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user';
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { CreateUserPayload } from '@/types/user';
 import { Gem } from 'lucide-react';
 import HomeCard from '@/components/common/home-card';
 import {
@@ -22,8 +24,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosApi } from '@/api/usuarios/usuarios';
 import { ModalNotifications } from '@/components/custom/common/modal-notifications';
 import { useModalNotifications } from '@/hooks/use-modal-notifications';
-import { UsersTable } from '@/components/users/table';
-import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import { useToast } from '@/context/ToastContext';
 
 export const Route = createFileRoute('/usuarios/')({
@@ -38,13 +38,15 @@ function UsuariosComponent() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [resetSelection, setResetSelection] = useState(0); // Counter to trigger reset
+
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Query para obtener usuarios
   const {
     data: usersData,
     isLoading: isLoadingUsers,
-    error: errorUsers,
+    error: usersError,
     refetch: refetchUsers,
     isFetching: isFetchingUsers,
   } = useQuery<User[], Error>({
@@ -80,27 +82,25 @@ function UsuariosComponent() {
     },
   });
 
-  // Mutation para eliminar múltiples usuarios
-  const { mutate: bulkDeleteUsers, isPending: isBulkDeleting } = useMutation<
-    void,
-    Error,
-    string[]
-  >({
-    mutationFn: (ids) => usuariosApi.bulkDeleteUsuarios(ids),
-    onSuccess: (_, ids) => {
-      toast.success('Usuarios Eliminados', {
-        description: `${ids.length} usuario(s) eliminado(s) exitosamente.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
-      // Resetear selección después de eliminación exitosa
-      setResetSelection((prev) => prev + 1);
-    },
-    onError: (err) => {
-      toast.error('Error al Eliminar Usuarios', {
-        description: err.message || 'No se pudieron eliminar los usuarios.',
-      });
-    },
-  });
+  // Mutation para eliminar múltiples usuarios - temporalmente deshabilitada
+  // const { mutate: bulkDeleteUsers, isPending: isBulkDeleting } = useMutation<
+  //   void,
+  //   Error,
+  //   string[]
+  // >({
+  //   mutationFn: (ids) => usuariosApi.bulkDeleteUsuarios(ids),
+  //   onSuccess: (_, ids) => {
+  //     toast.success('Usuarios Eliminados', {
+  //       description: `${ids.length} usuario(s) eliminado(s) exitosamente.`,
+  //     });
+  //     queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+  //   },
+  //   onError: (err) => {
+  //     toast.error('Error al Eliminar Usuarios', {
+  //       description: err.message || 'No se pudieron eliminar los usuarios.',
+  //     });
+  //   },
+  // });
 
   const handleEdit = (user: User) => {
     navigate({
@@ -116,23 +116,23 @@ function UsuariosComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const result = await refetchUsers();
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return result;
   };
 
-  const btnSizeClasses = 'h-11 w-28 px-4';
+  // const btnSizeClasses = 'h-11 w-28 px-4'; // No se usa temporalmente
 
-  if (errorUsers) return <p>Error cargando usuarios: {errorUsers.message}</p>;
+  if (usersError) return <p>Error cargando usuarios: {usersError.message}</p>;
 
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
@@ -157,7 +157,7 @@ function UsuariosComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/usuarios/agregar' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
@@ -170,20 +170,83 @@ function UsuariosComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-          <UsersTable
-            data={usersData || []}
-            onEdit={handleEdit}
-            onDelete={(u) => {
-              setUserToDelete(u);
-              setIsDeleteModalOpen(true);
-            }}
-            onViewMemberships={handleViewMemberships}
-            onBulkDelete={bulkDeleteUsers}
-            isBulkDeleting={isBulkDeleting}
-            resetSelection={resetSelection}
-            onRefresh={handleRefresh}
-            isRefreshing={isFetchingUsers}
-          />
+          <div className="flex-1 flex flex-col border rounded-md bg-white p-4">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Lista de Usuarios</h3>
+              <p className="text-sm text-gray-600">
+                Total: {usersData?.length || 0} usuarios
+              </p>
+            </div>
+
+            {usersData && usersData.length > 0 ? (
+              <div className="space-y-2">
+                {usersData.slice(0, 10).map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-blue-600">
+                          {(user.name || user.email || 'U')
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {user.name || 'Sin nombre'}
+                        </p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                        <p className="text-xs text-gray-400">
+                          Rol:{' '}
+                          {user.rol === 'admin'
+                            ? 'Administrador'
+                            : user.rol === 'user'
+                              ? 'Cliente'
+                              : user.rol === 'ADMINISTRATOR'
+                                ? 'Administrador'
+                                : user.rol === 'CLIENT'
+                                  ? 'Cliente'
+                                  : 'Invitado'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(user)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setUserToDelete(user);
+                          setIsDeleteModalOpen(true);
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                {usersData.length > 10 && (
+                  <div className="text-center py-4 text-gray-500">
+                    Mostrando 10 de {usersData.length} usuarios
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-gray-500">No hay usuarios disponibles</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -219,8 +282,49 @@ function UsuariosComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Usuarios"
+        expectedExcelColumns={[
+          'Correo electrónico',
+          'Nombres',
+          'Primer apellido',
+          'Segundo apellido',
+          'Foto',
+        ]}
+        dbFieldNames={[
+          'email',
+          'name',
+          'firstLastName',
+          'secondLastName',
+          'avatar',
+        ]}
+        onParsedData={async (data) => {
+          try {
+            const transformed = data.map((item) => ({
+              email: item.email?.toString().trim(),
+              name: item.name?.toString().trim(),
+              password: '12345678', // Password fijo para todos (puedes personalizarlo)
+              role: 'user',
+              avatar: item.avatar?.toString().trim(),
+              onboarding: {}, // Se deja vacío si no se usa
+              first_last_name: item.firstLastName?.toString().trim(),
+              second_last_name: item.secondLastName?.toString().trim(),
+            }));
 
-      <ModalNotifications modal={modal} onClose={closeModal} />
+            await usuariosApi.bulkCreateUsuarios({ users: transformed });
+            toast.success('Usuarios cargados exitosamente');
+            queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+          } catch (error: any) {
+            toast.error('Error durante la carga masiva', {
+              description: error.message,
+            });
+          }
+        }}
+      />
     </div>
   );
 }

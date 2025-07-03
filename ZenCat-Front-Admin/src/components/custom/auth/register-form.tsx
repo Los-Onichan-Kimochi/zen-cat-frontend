@@ -28,7 +28,7 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -36,7 +36,12 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
 
   const validateForm = () => {
     // Validar campos vacíos
-    if (!formData.name.trim() || !formData.email.trim() || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       error('Error de validación', {
         description: 'Todos los campos son obligatorios',
       });
@@ -71,7 +76,8 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       error('Contraseñas no coinciden', {
-        description: 'La confirmación de contraseña debe ser igual a la contraseña',
+        description:
+          'La confirmación de contraseña debe ser igual a la contraseña',
       });
       return false;
     }
@@ -80,10 +86,11 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
     const hasUpperCase = /[A-Z]/.test(formData.password);
     const hasLowerCase = /[a-z]/.test(formData.password);
     const hasNumbers = /\d/.test(formData.password);
-    
+
     if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
       error('Contraseña débil', {
-        description: 'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
+        description:
+          'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
       });
       return false;
     }
@@ -102,11 +109,11 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
 
     try {
       // Intentar registro con el backend
-      console.log('RegisterForm: Attempting register with:', { 
-        name: formData.name, 
-        email: formData.email 
+      console.log('RegisterForm: Attempting register with:', {
+        name: formData.name,
+        email: formData.email,
       });
-      
+
       const response = await authService.register({
         name: formData.name.trim(),
         email: formData.email.trim(),
@@ -124,14 +131,30 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
 
       // El authService ya guarda los tokens en cookies
       // Ahora guardamos el usuario en el context
+      // Mapear el rol del backend al frontend
+      const mapRole = (backendRole: string): 'admin' | 'user' | 'guest' => {
+        switch (backendRole) {
+          case 'ADMINISTRATOR':
+            return 'admin';
+          case 'CLIENT':
+            return 'user';
+          case 'GUEST':
+            return 'guest';
+          default:
+            return 'user'; // Default fallback
+        }
+      };
+
       const user = {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email,
-        role: 'admin' as const,
+        role: mapRole(response.user.rol),
+        rol: response.user.rol, // Mantener el rol original del backend
         password: '', // No guardamos la contraseña
         isAuthenticated: true,
-        permissions: ['admin'],
+        permissions:
+          response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
         avatar: response.user.image_url || '',
         address: '',
         district: '',
@@ -155,21 +178,32 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
       let errorMessage = 'No se pudo crear la cuenta';
 
       if (err.message) {
-        if (err.message.includes('409') || err.message.includes('already exists')) {
+        if (
+          err.message.includes('409') ||
+          err.message.includes('already exists')
+        ) {
           errorTitle = 'Email ya registrado';
-          errorMessage = 'Ya existe una cuenta con este email. Intente iniciar sesión o use un email diferente.';
+          errorMessage =
+            'Ya existe una cuenta con este email. Intente iniciar sesión o use un email diferente.';
         } else if (err.message.includes('400')) {
           errorTitle = 'Datos inválidos';
-          errorMessage = 'Los datos proporcionados no son válidos. Verifique la información.';
+          errorMessage =
+            'Los datos proporcionados no son válidos. Verifique la información.';
         } else if (err.message.includes('500')) {
           errorTitle = 'Error del servidor';
-          errorMessage = 'Hubo un problema en el servidor. Intente nuevamente más tarde.';
-        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorMessage =
+            'Hubo un problema en el servidor. Intente nuevamente más tarde.';
+        } else if (
+          err.message.includes('Network') ||
+          err.message.includes('fetch')
+        ) {
           errorTitle = 'Error de conexión';
-          errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+          errorMessage =
+            'No se pudo conectar con el servidor. Verifique su conexión a internet.';
         } else if (err.message.includes('timeout')) {
           errorTitle = 'Tiempo de espera agotado';
-          errorMessage = 'La conexión tardó demasiado tiempo. Intente nuevamente.';
+          errorMessage =
+            'La conexión tardó demasiado tiempo. Intente nuevamente.';
         } else {
           errorMessage = err.message;
         }
@@ -265,4 +299,4 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
       <ModalNotifications modal={modal} onClose={closeModal} />
     </>
   );
-} 
+}

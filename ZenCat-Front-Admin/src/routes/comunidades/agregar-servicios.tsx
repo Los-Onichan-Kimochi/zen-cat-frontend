@@ -7,6 +7,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
+import { communityServicesApi } from '@/api/communities/community-services';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
@@ -45,6 +46,10 @@ function AddCommunityServicePageComponent() {
   const servicesAsociated: string[] = JSON.parse(
     sessionStorage.getItem('draftSelectedServices') ?? '[]',
   ).map((service: Service) => service.id);
+  const currentCommunityId = sessionStorage.getItem('currentCommunity'); // guardado previamente
+
+  const redirectPath =
+    mode === 'editar' ? '/comunidades/ver' : '/comunidades/agregar-comunidad';
 
   const {
     data: servicesData,
@@ -57,17 +62,51 @@ function AddCommunityServicePageComponent() {
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
-    navigate({ to: '/comunidades/agregar-comunidad' });
+    navigate({ to: redirectPath });
   };
 
-  const handleGuardar = () => {
-    const selected = table
+  const handleGuardar = async () => {
+    const selectedServices = table
       .getSelectedRowModel()
       .rows.map((row) => row.original);
 
-    sessionStorage.setItem('draftSelectedServices', JSON.stringify(selected));
+    if (mode === 'editar') {
+      const newServices = selectedServices.filter(
+        (service) => !servicesAsociated.includes(service.id),
+      );
 
-    navigate({ to: '/comunidades/agregar-comunidad' });
+      if (newServices.length > 0) {
+        if (!currentCommunityId) {
+          alert('Falta el ID de la comunidad');
+          return;
+        }
+
+        const payload = newServices.map((s) => ({
+          community_id: currentCommunityId,
+          service_id: s.id,
+        }));
+
+        try {
+          await communityServicesApi.bulkCreateCommunityServices({
+            community_services: payload,
+          });
+        } catch (error) {
+          console.error('Error al guardar nuevos servicios:', error);
+          return;
+        }
+      }
+
+      sessionStorage.removeItem('modeAddService');
+      sessionStorage.removeItem('draftSelectedServices');
+
+      navigate({ to: redirectPath, search: { id: currentCommunityId } });
+    } else {
+      sessionStorage.setItem(
+        'draftSelectedServices',
+        JSON.stringify(selectedServices),
+      );
+      navigate({ to: redirectPath });
+    }
   };
 
   useEffect(() => {

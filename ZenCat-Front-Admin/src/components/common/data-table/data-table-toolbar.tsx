@@ -207,11 +207,13 @@ export function DataTableToolbar<TData extends DataWithId>({
               size="sm"
               onClick={onRefreshClick}
               disabled={isRefreshing}
-              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+              className={`h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95 ${
                 isRefreshing ? 'bg-blue-50 border-blue-300' : ''
               }`}
             >
-              <RefreshCw className={`h-4 w-4 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+              <RefreshCw
+                className={`h-4 w-4 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`}
+              />
             </Button>
           )}
           {showSortButton && (
@@ -220,7 +222,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <ArrowUpDown className="mr-2 h-4 w-4 opacity-50" />
                   Ordenar por
@@ -234,7 +236,9 @@ export function DataTableToolbar<TData extends DataWithId>({
                     (col) =>
                       col.getCanSort() &&
                       col.id !== 'select' &&
-                      col.id !== 'actions',
+                      col.id !== 'actions' &&
+                      col.id !== 'userAgent' &&
+                      col.id !== 'ipAddress',
                   )
                   .map((col) => {
                     const dir = col.getIsSorted();
@@ -260,14 +264,17 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="outline"
               size="sm"
               onClick={onFilterClick}
-              className={`h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95 ${
+              className={`h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95 ${
                 hasActiveFilters ? 'bg-blue-50 border-blue-300' : ''
               }`}
             >
               <Filter className="mr-2 h-4 w-4" />
               <span>Filtrar</span>
               {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-blue-100 text-blue-800 text-xs"
+                >
                   •
                 </Badge>
               )}
@@ -279,7 +286,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <Filter className="mr-2 h-4 w-4 opacity-50" /> Filtrar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -288,12 +295,8 @@ export function DataTableToolbar<TData extends DataWithId>({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filtros</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  Opción A
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Opción B
-                </DropdownMenuItem>
+                <DropdownMenuItem>Opción A</DropdownMenuItem>
+                <DropdownMenuItem>Opción B</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -302,7 +305,7 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="outline"
               size="sm"
               onClick={onExportClick}
-              className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+              className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
             >
               <Download className="mr-2 h-4 w-4" />
               <span>Exportar</span>
@@ -314,7 +317,7 @@ export function DataTableToolbar<TData extends DataWithId>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-sm active:scale-95"
+                  className="h-10 border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
                 >
                   <Download className="mr-2 h-4 w-4 opacity-50" /> Exportar
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -343,14 +346,13 @@ export function DataTableToolbar<TData extends DataWithId>({
               variant="destructive"
               size="sm"
               type="button"
-              className="h-10 bg-red-500 text-white font-bold hover:bg-red-600 transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
+              className="h-10 bg-red-500 text-white font-bold hover:bg-black hover:text-white transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
               onClick={handleDeleteSelected}
               disabled={!rowsSelected || isBulkDeleting || !isBulkDeleteEnabled}
             >
               <Trash className="mr-2 h-4 w-4" /> Eliminar
             </Button>
           )}
-
         </div>
       </div>
       <ConfirmDeleteBulkDialog

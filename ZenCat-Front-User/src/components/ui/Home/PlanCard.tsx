@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CheckIcon, StarIcon } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
 export interface PlanCardProps {
   title: string;
@@ -53,10 +54,11 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
     <CardFooter className="px-6 pb-6 mt-auto">
       <Button
+        asChild
         className="w-full bg-black text-white hover:bg-gray-800 transition cursor-pointer"
         onClick={onClick}
       >
-        {buttonLabel}
+        <Link to="/comunidades">{buttonLabel}</Link>
       </Button>
     </CardFooter>
   </Card>

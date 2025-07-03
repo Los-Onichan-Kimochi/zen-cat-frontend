@@ -22,3 +22,6 @@ export interface CreateServicePayload {
 export type UpdateServicePayload = Partial<CreateServicePayload>;
 
 export type BulkCreateServicePayload = CreateServicePayload[];
+//export interface BulkCreateServicePayload {
+//services: CreateServicePayload[];
+//}

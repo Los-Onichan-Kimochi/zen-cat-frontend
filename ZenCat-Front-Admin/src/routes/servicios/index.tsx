@@ -39,6 +39,10 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ServicesTable } from '@/components/services/table';
+//import p 2 de 4 carga masiva
+import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
+import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
+
 import { useBulkDelete } from '@/hooks/use-bulk-delete';
 import {
   AlertDialog,
@@ -75,6 +79,10 @@ function ServiciosComponent() {
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  //Adaptando para carga masiva 2 lineas 1 de 4
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const queryClient = useQueryClient();
 
   const {
@@ -95,15 +103,15 @@ function ServiciosComponent() {
   >({
     mutationFn: (id) => servicesApi.deleteService(id),
     onSuccess: (_, id) => {
-      toast.success('Servicio Eliminado', { 
-        description: 'El servicio ha sido eliminado exitosamente.' 
+      toast.success('Servicio Eliminado', {
+        description: 'El servicio ha sido eliminado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       setRowSelection({});
     },
     onError: (err) => {
-      toast.error('Error al Eliminar', { 
-        description: err.message || 'No se pudo eliminar el servicio.' 
+      toast.error('Error al Eliminar', {
+        description: err.message || 'No se pudo eliminar el servicio.',
       });
     },
   });
@@ -152,20 +160,20 @@ function ServiciosComponent() {
 
   const handleRefresh = async () => {
     const startTime = Date.now();
-    
+
     const [servicesResult, countsResult] = await Promise.all([
       refetchServices(),
-      refetchCounts()
+      refetchCounts(),
     ]);
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
+
     if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-    
+
     return { servicesResult, countsResult };
   };
 
@@ -294,7 +302,7 @@ function ServiciosComponent() {
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
       <HeaderDescriptor title="SERVICIOS" subtitle="LISTADO DE SERVICIOS" />
-      
+
       {/* Statistics Section */}
       <div className="flex-shrink-0">
         <div className="flex items-center justify-center space-x-20 mt-2 font-montserrat min-h-[120px]">
@@ -323,10 +331,10 @@ function ServiciosComponent() {
             <p>No hay datos de servicios para mostrar conteos.</p>
           )}
         </div>
-        
+
         <ViewToolbar
           onAddClick={() => navigate({ to: '/servicios/servicio-nuevo' })}
-          onBulkUploadClick={() => {}}
+          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
@@ -339,18 +347,71 @@ function ServiciosComponent() {
             <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
           </div>
         ) : (
-                  <ServicesTable
-          data={servicesData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-          onRefresh={handleRefresh}
-          isRefreshing={isFetchingServices}
-        />
+          <ServicesTable
+            data={servicesData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+            onRefresh={handleRefresh}
+            isRefreshing={isFetchingServices}
+          />
         )}
       </div>
+
+      <BulkCreateDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        title="Carga Masiva de Servicios"
+        expectedExcelColumns={['Nombre', 'Descripción', 'Tipo', 'Foto']}
+        dbFieldNames={['name', 'description', 'is_virtual', 'image_url']}
+        // Se necesita implementacion de POST /service/bulk-create/
+        //onParsedData={async (data) => {
+        //try {
+        //console.log('Servicios procesados para enviar:', data);
+        //await servicesApi.bulkCreateServices(data);// mismo formato que community
+        //queryClient.invalidateQueries({ queryKey: ['services'] });
+        //setShowUploadDialog(false);
+        //setShowSuccess(true);
+        //} catch (error) {
+        //console.error(error);
+        //toast.error('Error durante la carga masiva de servicios');
+        //}
+        //}}
+        onParsedData={async (processed) => {
+          try {
+            for (const item of processed) {
+              const tipo = item.is_virtual?.toString().toLowerCase().trim();
+              const payload = {
+                ...item,
+                is_virtual:
+                  tipo === 'virtual' ||
+                  tipo === 'sí' ||
+                  tipo === 'si' ||
+                  tipo === '1',
+              };
+              await servicesApi.createService(payload);
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            setShowUploadDialog(false);
+            setShowSuccess(true);
+          } catch (error) {
+            console.error(error);
+            toast.error('Error durante la carga masiva de servicios');
+          }
+        }}
+      />
+
+      <SuccessDialog
+        open={showSuccess}
+        onOpenChange={setShowSuccess}
+        title="La carga se realizó exitosamente"
+        description="Todos los servicios fueron registrados correctamente."
+        buttonText="Cerrar"
+      />
+
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

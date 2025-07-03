@@ -101,7 +101,11 @@ export function CommunityTable({
         showSortButton
       />
       <div className="flex-1 min-h-0">
-        <DataTable table={table} columns={columns} isRefreshing={isRefreshing} />
+        <DataTable
+          table={table}
+          columns={columns}
+          isRefreshing={isRefreshing}
+        />
       </div>
       <DataTablePagination table={table} />
     </div>

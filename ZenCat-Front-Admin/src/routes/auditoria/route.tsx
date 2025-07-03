@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
@@ -22,7 +22,6 @@ function AuditoriaComponent() {
     page: 1,
     limit: 25,
   });
-  const [tempFilters, setTempFilters] = useState<AuditLogFilters>(filters);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -53,82 +52,100 @@ function AuditoriaComponent() {
     refetchOnWindowFocus: false,
   });
 
-  const handleFiltersChange = (newFilters: AuditLogFilters) => {
-    setTempFilters(newFilters);
-  };
+  // Memoizar si hay filtros activos para evitar recálculos
+  const hasActiveFilters = useMemo(() => {
+    return Object.entries(filters).some(
+      ([key, value]) =>
+        key !== 'page' &&
+        key !== 'limit' &&
+        value !== undefined &&
+        value !== '',
+    );
+  }, [filters]);
 
-  const handleApplyFilters = () => {
+  const handleFiltersChange = useCallback((newFilters: AuditLogFilters) => {
     setFilters({
-      ...tempFilters,
+      ...newFilters,
       page: 1, // Reset to first page when filters change
     });
-  };
+  }, []);
 
-  const handleClearFilters = () => {
+  const handleApplyFilters = useCallback(() => {
+    // This will be called by the modal after updating filters
+    setIsFiltersModalOpen(false);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
     const clearedFilters = {
       page: 1,
       limit: filters.limit,
     };
-    setTempFilters(clearedFilters);
     setFilters(clearedFilters);
-  };
+  }, [filters.limit]);
 
-  const handleOpenFiltersModal = () => {
-    setTempFilters(filters); // Sync temp filters with current filters
-    setIsFiltersModalOpen(true);
-  };
-
-  const handleViewLog = (log: AuditLog) => {
-    setSelectedLog(log);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleExportLogs = async () => {
-    try {
-      // TODO: Implement export functionality
-      toast.info('Exportar Logs', {
-        description: 'Funcionalidad de exportación en desarrollo',
-      });
-    } catch (error) {
-      toast.error('Error al Exportar', {
-        description: 'No se pudieron exportar los logs de auditoría',
-      });
+  const handleOpenFiltersModal = useCallback(() => {
+    // Close detail modal if open to prevent focus conflicts
+    if (isDetailModalOpen) {
+      setIsDetailModalOpen(false);
+      setSelectedLog(null);
     }
-  };
+    setIsFiltersModalOpen(true);
+  }, [isDetailModalOpen]);
 
-  const handleRefresh = async () => {
+  const handleViewLog = useCallback(
+    (log: AuditLog) => {
+      // Close filters modal if open to prevent focus conflicts
+      if (isFiltersModalOpen) {
+        setIsFiltersModalOpen(false);
+      }
+      setSelectedLog(log);
+      setIsDetailModalOpen(true);
+    },
+    [isFiltersModalOpen],
+  );
+
+  const handleCloseDetailModal = useCallback(() => {
+    setIsDetailModalOpen(false);
+    setSelectedLog(null);
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
     const startTime = Date.now();
-    
+
     // Ejecutar ambos refetch en paralelo
     const [logsResult, statsResult] = await Promise.all([
       refetchLogs(),
-      refetchStats()
+      refetchStats(),
     ]);
-    
+
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
-    
-    if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime));
-    }
-    
-    return { logsResult, statsResult };
-  };
 
-  // Check if there are active filters (excluding page and limit)
-  const hasActiveFilters = Object.entries(filters).some(([key, value]) => 
-    key !== 'page' && key !== 'limit' && value !== undefined && value !== ''
-  );
+    if (remainingTime > 0) {
+      await new Promise((resolve) => setTimeout(resolve, remainingTime));
+    }
+
+    return { logsResult, statsResult };
+  }, [refetchLogs, refetchStats]);
 
   if (errorLogs) {
     return (
       <div className="p-6 h-full flex flex-col font-montserrat">
-        <HeaderDescriptor title="AUDITORÍA" subtitle="REGISTRO DE ACTIVIDAD DEL SISTEMA" />
+        <HeaderDescriptor
+          title="AUDITORÍA"
+          subtitle="REGISTRO DE ACTIVIDAD DEL SISTEMA"
+        />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-600 mb-4">Error cargando logs de auditoría</p>
-            <Button onClick={() => refetchLogs()} variant="outline" className="hover:bg-gray-50 transition-colors duration-200">
+            <p className="text-red-600 mb-4">
+              Error cargando logs de auditoría
+            </p>
+            <Button
+              onClick={() => refetchLogs()}
+              variant="outline"
+              className="hover:bg-gray-50 transition-colors duration-200"
+            >
               Reintentar
             </Button>
           </div>
@@ -139,13 +156,16 @@ function AuditoriaComponent() {
 
   return (
     <div className="p-6 h-screen flex flex-col font-montserrat overflow-hidden">
-      <HeaderDescriptor title="AUDITORÍA" subtitle="REGISTRO DE ACTIVIDAD DEL SISTEMA" />
+      <HeaderDescriptor
+        title="AUDITORÍA"
+        subtitle="REGISTRO DE ACTIVIDAD DEL SISTEMA"
+      />
 
       {/* Statistics Section */}
       <div className="flex-shrink-0">
-        <AuditStats 
-          stats={statsData} 
-          isLoading={isLoadingStats || isFetchingStats} 
+        <AuditStats
+          stats={statsData}
+          isLoading={isLoadingStats || isFetchingStats}
         />
       </div>
 
@@ -156,7 +176,9 @@ function AuditoriaComponent() {
             <div className="text-center">
               <Loader2 className="h-16 w-16 animate-spin text-gray-500 mx-auto mb-4" />
               <p className="text-gray-500">
-                {isLoadingLogs ? 'Cargando logs de auditoría...' : 'Actualizando datos...'}
+                {isLoadingLogs
+                  ? 'Cargando logs de auditoría...'
+                  : 'Actualizando datos...'}
               </p>
             </div>
           </div>
@@ -164,7 +186,7 @@ function AuditoriaComponent() {
           <AuditTable
             data={auditData?.logs || []}
             onView={handleViewLog}
-            onExport={handleExportLogs}
+            onExport={undefined}
             onOpenFilters={handleOpenFiltersModal}
             onRefresh={handleRefresh}
             isLoading={isLoadingLogs}
@@ -178,7 +200,7 @@ function AuditoriaComponent() {
       <AuditFiltersModal
         isOpen={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
-        filters={tempFilters}
+        filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
         onApplyFilters={handleApplyFilters}
@@ -187,10 +209,7 @@ function AuditoriaComponent() {
       {/* Detail Modal */}
       <AuditDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedLog(null);
-        }}
+        onClose={handleCloseDetailModal}
         auditLog={selectedLog}
       />
     </div>

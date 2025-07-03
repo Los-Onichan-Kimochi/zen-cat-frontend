@@ -16,14 +16,13 @@ const getHeaders = () => {
 const mapBackendUserToUser = (backendUser: any): User => {
   console.log('Mapping backend user:', backendUser);
 
+  // Mantener el rol original del backend
+
   return {
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
-    role: (backendUser.rol || backendUser.role || 'user') as
-      | 'admin'
-      | 'user'
-      | 'guest',
+    rol: backendUser.rol || backendUser.role || 'CLIENT',
     password: backendUser.password || '',
     isAuthenticated: false,
     permissions: backendUser.permissions || [],
@@ -58,7 +57,7 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
   const backendPayload: any = {
     name: payload.name,
     email: payload.email,
-    rol: payload.role, // Backend usa "rol"
+    rol: payload.rol, // Backend usa "rol"
     password: payload.password,
     image_url: payload.avatar || '',
   };
@@ -98,7 +97,7 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
 
   if (payload.name) backendPayload.name = payload.name;
   if (payload.email) backendPayload.email = payload.email;
-  if (payload.role) backendPayload.rol = payload.role;
+  if (payload.rol) backendPayload.rol = payload.rol;
   if (payload.password) backendPayload.password = payload.password;
   if (payload.avatar !== undefined) backendPayload.image_url = payload.avatar;
 
@@ -418,4 +417,33 @@ export const usuariosApi = {
       throw error;
     }
   },
+  //carga masiva
+  bulkCreateUsuarios: async (payload: {
+    users: CreateUserPayload[];
+  }): Promise<void> => {
+    try {
+      const transformedUsers = payload.users.map(transformPayloadToBackend);
+
+      const response = await fetch(`${API_BASE_URL}/user/bulk-create/`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ users: transformedUsers }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          `Error creando usuarios en masa: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      console.log('Usuarios cargados exitosamente');
+    } catch (error) {
+      console.error('Error en bulkCreateUsuarios:', error);
+      throw error;
+    }
+  },
 };
+
+// Export alias for backward compatibility
+export const userService = usuariosApi;

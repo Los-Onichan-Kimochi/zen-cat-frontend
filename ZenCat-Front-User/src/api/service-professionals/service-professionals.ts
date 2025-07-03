@@ -35,8 +35,10 @@ export const serviceProfessionalsApi = {
     }
 
     const endpoint = `/service-professional/?${params}`;
-    const data = await apiClient.get<{ service_professionals: ServiceProfessional[] }>(endpoint);
-    
+    const data = await apiClient.get<{
+      service_professionals: ServiceProfessional[];
+    }>(endpoint);
+
     if (data && typeof data === 'object' && 'service_professionals' in data) {
       return data.service_professionals;
     }
@@ -61,7 +63,10 @@ export const serviceProfessionalsApi = {
   createServiceProfessional: async (
     request: CreateServiceProfessionalRequest,
   ): Promise<ServiceProfessional> => {
-    return apiClient.post<ServiceProfessional>('/service-professional/', request);
+    return apiClient.post<ServiceProfessional>(
+      '/service-professional/',
+      request,
+    );
   },
 
   // Delete a service-professional association

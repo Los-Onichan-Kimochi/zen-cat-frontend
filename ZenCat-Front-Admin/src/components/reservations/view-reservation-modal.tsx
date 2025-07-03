@@ -88,7 +88,7 @@ export function ViewReservationModal({
               {format(
                 new Date(reservation.reservation_time),
                 'dd/MM/yyyy HH:mm',
-                { locale: es }
+                { locale: es },
               )}
             </div>
           </div>
@@ -96,7 +96,9 @@ export function ViewReservationModal({
           {/* Estado */}
           <div className="space-y-1.5">
             <div className="text-sm font-medium">Estado</div>
-            <Badge className={`${getStateColor(reservation.state)} px-3 py-1.5`}>
+            <Badge
+              className={`${getStateColor(reservation.state)} px-3 py-1.5`}
+            >
               {getStateLabel(reservation.state)}
             </Badge>
           </div>
