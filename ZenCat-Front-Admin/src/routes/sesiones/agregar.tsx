@@ -157,17 +157,23 @@ function AddSessionComponent() {
   // Obtener servicios por comunidad
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services', watchedValues.community_id],
-    queryFn: () => communityServicesApi.getServicesByCommunityId(watchedValues.community_id),
+    queryFn: () =>
+      communityServicesApi.getServicesByCommunityId(watchedValues.community_id),
     enabled: !!watchedValues.community_id,
   });
 
   // Obtener profesionales filtrados por servicio y comunidad
   const { data: professionals, isLoading: isLoadingProfessionals } = useQuery({
-    queryKey: ['professionals', watchedValues.service_id, watchedValues.is_virtual],
-    queryFn: () => serviceProfessionalApi.fetchFilteredProfessionals(
+    queryKey: [
+      'professionals',
       watchedValues.service_id,
-      watchedValues.is_virtual || false
-    ),
+      watchedValues.is_virtual,
+    ],
+    queryFn: () =>
+      serviceProfessionalApi.fetchFilteredProfessionals(
+        watchedValues.service_id,
+        watchedValues.is_virtual || false,
+      ),
     enabled: !!watchedValues.service_id,
     // Refetch cuando cambia el tipo de servicio (virtual/presencial)
     refetchOnWindowFocus: false,
@@ -175,9 +181,19 @@ function AddSessionComponent() {
 
   // Obtener locales filtrados por servicio y comunidad
   const { data: serviceLocals, isLoading: isLoadingLocals } = useQuery({
-    queryKey: ['serviceLocals', watchedValues.service_id, watchedValues.community_id],
-    queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: watchedValues.service_id}),
-    enabled: !!watchedValues.service_id && !!watchedValues.community_id && !watchedValues.is_virtual,
+    queryKey: [
+      'serviceLocals',
+      watchedValues.service_id,
+      watchedValues.community_id,
+    ],
+    queryFn: () =>
+      serviceLocalApi.fetchServiceLocals({
+        serviceId: watchedValues.service_id,
+      }),
+    enabled:
+      !!watchedValues.service_id &&
+      !!watchedValues.community_id &&
+      !watchedValues.is_virtual,
   });
 
   // Obtener los detalles completos de los locales a partir de los IDs - uno por uno
@@ -185,10 +201,10 @@ function AddSessionComponent() {
     queryKey: ['locals', serviceLocals],
     queryFn: async () => {
       if (!serviceLocals || serviceLocals.length === 0) return [];
-      
+
       // Obtener los IDs de locales de las asociaciones servicio-local
-      const localIds = serviceLocals.map(sl => sl.local_id);
-      
+      const localIds = serviceLocals.map((sl) => sl.local_id);
+
       // Obtener cada local individualmente para garantizar compatibilidad
       const localsList: any[] = [];
       for (const localId of localIds) {
@@ -205,25 +221,34 @@ function AddSessionComponent() {
     },
     enabled: !!serviceLocals && serviceLocals.length > 0,
   });
-  
+
   // Get selected service details
-  const selectedService = services?.find(service => service.id === watchedValues.service_id);
-  
+  const selectedService = services?.find(
+    (service) => service.id === watchedValues.service_id,
+  );
+
   // Fetch community service association when service and community are selected
   React.useEffect(() => {
     if (watchedValues.service_id && watchedValues.community_id) {
       // Fetch the specific community-service association
-      communityServicesApi.getCommunityServices(watchedValues.community_id, watchedValues.service_id)
-        .then(communityServices => {
+      communityServicesApi
+        .getCommunityServices(
+          watchedValues.community_id,
+          watchedValues.service_id,
+        )
+        .then((communityServices) => {
           if (communityServices && communityServices.length > 0) {
             const communityServiceId = communityServices[0].id;
             setValue('community_service_id', communityServiceId);
-            console.log('Set community_service_id from API:', communityServiceId);
+            console.log(
+              'Set community_service_id from API:',
+              communityServiceId,
+            );
           } else {
             console.error('No community service association found');
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error fetching community service association:', error);
         });
     }
@@ -234,10 +259,10 @@ function AddSessionComponent() {
     if (selectedService) {
       const previousVirtualValue = watchedValues.is_virtual;
       const newVirtualValue = selectedService.is_virtual;
-      
+
       // Update virtual status
       setValue('is_virtual', newVirtualValue);
-      
+
       // Clear incompatible values
       if (newVirtualValue) {
         setValue('local_id', undefined);
@@ -245,7 +270,7 @@ function AddSessionComponent() {
       } else {
         setValue('session_link', '');
       }
-      
+
       // Reset professional selection if switching between virtual/non-virtual
       // to ensure proper filtering of MEDIC professionals
       if (previousVirtualValue !== newVirtualValue) {
@@ -255,7 +280,7 @@ function AddSessionComponent() {
     }
     console.log('Service locals data:', serviceLocals);
   }, [selectedService, setValue, watchedValues.is_virtual]);
-  
+
   // Añadir un efecto para monitorear datos importantes
   React.useEffect(() => {
     console.log('------- DATOS ACTUALES -------');
@@ -265,22 +290,34 @@ function AddSessionComponent() {
     console.log('Locals:', locals);
     console.log('Selected Service:', selectedService);
     console.log('community_service_id:', watchedValues.community_service_id);
-    
+
     // Log professional details with types for debugging
     if (professionals && professionals.length > 0) {
       console.log('Professionals:', professionals.length, 'available');
-      console.log('Professional types:', professionals.map(p => ({
-        id: p.id,
-        name: p.name,
-        type: p.type
-      })));
+      console.log(
+        'Professional types:',
+        professionals.map((p) => ({
+          id: p.id,
+          name: p.name,
+          type: p.type,
+        })),
+      );
     } else {
       console.log('Professionals: None available');
     }
-    
+
     console.log('is_virtual:', watchedValues.is_virtual);
     console.log('----------------------------');
-  }, [communities, services, professionals, serviceLocals, locals, selectedService, watchedValues.is_virtual, watchedValues.community_service_id]);
+  }, [
+    communities,
+    services,
+    professionals,
+    serviceLocals,
+    locals,
+    selectedService,
+    watchedValues.is_virtual,
+    watchedValues.community_service_id,
+  ]);
 
   // Verificar conflictos
   const conflictCheck = {
@@ -367,10 +404,11 @@ function AddSessionComponent() {
     };
 
     console.log('Submitting session with payload:', payload);
-    
+
     if (!data.community_service_id) {
       toast.error('Datos Incompletos', {
-        description: 'No se pudo obtener la asociación entre comunidad y servicio.',
+        description:
+          'No se pudo obtener la asociación entre comunidad y servicio.',
       });
       return;
     }
@@ -501,7 +539,10 @@ function AddSessionComponent() {
                             </SelectItem>
                           ) : (
                             communities?.map((community) => (
-                              <SelectItem key={community.id} value={community.id}>
+                              <SelectItem
+                                key={community.id}
+                                value={community.id}
+                              >
                                 {community.name}
                               </SelectItem>
                             ))
@@ -572,11 +613,11 @@ function AddSessionComponent() {
                             </SelectItem>
                           ) : (
                             services?.map((service) => (
-                              <SelectItem
-                                key={service.id}
-                                value={service.id}
-                              >
-                                {service.name} {service.is_virtual ? "(Virtual)" : "(Presencial)"}
+                              <SelectItem key={service.id} value={service.id}>
+                                {service.name}{' '}
+                                {service.is_virtual
+                                  ? '(Virtual)'
+                                  : '(Presencial)'}
                               </SelectItem>
                             ))
                           )}
@@ -610,19 +651,24 @@ function AddSessionComponent() {
                         <Select
                           value={watchedValues.local_id}
                           onValueChange={(value) => setValue('local_id', value)}
-                          disabled={!watchedValues.service_id || watchedValues.is_virtual}
+                          disabled={
+                            !watchedValues.service_id ||
+                            watchedValues.is_virtual
+                          }
                         >
                           <SelectTrigger
                             className={`transition-colors ${
-                              !watchedValues.service_id || watchedValues.is_virtual
+                              !watchedValues.service_id ||
+                              watchedValues.is_virtual
                                 ? 'bg-gray-100 cursor-not-allowed'
                                 : 'border-blue-300 bg-blue-50 hover:bg-blue-100'
                             }`}
                           >
                             <SelectValue
-                              placeholder={!watchedValues.service_id
-                                ? 'Primero seleccione un servicio'
-                                : 'Seleccionar local'
+                              placeholder={
+                                !watchedValues.service_id
+                                  ? 'Primero seleccione un servicio'
+                                  : 'Seleccionar local'
                               }
                             />
                           </SelectTrigger>
@@ -663,7 +709,8 @@ function AddSessionComponent() {
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                       <span
                         className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
-                          watchedValues.service_id && (watchedValues.is_virtual || watchedValues.local_id)
+                          watchedValues.service_id &&
+                          (watchedValues.is_virtual || watchedValues.local_id)
                             ? 'bg-black text-white'
                             : 'bg-gray-300 text-gray-600'
                         }`}
@@ -677,7 +724,7 @@ function AddSessionComponent() {
                       <Select
                         value={watchedValues.professional_id}
                         onValueChange={(value) => {
-                          setValue('professional_id', value)
+                          setValue('professional_id', value);
                         }}
                         disabled={
                           !watchedValues.service_id ||
@@ -686,7 +733,9 @@ function AddSessionComponent() {
                       >
                         <SelectTrigger
                           className={`transition-colors ${
-                            !watchedValues.service_id || (!watchedValues.is_virtual && !watchedValues.local_id)
+                            !watchedValues.service_id ||
+                            (!watchedValues.is_virtual &&
+                              !watchedValues.local_id)
                               ? 'bg-gray-100 cursor-not-allowed'
                               : 'border-blue-300 bg-blue-50'
                           }`}
@@ -695,9 +744,10 @@ function AddSessionComponent() {
                             placeholder={
                               !watchedValues.service_id
                                 ? 'Primero seleccione un servicio'
-                                : !watchedValues.is_virtual && !watchedValues.local_id
-                                ? 'Primero seleccione un local'
-                                : 'Seleccionar profesional'
+                                : !watchedValues.is_virtual &&
+                                    !watchedValues.local_id
+                                  ? 'Primero seleccione un local'
+                                  : 'Seleccionar profesional'
                             }
                           />
                         </SelectTrigger>
@@ -706,7 +756,8 @@ function AddSessionComponent() {
                             <SelectItem value="none" disabled>
                               Seleccione un servicio primero
                             </SelectItem>
-                          ) : !watchedValues.is_virtual && !watchedValues.local_id ? (
+                          ) : !watchedValues.is_virtual &&
+                            !watchedValues.local_id ? (
                             <SelectItem value="none" disabled>
                               Seleccione un local primero
                             </SelectItem>
@@ -716,7 +767,8 @@ function AddSessionComponent() {
                             </SelectItem>
                           ) : professionals?.length === 0 ? (
                             <SelectItem value="none" disabled>
-                              No hay profesionales disponibles para este servicio
+                              No hay profesionales disponibles para este
+                              servicio
                             </SelectItem>
                           ) : (
                             professionals?.map((professional) => (
@@ -736,12 +788,14 @@ function AddSessionComponent() {
                           {form.formState.errors.professional_id.message}
                         </p>
                       )}
-                      {watchedValues.service_id && !watchedValues.is_virtual && (
-                        <p className="text-blue-600 text-sm mt-1 italic">
-                          <AlertTriangle className="inline h-3 w-3 mr-1" />
-                          Nota: Profesionales de tipo Médico solo están disponibles para servicios virtuales
-                        </p>
-                      )}
+                      {watchedValues.service_id &&
+                        !watchedValues.is_virtual && (
+                          <p className="text-blue-600 text-sm mt-1 italic">
+                            <AlertTriangle className="inline h-3 w-3 mr-1" />
+                            Nota: Profesionales de tipo Médico solo están
+                            disponibles para servicios virtuales
+                          </p>
+                        )}
                     </div>
                   </div>
 
@@ -749,7 +803,8 @@ function AddSessionComponent() {
                   {watchedValues.is_virtual && (
                     <div className="space-y-4 border-b pb-6">
                       <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                        <span className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
+                        <span
+                          className={`rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2 ${
                             watchedValues.professional_id
                               ? 'bg-black text-white'
                               : 'bg-gray-300 text-gray-600'
@@ -760,14 +815,20 @@ function AddSessionComponent() {
                         Enlace Virtual
                       </h3>
                       <div>
-                        <Label htmlFor="session_link">Enlace de la sesión</Label>
+                        <Label htmlFor="session_link">
+                          Enlace de la sesión
+                        </Label>
                         <Input
                           id="session_link"
                           type="url"
                           {...form.register('session_link')}
                           placeholder="https://meet.google.com/..."
                           disabled={!watchedValues.professional_id}
-                          className={!watchedValues.professional_id ? 'bg-gray-100 cursor-not-allowed' : ''}
+                          className={
+                            !watchedValues.professional_id
+                              ? 'bg-gray-100 cursor-not-allowed'
+                              : ''
+                          }
                         />
                         {form.formState.errors.session_link && (
                           <p className="text-red-500 text-sm mt-1">
@@ -807,7 +868,8 @@ function AddSessionComponent() {
                           disabled={
                             !watchedValues.date ||
                             !watchedValues.professional_id ||
-                            (!watchedValues.is_virtual && !watchedValues.local_id)
+                            (!watchedValues.is_virtual &&
+                              !watchedValues.local_id)
                           }
                         />
                       </div>
@@ -821,12 +883,14 @@ function AddSessionComponent() {
                             disabled={
                               !watchedValues.date ||
                               !watchedValues.professional_id ||
-                              (!watchedValues.is_virtual && !watchedValues.local_id)
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
                             }
                             className={
                               !watchedValues.date ||
                               !watchedValues.professional_id ||
-                              (!watchedValues.is_virtual && !watchedValues.local_id)
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
                                 ? 'bg-gray-100 cursor-not-allowed'
                                 : ''
                             }
@@ -846,12 +910,14 @@ function AddSessionComponent() {
                             disabled={
                               !watchedValues.date ||
                               !watchedValues.professional_id ||
-                              (!watchedValues.is_virtual && !watchedValues.local_id)
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
                             }
                             className={
                               !watchedValues.date ||
                               !watchedValues.professional_id ||
-                              (!watchedValues.is_virtual && !watchedValues.local_id)
+                              (!watchedValues.is_virtual &&
+                                !watchedValues.local_id)
                                 ? 'bg-gray-100 cursor-not-allowed'
                                 : ''
                             }
@@ -883,7 +949,11 @@ function AddSessionComponent() {
                                   className="text-sm text-red-600 bg-red-100 p-2 rounded"
                                 >
                                   {session.title} -{' '}
-                                  {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                                  {format(
+                                    new Date(session.start_time),
+                                    'HH:mm',
+                                  )}{' '}
+                                  a{' '}
                                   {format(new Date(session.end_time), 'HH:mm')}
                                 </div>
                               ))}
@@ -900,7 +970,11 @@ function AddSessionComponent() {
                                   className="text-sm text-red-600 bg-red-100 p-2 rounded"
                                 >
                                   {session.title} -{' '}
-                                  {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                                  {format(
+                                    new Date(session.start_time),
+                                    'HH:mm',
+                                  )}{' '}
+                                  a{' '}
                                   {format(new Date(session.end_time), 'HH:mm')}
                                 </div>
                               ))}
@@ -909,8 +983,6 @@ function AddSessionComponent() {
                         </div>
                       </div>
                     )}
-
-                    
                   </div>
 
                   {/* Botones */}
@@ -993,7 +1065,7 @@ function AddSessionComponent() {
                         <p className="font-medium">
                           {
                             communities?.find(
-                              (c) => c.id === watchedValues.community_id
+                              (c) => c.id === watchedValues.community_id,
                             )?.name
                           }
                         </p>
@@ -1023,9 +1095,7 @@ function AddSessionComponent() {
                       </div>
                     ) : selectedService ? (
                       <div>
-                        <p className="font-medium">
-                          {selectedService.name}
-                        </p>
+                        <p className="font-medium">{selectedService.name}</p>
                         <div className="flex items-center gap-1 mt-1 text-sm">
                           <span
                             className={`px-2 py-0.5 rounded-full text-xs ${
@@ -1034,7 +1104,9 @@ function AddSessionComponent() {
                                 : 'bg-green-100 text-green-800'
                             }`}
                           >
-                            {selectedService.is_virtual ? 'Virtual' : 'Presencial'}
+                            {selectedService.is_virtual
+                              ? 'Virtual'
+                              : 'Presencial'}
                           </span>
                         </div>
                         {selectedService.description && (
@@ -1042,7 +1114,6 @@ function AddSessionComponent() {
                             {selectedService.description}
                           </p>
                         )}
-                        
                       </div>
                     ) : null}
                   </CardContent>
@@ -1106,11 +1177,15 @@ function AddSessionComponent() {
                 </CardHeader>
                 <CardContent className="text-sm text-gray-600 space-y-2">
                   <p>• La duración mínima de una sesión es 30 minutos</p>
-                  <p>• No puede haber sesiones simultáneas del mismo profesional</p>
+                  <p>
+                    • No puede haber sesiones simultáneas del mismo profesional
+                  </p>
                   <p>• Un local no puede tener sesiones superpuestas</p>
                   <p>• Las fechas pasadas no están disponibles</p>
                   <p>• Para servicios virtuales, el enlace es opcional</p>
-                  <p>• Para servicios presenciales, debe seleccionar un local</p>
+                  <p>
+                    • Para servicios presenciales, debe seleccionar un local
+                  </p>
                 </CardContent>
               </Card>
             </div>

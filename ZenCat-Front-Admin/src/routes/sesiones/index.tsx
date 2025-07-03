@@ -440,9 +440,11 @@ function SesionesComponent() {
           </div>
           <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
             <p>
-              El archivo debe contener las siguientes columnas (en este orden):<br />
+              El archivo debe contener las siguientes columnas (en este orden):
+              <br />
               <strong>
-                Título, Fecha, Hora de inicio, Hora de fin, Capacidad, Enlace de sesión
+                Título, Fecha, Hora de inicio, Hora de fin, Capacidad, Enlace de
+                sesión
               </strong>
             </p>
             <a

@@ -22,7 +22,6 @@ export const API_ENDPOINTS = {
     BULK_CREATE: '/community/bulk-create/',
     BULK_DELETE: '/community/bulk-delete/',
     BY_ID: (id: string) => `/community/${id}/`,
-    WITH_IMAGE: (id: string) => `/community/${id}/image/`,
   },
 
   // User endpoints
@@ -98,7 +97,8 @@ export const API_ENDPOINTS = {
     BASE: '/community-service/',
     BULK_CREATE: '/community-service/bulk-create/',
     BULK_DELETE: '/community-service/bulk-delete/',
-    BY_COMMUNITY_ID: (communityId: string) => `/community-service/${communityId}/`,
+    BY_COMMUNITY_ID: (communityId: string) =>
+      `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
   },
