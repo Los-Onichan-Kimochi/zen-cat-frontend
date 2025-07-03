@@ -4,7 +4,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
 import { communityServicesApi } from '@/api/communities/community-services';
@@ -32,6 +32,7 @@ export const Route = createFileRoute('/comunidades/agregar-servicios')({
 
 function AddCommunityServicePageComponent() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -62,7 +63,11 @@ function AddCommunityServicePageComponent() {
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
-    navigate({ to: redirectPath });
+    if (mode === 'editar' && currentCommunityId) {
+      navigate({ to: redirectPath, search: { id: currentCommunityId } });
+    } else {
+      navigate({ to: redirectPath });
+    }
   };
 
   const handleGuardar = async () => {
@@ -89,6 +94,9 @@ function AddCommunityServicePageComponent() {
         try {
           await communityServicesApi.bulkCreateCommunityServices({
             community_services: payload,
+          });
+          await queryClient.invalidateQueries({
+            queryKey: ['community-services', currentCommunityId],
           });
         } catch (error) {
           console.error('Error al guardar nuevos servicios:', error);
@@ -208,7 +216,7 @@ function AddCommunityServicePageComponent() {
         <Button
           variant="outline"
           size="default"
-          onClick={() => navigate({ to: '/comunidades/agregar-comunidad' })}
+          onClick={handleCancel}
         >
           <ChevronLeft className="w-5 h-5" />
           Volver
