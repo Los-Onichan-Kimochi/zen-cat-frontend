@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
-import { CreateOnboardingRequest, OnboardingResponse } from '@/types/onboarding';
+import { CreateOnboardingRequest, OnboardingResponse, UpdateOnboardingRequest } from '@/types/onboarding';
 
 export const onboardingService = {
   /**
@@ -44,4 +44,35 @@ export const onboardingService = {
       throw error;
     }
   },
+
+  /**
+   * Updates onboarding data for a specific user
+   * @param userId - The ID of the user to update onboarding for
+   * @param onboardingData - The onboarding data to update
+   * @returns Promise<OnboardingResponse> - The updated onboarding data
+   */
+  async updateOnboardingForUser(
+    userId: string,
+    onboardingData: Partial<UpdateOnboardingRequest>
+  ): Promise<OnboardingResponse> {
+    try {
+      // Ensure we include the updated_by field
+      const dataWithUpdatedBy = {
+        ...onboardingData,
+        updated_by: userId, // Always include who's making the update
+      };
+
+      const response = await apiClient.patch<OnboardingResponse>(
+        API_ENDPOINTS.ONBOARDING.UPDATE_FOR_USER(userId),
+        dataWithUpdatedBy
+      );
+
+      return response;
+    } catch (error) {
+      console.error('Error updating onboarding for user:', error);
+      throw error;
+    }
+  }
+
+
 };

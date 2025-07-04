@@ -6,7 +6,9 @@ import './index.css';
 
 import { routeTree } from './routeTree.gen';
 import { AuthProvider } from './context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+const queryClient = new QueryClient();
 const router = createRouter({ routeTree });
 const CLIENT_ID =
   '983602358556-gn1a4fuqj64s1sbf7m1e4eqk4otsqvbn.apps.googleusercontent.com';
@@ -23,7 +25,9 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <GoogleOAuthProvider clientId={CLIENT_ID}>
         <AuthProvider>
-          <RouterProvider router={router} />
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
         </AuthProvider>
       </GoogleOAuthProvider>
     </StrictMode>,
