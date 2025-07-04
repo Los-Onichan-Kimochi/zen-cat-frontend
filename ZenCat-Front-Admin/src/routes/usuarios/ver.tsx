@@ -718,7 +718,7 @@ function VerUsuario() {
                       Subir imagen
                     </button>
                     <span className="text-xs text-gray-500 mt-1 text-center">
-                      Formatos permitidos: JPG, PNG. Tamaño máximo: 2MB
+                      Formatos permitidos: JPG, PNG. Tamaño máximo: 10MB
                     </span>
                   </>
                 )}
