@@ -6,7 +6,7 @@ import { ViewToolbar } from '@/components/common/view-toolbar';
 import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Calendar, Clock, Users, Activity } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { sessionsApi } from '@/api/sessions/sessions';
 import { convertLimaToUTC } from '@/api/sessions/sessions';
 import { Session, SessionState } from '@/types/session';
@@ -91,6 +91,10 @@ function SesionesComponent() {
   //
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // We don't need a manual effect for refetching anymore
+  // The useQuery hook is configured to automatically refetch data
+
   //adicion -------------------------------------------------------------
   // adaprtar para limpiar seleccion
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<
@@ -121,6 +125,9 @@ function SesionesComponent() {
   } = useQuery<Session[], Error>({
     queryKey: ['sessions'],
     queryFn: () => sessionsApi.getSessions(),
+    // Enable automatic refetching
+    refetchOnMount: true,      // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus   
   });
 
   // Mock data for reservations - you should replace this with actual API call
@@ -190,10 +197,12 @@ function SesionesComponent() {
   }, [sessionsData]);
 
   const handleEdit = (session: Session) => {
-    navigate({ to: '/sesiones/editar', search: { id: session.id } });
+    // Use the same pattern as used elsewhere in the app
+    navigate({ to: '/sesiones/ver', search: { id: session.id } });
   };
 
   const handleView = (session: Session) => {
+    // Use the same pattern as used elsewhere in the app
     navigate({ to: '/sesiones/ver', search: { id: session.id } });
   };
 
@@ -205,12 +214,10 @@ function SesionesComponent() {
   const handleRefresh = async () => {
     const startTime = Date.now();
 
-    const [sessionsResult, countsResult] = await Promise.all([
-      refetchSessions(),
-      refetchCounts(),
-    ]);
+    // Refetch sessions data
+    const result = await refetchSessions();
 
-    // Asegurar que pase al menos 1 segundo
+    // Ensure at least 1 second passes for UI feedback
     const elapsedTime = Date.now() - startTime;
     const remainingTime = Math.max(0, 1000 - elapsedTime);
 
@@ -218,12 +225,14 @@ function SesionesComponent() {
       await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
 
-    return { sessionsResult, countsResult };
+    return { result };
   };
 
   const handleBulkDelete = (sessions: Session[]) => {
     bulkDeleteSessions(sessions);
   };
+
+  // No additional useEffect needed for navigation - React Query handles refetching
 
   if (errorSessions)
     return <p>Error cargando sesiones: {errorSessions.message}</p>;
