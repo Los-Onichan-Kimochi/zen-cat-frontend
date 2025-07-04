@@ -35,7 +35,10 @@ import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/comunidades/ver')({
   validateSearch: (search) => ({ id: search.id as string }),
-  component: EditCommunityPage,
+  component: function EditCommunityPageRoute() {
+    const { id } = Route.useSearch();
+    return <EditCommunityPage key={id} />;
+  },
 });
 
 function EditCommunityPage() {
@@ -137,12 +140,15 @@ function EditCommunityPage() {
     mutationFn: async (data: UpdateCommunityPayload) => {
       return communitiesApi.updateCommunity(id, data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Comunidad Actualizada', {
         description: 'La comunidad ha sido actualizada correctamente.',
       });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-      queryClient.invalidateQueries({ queryKey: ['community', id, 'withImage'] });
+      await queryClient.invalidateQueries({ queryKey: ['communities'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['community', id, 'withImage'],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
