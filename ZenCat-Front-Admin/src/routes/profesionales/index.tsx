@@ -214,20 +214,22 @@ function ProfesionalesComponent() {
         />
       </div>
 
-      {isLoadingProfessionals ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
-        </div>
-      ) : (
-        <ProfessionalsTable
-          data={professionalsData || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          onBulkDelete={handleBulkDelete}
-          isBulkDeleting={isBulkDeleting}
-        />
-      )}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoadingProfessionals ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-16 w-16 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          <ProfessionalsTable
+            data={professionalsData || []}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            onBulkDelete={handleBulkDelete}
+            isBulkDeleting={isBulkDeleting}
+          />
+        )}
+      </div>
 
       <BulkCreateDialog
         open={showUploadDialog}

@@ -4,6 +4,7 @@ import {
   CreateProfessionalPayload,
   UpdateProfessionalPayload,
   BulkDeleteProfessionalPayload,
+  ProfessionalWithImage,
 } from '@/types/professional';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
@@ -27,6 +28,14 @@ export const professionalsApi = {
 
   getProfessionalById: async (id: string): Promise<Professional> => {
     return apiClient.get<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(id));
+  },
+
+  getProfessionalWithImage: async (
+    id: string,
+  ): Promise<ProfessionalWithImage> => {
+    return apiClient.get<ProfessionalWithImage>(
+      API_ENDPOINTS.PROFESSIONALS.WITH_IMAGE(id),
+    );
   },
 
   createProfessional: async (

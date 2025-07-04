@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/professional/${id}/`,
     BULK_CREATE: '/professional/bulk-create/',
     BULK_DELETE: '/professional/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/professional/${id}/image/`,
   },
 
   // Session endpoints
