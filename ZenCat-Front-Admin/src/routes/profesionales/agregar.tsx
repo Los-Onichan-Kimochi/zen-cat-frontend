@@ -35,6 +35,7 @@ import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
 import { Loader2, UploadCloud } from 'lucide-react';
 import '../../index.css';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/profesionales/agregar')({
   component: AddProfessionalPageComponent,
@@ -114,14 +115,6 @@ function AddProfessionalPageComponent() {
   };
 
   const onSubmit = async (data: ProfessionalFormData) => {
-    const imageUrl = 'https://via.placeholder.com/150';
-    if (imageFile) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen (simulada)', {
-        description: 'Subida de imagen simulada completada.',
-      });
-    }
-
     const payload: CreateProfessionalPayload = {
       name: data.name,
       first_last_name: data.first_last_name,
@@ -130,8 +123,23 @@ function AddProfessionalPageComponent() {
       specialty: data.specialty,
       email: data.email,
       phone_number: data.phone_number,
-      image_url: imageUrl,
+      image_url: '', // Se llenará si hay imagen
     };
+
+    if (imageFile) {
+      payload.image_url = imageFile.name;
+      try {
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      } catch (error) {
+        toast.error('Error al Procesar Imagen', {
+          description:
+            'No se pudo convertir la imagen. Por favor, intente con otra.',
+        });
+        return;
+      }
+    }
+
     createProfessionalMutation.mutate(payload);
   };
 

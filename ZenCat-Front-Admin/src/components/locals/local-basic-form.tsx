@@ -282,42 +282,45 @@ export function LocalForm({
         </div>
 
         {/* Columna Derecha */}
-        <div className="flex flex-col space-y-6">
-          <div className="flex flex-col">
+        <div className="flex flex-col">
+          {!isReadOnly && (
             <Label htmlFor="profileImageFile" className="mb-2 self-start">
               Imagen Local
             </Label>
-            <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Vista previa"
-                  className="object-contain h-full w-full rounded-md"
-                />
-              ) : (
-                <div className="text-center text-gray-400">
-                  <UploadCloud size={48} className="mx-auto" />
-                  <p>Arrastra o selecciona un archivo</p>
-                  <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
-                </div>
-              )}
+          )}
+          <div className="relative w-full flex-grow border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50">
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Vista previa del local"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="text-center text-gray-400">
+                <UploadCloud size={48} className="mx-auto" />
+                <p>
+                  {isReadOnly
+                    ? 'No hay imagen disponible'
+                    : 'Arrastre y suelte la imagen aquí, o haga clic para seleccionar'}
+                </p>
+              </div>
+            )}
+            {!isReadOnly && (
               <Input
-                id="image_url"
+                id="imageFile"
                 type="file"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                accept="image/png, image/jpeg, image/gif"
-                {...register('image_url')}
+                accept="image/*"
                 onChange={handleImageChange}
                 disabled={isReadOnly}
               />
-            </div>
-            {errors.image_url &&
-              typeof errors.image_url.message === 'string' && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.image_url.message}
-                </p>
-              )}
+            )}
           </div>
+          {!isReadOnly && (
+            <small className="text-xs text-gray-500 mt-1">
+              Sugerencia: Intente con imágenes de 400x400
+            </small>
+          )}
         </div>
       </CardContent>
     </Card>

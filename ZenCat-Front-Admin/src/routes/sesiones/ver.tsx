@@ -110,47 +110,61 @@ function SessionDetailComponent() {
   }, [session]);
 
   // Get community service details
-  const { data: communityServices, isLoading: isLoadingCommunityServices } = useQuery({
-    queryKey: ['communityServices', session?.community_service_id],
-    queryFn: () => session?.community_service_id 
-      ? communityServicesApi.getCommunityServices(undefined, undefined, session.community_service_id)
-      : Promise.resolve([]),
-    enabled: !!session?.community_service_id,
-  });
+  const { data: communityServices, isLoading: isLoadingCommunityServices } =
+    useQuery({
+      queryKey: ['communityServices', session?.community_service_id],
+      queryFn: () =>
+        session?.community_service_id
+          ? communityServicesApi.getCommunityServices(
+              undefined,
+              undefined,
+              session.community_service_id,
+            )
+          : Promise.resolve([]),
+      enabled: !!session?.community_service_id,
+    });
 
   // Update form data when communityServices data is loaded
   useEffect(() => {
     if (communityServices && communityServices.length > 0) {
       const communityService = communityServices[0];
       console.log('Community Service association found:', communityService);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         community_id: communityService.community_id,
-        service_id: communityService.service_id
+        service_id: communityService.service_id,
       }));
     }
   }, [communityServices]);
-  
+
   // Alternative way to get community_id and service_id when we have community_service_id
   useEffect(() => {
-    if (session?.community_service_id && (!formData.community_id || !formData.service_id)) {
+    if (
+      session?.community_service_id &&
+      (!formData.community_id || !formData.service_id)
+    ) {
       // Use the direct endpoint to get community service by ID
-      communityServicesApi.getCommunityServiceById(session.community_service_id)
-        .then(communityService => {
+      communityServicesApi
+        .getCommunityServiceById(session.community_service_id)
+        .then((communityService) => {
           console.log('Community service found by ID:', communityService);
           if (communityService) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
               community_id: communityService.community_id,
-              service_id: communityService.service_id
+              service_id: communityService.service_id,
             }));
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error fetching community service by ID:', error);
         });
     }
-  }, [session?.community_service_id, formData.community_id, formData.service_id]);
+  }, [
+    session?.community_service_id,
+    formData.community_id,
+    formData.service_id,
+  ]);
 
   // Fetch professionals for display
   const { data: professionals } = useQuery({
@@ -158,17 +172,25 @@ function SessionDetailComponent() {
     queryFn: professionalsApi.getProfessionals,
     enabled: !!session && !formData.service_id,
   });
-  
+
   // Fetch filtered professionals for virtual service
-  const { data: filteredProfessionals, isLoading: isLoadingFilteredProfessionals } = useQuery({
-    queryKey: ['filteredProfessionals', formData.service_id, formData.is_virtual],
-    queryFn: () => serviceProfessionalApi.fetchFilteredProfessionals(
+  const {
+    data: filteredProfessionals,
+    isLoading: isLoadingFilteredProfessionals,
+  } = useQuery({
+    queryKey: [
+      'filteredProfessionals',
       formData.service_id,
-      formData.is_virtual || false
-    ),
-    enabled: !!formData.service_id  && isEditing,
+      formData.is_virtual,
+    ],
+    queryFn: () =>
+      serviceProfessionalApi.fetchFilteredProfessionals(
+        formData.service_id,
+        formData.is_virtual || false,
+      ),
+    enabled: !!formData.service_id && isEditing,
   });
-  
+
   // Combined professionals list for the dropdown
   const availableProfessionals = useMemo(() => {
     // Always use filtered professionals when we have a service_id
@@ -185,12 +207,14 @@ function SessionDetailComponent() {
     queryFn: localsApi.getLocals,
     enabled: !!session && !isEditing,
   });
-  
+
   // Fetch service-specific locals for edit mode
   const { data: serviceLocals } = useQuery({
     queryKey: ['serviceLocals', formData.service_id],
-    queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: formData.service_id }),
-    enabled: !!session && !!formData.service_id && isEditing && !formData.is_virtual,
+    queryFn: () =>
+      serviceLocalApi.fetchServiceLocals({ serviceId: formData.service_id }),
+    enabled:
+      !!session && !!formData.service_id && isEditing && !formData.is_virtual,
   });
 
   // Fetch communities
@@ -203,18 +227,19 @@ function SessionDetailComponent() {
   // Fetch services for the community
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services', formData.community_id],
-    queryFn: () => formData.community_id 
-      ? communityServicesApi.getServicesByCommunityId(formData.community_id)
-      : Promise.resolve([]),
+    queryFn: () =>
+      formData.community_id
+        ? communityServicesApi.getServicesByCommunityId(formData.community_id)
+        : Promise.resolve([]),
     enabled: !!formData.community_id,
   });
-  
-  
 
   // Find professional and local details - use useMemo to update when formData changes in edit mode
   const professional = useMemo(() => {
     if (isEditing && formData.is_virtual && filteredProfessionals) {
-      return filteredProfessionals.find((p) => p.id === formData.professional_id);
+      return filteredProfessionals.find(
+        (p) => p.id === formData.professional_id,
+      );
     } else if (!professionals) {
       return null;
     }
@@ -234,11 +259,13 @@ function SessionDetailComponent() {
   const availableLocals = useMemo(() => {
     if (isEditing && serviceLocals) {
       // In edit mode, use service-specific locals when available
-      return serviceLocals.map(sl => {
-        // Find the full local details from all locals if available
-        const localDetails = allLocals?.find(l => l.id === sl.local_id);
-        return localDetails || null;
-      }).filter(Boolean);
+      return serviceLocals
+        .map((sl) => {
+          // Find the full local details from all locals if available
+          const localDetails = allLocals?.find((l) => l.id === sl.local_id);
+          return localDetails || null;
+        })
+        .filter(Boolean);
     }
     // In view mode or when service locals are not available yet, use all locals
     return allLocals || [];
@@ -250,7 +277,7 @@ function SessionDetailComponent() {
       ? availableLocals.find((l) => l.id === formData.local_id)
       : availableLocals.find((l) => l.id === session?.local_id);
   }, [availableLocals, session?.local_id, formData.local_id, isEditing]);
-  
+
   // Find community and service details
   const community = useMemo(() => {
     if (!communities) return null;
@@ -261,61 +288,78 @@ function SessionDetailComponent() {
     if (!services) return null;
     return services.find((s) => s.id === formData.service_id);
   }, [services, formData.service_id]);
-  
+
   // Get selected service details
-  const selectedService = services?.find(service => service.id === formData.service_id);
-  
+  const selectedService = services?.find(
+    (service) => service.id === formData.service_id,
+  );
+
   // Prevent changes to community and service in edit mode
   // They should be displayed but not editable
   useEffect(() => {
     if (isEditing && session && session.community_service_id) {
       // Make sure community_service_id is preserved during edits
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        community_service_id: session.community_service_id || ''
+        community_service_id: session.community_service_id || '',
       }));
     }
   }, [isEditing, session]);
-  
+
   // Update is_virtual when service changes - similar to agregar.tsx
   useEffect(() => {
     if (selectedService && isEditing) {
       const previousVirtualValue = formData.is_virtual;
       const newVirtualValue = selectedService.is_virtual;
-      
+
       // Always update to match the service type
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         is_virtual: newVirtualValue,
         local_id: newVirtualValue ? '' : prev.local_id,
         session_link: newVirtualValue ? prev.session_link : '',
         // Reset professional when switching between virtual/non-virtual
-        professional_id: previousVirtualValue !== newVirtualValue ? '' : prev.professional_id
+        professional_id:
+          previousVirtualValue !== newVirtualValue ? '' : prev.professional_id,
       }));
-      
+
       if (previousVirtualValue !== newVirtualValue) {
-        console.log(`Service type changed to ${newVirtualValue ? 'virtual' : 'in-person'}`);
-        
+        console.log(
+          `Service type changed to ${newVirtualValue ? 'virtual' : 'in-person'}`,
+        );
+
         // If switching to virtual and we have a professional selected
-        if (newVirtualValue && formData.professional_id && filteredProfessionals) {
-          const isValidProfessional = filteredProfessionals.some(p => p.id === formData.professional_id);
+        if (
+          newVirtualValue &&
+          formData.professional_id &&
+          filteredProfessionals
+        ) {
+          const isValidProfessional = filteredProfessionals.some(
+            (p) => p.id === formData.professional_id,
+          );
           if (!isValidProfessional) {
             // Reset the professional if not valid for this virtual service
             setFormData((prev) => ({ ...prev, professional_id: '' }));
             toast.warning('Profesional no disponible', {
-              description: 'El profesional seleccionado no está disponible para este servicio virtual. Por favor seleccione otro.',
+              description:
+                'El profesional seleccionado no está disponible para este servicio virtual. Por favor seleccione otro.',
             });
           }
         }
       }
     }
-  }, [selectedService, isEditing, filteredProfessionals, formData.professional_id]);
+  }, [
+    selectedService,
+    isEditing,
+    filteredProfessionals,
+    formData.professional_id,
+  ]);
 
   // Check if session is virtual - use formData when in edit mode
   const isVirtual = isEditing
     ? formData.is_virtual
     : session && !session.local_id;
-    
+
   // Debug logging - similar to agregar.tsx
   useEffect(() => {
     if (session) {
@@ -336,7 +380,16 @@ function SessionDetailComponent() {
       console.log('Available Locals:', availableLocals);
       console.log('-------------------------------------------');
     }
-  }, [session, communities, services, communityServices, formData, community, service, selectedService]);
+  }, [
+    session,
+    communities,
+    services,
+    communityServices,
+    formData,
+    community,
+    service,
+    selectedService,
+  ]);
 
   // Update session mutation
   const updateSessionMutation = useMutation({
@@ -381,28 +434,37 @@ function SessionDetailComponent() {
     if (name === 'service_id') {
       // The is_virtual property will be updated by the useEffect that watches selectedService
       // We'll reset the professional_id in that useEffect as needed
-      
+
       // Reset local_id when service changes to ensure compatibility
       if (!formData.is_virtual) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           [name]: value,
-          local_id: '' // Reset local selection when service changes
+          local_id: '', // Reset local selection when service changes
         }));
-        
+
         toast.info('Local resetado', {
-          description: 'Debe seleccionar un local disponible para este servicio.',
+          description:
+            'Debe seleccionar un local disponible para este servicio.',
         });
       }
     }
-    
+
     // If changing the professional_id and we have a virtual service, validate compatibility
-    if (name === 'professional_id' && formData.is_virtual && formData.service_id && filteredProfessionals) {
-      const isValidProfessional = filteredProfessionals.some(p => p.id === value);
+    if (
+      name === 'professional_id' &&
+      formData.is_virtual &&
+      formData.service_id &&
+      filteredProfessionals
+    ) {
+      const isValidProfessional = filteredProfessionals.some(
+        (p) => p.id === value,
+      );
       if (!isValidProfessional) {
         // Show warning but don't auto-reset - let the form validation catch this
         toast.warning('Profesional no disponible', {
-          description: 'El profesional seleccionado no está disponible para este servicio virtual. Por favor seleccione otro.',
+          description:
+            'El profesional seleccionado no está disponible para este servicio virtual. Por favor seleccione otro.',
         });
       }
     }
@@ -430,28 +492,32 @@ function SessionDetailComponent() {
       });
       return false;
     }
-    
+
     // Validate that the professional is available for virtual service
     if (formData.is_virtual && formData.service_id && filteredProfessionals) {
-      const isValidProfessional = filteredProfessionals.some(p => p.id === formData.professional_id);
+      const isValidProfessional = filteredProfessionals.some(
+        (p) => p.id === formData.professional_id,
+      );
       if (!isValidProfessional) {
         toast.error('Error de validación', {
-          description: 'El profesional seleccionado no está disponible para este servicio virtual.',
+          description:
+            'El profesional seleccionado no está disponible para este servicio virtual.',
         });
         return false;
       }
     }
-    
+
     if (!formData.community_service_id) {
       // Try to use the community_service_id from the session
       if (session?.community_service_id) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          community_service_id: session.community_service_id || ''
+          community_service_id: session.community_service_id || '',
         }));
       } else {
         toast.error('Error de validación', {
-          description: 'No se pudo determinar la asociación comunidad-servicio.',
+          description:
+            'No se pudo determinar la asociación comunidad-servicio.',
         });
         return false;
       }
@@ -463,13 +529,16 @@ function SessionDetailComponent() {
       });
       return false;
     }
-    
+
     // Validate that the local is available for the service
     if (!formData.is_virtual && formData.local_id && serviceLocals) {
-      const isValidLocal = serviceLocals.some(sl => sl.local_id === formData.local_id);
+      const isValidLocal = serviceLocals.some(
+        (sl) => sl.local_id === formData.local_id,
+      );
       if (!isValidLocal) {
         toast.error('Error de validación', {
-          description: 'El local seleccionado no está disponible para este servicio. Por favor seleccione otro local.',
+          description:
+            'El local seleccionado no está disponible para este servicio. Por favor seleccione otro local.',
         });
         return false;
       }
@@ -513,15 +582,16 @@ function SessionDetailComponent() {
       // Use the one from the session if available
       formData.community_service_id = session.community_service_id;
     }
-    
+
     // Final check before submission
     if (!formData.community_service_id) {
       toast.error('Datos Incompletos', {
-        description: 'No se pudo obtener la asociación entre comunidad y servicio.',
+        description:
+          'No se pudo obtener la asociación entre comunidad y servicio.',
       });
       return;
     }
-    
+
     try {
       // Format the data for API
       const updatedSession: UpdateSessionPayload = {
@@ -539,7 +609,10 @@ function SessionDetailComponent() {
 
       console.log('Form data before submission:', formData);
       console.log('Prepared update payload:', updatedSession);
-      console.log('Community Service ID in payload:', updatedSession.community_service_id);
+      console.log(
+        'Community Service ID in payload:',
+        updatedSession.community_service_id,
+      );
 
       updateSessionMutation.mutate(updatedSession);
     } catch (error) {
@@ -672,49 +745,57 @@ function SessionDetailComponent() {
                         2
                       </span>
                       Profesional
-                    </h3>                      <div>
-                        <Label>Profesional</Label>
-                        <Select
-                          disabled={!isEditing}
-                          value={
-                            isEditing
-                              ? formData.professional_id
-                              : session.professional_id
-                          }
-                          onValueChange={(value) =>
-                            handleSelectChange('professional_id', value)
-                          }
+                    </h3>{' '}
+                    <div>
+                      <Label>Profesional</Label>
+                      <Select
+                        disabled={!isEditing}
+                        value={
+                          isEditing
+                            ? formData.professional_id
+                            : session.professional_id
+                        }
+                        onValueChange={(value) =>
+                          handleSelectChange('professional_id', value)
+                        }
+                      >
+                        <SelectTrigger
+                          className={!isEditing ? 'bg-gray-50' : ''}
                         >
-                          <SelectTrigger
-                            className={!isEditing ? 'bg-gray-50' : ''}
-                          >
-                            <SelectValue>
-                              {professional
-                                ? `${professional.name} ${professional.first_last_name || ''}`
-                                : 'Profesional no encontrado'}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableProfessionals && availableProfessionals.length > 0 ? (
-                              availableProfessionals.map((prof) => (
-                                <SelectItem key={prof.id} value={prof.id}>
-                                  {`${prof.name} ${prof.first_last_name || ''}`}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <div className="p-2 text-center text-sm text-gray-500">
-                                {formData.is_virtual ? 'No hay profesionales disponibles para este servicio virtual.' : 'No hay profesionales disponibles.'}
-                              </div>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        {isEditing && formData.service_id && selectedService && !formData.is_virtual && (
+                          <SelectValue>
+                            {professional
+                              ? `${professional.name} ${professional.first_last_name || ''}`
+                              : 'Profesional no encontrado'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableProfessionals &&
+                          availableProfessionals.length > 0 ? (
+                            availableProfessionals.map((prof) => (
+                              <SelectItem key={prof.id} value={prof.id}>
+                                {`${prof.name} ${prof.first_last_name || ''}`}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              {formData.is_virtual
+                                ? 'No hay profesionales disponibles para este servicio virtual.'
+                                : 'No hay profesionales disponibles.'}
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {isEditing &&
+                        formData.service_id &&
+                        selectedService &&
+                        !formData.is_virtual && (
                           <p className="text-blue-600 text-sm mt-1 italic">
                             <AlertTriangle className="inline h-3 w-3 mr-1" />
-                            Nota: Profesionales de tipo Médico solo están disponibles para servicios virtuales
+                            Nota: Profesionales de tipo Médico solo están
+                            disponibles para servicios virtuales
                           </p>
                         )}
-                      </div>
+                    </div>
                   </div>
 
                   {/* Paso 3: Local (solo para servicios presenciales) */}
@@ -757,8 +838,8 @@ function SessionDetailComponent() {
                               ))
                             ) : (
                               <div className="p-2 text-center text-sm text-gray-500">
-                                {isEditing && formData.service_id 
-                                  ? 'No hay locales disponibles para este servicio.' 
+                                {isEditing && formData.service_id
+                                  ? 'No hay locales disponibles para este servicio.'
                                   : 'No hay locales disponibles.'}
                               </div>
                             )}
@@ -767,7 +848,7 @@ function SessionDetailComponent() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Paso 3: Enlace (solo para servicios virtuales) */}
                   {(isEditing ? formData.is_virtual : isVirtual) && (
                     <div className="space-y-4 border-b pb-6">
@@ -1004,9 +1085,13 @@ function SessionDetailComponent() {
                 {!session?.community_service_id ? (
                   <div className="text-yellow-600 bg-yellow-50 p-3 rounded-md text-sm">
                     <p className="font-medium">Información incompleta</p>
-                    <p>Esta sesión no tiene una asociación comunidad-servicio.</p>
+                    <p>
+                      Esta sesión no tiene una asociación comunidad-servicio.
+                    </p>
                   </div>
-                ) : isLoadingCommunities || isLoadingServices || isLoadingCommunityServices ? (
+                ) : isLoadingCommunities ||
+                  isLoadingServices ||
+                  isLoadingCommunityServices ? (
                   <div className="flex items-center justify-center p-4">
                     <Loader2 className="h-5 w-5 animate-spin mr-2" />
                     <span>Cargando información...</span>
@@ -1018,7 +1103,9 @@ function SessionDetailComponent() {
                       <div>
                         <p className="text-sm text-gray-500">Comunidad</p>
                         <p className="font-medium">
-                          {community ? community.name : 'Comunidad no encontrada'}
+                          {community
+                            ? community.name
+                            : 'Comunidad no encontrada'}
                         </p>
                       </div>
                     </div>
