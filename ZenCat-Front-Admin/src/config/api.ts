@@ -22,7 +22,6 @@ export const API_ENDPOINTS = {
     BULK_CREATE: '/community/bulk-create/',
     BULK_DELETE: '/community/bulk-delete/',
     BY_ID: (id: string) => `/community/${id}/`,
-    WITH_IMAGE: (id: string) => `/community/${id}/image/`,
   },
 
   // User endpoints
@@ -60,6 +59,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/local/${id}/`,
     BULK_CREATE: '/local/bulk-create/',
     BULK_DELETE: '/local/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/local/${id}/image/`,
   },
 
   // Plan endpoints
@@ -98,6 +98,8 @@ export const API_ENDPOINTS = {
     BASE: '/community-service/',
     BULK_CREATE: '/community-service/bulk-create/',
     BULK_DELETE: '/community-service/bulk-delete/',
+    BY_COMMUNITY_ID: (communityId: string) =>
+      `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
   },
@@ -109,6 +111,12 @@ export const API_ENDPOINTS = {
     BULK_DELETE: '/community-plan/bulk-delete/',
     BY_IDS: (communityId: string, planId: string) =>
       `/community-plan/${communityId}/${planId}/`,
+  },
+
+  // Report endpoints
+  REPORTS: {
+    SERVICES: '/reports/services',
+    // Aquí podemos agregar mas si da el tiempo :c
   },
 } as const;
 

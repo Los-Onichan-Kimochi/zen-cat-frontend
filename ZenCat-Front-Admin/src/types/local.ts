@@ -23,6 +23,7 @@ export interface CreateLocalPayload {
   reference: string;
   capacity: number;
   image_url: string;
+  image_bytes?: string;
 }
 /*
 export interface Region { //Departamento
@@ -70,3 +71,7 @@ export type Distrito = {
   province_id: string;
   department_id: string;
 };
+
+export interface LocalWithImage extends Local {
+  image_bytes?: string;
+}

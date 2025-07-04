@@ -4,7 +4,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { MembershipPlan } from '@/types/membership-plan';
 import { DataTable } from '@/components/common/data-table/data-table';
@@ -32,6 +32,7 @@ export const Route = createFileRoute('/comunidades/agregar-planes-membresía')({
 
 function AddCommunityMembershipPlanPageComponent() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -62,7 +63,11 @@ function AddCommunityMembershipPlanPageComponent() {
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
-    navigate({ to: redirectPath });
+    if (mode === 'editar' && currentCommunityId) {
+      navigate({ to: redirectPath, search: { id: currentCommunityId } });
+    } else {
+      navigate({ to: redirectPath });
+    }
   };
 
   const handleGuardar = async () => {
@@ -89,6 +94,9 @@ function AddCommunityMembershipPlanPageComponent() {
         try {
           await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({
             community_plans: payload,
+          });
+          await queryClient.invalidateQueries({
+            queryKey: ['community-plans', currentCommunityId],
           });
         } catch (error) {
           console.error('Error al guardar nuevos planes:', error);

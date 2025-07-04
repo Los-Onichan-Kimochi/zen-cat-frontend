@@ -43,7 +43,6 @@ export function CreateReservationModal({
 }: CreateReservationModalProps) {
   const [name, setName] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [guestCount, setGuestCount] = useState(1);
   const [notes, setNotes] = useState('');
   const { modal, error, closeModal } = useModalNotifications();
   const toast = useToast();
@@ -89,7 +88,6 @@ export function CreateReservationModal({
       session_id: sessionId,
       user_id: selectedUserId,
       name: name.trim(),
-      guest_count: guestCount,
       notes: notes.trim(),
       state: 'CONFIRMED',
       reservation_time: new Date().toISOString(), // Usamos la fecha actual como tiempo de reserva
@@ -102,7 +100,6 @@ export function CreateReservationModal({
   const handleClose = () => {
     setName('');
     setSelectedUserId('');
-    setGuestCount(1);
     setNotes('');
     onClose();
   };
@@ -149,18 +146,6 @@ export function CreateReservationModal({
                   )}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="guests">Número de invitados</Label>
-              <Input
-                id="guests"
-                type="number"
-                min="1"
-                max="10"
-                value={guestCount}
-                onChange={(e) => setGuestCount(Number(e.target.value))}
-              />
             </div>
 
             <div className="space-y-2">

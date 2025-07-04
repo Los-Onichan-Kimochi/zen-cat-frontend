@@ -10,16 +10,15 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import { ImageUpload } from '@/components/common/image-upload';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CommunityFormData } from '@/hooks/use-community-basic-form';
+import { UploadCloud } from 'lucide-react';
 
 interface CommunityFormProps {
   register: UseFormRegister<CommunityFormData>;
   errors: FieldErrors<CommunityFormData>;
   imagePreview: string | null;
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageRemove?: () => void;
   isEditing?: boolean;
 }
 
@@ -28,7 +27,6 @@ export function CommunityForm({
   errors,
   imagePreview,
   handleImageChange,
-  onImageRemove,
   isEditing = true,
 }: CommunityFormProps) {
   return (
@@ -76,19 +74,41 @@ export function CommunityForm({
 
         {/* Columna Derecha - Logo */}
         <div className="flex flex-col space-y-6">
-          <ImageUpload
-            imagePreview={imagePreview}
-            onImageChange={handleImageChange}
-            label="Logo"
-            disabled={!isEditing}
-            inputProps={{ ...register('profileImageFile') }}
-            errorMessage={
-              errors.profileImageFile &&
-              typeof errors.profileImageFile.message === 'string'
-                ? errors.profileImageFile.message
-                : undefined
-            }
-          />
+          <div className="flex flex-col">
+            <Label htmlFor="profileImageFile" className="mb-2 self-start">
+              Logo
+            </Label>
+            <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Vista previa"
+                  className="object-contain h-full w-full rounded-md"
+                />
+              ) : (
+                <div className="text-center text-gray-400">
+                  <UploadCloud size={48} className="mx-auto" />
+                  <p>Arrastra o selecciona un archivo</p>
+                  <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
+                </div>
+              )}
+              <Input
+                id="profileImageFile"
+                type="file"
+                disabled={!isEditing}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept="image/png, image/jpeg, image/gif"
+                {...register('profileImageFile')}
+                onChange={handleImageChange}
+              />
+            </div>
+            {errors.profileImageFile &&
+              typeof errors.profileImageFile.message === 'string' && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.profileImageFile.message}
+                </p>
+              )}
+          </div>
         </div>
       </CardContent>
     </Card>

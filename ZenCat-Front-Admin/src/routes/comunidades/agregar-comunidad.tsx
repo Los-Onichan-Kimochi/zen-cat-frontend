@@ -2,7 +2,6 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
-import { showImageUploadProcessing } from '@/utils/image-toast-helpers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useCommunityForm } from '@/hooks/use-community-basic-form';
@@ -46,7 +45,6 @@ function AddCommunityPage() {
     errors,
     imageFile,
     imagePreview,
-    imageBytes,
     watch,
     reset,
     handleImageChange,
@@ -77,36 +75,29 @@ function AddCommunityPage() {
   });
 
   const onSubmit = async (data: any) => {
-    // Generate a unique filename for S3
-    let imageUrl = 'default-community-image.jpg';
+    const imageUrl = 'https://via.placeholder.com/150';
     if (imageFile) {
-      const timestamp = Date.now();
-      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
-      imageUrl = `community-${timestamp}.${fileExtension}`;
-
-      showImageUploadProcessing(toast);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.info('Imagen Procesada', {
+        description: 'Subida simulada de imagen completada.',
+      });
     }
 
     try {
-      const payload: CreateCommunityPayload = {
+      const newCommunity = await createCommunityMutation.mutateAsync({
         name: data.name,
         purpose: data.purpose,
         image_url: imageUrl,
-      };
-
-      // Add image bytes if available
-      if (imageBytes && imageBytes.length > 0) {
-        payload.image_bytes = imageBytes;
-      }
-
-      const newCommunity = await createCommunityMutation.mutateAsync(payload);
+      });
 
       if (selectedServices.length > 0) {
         const payload = selectedServices.map((s) => ({
           community_id: newCommunity.id,
           service_id: s.id,
         }));
-        await communityServicesApi.bulkCreateCommunityServices(payload);
+        await communityServicesApi.bulkCreateCommunityServices({
+          community_services: payload,
+        });
       }
 
       if (selectedMembershipPlans.length > 0) {

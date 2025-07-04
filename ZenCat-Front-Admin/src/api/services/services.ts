@@ -7,6 +7,7 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const servicesApi = {
   bulkCreateServices: async (
     payload: BulkCreateServicePayload,

@@ -4,6 +4,7 @@ import {
   Local,
   CreateLocalPayload,
   UpdateLocalPayload,
+  LocalWithImage,
 } from '@/types/local';
 
 import { apiClient } from '@/lib/api-client';
@@ -24,6 +25,10 @@ export const localsApi = {
 
   getLocalById: async (id: string): Promise<Local> => {
     return apiClient.get<Local>(API_ENDPOINTS.LOCALS.BY_ID(id));
+  },
+
+  getLocalWithImage: async (id: string): Promise<LocalWithImage> => {
+    return apiClient.get<LocalWithImage>(API_ENDPOINTS.LOCALS.WITH_IMAGE(id));
   },
 
   createLocal: async (payload: CreateLocalPayload): Promise<Local> => {
