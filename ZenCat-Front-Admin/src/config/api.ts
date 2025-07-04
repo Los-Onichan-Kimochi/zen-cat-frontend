@@ -101,6 +101,7 @@ export const API_ENDPOINTS = {
     BY_COMMUNITY_ID: (communityId: string) => `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
+    BY_ID: (id: string) => `/community-service/id/${id}/`,
   },
 
   // Community-Plan association endpoints
