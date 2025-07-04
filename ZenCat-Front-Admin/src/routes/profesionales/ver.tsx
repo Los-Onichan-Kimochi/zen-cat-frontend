@@ -27,10 +27,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/context/ToastContext';
-import {
-  Professional,
-  UpdateProfessionalPayload,
-} from '@/types/professional';
+import { Professional, UpdateProfessionalPayload } from '@/types/professional';
 import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/profesionales/ver')({

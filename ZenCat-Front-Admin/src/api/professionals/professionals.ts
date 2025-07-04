@@ -30,7 +30,9 @@ export const professionalsApi = {
     return apiClient.get<Professional>(API_ENDPOINTS.PROFESSIONALS.BY_ID(id));
   },
 
-  getProfessionalWithImage: async (id: string): Promise<ProfessionalWithImage> => {
+  getProfessionalWithImage: async (
+    id: string,
+  ): Promise<ProfessionalWithImage> => {
     return apiClient.get<ProfessionalWithImage>(
       API_ENDPOINTS.PROFESSIONALS.WITH_IMAGE(id),
     );
