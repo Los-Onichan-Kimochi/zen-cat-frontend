@@ -455,7 +455,10 @@ function SesionesComponent() {
                   end_time: new Date(`${dateString}T${endTimeStr}:00-05:00`).toISOString(),
                   capacity: Number(item.capacity),
                   session_link: item.session_link || null,
-                  professional_id: uploadMode === 'virtual' ? selectedProfessionalId : '00ca3624-2fee-4aea-bd30-7ff3e30c2701',
+                  professional_id:
+                    uploadMode === 'virtual'
+                      ? selectedProfessionalId
+                      : selectedProfessionalId || '00ca3624-2fee-4aea-bd30-7ff3e30c2701',
                   local_id: uploadMode === 'presencial' ? selectedLocal?.id : null,
                 };
               });
@@ -483,7 +486,7 @@ function SesionesComponent() {
                 setError?.('Ocurrió un error inesperado al crear las sesiones.');
               }
               //const mensaje =
-                //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
+              //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
 
               //setError?.(error ? `${error}\n${mensaje}` : mensaje);
               // NO CIERRES EL MODAL
@@ -538,6 +541,22 @@ function SesionesComponent() {
                   {locals.map((local) => (
                     <SelectItem key={local.id} value={local.id}>
                       {local.local_name} - Capacidad: {local.capacity}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <label className="block text-sm font-medium mb-1">Selecciona un profesional (opcional)</label>
+              <Select
+                value={selectedProfessionalId || '00ca3624-2fee-4aea-bd30-7ff3e30c2701'}
+                onValueChange={(value) => setSelectedProfessionalId(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Profesional (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {professionals.map((pro) => (
+                    <SelectItem key={pro.id} value={pro.id}>
+                      {pro.name} {pro.first_last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
