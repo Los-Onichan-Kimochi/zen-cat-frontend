@@ -51,7 +51,9 @@ export interface Membership {
   description: string;
   start_date: string;
   end_date: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
+  status: MembershipState;
+  reservations_used?: number | null;
+  
   community: {
     id: string;
     name: string;
@@ -67,6 +69,13 @@ export interface Membership {
   };
 }
 
+export enum MembershipState {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+}
+
 export interface MembershipsResponse {
   memberships: Membership[];
   total: number;
@@ -79,4 +88,7 @@ export interface CreateMembershipRequest {
   start_date: string;
   end_date: string;
   status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+  reservations_used?: number | null;
 }
+
+export type UpdateMembershipRequest = Partial<CreateMembershipRequest>;

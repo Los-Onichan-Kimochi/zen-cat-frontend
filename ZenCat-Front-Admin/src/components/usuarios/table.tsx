@@ -107,4 +107,4 @@ export function UsersTable({
       <DataTablePagination table={table} />
     </div>
   );
-} 
+}

@@ -88,9 +88,11 @@ function SesionesComponent() {
   //
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  //adicion ------------------------------------------------------------- 
+  //adicion -------------------------------------------------------------
   // adaprtar para limpiar seleccion
-  const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | undefined>();
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<
+    string | undefined
+  >();
 
   const { data: professionals = [] } = useQuery<Professional[]>({
     queryKey: ['professionals'],
@@ -355,9 +357,11 @@ function SesionesComponent() {
             'session_link',
           ]}
           existingSessions={
-            sessionsData?.filter((s) => s.professional_id === selectedProfessionalId) || []
+            sessionsData?.filter(
+              (s) => s.professional_id === selectedProfessionalId,
+            ) || []
           } // Esta es la línea nueva
-          onParsedData={async (data,setError) => {
+          onParsedData={async (data, setError) => {
             if (!selectedProfessionalId) {
               //setError('Selecciona un profesional antes de cargar.');
               setError?.('Selecciona un profesional antes de cargar.');
@@ -415,6 +419,9 @@ function SesionesComponent() {
                 const startTimeStr = normalizeTime(item.start_time);
                 const endTimeStr = normalizeTime(item.end_time);
 
+                const fullStart = `${dateString}T${startTimeStr}:00`;
+                const fullEnd = `${dateString}T${endTimeStr}:00`;
+
                 if (
                   !/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTimeStr) ||
                   !/^([01]\d|2[0-3]):([0-5]\d)$/.test(endTimeStr)
@@ -426,11 +433,9 @@ function SesionesComponent() {
 
                 return {
                   title: item.title,
-                  date: convertLimaToUTC(`${dateString}T00:00:00`),
-                  start_time: convertLimaToUTC(
-                    `${dateString}T${startTimeStr}:00`,
-                  ),
-                  end_time: convertLimaToUTC(`${dateString}T${endTimeStr}:00`),
+                  date: new Date(`${dateString}T00:00:00-05:00`).toISOString(),
+                  start_time: new Date(`${dateString}T${startTimeStr}:00-05:00`).toISOString(),
+                  end_time: new Date(`${dateString}T${endTimeStr}:00-05:00`).toISOString(),
                   capacity: Number(item.capacity),
                   session_link: item.session_link || null,
                   professional_id: selectedProfessionalId,
@@ -451,9 +456,9 @@ function SesionesComponent() {
               //description: err.message || 'Error bulk creating sessions',
               //});
               //setError(err.message || 'Ocurrió un error inesperado al crear las sesiones.');
-              //comentar: 
+              //comentar:
               //const mensaje =
-                //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
+              //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
 
               //setError?.(error ? `${error}\n${mensaje}` : mensaje);
               // NO CIERRES EL MODAL

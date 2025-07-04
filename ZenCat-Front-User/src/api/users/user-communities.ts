@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 import { Community } from '@/components/communities/CommunityCard';
+import { MembershipState } from '@/types/membership';
 import { UpdateUserRequest, User } from '@/types/user';
 
 // ========================
@@ -41,7 +42,7 @@ export interface Membership {
   description: string;
   start_date: string;
   end_date: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
+  status: MembershipState;
   community: CommunityData;
   plan: MembershipPlan;
 }
@@ -120,12 +121,13 @@ export const userCommunitiesService = {
  * Map API membership status to frontend status
  */
 function mapMembershipStatus(
-  apiStatus: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED',
-): 'active' | 'suspended' | 'expired' {
+  apiStatus: MembershipState,
+): 'active' | 'suspended' | 'expired' | 'cancelled' {
   const statusMap = {
-    ACTIVE: 'active' as const,
-    SUSPENDED: 'suspended' as const,
-    EXPIRED: 'expired' as const,
+    [MembershipState.ACTIVE]: 'active' as const,
+    [MembershipState.SUSPENDED]: 'suspended' as const,
+    [MembershipState.EXPIRED]: 'expired' as const,
+    [MembershipState.CANCELLED]: 'cancelled' as const, // Tratamos canceladas como expiradas para el frontend
   };
 
   return statusMap[apiStatus];
@@ -175,12 +177,13 @@ export function transformMembershipsToFrontend(
  * Get status display text in Spanish
  */
 export function getStatusDisplayText(
-  status: 'active' | 'suspended' | 'expired',
+  status: 'active' | 'suspended' | 'expired' | 'cancelled',
 ): string {
   const statusText = {
     active: 'Membresía activa',
     suspended: 'Membresía suspendida',
     expired: 'Membresía vencida',
+    cancelled: 'Membresía cancelada',
   };
 
   return statusText[status];
