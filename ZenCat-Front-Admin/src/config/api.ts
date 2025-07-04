@@ -52,6 +52,7 @@ export const API_ENDPOINTS = {
     BASE: '/service/',
     BY_ID: (id: string) => `/service/${id}/`,
     BULK_DELETE: '/service/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/service/${id}/image/`,
   },
 
   // Local endpoints

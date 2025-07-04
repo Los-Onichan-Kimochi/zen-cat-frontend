@@ -211,7 +211,9 @@ function ProfesionalesComponent() {
             showSortButton={true}
             showFilterButton={true}
             onFilterClick={() => {}}
-            enableDeleteButton={false}
+            isBulkDeleting={false}
+            onBulkDelete={() => {}}
+            showBulkDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
             <DataTable table={table} columns={columns} />

@@ -52,12 +52,38 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/context/ToastContext';
+import { UpdateServicePayload, Service } from '@/types/service';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/servicios/servicio-ver')({
   component: SeeServicePageComponent,
 });
 
 export function SeeServicePageComponent() {
+  const navigate = useNavigate();
+  const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const serviceId = localStorage.getItem('currentService');
+    if (!serviceId) {
+      navigate({ to: '/servicios' });
+    } else {
+      setId(serviceId);
+    }
+  }, [navigate]);
+
+  if (!id) {
+    return (
+      <div className="p-6">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  return <ServiceView id={id} />;
+}
+
+function ServiceView({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -82,27 +108,18 @@ export function SeeServicePageComponent() {
   const [initialValues, setInitialValues] = useState({
     name: '',
     description: '',
-    isVirtual: 'false',
+    isVirtual: '',
     image: '',
   });
-
-  const id =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('currentService')
-      : null;
-
-  if (!id) {
-    navigate({ to: '/servicios' });
-    return null;
-  }
 
   const {
     data: ser,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['service', id],
-    queryFn: () => servicesApi.getServiceById(id!),
+    queryKey: ['service', id, 'withImage'],
+    queryFn: () => servicesApi.getServiceWithImage(id!),
+    enabled: !!id,
   });
 
   const {
@@ -121,6 +138,24 @@ export function SeeServicePageComponent() {
       queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id }),
       enabled: !!id,
     });
+
+  const updateServiceMutation = useMutation({
+    mutationFn: (payload: { id: string; data: UpdateServicePayload }) =>
+      servicesApi.updateService(payload.id, payload.data),
+    onSuccess: () => {
+      toast.success('Servicio Actualizado', {
+        description: 'El servicio ha sido actualizado correctamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['service', id, 'withImage'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] }); // para la tabla principal
+      setIsEditing(false);
+    },
+    onError: (error: any) => {
+      toast.error('Error al Actualizar', {
+        description: error.message || 'No se pudo actualizar el servicio.',
+      });
+    },
+  });
 
   async function deleteServiceProfessional(professionalId: string) {
     try {
@@ -160,19 +195,27 @@ export function SeeServicePageComponent() {
 
   // inicializar estados al cargar prof
   useEffect(() => {
-    if (ser && initialValues.name === '') {
+    if (ser) {
       setName(ser.name);
       setDescription(ser.description);
       setIsVirtual(ser.is_virtual === true ? 'Sí' : 'No');
-      setImagePreview(ser.image_url);
+
+      if (ser.image_bytes) {
+        setImagePreview(`data:image/jpeg;base64,${ser.image_bytes}`);
+      } else if (ser.image_url) {
+        setImagePreview(ser.image_url);
+      } else {
+        setImagePreview(null);
+      }
+
       setInitialValues({
         name: ser.name,
         description: ser.description,
-        isVirtual: ser.is_virtual ? 'true' : 'false',
+        isVirtual: ser.is_virtual ? 'Sí' : 'No',
         image: ser.image_url || '',
       });
     }
-    if (asociacionesProfesionales && asociacionesProfesionales.length > 0) {
+    if (asociacionesProfesionales) {
       Promise.all(
         asociacionesProfesionales.map((asc) =>
           professionalsApi.getProfessionalById(asc.professional_id),
@@ -181,14 +224,14 @@ export function SeeServicePageComponent() {
     } else {
       setProfesionalesSeleccionados([]);
     }
-    if (asociacionesLocales && asociacionesLocales.length > 0) {
+    if (asociacionesLocales) {
       Promise.all(
         asociacionesLocales.map((asc) => localsApi.getLocalById(asc.local_id)),
       ).then(setLocalesSeleccionados);
     } else {
       setLocalesSeleccionados([]);
     }
-  }, [ser, initialValues.name, asociacionesProfesionales, asociacionesLocales]);
+  }, [ser, asociacionesProfesionales, asociacionesLocales]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -202,7 +245,30 @@ export function SeeServicePageComponent() {
     }
   };
 
-  const columnsProfesionales = [
+  const handleSave = async () => {
+    const payload: UpdateServicePayload = {
+      name,
+      description,
+      is_virtual: isVirtual === 'Sí',
+    };
+
+    if (imageFile) {
+      payload.image_url = imageFile.name;
+      try {
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      } catch (error) {
+        toast.error('Error al Procesar Imagen', {
+          description:
+            'No se pudo convertir la imagen. Por favor, intente con otra.',
+        });
+        return;
+      }
+    }
+    updateServiceMutation.mutate({ id: id!, data: payload });
+  };
+
+  const columnsProfesionales: ColumnDef<Professional>[] = [
     {
       accessorKey: 'name',
       header: 'Nombre',
@@ -230,14 +296,14 @@ export function SeeServicePageComponent() {
     {
       id: 'actions',
       cell: ({ row }: { row: Row<Professional> }) => {
-        const serv = row.original;
+        const professional = row.original;
         return (
           <div className="flex items-center space-x-2">
             <Button
               className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
-                setProfessionalToDelete(serv);
+                setProfessionalToDelete(professional);
                 setIsDeleteModalOpen(true);
               }}
               disabled={!isEditing}
@@ -250,46 +316,49 @@ export function SeeServicePageComponent() {
     },
   ];
 
-  const columnsLocales = [
+  const tableProfesionales = useReactTable({
+    data: profesionalesSeleccionados,
+    columns: columnsProfesionales,
+    getCoreRowModel: getCoreRowModel(),
+    // ... más configuración si es necesaria
+  });
+
+  const columnsLocales: ColumnDef<Local>[] = [
     {
       accessorKey: 'local_name',
-      header: 'Nombre',
+      header: 'Nombre del Local',
+    },
+    {
+      accessorKey: 'street_name',
+      header: 'Dirección',
     },
     {
       accessorKey: 'district',
       header: 'Distrito',
     },
     {
-      id: 'direccion',
-      header: 'Dirección',
-      accessorFn: (row: any) =>
-        `${row.street_name ?? ''} ${row.building_number ?? ''}`,
-      cell: ({ row }: { row: any }) => (
-        <span>
-          {row.original.street_name} {row.original.building_number}
-        </span>
-      ),
-    },
-    {
       accessorKey: 'province',
       header: 'Provincia',
     },
     {
+      accessorKey: 'region',
+      header: 'Región',
+    },
+    {
       accessorKey: 'capacity',
-      header: 'Capacidad',
-      cell: ({ row }: { row: any }) => `${row.original.capacity} personas`,
+      header: 'Aforo',
     },
     {
       id: 'actions',
       cell: ({ row }: { row: Row<Local> }) => {
-        const loc = row.original;
+        const local = row.original;
         return (
           <div className="flex items-center space-x-2">
             <Button
               className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-red-100 hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
-                setLocalToDelete(loc);
+                setLocalToDelete(local);
                 setIsDeleteModalOpen(true);
               }}
               disabled={!isEditing}
@@ -302,307 +371,276 @@ export function SeeServicePageComponent() {
     },
   ];
 
-  const profesionalesTable = useReactTable({
-    data: profesionalesSeleccionados,
-    columns: columnsProfesionales,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  const localesTable = useReactTable({
+  const tableLocales = useReactTable({
     data: localesSeleccionados,
     columns: columnsLocales,
     getCoreRowModel: getCoreRowModel(),
+    // ... más configuración si es necesaria
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin w-12 h-12" />
-      </div>
-    );
-  }
-  if (error || !ser) {
-    navigate({ to: '/servicios' });
-    return null;
-  }
-
-  const hasChanges =
-    name !== initialValues.name ||
-    description !== initialValues.description ||
-    isVirtual !== initialValues.isVirtual ||
-    (imageFile && imageFile.name !== initialValues.image);
+  if (isLoading) return <div>Cargando...</div>;
+  if (error) return <div>Error al cargar el servicio.</div>;
+  if (!ser) return <div>No se encontró el servicio.</div>;
 
   return (
-    <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">
-      <HeaderDescriptor title="SERVICIOS" subtitle="VER SERVICIO" />
-      <Card className="mt-6 flex-grow">
+    <div className="p-6">
+      <HeaderDescriptor
+        title={isEditing ? 'EDITAR SERVICIO' : 'VER SERVICIO'}
+        subtitle="SERVICIOS"
+      />
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle>Datos del Servicio</CardTitle>
         </CardHeader>
-
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {/* Columna Izquierda para campos */}
-          <div className="grid grid-cols-1 gap-y-6">
+          {/* Columna Izquierda: Información */}
+          <div className="space-y-6">
             <div>
-              <Label htmlFor="name" className="mb-2">
-                Nombre
-              </Label>
+              <Label htmlFor="name">Nombre</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                disabled={!isEditing}
+                readOnly={!isEditing}
+                className={!isEditing ? 'border-none pl-1' : ''}
               />
             </div>
             <div>
-              <div>
-                <Label className="mb-2 block">¿Es virtual?</Label>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      value="true"
-                      checked={isVirtual === 'Sí'}
-                      onChange={() => setIsVirtual('Sí')}
-                      disabled={!isEditing}
-                    />
-                    Sí
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      value="false"
-                      checked={isVirtual === 'No'}
-                      onChange={() => setIsVirtual('No')}
-                      disabled={!isEditing}
-                    />
-                    No
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="description" className="mb-2">
-                Descripción
-              </Label>
-              <Input
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                disabled={!isEditing}
-                placeholder="Ingrese el segundo apellido"
+                readOnly={!isEditing}
+                className={!isEditing ? 'border-none pl-1' : ''}
               />
+            </div>
+            <div>
+              <Label htmlFor="is_virtual">¿Es virtual?</Label>
+              <div className="flex items-center space-x-4 pt-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="is_virtual"
+                    value="Sí"
+                    checked={isVirtual === 'Sí'}
+                    onChange={(e) => setIsVirtual(e.target.value)}
+                    disabled={!isEditing}
+                    className="form-radio"
+                  />
+                  <span className="ml-2">Sí</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="is_virtual"
+                    value="No"
+                    checked={isVirtual === 'No'}
+                    onChange={(e) => setIsVirtual(e.target.value)}
+                    disabled={!isEditing}
+                    className="form-radio"
+                  />
+                  <span className="ml-2">No</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          {/* Columna Derecha para foto de perfil y botones */}
-          <div className="flex flex-col space-y-6">
-            <div className="flex flex-col">
-              <Label htmlFor="profileImageFile" className="mb-2 self-start">
-                Foto de perfil
-              </Label>
-              <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4 relative">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Vista previa"
-                    className="object-contain h-full w-full rounded-md"
-                  />
-                ) : (
-                  <div className="text-center text-gray-400">
-                    <UploadCloud size={48} className="mx-auto" />
-                    <p>Arrastra o selecciona un archivo</p>
-                    <p className="text-xs">PNG, JPG, GIF hasta 10MB</p>
-                  </div>
-                )}
-                <Input
-                  id="profileImageFile"
-                  type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  accept="image/png, image/jpeg, image/gif"
-                  onChange={handleImageChange}
-                  disabled={!isEditing}
+          {/* Columna Derecha: Imagen */}
+          <div className="flex flex-col">
+            <Label>Imagen del Servicio</Label>
+            <div
+              className="mt-2 w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50 text-gray-400"
+              onClick={() =>
+                isEditing && document.getElementById('image-upload')?.click()
+              }
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Vista previa"
+                  className="h-full w-full object-cover rounded-lg"
                 />
-              </div>
-            </div>
-
-            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end pt-4">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => navigate({ to: '/servicios' })}
-                className="w-full sm:w-auto"
-              >
-                Volver
-              </Button>
-              <Button
-                variant="default"
-                onClick={() => {
-                  if (!isEditing) {
-                    setIsEditing(true);
-                  } else if (hasChanges) {
-                    setIsEditConfirmOpen(true);
-                  } else {
-                    setIsEditing(false);
-                  }
-                }}
-              >
-                {isEditing ? 'Guardar' : 'Editar'}
-              </Button>
+              ) : (
+                <div className="text-center">
+                  <UploadCloud className="mx-auto h-12 w-12" />
+                  <span>
+                    {isEditing
+                      ? 'Haz clic para subir una imagen'
+                      : 'No hay imagen disponible'}
+                  </span>
+                </div>
+              )}
+              {isEditing && (
+                <input
+                  id="image-upload"
+                  type="file"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                />
+              )}
             </div>
           </div>
         </CardContent>
+        <CardFooter className="flex justify-end gap-2 pt-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (isEditing) {
+                // Si está editando, cancelar resetea los cambios
+                if (ser) {
+                  setName(ser.name);
+                  setDescription(ser.description);
+                  setIsVirtual(ser.is_virtual ? 'Sí' : 'No');
+                  if (ser.image_bytes) {
+                    setImagePreview(
+                      `data:image/jpeg;base64,${ser.image_bytes}`,
+                    );
+                  } else if (ser.image_url) {
+                    setImagePreview(ser.image_url);
+                  } else {
+                    setImagePreview(null);
+                  }
+                }
+                setIsEditing(false);
+              } else {
+                navigate({ to: '/servicios' });
+              }
+            }}
+          >
+            {isEditing ? 'Cancelar' : 'Volver'}
+          </Button>
+          <Button
+            onClick={() => {
+              if (isEditing) {
+                setIsEditConfirmOpen(true);
+              } else {
+                setIsEditing(true);
+              }
+            }}
+          >
+            {isEditing ? 'Guardar Cambios' : 'Editar'}
+          </Button>
+        </CardFooter>
       </Card>
-      {isVirtual === 'Sí' && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Profesionales Asociados</CardTitle>
-            <CardDescription>
-              Listado de profesionales disponibles para este servicio virtual.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-end space-x-2 py-4">
-              <Button
-                onClick={() => {
-                  localStorage.setItem(
-                    'profesionalesAsociados',
-                    JSON.stringify(profesionalesSeleccionados.map((p) => p.id)),
-                  );
-                  localStorage.setItem('modoAgregarProfesional', 'editar');
 
-                  navigate({ to: '/servicios/agregar-profesionales' });
-                }}
+      <div className="mt-6">
+        {isVirtual === 'Sí' ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Profesionales Asignados</CardTitle>
+              <Button
                 disabled={!isEditing}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Agregar Profesional
-              </Button>
-            </div>
-            <DataTable
-              table={profesionalesTable}
-              columns={columnsProfesionales}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {isVirtual === 'No' && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Locales Asociados</CardTitle>
-            <CardDescription>
-              Listado de locales disponibles para este servicio virtual.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-end space-x-2 py-4">
-              <Button
                 onClick={() => {
+                  localStorage.setItem('modoAgregarProfesional', 'editar');
+                  localStorage.setItem('currentService', id);
                   localStorage.setItem(
-                    'localesAsociados',
-                    JSON.stringify(localesSeleccionados.map((p) => p.id)),
+                    'profesionalesSeleccionados',
+                    JSON.stringify(profesionalesSeleccionados),
                   );
+                  navigate({
+                    to: '/servicios/agregar-profesionales',
+                  });
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Asignar Profesional
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                table={tableProfesionales}
+                columns={columnsProfesionales}
+                //isLoading={loadingAsociacionesProfesionales}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Locales Asignados</CardTitle>
+              <Button
+                disabled={!isEditing}
+                onClick={() => {
                   localStorage.setItem('modoAgregarLocal', 'editar');
-
+                  localStorage.setItem('currentService', id);
+                  localStorage.setItem(
+                    'localesSeleccionados',
+                    JSON.stringify(localesSeleccionados),
+                  );
                   navigate({ to: '/servicios/agregar-locales' });
                 }}
-                disabled={!isEditing}
               >
-                <Plus className="mr-2 h-4 w-4" /> Agregar Local
+                <Plus className="mr-2 h-4 w-4" /> Asignar Local
               </Button>
-            </div>
-            <DataTable table={localesTable} columns={columnsLocales} />
-          </CardContent>
-        </Card>
-      )}
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                table={tableLocales}
+                columns={columnsLocales}
+                //isLoading={loadingAsociacionesLocales}
+              />
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <AlertDialog
+        open={isEditConfirmOpen}
+        onOpenChange={setIsEditConfirmOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {professionalToDelete
-                ? '¿Estás seguro que deseas eliminar este profesional asociado?'
-                : '¿Estás seguro que deseas eliminar este local asociado?'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Confirmar Cambios</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer.
-              <div className="mt-2 font-medium">
-                {professionalToDelete
-                  ? `Profesional: ${professionalToDelete.name}`
-                  : localToDelete
-                    ? `Local: ${localToDelete.local_name ?? localToDelete.id}`
-                    : ''}
-              </div>
+              ¿Estás seguro de que quieres guardar los cambios en este servicio?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="space-x-2">
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Eliminación</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres desvincular{' '}
+              {professionalToDelete
+                ? `${professionalToDelete.name} ${professionalToDelete.first_last_name}`
+                : localToDelete?.local_name}
+              ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => {
-                setIsDeleteModalOpen(false);
                 setProfessionalToDelete(null);
                 setLocalToDelete(null);
               }}
             >
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (professionalToDelete) {
-                    deleteServiceProfessional(professionalToDelete.id);
-                    setProfessionalToDelete(null);
-                  }
-                  if (localToDelete) {
-                    deleteServiceLocal(localToDelete.id);
-                    setLocalToDelete(null);
-                  }
-                  setIsDeleteModalOpen(false);
-                }}
-              >
-                Eliminar
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isEditConfirmOpen} onOpenChange={setIsEditConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar modificaciones</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Estás seguro que deseas guardar los cambios realizados?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="space-x-2">
-            <AlertDialogCancel onClick={() => setIsEditConfirmOpen(false)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  servicesApi.updateService(id!, {
-                    name,
-                    description: description,
-                    is_virtual: isVirtual === 'Sí',
-                    image_url: imageFile
-                      ? URL.createObjectURL(imageFile)
-                      : initialValues.image,
-                  });
-                  setInitialValues({
-                    description: description,
-                    isVirtual: isVirtual === 'Sí',
-                    image_url: imageFile
-                      ? URL.createObjectURL(imageFile)
-                      : initialValues.image,
-                  });
-                  setIsEditing(false);
-                  setIsEditConfirmOpen(false);
-                }}
-              >
-                Confirmar
-              </Button>
+            <AlertDialogAction
+              onClick={() => {
+                if (professionalToDelete) {
+                  deleteServiceProfessional(professionalToDelete.id);
+                } else if (localToDelete) {
+                  deleteServiceLocal(localToDelete.id);
+                }
+                setProfessionalToDelete(null);
+                setLocalToDelete(null);
+              }}
+            >
+              Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
