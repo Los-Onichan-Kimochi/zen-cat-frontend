@@ -8,12 +8,10 @@ export const communitiesApi = {
       API_ENDPOINTS.COMMUNITIES.BASE,
     );
     if (data && Array.isArray(data.communities)) {
-      console.log('Data from API (communities array):', data.communities); // <-- ADD THIS LOG
       return data.communities;
     } else if (Array.isArray(data)) {
       return data;
     }
-    console.error('Unexpected data structure from /community/ endpoint:', data);
     throw new Error('Unexpected data structure from communities API for list');
   },
 

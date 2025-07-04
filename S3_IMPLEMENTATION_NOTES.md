@@ -1,20 +1,60 @@
-# Pasos para la Implementación de Subida y Visualización de Imágenes en Locales
+# Guía de Implementación para Subida de Imágenes (S3)
 
-Este documento resume los pasos seguidos para implementar la funcionalidad de subida y visualización de imágenes para el módulo de "Locales" en el frontend.
+Este documento sirve como una guía genérica para implementar la funcionalidad de subida y visualización de imágenes para cualquier módulo del proyecto.
 
-## 1. Corrección del Componente de Formulario de Imagen
+## 1. Preparación de Tipos y API
 
-Antes de la implementación de la subida, se detectaron y corrigieron varios problemas en el componente `local-basic-form.tsx`:
+El primer paso es asegurar que los tipos y la capa de la API estén listos para manejar imágenes.
 
-- **Texto Superpuesto**: Se solucionó un problema en la vista de solo lectura (`ver.tsx`) donde se mostraban dos textos ("Vista previa" y "No se ha seleccionado ningún archivo") uno encima del otro. Se ajustó la lógica para mostrar un único mensaje ("No hay imagen disponible") cuando el formulario está en modo solo lectura y no hay imagen.
-- **Tamaño del Contenedor**: Se corrigió el tamaño del contenedor de la imagen para que ocupe todo el alto de la columna derecha, asegurando una apariencia consistente y estéticamente agradable. Se usó `flex-grow` para que la altura se ajuste dinámicamente al contenido de la columna izquierda.
+- **En `src/types/<moduleName>.ts`**:
+    1.  Asegúrate de que los payloads `Create<ModuleName>Payload` y `Update<ModuleName>Payload` incluyan el campo opcional: `image_bytes?: string;`.
+    2.  Define una nueva interfaz para los datos que incluyen la imagen: `export interface <ModuleName>WithImage extends <ModuleName> { image_bytes?: string; }`.
+- **En `src/config/api.ts`**:
+    1.  Agrega un nuevo endpoint para obtener el recurso con su imagen: `WITH_IMAGE: (id: string) => \`/<moduleName>/${id}/image/\`,`.
+- **En `src/api/<moduleName>s/<moduleName>s.ts`**:
+    1.  Crea una nueva función `get<ModuleName>WithImage` que consuma el nuevo endpoint y devuelva el tipo `<ModuleName>WithImage`.
 
 ## 2. Creación de una Utilidad de Imagen Reutilizable
 
-Para asegurar que la lógica de conversión de imágenes fuera modular y se pudiera usar en otras partes del proyecto, se creó un nuevo archivo:
+Para mantener el código modular, usamos una función central para convertir archivos a Base64.
 
 - **Archivo**: `src/utils/imageUtils.ts`
-- **Contenido**: Se añadió una función `fileToBase64` que convierte un objeto `File` en un string Base64.
+- **Función**: `fileToBase64`. Esta función toma un `File` y devuelve una `Promise<string>` con el contenido en Base64.
+
+## 3. Implementación en la Pantalla de Creación (`agregar.tsx`)
+
+- **Archivo**: `src/routes/<moduleName>s/agregar.tsx`
+- **Lógica de `onSubmit`**:
+    1.  Si el usuario selecciona una imagen (`imageFile`), actualiza el `payload` antes de enviarlo:
+        - El campo `image_url` se rellena con el nombre del archivo (`imageFile.name`).
+        - Se usa la utilidad `fileToBase64` para convertir el archivo y el resultado se asigna a `image_bytes`.
+
+## 4. Implementación en Pantallas de Visualización y Edición
+
+### Patrón A: "Ver" y "Editar" en archivos separados (`ver.tsx`, `editar.tsx`)
+
+Este patrón se usó en el módulo de **Locales**.
+
+- **En `ver.tsx`**:
+    1.  **Llamada a la API**: Usa `get<ModuleName>WithImage` para obtener los datos.
+    2.  **Clave de Caché Única**: Para evitar colisiones, usa una clave específica como `['<moduleName>', id, 'withImage']`.
+    3.  **Visualización**: Convierte los `image_bytes` recibidos a una URL de datos (`data:image/jpeg;base64,...`) para mostrar la imagen.
+- **En `editar.tsx`**:
+    1.  **Manejo de Archivo**: Usa `useState` para `imageFile` y `imagePreview` y una función `handleImageChange` para actualizar estos estados cuando el usuario selecciona un archivo.
+    2.  **Lógica de Mutación**: En la función de la mutación de actualización, si existe un `imageFile`, añade `image_url` y `image_bytes` al payload.
+    3.  **Invalidación de Caché**: En `onSuccess`, invalida la caché con `queryClient.invalidateQueries({ queryKey: ['<moduleName>', id] })` y `queryClient.invalidateQueries({ queryKey: ['<moduleName>s'] })`. Esto refrescará automáticamente todas las vistas relacionadas.
+
+### Patrón B: "Ver" y "Editar" en el mismo archivo (`ver.tsx`)
+
+Este patrón se usó en el módulo de **Profesionales**.
+
+- **Archivo**: `src/routes/<moduleName>s/ver.tsx`
+- **Lógica Combinada**:
+    1.  **Obtención de Datos**: Igual que en el Patrón A, usa `get<ModuleName>WithImage` con una `queryKey` única.
+    2.  **Manejo de Estado**: El componente necesita todos los estados para la edición (los campos del formulario, `isEditing`, `imageFile`, `imagePreview`) y la función `handleImageChange`.
+    3.  **Renderizado Condicional**: La UI cambia según el estado de `isEditing`. El `input` para subir archivos solo es visible y funcional cuando `isEditing` es `true`. La imagen mostrada se basa en `imagePreview` (si se acaba de seleccionar una nueva) o en los `image_bytes` que vienen de la API.
+    4.  **Lógica de Guardado**: La mutación de actualización se activa al guardar y, al igual que en el Patrón A, solo añade los datos de la imagen al payload si se ha subido un archivo nuevo.
+    5.  **Invalidación de Caché**: La invalidación en `onSuccess` es idéntica al Patrón A para garantizar la consistencia de los datos.
 
 ```typescript
 // src/utils/imageUtils.ts
@@ -30,18 +70,6 @@ export const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 ```
-
-## 3. Implementación de la Subida de Imagen en "Agregar Local"
-
-Se modificó la pantalla de `agregar.tsx` para manejar la subida de imágenes reales al backend.
-
-- **Archivo Modificado**: `src/routes/locales/agregar.tsx`
-- **Lógica de `onSubmit`**:
-    1.  Si el usuario selecciona una imagen (`imageFile`), se actualiza el `payload` de la siguiente manera:
-        - El campo `image_url` se rellena con el nombre del archivo (`imageFile.name`).
-        - Se llama a la utilidad `fileToBase64` para convertir el archivo.
-        - El string Base64 resultante se asigna al campo `image_bytes`.
-    2.  Se envía el `payload` completo al endpoint de creación del backend.
 
 ```typescript
 // src/routes/locales/agregar.tsx (resumen del onSubmit)
@@ -63,16 +91,6 @@ const onSubmit = async (data: any) => {
 };
 ```
 
-## 4. Implementación de la Visualización de Imagen en "Ver Local"
-
-Finalmente, se actualizó la pantalla `ver.tsx` para mostrar la imagen del local obtenida desde el backend.
-
-- **Archivo Modificado**: `src/routes/locales/ver.tsx`
-- **Cambios Realizados**:
-    1.  **Llamada a la API**: Se cambió la función de `useQuery` para que llamara a `localsApi.getLocalWithImage(id!)` en lugar de `getLocalById`. Esta función consume el endpoint que devuelve los datos del local junto con los bytes de la imagen.
-    2.  **Construcción de la URL de la Imagen**: Se usó un hook `useMemo` para crear una URL de datos (`data:image/jpeg;base64,...`) a partir del campo `image_bytes` recibido de la API. Esto se hace solo si `image_bytes` existe.
-    3.  **Visualización**: La URL de datos generada se pasa a la prop `imagePreview` del componente `LocalForm` para su renderizado.
-
 ```typescript
 // src/routes/locales/ver.tsx (resumen de la lógica)
 const { data: local } = useQuery({
@@ -93,19 +111,6 @@ const imagePreviewUrl = useMemo(() => {
   // ... otras props ...
 />
 ```
-
-## 5. Implementación de la Actualización de Imagen en "Editar Local"
-
-Para completar el ciclo, se añadió la funcionalidad de cambiar la imagen de un local existente desde la pantalla de edición.
-
-- **Archivo Modificado**: `src/routes/locales/editar.tsx`
-- **Cambios Realizados**:
-    1.  **Habilitar Selección de Imagen**: Se implementó la función `handleImageChange` y se conectó al componente `LocalForm`. Esto permite al usuario seleccionar un nuevo archivo de imagen y ver una vista previa instantánea.
-    2.  **Actualizar la Mutación**: La lógica de `updateMutation` fue modificada. Ahora, si el usuario ha seleccionado una nueva `imageFile`:
-        - Se asigna el nombre del nuevo archivo a `payload.image_url`.
-        - Se utiliza la utilidad `fileToBase64` para convertir la imagen.
-        - Se asigna el string Base64 resultante a `payload.image_bytes`.
-    3.  **Llamada a la API**: El `payload` (con o sin los datos de la nueva imagen) se envía al backend para actualizar el local. Si no se selecciona una nueva imagen, la existente no se modifica.
 
 ```typescript
 // src/routes/locales/editar.tsx (resumen de la lógica)
@@ -136,15 +141,6 @@ const updateMutation = useMutation({
   // ...
 });
 ```
-
-## 6. Corrección de Bug de Caché Post-Actualización
-
-Se detectó un bug donde, después de actualizar un local con una nueva imagen, la vista de "Ver Local" no mostraba la imagen actualizada hasta que se refrescaba la página manualmente (F5).
-
-- **Causa**: Las páginas de "Ver" y "Editar" usaban la misma `queryKey` (`['local', id]`) para datos con estructuras diferentes (una con imagen y otra sin), causando una colisión en la caché de React Query. La aplicación servía datos obsoletos.
-- **Solución**:
-    1.  **Diferenciar la `queryKey`**: En `ver.tsx`, se cambió la clave a `['local', id, 'withImage']` para crear una entrada de caché única para los datos del local que incluyen la imagen.
-    2.  **Invalidación de Caché**: La invalidación existente en `editar.tsx` (`queryClient.invalidateQueries({ queryKey: ['local', id] })`) es suficiente. Gracias a la concordancia parcial de React Query, invalida automáticamente todas las claves que comiencen con `['local', id]`, incluyendo la nueva, asegurando que los datos se refresquen correctamente.
 
 ```typescript
 // src/routes/locales/ver.tsx (solución)

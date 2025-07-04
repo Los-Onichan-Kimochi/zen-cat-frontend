@@ -24,25 +24,7 @@ export interface CreateLocalPayload {
   capacity: number;
   image_url: string;
 }
-/*
-export interface Region { //Departamento
-  id: string;
-  name: string;
-}
 
-export interface Province {
-  id: string;
-  name: string;
-  department_id: string;
-}
-
-export interface District {
-  id: string;
-  name: string;
-  province_id: string;
-  department_id: string;
-}
-*/
 export type UpdateLocalPayload = Partial<CreateLocalPayload>;
 
 export interface BulkCreateLocalPayload {

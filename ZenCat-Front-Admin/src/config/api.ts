@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/professional/${id}/`,
     BULK_CREATE: '/professional/bulk-create/',
     BULK_DELETE: '/professional/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/professional/${id}/image/`,
   },
 
   // Session endpoints
@@ -117,6 +118,12 @@ export const API_ENDPOINTS = {
   REPORTS: {
     SERVICES: '/reports/services',
     // Aquí podemos agregar mas si da el tiempo :c
+  },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
   },
 } as const;
 
