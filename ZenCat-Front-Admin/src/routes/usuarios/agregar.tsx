@@ -35,6 +35,7 @@ import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
 import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
 import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
 import { Region, Provincia, Distrito } from '@/types/local';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 const regiones: Region[] = rawRegiones;
 const provincias: Provincia[] = rawProvincias;
@@ -61,6 +62,8 @@ function AgregarUsuario() {
   const { modal, error, closeModal } = useModalNotifications();
   const toast = useToast();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Estados para los campos y errores
   const [form, setForm] = useState({
@@ -127,6 +130,14 @@ function AgregarUsuario() {
       });
     },
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   // Handler para el botón Cancelar
   const handleCancel = () => {
@@ -276,44 +287,35 @@ function AgregarUsuario() {
     setIsConfirmDialogOpen(true);
   };
 
-  const confirmCreate = () => {
-    // Convert IDs back to names for the API
-    const regionName = form.region
-      ? regiones.find((r) => r.id === form.region)?.name || ''
-      : '';
-    const provinciaName = form.provincia
-      ? provincias.find((p) => p.id === form.provincia)?.name || ''
-      : '';
-    const distritoName = form.distrito
-      ? distritos.find((d) => d.id === form.distrito)?.name || ''
-      : '';
-
+  const confirmCreate = async () => {
     const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
-      rol: 'user',
-      password: '123456', // Contraseña por defecto
-      permissions: ['read'],
-      avatar: '',
+      rol: 'CLIENT',
+      password: 'defaultPassword', // Consider a more secure way to handle this
     };
 
+    if (imageFile) {
+      payload.image_url = imageFile.name;
+      payload.image_bytes = await fileToBase64(imageFile);
+    }
+
     if (onboardingEnabled) {
-      // Solo agregar datos en el objeto onboarding, no duplicarlos en el nivel raíz
       payload.onboarding = {
-        documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
+        documentType: form.tipoDoc as any,
         documentNumber: form.numDoc,
         phoneNumber: form.celular,
         birthDate: form.fechaNacimiento,
-        gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
-        region: regionName,
-        province: provinciaName,
+        gender: form.genero as any,
+        region: regiones.find((r) => r.id === form.region)?.name,
+        province: provincias.find((p) => p.id === form.provincia)?.name,
+        district: distritos.find((d) => d.id === form.distrito)?.name,
         postalCode: form.codigoPostal,
-        district: distritoName,
         address: form.calle,
       };
     }
-
     createUserMutation.mutate(payload);
+    setIsConfirmDialogOpen(false);
   };
 
   // Handler para cambios en los inputs
@@ -377,86 +379,108 @@ function AgregarUsuario() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-4">
-                <div>
-                  <label htmlFor="nombres" className="block font-medium mb-1">
-                    Nombres
+                <div className="flex items-center justify-between col-span-1 md:col-span-2">
+                  <h3 className="text-lg font-semibold">Datos Personales</h3>
+                </div>
+                {/* Campo para Nombres */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="nombres" className="font-medium">
+                    Nombres <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="nombres"
                     name="nombres"
                     value={form.nombres}
                     onChange={handleChange}
-                    placeholder="Ingrese los nombres del usuario"
+                    placeholder="Ej. Juan"
                   />
                   {errors.nombres && (
-                    <span className="text-red-500 text-sm">
-                      {errors.nombres}
-                    </span>
+                    <p className="text-red-500 text-sm">{errors.nombres}</p>
                   )}
                 </div>
-                <div>
-                  <label
-                    htmlFor="primer-apellido"
-                    className="block font-medium mb-1"
-                  >
-                    Primer apellido
+
+                {/* Campo para Primer Apellido */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="primerApellido" className="font-medium">
+                    Primer Apellido <span className="text-red-500">*</span>
                   </label>
                   <Input
-                    id="primer-apellido"
+                    id="primerApellido"
                     name="primerApellido"
                     value={form.primerApellido}
                     onChange={handleChange}
-                    placeholder="Ingrese el primer apellido del usuario"
+                    placeholder="Ej. Pérez"
                   />
                   {errors.primerApellido && (
-                    <span className="text-red-500 text-sm">
+                    <p className="text-red-500 text-sm">
                       {errors.primerApellido}
-                    </span>
+                    </p>
                   )}
                 </div>
-                <div>
-                  <label
-                    htmlFor="segundo-apellido"
-                    className="block font-medium mb-1"
-                  >
-                    Segundo apellido
+
+                {/* Campo para Segundo Apellido */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="segundoApellido" className="font-medium">
+                    Segundo Apellido
                   </label>
                   <Input
-                    id="segundo-apellido"
+                    id="segundoApellido"
                     name="segundoApellido"
                     value={form.segundoApellido}
                     onChange={handleChange}
-                    placeholder="Ingrese el segundo apellido del usuario"
+                    placeholder="Ej. Gómez"
                   />
                 </div>
-                <div>
-                  <label htmlFor="correo" className="block font-medium mb-1">
-                    Correo electrónico
+
+                {/* Campo para Correo Electrónico */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="correo" className="font-medium">
+                    Correo Electrónico <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="correo"
                     name="correo"
+                    type="email"
                     value={form.correo}
                     onChange={handleChange}
-                    placeholder="Ingrese el correo electrónico del profesional"
-                    type="email"
+                    placeholder="ejemplo@correo.com"
                   />
                   {errors.correo && (
-                    <span className="text-red-500 text-sm">
-                      {errors.correo}
-                    </span>
+                    <p className="text-red-500 text-sm">{errors.correo}</p>
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="font-semibold mb-2">Foto de perfil</label>
-                <div className="flex flex-col items-center justify-center border border-neutral-300 rounded-lg h-40 mb-2 bg-white">
-                  <Upload className="w-16 h-16 text-neutral-400" />
+              {/* Sección de carga de imagen */}
+              <div className="flex flex-col items-center justify-center p-4 space-y-2">
+                <label htmlFor="profileImageFile" className="mb-2 self-start font-semibold">
+                  Foto de perfil
+                </label>
+                <div className="relative w-48 h-48 border-2 border-dashed rounded-lg flex items-center justify-center bg-white">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Vista previa"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-gray-400 flex items-center justify-center w-full h-full text-center">Vista Previa</span>
+                  )}
+                  <input
+                    id="profileImageFile"
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
                 </div>
-                <Input type="file" />
-                <span className="text-sm text-neutral-500">
-                  Sin archivos seleccionados
-                </span>
+                <label
+                  htmlFor="profileImageFile"
+                  className="cursor-pointer bg-black text-white px-4 py-2 rounded-md font-bold hover:bg-gray-800 mt-2"
+                >
+                  <Upload className="inline-block w-4 h-4 mr-2" />
+                  Subir Imagen
+                </label>
+                <p className="text-xs text-gray-500">PNG, JPG, GIF hasta 10MB</p>
               </div>
             </div>
           </Card>
