@@ -10,14 +10,18 @@ export interface CreateCommunityPayload {
   name: string;
   purpose: string;
   image_url: string;
-  //image_bytes?: number[]; // Array of bytes to send to backend
+  image_bytes?: string;
 }
 
 export interface UpdateCommunityPayload {
   name?: string;
   purpose?: string;
   image_url?: string;
-  //image_bytes?: number[]; // Array of bytes to send to backend
+  image_bytes?: string;
+}
+
+export interface CommunityWithImage extends Community {
+  image_bytes?: string;
 }
 
 export interface BulkCreateCommunityPayload {

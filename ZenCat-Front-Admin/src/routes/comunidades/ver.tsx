@@ -3,7 +3,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { CommunityForm } from '@/components/community/community-basic-form';
 import { CommunityServiceTable } from '@/components/community/community-service-table';
@@ -31,10 +31,14 @@ import { Service } from '@/types/service';
 import { MembershipPlan } from '@/types/membership-plan';
 import { UpdateCommunityPayload } from '@/types/community';
 import { Plus, ChevronLeft } from 'lucide-react';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/comunidades/ver')({
   validateSearch: (search) => ({ id: search.id as string }),
-  component: EditCommunityPage,
+  component: function EditCommunityPageRoute() {
+    const { id } = Route.useSearch();
+    return <EditCommunityPage key={id} />;
+  },
 });
 
 function EditCommunityPage() {
@@ -60,8 +64,8 @@ function EditCommunityPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['community', id],
-    queryFn: () => communitiesApi.getCommunityById(id),
+    queryKey: ['community', id, 'withImage'],
+    queryFn: () => communitiesApi.getCommunityWithImage(id),
   });
 
   console.log('Comunidad: ', community);
@@ -89,6 +93,13 @@ function EditCommunityPage() {
     reset,
   } = useCommunityForm();
 
+  const imagePreviewUrl = useMemo(() => {
+    if (community && community.image_bytes) {
+      return `data:image/jpeg;base64,${community.image_bytes}`;
+    }
+    return community?.image_url ?? null;
+  }, [community]);
+
   useEffect(() => {
     if (community && id) {
       console.log('Id: ', id);
@@ -97,9 +108,9 @@ function EditCommunityPage() {
         name: community.name,
         purpose: community.purpose,
       });
-      //setImagePreview(community.image_url ?? null);
+      setImagePreview(imagePreviewUrl ?? null);
     }
-  }, [community, reset, setImagePreview]);
+  }, [community, reset, setImagePreview, imagePreviewUrl]);
 
   useEffect(() => {
     const loadAssociations = async () => {
@@ -129,11 +140,16 @@ function EditCommunityPage() {
     mutationFn: async (data: UpdateCommunityPayload) => {
       return communitiesApi.updateCommunity(id, data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Comunidad Actualizada', {
         description: 'La comunidad ha sido actualizada correctamente.',
       });
-      queryClient.invalidateQueries({ queryKey: ['community', id] });
+      await queryClient.invalidateQueries({ queryKey: ['communities'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['community', id, 'withImage'],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
+      await queryClient.invalidateQueries({ queryKey: ['community-services', id] });
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
@@ -144,21 +160,19 @@ function EditCommunityPage() {
   });
 
   const onSubmit = async (data: any) => {
-    const imageUrl = community?.image_url || 'https://via.placeholder.com/150';
-
-    if (imageFile) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen Procesada', {
-        description: 'Subida simulada de imagen completada.',
-      });
-    }
-
     try {
-      await updateMutation.mutateAsync({
+      const payload: UpdateCommunityPayload = {
         name: data.name,
         purpose: data.purpose,
-        image_url: imageUrl,
-      });
+      };
+
+      if (imageFile) {
+        payload.image_url = imageFile.name;
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      }
+
+      await updateMutation.mutateAsync(payload);
     } catch (err: any) {
       toast.error('Error al Actualizar Comunidad', {
         description: err.message || 'No se pudo actualizar la comunidad.',
@@ -340,9 +354,9 @@ function EditCommunityPage() {
                 setServiceToDelete(service);
                 setShowServiceConfirmDialog(true);
               }}
-              onBulkDelete={(ids) => bulkDeleteServiceMutation.mutate(ids)}
+              onBulkDelete={bulkDeleteServiceMutation.mutate}
               isBulkDeleting={bulkDeleteServiceMutation.isPending}
-              disableConfirmBulkDelete={false}
+              disableConfirmBulkDelete={!isEditing}
               isEditing={isEditing}
             />
           </CardContent>
@@ -387,11 +401,9 @@ function EditCommunityPage() {
                 setPlanToDelete(plan);
                 setShowPlanConfirmDialog(true);
               }}
-              onBulkDelete={(ids) =>
-                bulkDeleteMembershipPlanMutation.mutate(ids)
-              }
+              onBulkDelete={bulkDeleteMembershipPlanMutation.mutate}
               isBulkDeleting={bulkDeleteMembershipPlanMutation.isPending}
-              disableConfirmBulkDelete={false}
+              disableConfirmBulkDelete={!isEditing}
               isEditing={isEditing}
             />
           </CardContent>
@@ -401,7 +413,18 @@ function EditCommunityPage() {
             type="button"
             variant="outline"
             className="h-10 w-30 text-base"
-            onClick={() => navigate({ to: '/comunidades' })}
+            onClick={() => {
+              if (isEditing) {
+                setIsEditing(false);
+                reset({
+                  name: community?.name,
+                  purpose: community?.purpose,
+                });
+                setImagePreview(imagePreviewUrl ?? null);
+              } else {
+                navigate({ to: '/comunidades' });
+              }
+            }}
           >
             Cancelar
           </Button>
@@ -415,8 +438,13 @@ function EditCommunityPage() {
               }
             }}
             className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+            disabled={updateMutation.isPending}
           >
-            {isEditing ? 'Guardar' : 'Editar'}
+            {isEditing
+              ? updateMutation.isPending
+                ? 'Guardando...'
+                : 'Guardar'
+              : 'Editar'}
           </Button>
         </div>
       </form>
