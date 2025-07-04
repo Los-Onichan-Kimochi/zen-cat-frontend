@@ -255,8 +255,12 @@ function ProfesionalesComponent() {
           'type',
           'image_url',
         ]}
-        onParsedData={async (data) => {
+        onParsedData={async (data, setError) => {
           try {
+            const invalidRows: number[] = [];
+            const invalidTypeRows: number[] = [];
+            const invalidSpecialtyRows: number[] = [];
+
             const validTypes = ['MEDIC', 'GYM_TRAINER', 'YOGA_TRAINER'];
             const validSpecialties = [
               'Profesor de Yoga',
@@ -275,37 +279,40 @@ function ProfesionalesComponent() {
               type: item.type?.toString().trim().toUpperCase(),
               image_url: item.image_url?.toString().trim(),
             }));
-
-            const isValid = transformedData.every(
-              (item) =>
-                item.name &&
-                item.first_last_name &&
-                item.specialty &&
-                validSpecialties.includes(item.specialty) &&
-                item.email &&
-                item.phone_number &&
-                validTypes.includes(item.type) &&
-                item.image_url,
-            );
-
-            if (!isValid) {
-              toast.error(
-                'Error: Algunos registros tienen campos inválidos, tipo o especialidad no válidos.',
-              );
-              console.error('Registros inválidos:', transformedData);
-              return;
+            transformedData.forEach((item, index) => {
+              if (!item.name || !item.email) {
+                invalidRows.push(index + 2);
+              }
+              if (!validTypes.includes(item.type)) {
+                invalidTypeRows.push(index + 2);
+              }
+              if (!validSpecialties.includes(item.specialty)) {
+                invalidSpecialtyRows.push(index + 2);
+              }
+            });
+            const combinedErrors: string[] = [];
+            if (invalidTypeRows.length > 0) {
+              combinedErrors.push(`Las siguientes filas tienen un tipo inválido: ${invalidTypeRows.join(', ')}`);
+            }
+            if (invalidSpecialtyRows.length > 0) {
+              combinedErrors.push(`Las siguientes filas tienen una especialidad inválida: ${invalidSpecialtyRows.join(', ')}`);
+            }
+            if (invalidRows.length > 0) {
+              combinedErrors.push(`Las siguientes filas tienen campos obligatorios incompletos: ${invalidRows.join(', ')}`);
             }
 
-            console.log(
-              'Body final:',
-              JSON.stringify({ professionals: transformedData }, null, 2),
-            );
+            if (combinedErrors.length > 0) {
+              setError?.(combinedErrors.join('\n'));
+              return false;
+            }
+
             await professionalsApi.bulkCreateProfessionals({
               professionals: transformedData,
             });
-            queryClient.invalidateQueries({ queryKey: ['professionals'] });
+
             setShowUploadDialog(false);
             setShowSuccess(true);
+            queryClient.invalidateQueries({ queryKey: ['professionals'] });
           } catch (error: any) {
             toast.error('Error durante la carga masiva', {
               description:
@@ -314,7 +321,32 @@ function ProfesionalesComponent() {
             console.error('Detalle del error:', error);
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p className="text-xs text-gray-500 mt-2">
+            El archivo debe contener las siguientes columnas (en este orden): <br />
+            <strong>
+              Nombres, Primer apellido, Segundo apellido, Especialidad, Correo electrónico,
+              Número de celular, Tipo, Foto de perfil
+            </strong>
+            <br />
+            Tipos válidos: <strong>MEDIC, GYM_TRAINER, YOGA_TRAINER</strong><br />
+            Especialidades válidas:
+            <strong> Profesor de Yoga, Profesor de Gimnasio, Médico</strong>
+            <br />
+            <a
+              href="/plantillas/plantilla-carga-profesionales.xlsx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              Descargar plantilla de ejemplo
+            </a>
+          </p>
+        </div>
+
+
+      </BulkCreateDialog>
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
