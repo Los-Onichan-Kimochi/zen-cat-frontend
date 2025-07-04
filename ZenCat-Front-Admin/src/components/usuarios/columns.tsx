@@ -132,4 +132,4 @@ export const getUsersColumns = ({
     enableSorting: false,
     meta: { className: 'w-[100px]' },
   },
-]; 
+];

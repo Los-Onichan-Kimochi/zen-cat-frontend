@@ -88,9 +88,11 @@ function SesionesComponent() {
   //
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  //adicion ------------------------------------------------------------- 
+  //adicion -------------------------------------------------------------
   // adaprtar para limpiar seleccion
-  const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | undefined>();
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<
+    string | undefined
+  >();
 
   const { data: professionals = [] } = useQuery<Professional[]>({
     queryKey: ['professionals'],
@@ -355,9 +357,11 @@ function SesionesComponent() {
             'session_link',
           ]}
           existingSessions={
-            sessionsData?.filter((s) => s.professional_id === selectedProfessionalId) || []
+            sessionsData?.filter(
+              (s) => s.professional_id === selectedProfessionalId,
+            ) || []
           } // Esta es la línea nueva
-          onParsedData={async (data,setError) => {
+          onParsedData={async (data, setError) => {
             if (!selectedProfessionalId) {
               //setError('Selecciona un profesional antes de cargar.');
               setError?.('Selecciona un profesional antes de cargar.');
@@ -451,9 +455,9 @@ function SesionesComponent() {
               //description: err.message || 'Error bulk creating sessions',
               //});
               //setError(err.message || 'Ocurrió un error inesperado al crear las sesiones.');
-              //comentar: 
+              //comentar:
               //const mensaje =
-                //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
+              //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
 
               //setError?.(error ? `${error}\n${mensaje}` : mensaje);
               // NO CIERRES EL MODAL

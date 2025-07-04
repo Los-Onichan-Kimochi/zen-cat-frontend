@@ -36,13 +36,21 @@ export const communityServicesApi = {
     );
   },
 
+  getCommunityServiceById: async (id: string): Promise<CommunityService> => {
+    const endpoint = API_ENDPOINTS.COMMUNITY_SERVICES.BY_ID(id);
+    const data = await apiClient.get<CommunityService>(endpoint);
+    return data;
+  },
+
   getCommunityServices: async (
     communityId?: string,
     serviceId?: string,
+    id?: string,
   ): Promise<CommunityService[]> => {
     const queryParams = new URLSearchParams();
     if (communityId) queryParams.append('communityId', communityId);
     if (serviceId) queryParams.append('serviceId', serviceId);
+    if (id) queryParams.append('id', id);
 
     const endpoint = `${API_ENDPOINTS.COMMUNITY_SERVICES.BASE}?${queryParams.toString()}`;
     const data = await apiClient.get<any>(endpoint);
