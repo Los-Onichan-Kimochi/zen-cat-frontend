@@ -45,7 +45,7 @@ export function CreateReservationModal({
 }: CreateReservationModalProps) {
   const [name, setName] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [notes, setNotes] = useState('');
+  const [membershipReservationsUsed, setMembershipReservationsUsed] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { modal, error, closeModal } = useModalNotifications();
   const toast = useToast();
@@ -112,7 +112,7 @@ export function CreateReservationModal({
         user_id: selectedUserId,
         membership_id: membershipId, // Incluimos el ID de la membresía
         name: name.trim(),
-        notes: notes.trim(),
+        membership_reservations_used: membershipReservationsUsed, // Incluimos las reservas usadas
         state: 'CONFIRMED',
         reservation_time: new Date().toISOString(), // Usamos la fecha actual como tiempo de reserva
       };
@@ -129,7 +129,7 @@ export function CreateReservationModal({
   const handleClose = () => {
     setName('');
     setSelectedUserId('');
-    setNotes('');
+    setMembershipReservationsUsed(null);
     onClose();
   };
 
@@ -160,7 +160,35 @@ export function CreateReservationModal({
                 </Label>
                 <Select
                   value={selectedUserId}
-                  onValueChange={setSelectedUserId}
+                  onValueChange={(value) => {
+                    setSelectedUserId(value);
+                    // Al seleccionar un usuario, cargamos información de su membresía
+                    if (value && communityId) {
+                      setIsLoading(true);
+                      membershipsApi.getMembershipByUserAndCommunity(value, communityId)
+                        .then(membership => {
+                          console.log('Membership data received:', membership);
+                          
+                          // Verificar si el plan tiene límite de reservas
+                          if (membership.plan?.reservation_limit === null || 
+                              membership.plan?.reservation_limit === 0) {
+                            // Plan ilimitado
+                            console.log('Plan ilimitado, estableciendo a null');
+                            setMembershipReservationsUsed(null);
+                          } else {
+                            console.log('Estableciendo reservas usadas a:', membership.reservations_used);
+                            setMembershipReservationsUsed(membership.reservations_used !== undefined ? membership.reservations_used : null);
+                          }
+                        })
+                        .catch(err => {
+                          console.error('Error al obtener membresía:', err);
+                          setMembershipReservationsUsed(null);
+                        })
+                        .finally(() => {
+                          setIsLoading(false);
+                        });
+                    }
+                  }}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Seleccionar usuario" />
@@ -175,15 +203,16 @@ export function CreateReservationModal({
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="notes" className="text-right">
-                  Notas
+                <Label className="text-right">
+                  Reservas usadas
                 </Label>
-                <Input
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="col-span-3"
-                />
+                <div className="col-span-3 text-sm text-gray-600">
+                  {selectedUserId ? 
+                    (membershipReservationsUsed === null ? 
+                      "Ilimitado" : 
+                      membershipReservationsUsed.toString()) 
+                    : "Seleccione un usuario"}
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Sesión</Label>

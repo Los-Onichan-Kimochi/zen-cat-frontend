@@ -34,6 +34,7 @@ interface ReservationsTableProps {
   onDelete: (reservation: Reservation) => void;
   onBulkDelete?: (reservations: Reservation[]) => void;
   isBulkDeleting?: boolean;
+  disableEditing?: boolean;
 }
 
 const getStateColor = (state: ReservationState) => {
@@ -73,6 +74,7 @@ export function ReservationsTable({
   onDelete,
   onBulkDelete,
   isBulkDeleting = false,
+  disableEditing = false,
 }: ReservationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -174,10 +176,17 @@ export function ReservationsTable({
                 <Eye className="mr-2 h-4 w-4" />
                 Ver
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(reservation)}>
-                <Edit2 className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
+              {!disableEditing ? (
+                <DropdownMenuItem onClick={() => onEdit(reservation)}>
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem disabled className="text-gray-400">
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Editar (No disponible)
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => onDelete(reservation)}
                 className="text-red-600"
