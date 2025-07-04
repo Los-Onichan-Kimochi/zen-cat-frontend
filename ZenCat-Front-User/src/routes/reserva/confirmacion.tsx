@@ -10,13 +10,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  reservationsApi,
-  CreateReservationRequest,
-} from '@/api/reservations/reservations';
+import { reservationsApi } from '@/api/reservations/reservations';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { communitiesApi } from '@/api/communities/communities';
-
+import { CreateReservationRequest, ReservationState } from '@/types/reservation';
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
   component: ConfirmationStepComponent,
   validateSearch: z.object({
@@ -32,7 +29,7 @@ function ConfirmationStepComponent() {
   const [createdReservationId, setCreatedReservationId] = useState<
     string | null
   >(null);
-
+  console.log(reservationData);
   // Fetch professional data if session exists
   const { data: professionalData } = useQuery({
     queryKey: ['professional', reservationData.session?.professionalId],
@@ -72,7 +69,7 @@ function ConfirmationStepComponent() {
     const reservationRequest: CreateReservationRequest = {
       name: `Reserva ${reservationData.service?.name || 'Servicio'}`,
       reservation_time: new Date().toISOString(),
-      state: 'CONFIRMED',
+      state: ReservationState.CONFIRMED,
       user_id: reservationData.userId,
       session_id: reservationData.session.id,
     };

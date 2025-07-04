@@ -26,7 +26,7 @@ import { Route as PlanesMembresiaIndexImport } from './routes/planes-membresia/i
 import { Route as LocalesIndexImport } from './routes/locales/index';
 import { Route as ComunidadesIndexImport } from './routes/comunidades/index';
 import { Route as UsuariosVermembresiaImport } from './routes/usuarios/ver_membresia';
-import { Route as UsuariosEditarImport } from './routes/usuarios/editar';
+import { Route as UsuariosVerImport } from './routes/usuarios/ver';
 import { Route as UsuariosAgregarImport } from './routes/usuarios/agregar';
 import { Route as SesionesVerImport } from './routes/sesiones/ver';
 import { Route as SesionesAgregarImport } from './routes/sesiones/agregar';
@@ -140,9 +140,9 @@ const UsuariosVermembresiaRoute = UsuariosVermembresiaImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const UsuariosEditarRoute = UsuariosEditarImport.update({
-  id: '/usuarios/editar',
-  path: '/usuarios/editar',
+const UsuariosVerRoute = UsuariosVerImport.update({
+  id: '/usuarios/ver',
+  path: '/usuarios/ver',
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -456,11 +456,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsuariosAgregarImport;
       parentRoute: typeof rootRoute;
     };
-    '/usuarios/editar': {
-      id: '/usuarios/editar';
-      path: '/usuarios/editar';
-      fullPath: '/usuarios/editar';
-      preLoaderRoute: typeof UsuariosEditarImport;
+    '/usuarios/ver': {
+      id: '/usuarios/ver';
+      path: '/usuarios/ver';
+      fullPath: '/usuarios/ver';
+      preLoaderRoute: typeof UsuariosVerImport;
       parentRoute: typeof rootRoute;
     };
     '/usuarios/ver_membresia': {
@@ -558,7 +558,7 @@ export interface FileRoutesByFullPath {
   '/sesiones/agregar': typeof SesionesAgregarRoute;
   '/sesiones/ver': typeof SesionesVerRoute;
   '/usuarios/agregar': typeof UsuariosAgregarRoute;
-  '/usuarios/editar': typeof UsuariosEditarRoute;
+  '/usuarios/ver': typeof UsuariosVerRoute;
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute;
   '/comunidades': typeof ComunidadesIndexRoute;
   '/locales': typeof LocalesIndexRoute;
@@ -597,7 +597,7 @@ export interface FileRoutesByTo {
   '/sesiones/agregar': typeof SesionesAgregarRoute;
   '/sesiones/ver': typeof SesionesVerRoute;
   '/usuarios/agregar': typeof UsuariosAgregarRoute;
-  '/usuarios/editar': typeof UsuariosEditarRoute;
+  '/usuarios/ver': typeof UsuariosVerRoute;
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute;
   '/comunidades': typeof ComunidadesIndexRoute;
   '/locales': typeof LocalesIndexRoute;
@@ -637,7 +637,7 @@ export interface FileRoutesById {
   '/sesiones/agregar': typeof SesionesAgregarRoute;
   '/sesiones/ver': typeof SesionesVerRoute;
   '/usuarios/agregar': typeof UsuariosAgregarRoute;
-  '/usuarios/editar': typeof UsuariosEditarRoute;
+  '/usuarios/ver': typeof UsuariosVerRoute;
   '/usuarios/ver_membresia': typeof UsuariosVermembresiaRoute;
   '/comunidades/': typeof ComunidadesIndexRoute;
   '/locales/': typeof LocalesIndexRoute;
@@ -678,7 +678,7 @@ export interface FileRouteTypes {
     | '/sesiones/agregar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
-    | '/usuarios/editar'
+    | '/usuarios/ver'
     | '/usuarios/ver_membresia'
     | '/comunidades'
     | '/locales'
@@ -716,7 +716,7 @@ export interface FileRouteTypes {
     | '/sesiones/agregar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
-    | '/usuarios/editar'
+    | '/usuarios/ver'
     | '/usuarios/ver_membresia'
     | '/comunidades'
     | '/locales'
@@ -754,7 +754,7 @@ export interface FileRouteTypes {
     | '/sesiones/agregar'
     | '/sesiones/ver'
     | '/usuarios/agregar'
-    | '/usuarios/editar'
+    | '/usuarios/ver'
     | '/usuarios/ver_membresia'
     | '/comunidades/'
     | '/locales/'
@@ -794,7 +794,7 @@ export interface RootRouteChildren {
   SesionesAgregarRoute: typeof SesionesAgregarRoute;
   SesionesVerRoute: typeof SesionesVerRoute;
   UsuariosAgregarRoute: typeof UsuariosAgregarRoute;
-  UsuariosEditarRoute: typeof UsuariosEditarRoute;
+  UsuariosVerRoute: typeof UsuariosVerRoute;
   UsuariosVermembresiaRoute: typeof UsuariosVermembresiaRoute;
   ComunidadesIndexRoute: typeof ComunidadesIndexRoute;
   LocalesIndexRoute: typeof LocalesIndexRoute;
@@ -833,7 +833,7 @@ const rootRouteChildren: RootRouteChildren = {
   SesionesAgregarRoute: SesionesAgregarRoute,
   SesionesVerRoute: SesionesVerRoute,
   UsuariosAgregarRoute: UsuariosAgregarRoute,
-  UsuariosEditarRoute: UsuariosEditarRoute,
+  UsuariosVerRoute: UsuariosVerRoute,
   UsuariosVermembresiaRoute: UsuariosVermembresiaRoute,
   ComunidadesIndexRoute: ComunidadesIndexRoute,
   LocalesIndexRoute: LocalesIndexRoute,
@@ -881,7 +881,7 @@ export const routeTree = rootRoute
         "/sesiones/agregar",
         "/sesiones/ver",
         "/usuarios/agregar",
-        "/usuarios/editar",
+        "/usuarios/ver",
         "/usuarios/ver_membresia",
         "/comunidades/",
         "/locales/",
@@ -971,8 +971,8 @@ export const routeTree = rootRoute
     "/usuarios/agregar": {
       "filePath": "usuarios/agregar.tsx"
     },
-    "/usuarios/editar": {
-      "filePath": "usuarios/editar.tsx"
+    "/usuarios/ver": {
+      "filePath": "usuarios/ver.tsx"
     },
     "/usuarios/ver_membresia": {
       "filePath": "usuarios/ver_membresia.tsx"

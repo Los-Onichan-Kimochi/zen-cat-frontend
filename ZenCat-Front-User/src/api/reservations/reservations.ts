@@ -2,6 +2,7 @@ import {
   Reservation,
   CreateReservationRequest,
   UpdateReservationRequest,
+  BulkDeleteReservationPayload,
 } from '@/types/reservation';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
@@ -81,5 +82,24 @@ export const reservationsApi = {
       API_ENDPOINTS.RESERVATIONS.BULK_DELETE,
       payload,
     );
+  },
+
+  // Get reservations by community and user
+  getReservationsByCommunityAndUser: async (
+    communityId: string,
+    userId: string,
+  ): Promise<Reservation[]> => {
+    
+    const endpoint = `${API_ENDPOINTS.RESERVATIONS.BASE}${communityId}/${userId}/`;
+    const data = await apiClient.get<{ reservations: Reservation[] }>(endpoint);
+    console.log('Data: ', data);
+    if (data && typeof data === 'object' && 'reservations' in data) {
+      return data.reservations;
+    }
+    console.error(
+      'Unexpected data structure from /reservation/ endpoint:',
+      data,
+    );
+    throw new Error('Unexpected data structure from reservations API');
   },
 };

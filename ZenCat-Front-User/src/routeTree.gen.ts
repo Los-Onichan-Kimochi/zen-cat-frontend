@@ -33,6 +33,7 @@ import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
 import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
 import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
 import { Route as HistorialReservasCommunityIdRouteImport } from './routes/historial-reservas/$communityId'
+import { Route as HistorialMembresiasCommunityIdRouteImport } from './routes/historial-membresias/$communityId'
 
 const PreciosRoute = PreciosRouteImport.update({
   id: '/precios',
@@ -155,6 +156,12 @@ const HistorialReservasCommunityIdRoute =
     path: '/historial-reservas/$communityId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HistorialMembresiasCommunityIdRoute =
+  HistorialMembresiasCommunityIdRouteImport.update({
+    id: '/historial-membresias/$communityId',
+    path: '/historial-membresias/$communityId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/historial-membresias/$communityId': typeof HistorialMembresiasCommunityIdRoute
   '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByTo {
   '/membresia': typeof MembresiaRoute
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/historial-membresias/$communityId': typeof HistorialMembresiasCommunityIdRoute
   '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
@@ -223,6 +232,7 @@ export interface FileRoutesById {
   '/mis-comunidades': typeof MisComunidadesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/precios': typeof PreciosRoute
+  '/historial-membresias/$communityId': typeof HistorialMembresiasCommunityIdRoute
   '/historial-reservas/$communityId': typeof HistorialReservasCommunityIdRoute
   '/onboarding/membresia': typeof OnboardingMembresiaRoute
   '/reserva/confirmacion': typeof ReservaConfirmacionRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/perfil'
     | '/precios'
+    | '/historial-membresias/$communityId'
     | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/membresia'
     | '/perfil'
     | '/precios'
+    | '/historial-membresias/$communityId'
     | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
@@ -301,6 +313,7 @@ export interface FileRouteTypes {
     | '/mis-comunidades'
     | '/perfil'
     | '/precios'
+    | '/historial-membresias/$communityId'
     | '/historial-reservas/$communityId'
     | '/onboarding/membresia'
     | '/reserva/confirmacion'
@@ -328,6 +341,7 @@ export interface RootRouteChildren {
   MisComunidadesRoute: typeof MisComunidadesRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   PreciosRoute: typeof PreciosRoute
+  HistorialMembresiasCommunityIdRoute: typeof HistorialMembresiasCommunityIdRoute
   HistorialReservasCommunityIdRoute: typeof HistorialReservasCommunityIdRoute
   OnboardingMembresiaRoute: typeof OnboardingMembresiaRoute
   ReservasIndexRoute: typeof ReservasIndexRoute
@@ -503,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistorialReservasCommunityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/historial-membresias/$communityId': {
+      id: '/historial-membresias/$communityId'
+      path: '/historial-membresias/$communityId'
+      fullPath: '/historial-membresias/$communityId'
+      preLoaderRoute: typeof HistorialMembresiasCommunityIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -554,6 +575,7 @@ const rootRouteChildren: RootRouteChildren = {
   MisComunidadesRoute: MisComunidadesRouteWithChildren,
   PerfilRoute: PerfilRoute,
   PreciosRoute: PreciosRoute,
+  HistorialMembresiasCommunityIdRoute: HistorialMembresiasCommunityIdRoute,
   HistorialReservasCommunityIdRoute: HistorialReservasCommunityIdRoute,
   OnboardingMembresiaRoute: OnboardingMembresiaRoute,
   ReservasIndexRoute: ReservasIndexRoute,

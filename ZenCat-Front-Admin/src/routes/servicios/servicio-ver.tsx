@@ -128,14 +128,14 @@ function ServiceView({ id }: { id: string }) {
   } = useQuery({
     queryKey: ['service-professionals', id],
     queryFn: () =>
-      serviceProfessionalApi.fetchServiceProfessionals({ serviceId: id }),
+      serviceProfessionalApi.fetchServiceProfessionals({ serviceId: id! }),
     enabled: !!id,
   });
 
   const { data: asociacionesLocales, isLoading: loadingAsociacionesLocales } =
     useQuery({
       queryKey: ['service-locals', id],
-      queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id }),
+      queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id! }),
       enabled: !!id,
     });
 
