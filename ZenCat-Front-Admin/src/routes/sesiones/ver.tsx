@@ -6,6 +6,7 @@ import { professionalsApi } from '@/api/professionals/professionals';
 import { localsApi } from '@/api/locals/locals';
 import { communitiesApi } from '@/api/communities/communities';
 import { communityServicesApi } from '@/api/communities/community-services';
+import { CommunityService } from '@/types/community-service';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
 import { serviceLocalApi } from '@/api/services/service_locals';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import {
   Link as LinkIcon,
   CalendarIcon,
   Save,
+  Check,
   X,
   Building,
   BookOpen,
@@ -109,62 +111,47 @@ function SessionDetailComponent() {
     }
   }, [session]);
 
-  // Get community service details
-  const { data: communityServices, isLoading: isLoadingCommunityServices } =
-    useQuery({
-      queryKey: ['communityServices', session?.community_service_id],
-      queryFn: () =>
-        session?.community_service_id
-          ? communityServicesApi.getCommunityServices(
-              undefined,
-              undefined,
-              session.community_service_id,
-            )
-          : Promise.resolve([]),
+  // Unificamos la obtención de community service en una sola consulta directa
+  // Esto elimina la race condition y problemas de caché
+  const { data: communityService, isLoading: isLoadingCommunityService } =
+    useQuery<CommunityService | null>({
+      queryKey: ['communityServiceDetail', session?.id, session?.community_service_id],
+      queryFn: async () => {
+        if (!session?.community_service_id) {
+          console.warn('No community_service_id available');
+          return null;
+        }
+        
+        console.log('Fetching community service details for ID:', session.community_service_id);
+        try {
+          // Usamos directamente la API que obtiene un community service específico
+          // en lugar de filtrar una lista
+          return await communityServicesApi.getCommunityServiceById(session.community_service_id);
+        } catch (error) {
+          console.error('Error fetching community service by ID:', error);
+          return null;
+        }
+      },
       enabled: !!session?.community_service_id,
+      staleTime: 0, // Evitar uso de caché
+      cacheTime: 5000, // Tiempo corto de caché
+      retry: 1, // Limitar reintentos
     });
 
-  // Update form data when communityServices data is loaded
+  // Actualizamos formData con los datos del community service (un solo useEffect)
   useEffect(() => {
-    if (communityServices && communityServices.length > 0) {
-      const communityService = communityServices[0];
-      console.log('Community Service association found:', communityService);
+    if (communityService && session) {
+      console.log('Community service details loaded:', communityService);
+      
       setFormData((prev) => ({
         ...prev,
         community_id: communityService.community_id,
         service_id: communityService.service_id,
+        // Aseguramos que community_service_id siempre esté sincronizado
+        community_service_id: session.community_service_id,
       }));
     }
-  }, [communityServices]);
-
-  // Alternative way to get community_id and service_id when we have community_service_id
-  useEffect(() => {
-    if (
-      session?.community_service_id &&
-      (!formData.community_id || !formData.service_id)
-    ) {
-      // Use the direct endpoint to get community service by ID
-      communityServicesApi
-        .getCommunityServiceById(session.community_service_id)
-        .then((communityService) => {
-          console.log('Community service found by ID:', communityService);
-          if (communityService) {
-            setFormData((prev) => ({
-              ...prev,
-              community_id: communityService.community_id,
-              service_id: communityService.service_id,
-            }));
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching community service by ID:', error);
-        });
-    }
-  }, [
-    session?.community_service_id,
-    formData.community_id,
-    formData.service_id,
-  ]);
+  }, [communityService, session]);
 
   // Fetch professionals for display
   const { data: professionals } = useQuery({
@@ -224,7 +211,7 @@ function SessionDetailComponent() {
     enabled: !!session,
   });
 
-  // Fetch services for the community
+  // Fetch services for the community - solo para mostrar información, no para editar
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services', formData.community_id],
     queryFn: () =>
@@ -289,71 +276,21 @@ function SessionDetailComponent() {
     return services.find((s) => s.id === formData.service_id);
   }, [services, formData.service_id]);
 
-  // Get selected service details
+  // Get selected service details - used only for display, no editing
   const selectedService = services?.find(
     (service) => service.id === formData.service_id,
   );
 
-  // Prevent changes to community and service in edit mode
-  // They should be displayed but not editable
-  useEffect(() => {
-    if (isEditing && session && session.community_service_id) {
-      // Make sure community_service_id is preserved during edits
-      setFormData((prev) => ({
-        ...prev,
-        community_service_id: session.community_service_id || '',
-      }));
-    }
-  }, [isEditing, session]);
-
-  // Update is_virtual when service changes - similar to agregar.tsx
-  useEffect(() => {
-    if (selectedService && isEditing) {
-      const previousVirtualValue = formData.is_virtual;
-      const newVirtualValue = selectedService.is_virtual;
-
-      // Always update to match the service type
-      setFormData((prev) => ({
-        ...prev,
-        is_virtual: newVirtualValue,
-        local_id: newVirtualValue ? '' : prev.local_id,
-        session_link: newVirtualValue ? prev.session_link : '',
-        // Reset professional when switching between virtual/non-virtual
-        professional_id:
-          previousVirtualValue !== newVirtualValue ? '' : prev.professional_id,
-      }));
-
-      if (previousVirtualValue !== newVirtualValue) {
-        console.log(
-          `Service type changed to ${newVirtualValue ? 'virtual' : 'in-person'}`,
-        );
-
-        // If switching to virtual and we have a professional selected
-        if (
-          newVirtualValue &&
-          formData.professional_id &&
-          filteredProfessionals
-        ) {
-          const isValidProfessional = filteredProfessionals.some(
-            (p) => p.id === formData.professional_id,
-          );
-          if (!isValidProfessional) {
-            // Reset the professional if not valid for this virtual service
-            setFormData((prev) => ({ ...prev, professional_id: '' }));
-            toast.warning('Profesional no disponible', {
-              description:
-                'El profesional seleccionado no está disponible para este servicio virtual. Por favor seleccione otro.',
-            });
-          }
-        }
-      }
-    }
-  }, [
-    selectedService,
-    isEditing,
-    filteredProfessionals,
-    formData.professional_id,
-  ]);
+  // Esta parte del código se ha eliminado porque ya manejamos el community_service_id
+  // directamente en el useEffect que procesa communityService, evitando así 
+  // múltiples actualizaciones de estado que pueden causar problemas de sincronización
+  
+  // En ver.tsx nunca se permite cambiar el servicio ni la comunidad
+  // así que no necesitamos la lógica para gestionar cambios en esos campos
+  // El tipo de sesión (virtual/presencial) está determinado por el servicio
+  // y no se puede cambiar en la pantalla de ver.
+  // La propiedad is_virtual se establece al cargar los datos iniciales
+  // y se mantiene constante durante la edición
 
   // Check if session is virtual - use formData when in edit mode
   const isVirtual = isEditing
@@ -365,10 +302,13 @@ function SessionDetailComponent() {
     if (session) {
       console.log('------- DATOS ACTUALES EN VER.TSX -------');
       console.log('Session data:', session);
+      console.log('Session ID:', session.id);
+      console.log('Community Service ID (session):', session.community_service_id);
+      console.log('Community Service ID (formData):', formData.community_service_id);
+      console.log('¿Son iguales?:', session.community_service_id === formData.community_service_id);
       console.log('Communities:', communities);
       console.log('Services:', services);
-      console.log('Community Service ID:', session.community_service_id);
-      console.log('Community Services:', communityServices);
+      console.log('Community Service:', communityService);
       console.log('Form data:', formData);
       console.log('Community:', community);
       console.log('Service:', service);
@@ -384,7 +324,7 @@ function SessionDetailComponent() {
     session,
     communities,
     services,
-    communityServices,
+    communityService,
     formData,
     community,
     service,
@@ -406,11 +346,28 @@ function SessionDetailComponent() {
         description: 'Los cambios han sido guardados correctamente.',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating session:', error);
-      toast.error('Error', {
-        description: 'No se pudo actualizar la sesión. Inténtalo de nuevo.',
-      });
+      
+      // Detectar si es un error de conflicto específico
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('conflicto de horario') || errorMessage.includes('409')) {
+        toast.error('Error de Conflicto', {
+          description: 'Existe un conflicto de horario con otra sesión. Intenta con un horario diferente.',
+        });
+      } else if (errorMessage.includes('profesional')) {
+        toast.error('Error de Disponibilidad', {
+          description: 'El profesional seleccionado no está disponible en este horario.',
+        });
+      } else if (errorMessage.includes('local')) {
+        toast.error('Error de Disponibilidad', {
+          description: 'El local seleccionado no está disponible en este horario.',
+        });
+      } else {
+        toast.error('Error', {
+          description: 'No se pudo actualizar la sesión. Inténtalo de nuevo.',
+        });
+      }
     },
   });
 
@@ -425,30 +382,18 @@ function SessionDetailComponent() {
 
   // Handle select changes
   const handleSelectChange = (name: string, value: string | boolean) => {
+    // No permitimos cambiar community_id o service_id en la pantalla de ver
+    if (name === 'community_id' || name === 'service_id') {
+      toast.warning('Operación no permitida', {
+        description: 'No se puede cambiar la comunidad o servicio en una sesión existente.',
+      });
+      return;
+    }
+    
     setFormData({
       ...formData,
       [name]: value,
     });
-
-    // If changing the service_id, we need to check if the professional is valid
-    if (name === 'service_id') {
-      // The is_virtual property will be updated by the useEffect that watches selectedService
-      // We'll reset the professional_id in that useEffect as needed
-
-      // Reset local_id when service changes to ensure compatibility
-      if (!formData.is_virtual) {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: value,
-          local_id: '', // Reset local selection when service changes
-        }));
-
-        toast.info('Local resetado', {
-          description:
-            'Debe seleccionar un local disponible para este servicio.',
-        });
-      }
-    }
 
     // If changing the professional_id and we have a virtual service, validate compatibility
     if (
@@ -577,14 +522,22 @@ function SessionDetailComponent() {
       return;
     }
 
-    // Check for community_service_id
-    if (!formData.community_service_id && session?.community_service_id) {
-      // Use the one from the session if available
-      formData.community_service_id = session.community_service_id;
+    // Creamos una copia de formData para evitar mutación directa
+    const formDataCopy = { ...formData };
+
+    // Siempre usamos el community_service_id de la sesión (fuente confiable)
+    if (session?.community_service_id) {
+      formDataCopy.community_service_id = session.community_service_id;
+    }
+    
+    // Aseguramos que community_id y service_id no cambien
+    if (session && communityService) {
+      formDataCopy.community_id = communityService.community_id;
+      formDataCopy.service_id = communityService.service_id;
     }
 
     // Final check before submission
-    if (!formData.community_service_id) {
+    if (!formDataCopy.community_service_id) {
       toast.error('Datos Incompletos', {
         description:
           'No se pudo obtener la asociación entre comunidad y servicio.',
@@ -593,18 +546,33 @@ function SessionDetailComponent() {
     }
 
     try {
-      // Format the data for API
+      // Asegurar que las fechas estén en el formato correcto
+      const isoDateStr = formDataCopy.date;
+      const startTimeStr = formDataCopy.start_time;
+      const endTimeStr = formDataCopy.end_time;
+      
+      // Preparamos el payload para la API
+      // Separamos el envío de campos básicos y temporales para facilitar
+      // la recuperación en caso de conflictos
       const updatedSession: UpdateSessionPayload = {
-        title: formData.title,
-        date: formData.date,
-        capacity: parseInt(formData.capacity.toString()),
-        professional_id: formData.professional_id,
-        local_id: formData.is_virtual ? null : formData.local_id,
-        session_link: formData.is_virtual ? formData.session_link : null,
-        start_time: `${formData.date}T${formData.start_time}:00`,
-        end_time: `${formData.date}T${formData.end_time}:00`,
-        state: formData.state as SessionState,
-        community_service_id: formData.community_service_id,
+        // Datos básicos
+        title: formDataCopy.title,
+        capacity: parseInt(formDataCopy.capacity.toString()),
+        professional_id: formDataCopy.professional_id,
+        community_service_id: formDataCopy.community_service_id,
+        state: formDataCopy.state as SessionState,
+        
+        // Datos condicionales
+        local_id: formDataCopy.is_virtual ? null : formDataCopy.local_id,
+        session_link: formDataCopy.is_virtual ? formDataCopy.session_link : null,
+        
+        // Datos temporales - enviamos solo la fecha en formato YYYY-MM-DD
+        date: isoDateStr,
+        
+        // Para las horas, enviamos el tiempo como HH:MM:SS
+        // El API se encargará de combinarlos correctamente
+        start_time: `${startTimeStr}:00`,
+        end_time: `${endTimeStr}:00`,
       };
 
       console.log('Form data before submission:', formData);
@@ -1091,7 +1059,7 @@ function SessionDetailComponent() {
                   </div>
                 ) : isLoadingCommunities ||
                   isLoadingServices ||
-                  isLoadingCommunityServices ? (
+                  isLoadingCommunityService ? (
                   <div className="flex items-center justify-center p-4">
                     <Loader2 className="h-5 w-5 animate-spin mr-2" />
                     <span>Cargando información...</span>
@@ -1200,6 +1168,7 @@ function SessionDetailComponent() {
                   onClick={handleSubmit}
                   className="bg-green-600 text-white hover:bg-green-700 flex items-center w-1/2"
                   disabled={updateSessionMutation.isPending}
+                  type="button"
                 >
                   {updateSessionMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
