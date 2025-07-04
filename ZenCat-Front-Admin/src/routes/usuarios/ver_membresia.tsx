@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-
 export const Route = createFileRoute('/usuarios/ver_membresia')({
   component: VerMembresia,
 });
@@ -61,9 +60,12 @@ function VerMembresia() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filtrar membresías por término de búsqueda
-  const filteredMemberships = memberships.filter((membership) =>
-    membership.community?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    membership.plan?.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredMemberships = memberships.filter(
+    (membership) =>
+      membership.community?.name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      membership.plan?.type?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Función para formatear fechas
@@ -131,11 +133,20 @@ function VerMembresia() {
 
   // Estado de carga y confirmación
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [pendingChange, setPendingChange] = useState<{ membership: UserMembership; newStatus: 'active' | 'inactive' } | null>(null);
+  const [pendingChange, setPendingChange] = useState<{
+    membership: UserMembership;
+    newStatus: 'active' | 'inactive';
+  } | null>(null);
 
   // Mutation para actualizar estado
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'inactive' | 'active' }) => {
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: 'inactive' | 'active';
+    }) => {
       setUpdatingId(id);
       return membershipsApi.updateMembershipStatus(id, status);
     },
@@ -161,7 +172,10 @@ function VerMembresia() {
 
   const confirmChange = () => {
     if (!pendingChange) return;
-    updateStatusMutation.mutate({ id: pendingChange.membership.id, status: pendingChange.newStatus });
+    updateStatusMutation.mutate({
+      id: pendingChange.membership.id,
+      status: pendingChange.newStatus,
+    });
     setPendingChange(null);
   };
 
@@ -188,7 +202,10 @@ function VerMembresia() {
             </Button>
           </div>
           <div className="text-center text-red-600">
-            <p>Error cargando los datos: {userError?.message || membershipsError?.message}</p>
+            <p>
+              Error cargando los datos:{' '}
+              {userError?.message || membershipsError?.message}
+            </p>
           </div>
         </div>
       </div>
@@ -198,9 +215,9 @@ function VerMembresia() {
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
       <div className="p-6 h-full">
-        <HeaderDescriptor 
-          title="USUARIOS" 
-          subtitle={`VER MEMBRESÍAS - ${user?.name || 'Usuario'}`} 
+        <HeaderDescriptor
+          title="USUARIOS"
+          subtitle={`VER MEMBRESÍAS - ${user?.name || 'Usuario'}`}
         />
         <div className="mb-4">
           <Button
@@ -239,27 +256,45 @@ function VerMembresia() {
             </Button>
           </div>
         </div>
-      
+
         {/* Tabla */}
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full">
             <thead>
               <tr className="bg-gray-100">
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Comunidad</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Plan</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Costo</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Límite de reservas</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Inicio</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Fin</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Estado</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Comunidad
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Plan
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Costo
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Límite de reservas
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Inicio
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Fin
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Estado
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredMemberships.length > 0 ? (
                 filteredMemberships.map((membership) => (
                   <tr key={membership.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 text-center text-sm text-gray-900">{membership.community?.name || 'N/A'}</td>
+                    <td className="px-4 py-3 text-center text-sm text-gray-900">
+                      {membership.community?.name || 'N/A'}
+                    </td>
                     <td className="px-4 py-3 text-center text-sm text-gray-900">
                       {membership.plan?.type
                         ? translatePlanType(membership.plan.type)
@@ -275,8 +310,12 @@ function VerMembresia() {
                         ? 'Ilimitado'
                         : membership.plan?.reservation_limit || 'N/A'}
                     </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-900">{formatDate(membership.start_date)}</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-900">{formatDate(membership.end_date)}</td>
+                    <td className="px-4 py-3 text-center text-sm text-gray-900">
+                      {formatDate(membership.start_date)}
+                    </td>
+                    <td className="px-4 py-3 text-center text-sm text-gray-900">
+                      {formatDate(membership.end_date)}
+                    </td>
                     <td className="px-4 py-3 text-center text-sm">
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${getStatusColor(membership.status)}`}
@@ -288,19 +327,29 @@ function VerMembresia() {
                     <td className="px-4 py-3 text-center text-sm">
                       <Switch
                         checked={membership.status.toLowerCase() === 'active'}
-                        onCheckedChange={(checked) => handleToggle(membership, checked)}
-                        className={updatingId === membership.id || (pendingChange && pendingChange.membership.id === membership.id) ? 'opacity-50 pointer-events-none' : ''}
+                        onCheckedChange={(checked) =>
+                          handleToggle(membership, checked)
+                        }
+                        className={
+                          updatingId === membership.id ||
+                          (pendingChange &&
+                            pendingChange.membership.id === membership.id)
+                            ? 'opacity-50 pointer-events-none'
+                            : ''
+                        }
                       />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-gray-500">
+                  <td
+                    colSpan={8}
+                    className="px-4 py-6 text-center text-gray-500"
+                  >
                     {searchTerm
                       ? 'No se encontraron membresías que coincidan con la búsqueda'
-                      : 'Este usuario no tiene membresías registradas'
-                    }
+                      : 'Este usuario no tiene membresías registradas'}
                   </td>
                 </tr>
               )}
@@ -312,18 +361,22 @@ function VerMembresia() {
         <div className="flex justify-between items-center mt-4">
           <div>Total de membresías: {filteredMemberships.length}</div>
           <div>
-            {filteredMemberships.length > 0 && 
-              `Mostrando ${filteredMemberships.length} de ${memberships.length} registros`
-            }
+            {filteredMemberships.length > 0 &&
+              `Mostrando ${filteredMemberships.length} de ${memberships.length} registros`}
           </div>
         </div>
 
         {/* Diálogo de confirmación */}
-        <AlertDialog open={pendingChange !== null} onOpenChange={() => setPendingChange(null)}>
+        <AlertDialog
+          open={pendingChange !== null}
+          onOpenChange={() => setPendingChange(null)}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {pendingChange?.newStatus === 'inactive' ? '¿Cancelar membresía?' : '¿Reactivar membresía?'}
+                {pendingChange?.newStatus === 'inactive'
+                  ? '¿Cancelar membresía?'
+                  : '¿Reactivar membresía?'}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {pendingChange?.newStatus === 'inactive'
@@ -334,8 +387,14 @@ function VerMembresia() {
             <AlertDialogFooter>
               <AlertDialogCancel>Volver</AlertDialogCancel>
               <AlertDialogAction asChild>
-                <Button variant="default" onClick={confirmChange} disabled={updateStatusMutation.isPending}>
-                  {updateStatusMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                <Button
+                  variant="default"
+                  onClick={confirmChange}
+                  disabled={updateStatusMutation.isPending}
+                >
+                  {updateStatusMutation.isPending
+                    ? 'Procesando...'
+                    : 'Confirmar'}
                 </Button>
               </AlertDialogAction>
             </AlertDialogFooter>

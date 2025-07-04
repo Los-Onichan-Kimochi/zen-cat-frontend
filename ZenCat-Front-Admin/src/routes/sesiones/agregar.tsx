@@ -25,7 +25,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   Select,
@@ -35,7 +34,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 
 import { sessionsApi } from '@/api/sessions/sessions';
 import { professionalsApi } from '@/api/professionals/professionals';
@@ -214,7 +212,7 @@ function AddSessionComponent() {
             localsList.push(local);
           }
         } catch (error) {
-          console.error(`Error fetching local ${localId}:`, error);
+          console.error(`Error al obtener local ${localId}`);
         }
       }
       return localsList;
@@ -240,10 +238,6 @@ function AddSessionComponent() {
           if (communityServices && communityServices.length > 0) {
             const communityServiceId = communityServices[0].id;
             setValue('community_service_id', communityServiceId);
-            console.log(
-              'Set community_service_id from API:',
-              communityServiceId,
-            );
           } else {
             console.error('No community service association found');
           }
@@ -275,49 +269,16 @@ function AddSessionComponent() {
       // to ensure proper filtering of MEDIC professionals
       if (previousVirtualValue !== newVirtualValue) {
         setValue('professional_id', '');
-        console.log('Reset professional selection due to service type change');
       }
     }
-    console.log('Service locals data:', serviceLocals);
   }, [selectedService, setValue, watchedValues.is_virtual]);
 
   // Añadir un efecto para monitorear datos importantes
   React.useEffect(() => {
-    console.log('------- DATOS ACTUALES -------');
-    console.log('Communities:', communities);
-    console.log('Services:', services);
-    console.log('ServiceLocals:', serviceLocals);
-    console.log('Locals:', locals);
-    console.log('Selected Service:', selectedService);
-    console.log('community_service_id:', watchedValues.community_service_id);
-
-    // Log professional details with types for debugging
-    if (professionals && professionals.length > 0) {
-      console.log('Professionals:', professionals.length, 'available');
-      console.log(
-        'Professional types:',
-        professionals.map((p) => ({
-          id: p.id,
-          name: p.name,
-          type: p.type,
-        })),
-      );
-    } else {
-      console.log('Professionals: None available');
-    }
-
-    console.log('is_virtual:', watchedValues.is_virtual);
-    console.log('----------------------------');
-  }, [
-    communities,
-    services,
-    professionals,
-    serviceLocals,
-    locals,
-    selectedService,
-    watchedValues.is_virtual,
-    watchedValues.community_service_id,
-  ]);
+    // Este efecto se utiliza para mantener sincronizados todos los datos
+    // relacionados con la selección de servicio, comunidad y profesionales
+    // No es necesario realizar acciones adicionales aquí, solo mantener las dependencias
+  }, [communities, services, professionals, serviceLocals, locals, selectedService, watchedValues.is_virtual, watchedValues.community_service_id]);
 
   // Verificar conflictos
   const conflictCheck = {
@@ -402,8 +363,6 @@ function AddSessionComponent() {
         data.is_virtual && data.session_link ? data.session_link : null,
       community_service_id: data.community_service_id,
     };
-
-    console.log('Submitting session with payload:', payload);
 
     if (!data.community_service_id) {
       toast.error('Datos Incompletos', {
@@ -843,7 +802,7 @@ function AddSessionComponent() {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                       <span className="rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
-                        {watchedValues.is_virtual ? '6' : '6'}
+                        6
                       </span>
                       Horario de la Sesión
                     </h3>
@@ -874,6 +833,7 @@ function AddSessionComponent() {
                         />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Hora de inicio */}
                         <div>
                           <Label htmlFor="start_time">Hora de inicio *</Label>
                           <Input
@@ -901,6 +861,8 @@ function AddSessionComponent() {
                             </p>
                           )}
                         </div>
+                        
+                        {/* Hora de fin */}
                         <div>
                           <Label htmlFor="end_time">Hora de fin *</Label>
                           <Input

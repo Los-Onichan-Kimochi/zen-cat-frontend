@@ -37,10 +37,13 @@ export interface UserMembership {
 export const membershipsApi = {
   getUserMemberships: async (userId: string): Promise<UserMembership[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MEMBERSHIPS.BY_USER(userId)}`, {
-        method: 'GET',
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.MEMBERSHIPS.BY_USER(userId)}`,
+        {
+          method: 'GET',
+          headers: getHeaders(),
+        },
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -50,7 +53,7 @@ export const membershipsApi = {
         } else if (response.status === 500) {
           throw new Error('Error interno del servidor');
         }
-        
+
         const errorData = await response.json().catch(() => null);
         throw new Error(
           `Error fetching user memberships: ${response.status} ${response.statusText}`,
@@ -108,4 +111,4 @@ export const membershipsApi = {
       throw error;
     }
   },
-}; 
+};

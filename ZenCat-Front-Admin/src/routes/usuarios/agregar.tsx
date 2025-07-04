@@ -96,15 +96,19 @@ function AgregarUsuario() {
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
 
   // Cálculos para los dropdowns de ubigeo - usando IDs únicos
-  const selectedRegion = regiones.find(region => region.id === form.region);
-  const selectedProvincia = provincias.find(prov => prov.id === form.provincia);
+  const selectedRegion = regiones.find((region) => region.id === form.region);
+  const selectedProvincia = provincias.find(
+    (prov) => prov.id === form.provincia,
+  );
 
   const provinciasFiltradas = provincias.filter(
-    prov => prov.department_id === selectedRegion?.id
+    (prov) => prov.department_id === selectedRegion?.id,
   );
 
   const distritosFiltrados = distritos.filter(
-    dist => dist.department_id === selectedRegion?.id && dist.province_id === selectedProvincia?.id
+    (dist) =>
+      dist.department_id === selectedRegion?.id &&
+      dist.province_id === selectedProvincia?.id,
   );
 
   const createUserMutation = useMutation({
@@ -186,11 +190,18 @@ function AgregarUsuario() {
         if (form.tipoDoc === 'DNI' && !form.numDoc.match(/^\d{8}$/)) {
           newErrors.numDoc = 'El DNI debe tener 8 dígitos';
           valid = false;
-        } else if (form.tipoDoc === 'FOREIGNER_CARD' && !form.numDoc.match(/^\d{9}$/)) {
+        } else if (
+          form.tipoDoc === 'FOREIGNER_CARD' &&
+          !form.numDoc.match(/^\d{9}$/)
+        ) {
           newErrors.numDoc = 'El Carnet de Extranjería debe tener 9 dígitos';
           valid = false;
-        } else if (form.tipoDoc === 'PASSPORT' && !form.numDoc.match(/^[A-Za-z0-9]{6,12}$/)) {
-          newErrors.numDoc = 'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
+        } else if (
+          form.tipoDoc === 'PASSPORT' &&
+          !form.numDoc.match(/^[A-Za-z0-9]{6,12}$/)
+        ) {
+          newErrors.numDoc =
+            'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
           valid = false;
         }
       }
@@ -201,7 +212,11 @@ function AgregarUsuario() {
         valid = false;
       } else {
         const birthDate = new Date(form.fechaNacimiento);
-        if (isNaN(birthDate.getTime()) || birthDate > new Date() || birthDate < new Date('1900-01-01')) {
+        if (
+          isNaN(birthDate.getTime()) ||
+          birthDate > new Date() ||
+          birthDate < new Date('1900-01-01')
+        ) {
           newErrors.fechaNacimiento = 'Ingrese una fecha válida';
           valid = false;
         }
@@ -219,19 +234,32 @@ function AgregarUsuario() {
       }
 
       // Validar región
-      if (form.region && !regiones.find(r => r.id === form.region)) {
+      if (form.region && !regiones.find((r) => r.id === form.region)) {
         newErrors.region = 'Región seleccionada no válida';
         valid = false;
       }
 
       // Validar provincia
-      if (form.provincia && !provincias.find(p => p.id === form.provincia && p.department_id === form.region)) {
+      if (
+        form.provincia &&
+        !provincias.find(
+          (p) => p.id === form.provincia && p.department_id === form.region,
+        )
+      ) {
         newErrors.provincia = 'Provincia seleccionada no válida';
         valid = false;
       }
 
       // Validar distrito
-      if (form.distrito && !distritos.find(d => d.id === form.distrito && d.department_id === form.region && d.province_id === form.provincia)) {
+      if (
+        form.distrito &&
+        !distritos.find(
+          (d) =>
+            d.id === form.distrito &&
+            d.department_id === form.region &&
+            d.province_id === form.provincia,
+        )
+      ) {
         newErrors.distrito = 'Distrito seleccionado no válido';
         valid = false;
       }
@@ -250,9 +278,15 @@ function AgregarUsuario() {
 
   const confirmCreate = () => {
     // Convert IDs back to names for the API
-    const regionName = form.region ? regiones.find(r => r.id === form.region)?.name || '' : '';
-    const provinciaName = form.provincia ? provincias.find(p => p.id === form.provincia)?.name || '' : '';
-    const distritoName = form.distrito ? distritos.find(d => d.id === form.distrito)?.name || '' : '';
+    const regionName = form.region
+      ? regiones.find((r) => r.id === form.region)?.name || ''
+      : '';
+    const provinciaName = form.provincia
+      ? provincias.find((p) => p.id === form.provincia)?.name || ''
+      : '';
+    const distritoName = form.distrito
+      ? distritos.find((d) => d.id === form.distrito)?.name || ''
+      : '';
 
     const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
@@ -288,7 +322,7 @@ function AgregarUsuario() {
   ) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-    
+
     // Clear error for the field when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -546,10 +580,10 @@ function AgregarUsuario() {
                   <label htmlFor="region" className="block font-medium mb-1">
                     Región
                   </label>
-                                     <Select
-                     value={form.region}
-                     onValueChange={handleRegionChange}
-                   >
+                  <Select
+                    value={form.region}
+                    onValueChange={handleRegionChange}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccione una región" />
                     </SelectTrigger>
@@ -571,10 +605,10 @@ function AgregarUsuario() {
                   <label htmlFor="provincia" className="block font-medium mb-1">
                     Provincia
                   </label>
-                                     <Select
-                     value={form.provincia}
-                     onValueChange={handleProvinciaChange}
-                   >
+                  <Select
+                    value={form.provincia}
+                    onValueChange={handleProvinciaChange}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccione una provincia" />
                     </SelectTrigger>
@@ -596,10 +630,10 @@ function AgregarUsuario() {
                   <label htmlFor="distrito" className="block font-medium mb-1">
                     Distrito
                   </label>
-                                     <Select
-                     value={form.distrito}
-                     onValueChange={handleDistritoChange}
-                   >
+                  <Select
+                    value={form.distrito}
+                    onValueChange={handleDistritoChange}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccione un distrito" />
                     </SelectTrigger>
