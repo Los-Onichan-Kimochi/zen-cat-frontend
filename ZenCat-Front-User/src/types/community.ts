@@ -6,6 +6,24 @@ export interface Community {
   number_subscriptions: number;
 }
 
+export interface CommunityService {
+  id: string;
+  community_id: string;
+  service_id: string;
+  // Optional populated relations
+  community?: Community;
+  service?: any; // Define Service type if needed
+}
+
+export interface CommunityPlan {
+  id: string;
+  community_id: string;
+  plan_id: string;
+  // Optional populated relations
+  community?: Community;
+  plan?: import('@/types/membership').MembershipPlan;
+}
+
 export interface CreateCommunityPayload {
   name: string;
   purpose: string;

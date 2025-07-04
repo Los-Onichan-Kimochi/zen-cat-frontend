@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,21 +25,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
+import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
+import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
+import { Region, Provincia, Distrito } from '@/types/local';
 
-export const Route = createFileRoute('/usuarios/editar')({
+const regiones: Region[] = rawRegiones;
+const provincias: Provincia[] = rawProvincias;
+const distritos: Distrito[] = rawDistritos;
+
+export const Route = createFileRoute('/usuarios/ver')({
   validateSearch: (search: Record<string, unknown>) => {
     return {
       id: search.id as string,
     };
   },
-  component: EditarUsuario,
+  component: VerUsuario,
 });
 
-function EditarUsuario() {
+function VerUsuario() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
-  const search = useSearch({ from: '/usuarios/editar' });
+  const search = useSearch({ from: '/usuarios/ver' });
   const userId = search.id;
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -127,9 +142,10 @@ function EditarUsuario() {
     numDoc: '',
     fechaNacimiento: '',
     genero: '',
-    ciudad: '',
-    codigoPostal: '',
+    region: '',
+    provincia: '',
     distrito: '',
+    codigoPostal: '',
     calle: '',
   });
 
@@ -143,9 +159,10 @@ function EditarUsuario() {
     numDoc: '',
     fechaNacimiento: '',
     genero: '',
-    ciudad: '',
-    codigoPostal: '',
+    region: '',
+    provincia: '',
     distrito: '',
+    codigoPostal: '',
     calle: '',
   });
 
@@ -155,30 +172,89 @@ function EditarUsuario() {
     tipoDoc: '',
     nombres: '',
     primerApellido: '',
+    numDoc: '',
+    fechaNacimiento: '',
+    region: '',
+    provincia: '',
+    distrito: '',
   });
 
-  const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+  const [onboardingEnabled, setOnboardingEnabled] = useState(false);
   const [originallyHadOnboarding, setOriginallyHadOnboarding] = useState(false);
 
-  // Cargar datos del usuario al montar el componente
+  const selectedRegion = useMemo(
+    () => regiones.find((region) => region.id === form.region),
+    [regiones, form.region],
+  );
+
+  const selectedProvincia = useMemo(
+    () => provincias.find((prov) => prov.id === form.provincia),
+    [provincias, form.provincia],
+  );
+
+  const provinciasFiltradas = useMemo(() => {
+    if (!selectedRegion) return provincias;
+    return provincias.filter(
+      (prov) => prov.department_id === selectedRegion.id,
+    );
+  }, [provincias, selectedRegion]);
+
+  const distritosFiltrados = useMemo(() => {
+    const distritoActual = form.distrito
+      ? distritos.find((d) => d.id === form.distrito)
+      : null;
+    let filtrados: Distrito[] = [];
+
+    if (!selectedRegion && !selectedProvincia) {
+      filtrados = distritos;
+    } else if (selectedRegion && !selectedProvincia) {
+      filtrados = distritos.filter(
+        (dist) => dist.department_id === selectedRegion.id,
+      );
+    } else if (selectedRegion && selectedProvincia) {
+      filtrados = distritos.filter(
+        (dist) =>
+          dist.department_id === selectedRegion.id &&
+          dist.province_id === selectedProvincia.id,
+      );
+    }
+
+    if (distritoActual && !filtrados.find((d) => d.id === distritoActual.id)) {
+      filtrados = [distritoActual, ...filtrados];
+    }
+
+    return filtrados;
+  }, [distritos, selectedRegion, selectedProvincia, form.distrito]);
+
+  // Cargar datos del usuario
   useEffect(() => {
-    if (user && initialValues.nombres === '') {
-      // Separar el nombre completo en partes
+    if (user) {
       const nameParts = user.name.split(' ');
       const nombres = nameParts[0] || '';
       const primerApellido = nameParts[1] || '';
       const segundoApellido = nameParts.slice(2).join(' ') || '';
 
-      // Formatear fecha de nacimiento para el input tipo date
       let fechaNacimientoFormatted = '';
       if (user.onboarding?.birthDate) {
         try {
-          const date = new Date(user.onboarding.birthDate);
-          fechaNacimientoFormatted = date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+          fechaNacimientoFormatted = new Date(user.onboarding.birthDate)
+            .toISOString()
+            .split('T')[0];
         } catch (error) {
           console.warn('Error parsing birth date:', error);
         }
       }
+
+      // Convert geographic names from backend to IDs for the form
+      const regionId = user.onboarding?.region
+        ? regiones.find((r) => r.name === user.onboarding?.region)?.id || ''
+        : '';
+      const provinciaId = user.onboarding?.province
+        ? provincias.find((p) => p.name === user.onboarding?.province)?.id || ''
+        : '';
+      const distritoId = user.onboarding?.district
+        ? distritos.find((d) => d.name === user.onboarding?.district)?.id || ''
+        : '';
 
       const newForm = {
         nombres,
@@ -190,32 +266,53 @@ function EditarUsuario() {
         numDoc: user.onboarding?.documentNumber || '',
         fechaNacimiento: fechaNacimientoFormatted,
         genero: user.onboarding?.gender || '',
-        ciudad: user.onboarding?.city || '',
+        region: regionId,
+        provincia: provinciaId,
+        distrito: distritoId,
         codigoPostal: user.onboarding?.postalCode || '',
-        distrito: user.onboarding?.district || '',
         calle: user.onboarding?.address || '',
       };
 
       setForm(newForm);
       setInitialValues(newForm);
 
-      // Habilitar onboarding si hay datos de onboarding
-      setOnboardingEnabled(!!user.onboarding);
-      setOriginallyHadOnboarding(!!user.onboarding);
-    }
-  }, [user, initialValues.nombres]);
+      // Enable onboarding section if user has any onboarding data
+      const hasOnboardingData = !!user.onboarding;
+      setOnboardingEnabled(hasOnboardingData);
+      setOriginallyHadOnboarding(hasOnboardingData);
 
-  // Handler para el botón Cancelar
+      console.log('User onboarding data loaded:', {
+        hasOnboarding: hasOnboardingData,
+        region: user.onboarding?.region,
+        province: user.onboarding?.province,
+        district: user.onboarding?.district,
+        convertedIds: { regionId, provinciaId, distritoId },
+      });
+    }
+  }, [user, regiones, provincias, distritos]);
+
+  // Handlers
   const handleCancel = () => {
     if (isEditing) {
       setForm(initialValues);
+      setErrors({
+        correo: '',
+        celular: '',
+        tipoDoc: '',
+        nombres: '',
+        primerApellido: '',
+        numDoc: '',
+        fechaNacimiento: '',
+        region: '',
+        provincia: '',
+        distrito: '',
+      });
       setIsEditing(false);
     } else {
       navigate({ to: '/usuarios' });
     }
   };
 
-  // Validaciones simples
   const validate = () => {
     let valid = true;
     const newErrors = {
@@ -224,38 +321,109 @@ function EditarUsuario() {
       tipoDoc: '',
       nombres: '',
       primerApellido: '',
+      numDoc: '',
+      fechaNacimiento: '',
+      region: '',
+      provincia: '',
+      distrito: '',
     };
 
-    // Validar nombres
     if (!form.nombres.trim()) {
       newErrors.nombres = 'Los nombres son requeridos';
       valid = false;
     }
-
-    // Validar primer apellido
     if (!form.primerApellido.trim()) {
       newErrors.primerApellido = 'El primer apellido es requerido';
       valid = false;
     }
-
-    // Correo
     if (!form.correo.match(/^\S+@\S+\.\S+$/)) {
       newErrors.correo = 'Ingrese un correo válido';
       valid = false;
     }
 
-    // Solo validar campos de onboarding si está habilitado
     if (onboardingEnabled) {
-      // Celular (solo números y longitud 9-15)
       if (form.celular && !form.celular.match(/^\d{9,15}$/)) {
         newErrors.celular = 'Ingrese un número de celular válido';
         valid = false;
       }
-
-      // Tipo de documento (solo validar si hay número de documento)
       if (form.numDoc && !form.tipoDoc) {
         newErrors.tipoDoc = 'Seleccione un tipo de documento';
         valid = false;
+      }
+      if (form.tipoDoc === 'DNI' && !form.numDoc.match(/^\d{8}$/)) {
+        newErrors.numDoc = 'El DNI debe tener 8 dígitos';
+        valid = false;
+      }
+      if (form.tipoDoc === 'FOREIGNER_CARD' && !form.numDoc.match(/^\d{9}$/)) {
+        newErrors.numDoc = 'El Carnet de Extranjería debe tener 9 dígitos';
+        valid = false;
+      }
+      if (
+        form.tipoDoc === 'PASSPORT' &&
+        !form.numDoc.match(/^[A-Za-z0-9]{6,12}$/)
+      ) {
+        newErrors.numDoc =
+          'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
+        valid = false;
+      }
+      if (!form.fechaNacimiento.trim()) {
+        newErrors.fechaNacimiento = 'La fecha de nacimiento es obligatoria';
+        valid = false;
+      }
+      const birthDate = new Date(form.fechaNacimiento);
+      if (
+        isNaN(birthDate.getTime()) ||
+        birthDate > new Date() ||
+        birthDate < new Date('1900-01-01')
+      ) {
+        newErrors.fechaNacimiento = 'Ingrese una fecha válida';
+        valid = false;
+      }
+
+      // Validar región
+      if (!form.region.trim()) {
+        newErrors.region = 'Seleccione una región';
+        valid = false;
+      } else {
+        // Verify the region ID exists
+        const regionExists = regiones.find((r) => r.id === form.region);
+        if (!regionExists) {
+          newErrors.region = 'Región seleccionada no válida';
+          valid = false;
+        }
+      }
+
+      // Validar provincia
+      if (!form.provincia.trim()) {
+        newErrors.provincia = 'Seleccione una provincia';
+        valid = false;
+      } else {
+        // Verify the province ID exists and belongs to the selected region
+        const provinceExists = provincias.find(
+          (p) => p.id === form.provincia && p.department_id === form.region,
+        );
+        if (!provinceExists) {
+          newErrors.provincia = 'Provincia seleccionada no válida';
+          valid = false;
+        }
+      }
+
+      // Validar distrito
+      if (!form.distrito.trim()) {
+        newErrors.distrito = 'Seleccione un distrito';
+        valid = false;
+      } else {
+        // Verify the district ID exists and belongs to the selected province and region
+        const districtExists = distritos.find(
+          (d) =>
+            d.id === form.distrito &&
+            d.department_id === form.region &&
+            d.province_id === form.provincia,
+        );
+        if (!districtExists) {
+          newErrors.distrito = 'Distrito seleccionado no válido';
+          valid = false;
+        }
       }
     }
 
@@ -263,38 +431,42 @@ function EditarUsuario() {
     return valid;
   };
 
-  // Handler para el submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isEditing) {
-      setIsEditing(true);
-      return;
-    }
-
+    if (!isEditing) return;
     if (!validate()) return;
     setIsConfirmDialogOpen(true);
   };
 
-  const confirmUpdate = () => {
-    // Determinar qué campos han cambiado
+  const confirmUpdate = async () => {
     const basicUserFieldsChanged =
       form.nombres !== initialValues.nombres ||
       form.primerApellido !== initialValues.primerApellido ||
       form.segundoApellido !== initialValues.segundoApellido ||
       form.correo !== initialValues.correo;
-
     const onboardingFieldsChanged =
       form.celular !== initialValues.celular ||
       form.tipoDoc !== initialValues.tipoDoc ||
       form.numDoc !== initialValues.numDoc ||
       form.fechaNacimiento !== initialValues.fechaNacimiento ||
       form.genero !== initialValues.genero ||
-      form.ciudad !== initialValues.ciudad ||
+      form.region !== initialValues.region ||
+      form.provincia !== initialValues.provincia ||
       form.codigoPostal !== initialValues.codigoPostal ||
       form.distrito !== initialValues.distrito ||
       form.calle !== initialValues.calle;
 
-    // Preparar datos de onboarding si están habilitados
+    // Convert IDs back to names for the API
+    const regionName = form.region
+      ? regiones.find((r) => r.id === form.region)?.name || ''
+      : '';
+    const provinciaName = form.provincia
+      ? provincias.find((p) => p.id === form.provincia)?.name || ''
+      : '';
+    const distritoName = form.distrito
+      ? distritos.find((d) => d.id === form.distrito)?.name || ''
+      : '';
+
     const onboardingPayload = onboardingEnabled
       ? {
           documentType: form.tipoDoc as 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT',
@@ -302,85 +474,112 @@ function EditarUsuario() {
           phoneNumber: form.celular,
           birthDate: form.fechaNacimiento,
           gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
-          city: form.ciudad,
+          region: regionName,
+          province: provinciaName,
           postalCode: form.codigoPostal,
-          district: form.distrito,
+          district: distritoName,
           address: form.calle,
         }
       : null;
 
-    // CASO 1: Usuario NO tenía onboarding y ahora lo está agregando
-    if (!originallyHadOnboarding && onboardingEnabled) {
-      console.log('Creating new onboarding for user');
-      createOnboardingMutation.mutate(onboardingPayload!);
-    }
-    // CASO 2: Usuario SÍ tenía onboarding, solo cambios de onboarding, sin cambios básicos
-    else if (
-      originallyHadOnboarding &&
-      onboardingFieldsChanged &&
-      !basicUserFieldsChanged &&
-      onboardingEnabled
-    ) {
-      console.log('Updating existing onboarding only');
-      updateOnboardingMutation.mutate(onboardingPayload!);
-    }
-    // CASO 3: Cambios en datos básicos del usuario (con o sin onboarding)
-    else {
-      console.log('Using general user update API');
-      const payload: UpdateUserPayload = {
-        name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
-        email: form.correo,
-      };
-
-      if (onboardingEnabled && onboardingPayload) {
-        payload.onboarding = onboardingPayload;
+    try {
+      if (!originallyHadOnboarding && onboardingEnabled) {
+        if (basicUserFieldsChanged) {
+          await updateUserMutation.mutateAsync({
+            name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
+            email: form.correo,
+          });
+        }
+        createOnboardingMutation.mutate(onboardingPayload!);
+      } else if (
+        originallyHadOnboarding &&
+        onboardingFieldsChanged &&
+        !basicUserFieldsChanged &&
+        onboardingEnabled
+      ) {
+        updateOnboardingMutation.mutate(onboardingPayload!);
+      } else if (basicUserFieldsChanged) {
+        const userPayload: UpdateUserPayload = {
+          name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
+          email: form.correo,
+        };
+        if (
+          onboardingFieldsChanged &&
+          onboardingEnabled &&
+          originallyHadOnboarding
+        ) {
+          await updateUserMutation.mutateAsync(userPayload);
+          updateOnboardingMutation.mutate(onboardingPayload!);
+        } else {
+          updateUserMutation.mutate(userPayload);
+        }
+      } else if (
+        onboardingFieldsChanged &&
+        onboardingEnabled &&
+        originallyHadOnboarding
+      ) {
+        updateOnboardingMutation.mutate(onboardingPayload!);
       }
-
-      updateUserMutation.mutate(payload);
+    } catch (error) {
+      toast.error('Error al actualizar', {
+        description: 'Ocurrió un error durante la actualización.',
+      });
     }
   };
 
-  // Handler para cambios en los inputs
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  ) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleRegionChange = (value: string) => {
+    if (value !== form.region) {
+      setForm({ ...form, region: value, provincia: '', distrito: '' });
+      // Clear related errors
+      setErrors((prev) => ({
+        ...prev,
+        region: '',
+        provincia: '',
+        distrito: '',
+      }));
+    }
+  };
+  const handleProvinciaChange = (value: string) => {
+    if (value !== form.provincia) {
+      setForm({ ...form, provincia: value, distrito: '' });
+      // Clear related errors
+      setErrors((prev) => ({ ...prev, provincia: '', distrito: '' }));
+    }
+  };
+  const handleDistritoChange = (value: string) => {
+    setForm({ ...form, distrito: value });
+    // Clear error
+    setErrors((prev) => ({ ...prev, distrito: '' }));
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="animate-spin w-12 h-12" />
       </div>
     );
-  }
 
-  const hasChanges =
-    form.nombres !== initialValues.nombres ||
-    form.primerApellido !== initialValues.primerApellido ||
-    form.segundoApellido !== initialValues.segundoApellido ||
-    form.correo !== initialValues.correo ||
-    form.celular !== initialValues.celular ||
-    form.distrito !== initialValues.distrito ||
-    form.calle !== initialValues.calle ||
-    form.tipoDoc !== initialValues.tipoDoc ||
-    form.numDoc !== initialValues.numDoc ||
-    form.fechaNacimiento !== initialValues.fechaNacimiento ||
-    form.genero !== initialValues.genero ||
-    form.ciudad !== initialValues.ciudad ||
-    form.codigoPostal !== initialValues.codigoPostal;
+  const hasChanges = (Object.keys(form) as Array<keyof typeof form>).some(
+    (key) => form[key] !== initialValues[key],
+  );
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
       <div className="p-6 h-full">
-        <HeaderDescriptor title="USUARIOS" subtitle="EDITAR USUARIO" />
+        <HeaderDescriptor
+          title="USUARIOS"
+          subtitle={isEditing ? 'EDITAR USUARIO' : 'VER USUARIO'}
+        />
         <div className="mb-4">
           <Button
-            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-2"
-            onClick={handleCancel}
+            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-black hover:text-white hover:border-black hover:shadow-sm active:scale-95 transition-all duration-200"
+            onClick={() => navigate({ to: '/usuarios' })}
           >
-            <ChevronLeft className="w-5 h-5" />
-            {isEditing ? 'Cancelar' : 'Volver'}
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Volver
           </Button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -454,7 +653,7 @@ function EditarUsuario() {
                     name="correo"
                     value={form.correo}
                     onChange={handleChange}
-                    placeholder="Ingrese el correo electrónico del profesional"
+                    placeholder="Ingrese el correo electrónico"
                     type="email"
                     disabled={!isEditing}
                   />
@@ -478,7 +677,6 @@ function EditarUsuario() {
             </div>
           </Card>
 
-          {/* Toggle para habilitar/deshabilitar onboarding */}
           <div className="flex items-center gap-3 mb-4">
             <Switch
               id="onboarding-toggle"
@@ -525,7 +723,7 @@ function EditarUsuario() {
                     className="w-full h-10 px-3 border border-gray-300 rounded-md"
                     disabled={!isEditing}
                   >
-                    <option value="">Seleccione un tipo de documento</option>
+                    <option value="">Seleccione un tipo</option>
                     <option value="DNI">DNI</option>
                     <option value="FOREIGNER_CARD">
                       Carnet de Extranjería
@@ -550,6 +748,11 @@ function EditarUsuario() {
                     placeholder="Ingrese el número del documento"
                     disabled={!isEditing}
                   />
+                  {errors.numDoc && (
+                    <span className="text-red-500 text-sm">
+                      {errors.numDoc}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label
@@ -566,6 +769,11 @@ function EditarUsuario() {
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
+                  {errors.fechaNacimiento && (
+                    <span className="text-red-500 text-sm">
+                      {errors.fechaNacimiento}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="genero" className="block font-medium mb-1">
@@ -587,20 +795,87 @@ function EditarUsuario() {
                 </div>
               </div>
               <div className="mb-4 font-semibold">Dirección</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label htmlFor="ciudad" className="block font-medium mb-1">
-                    Ciudad
+                  <label htmlFor="region" className="block font-medium mb-1">
+                    Región / Departamento
                   </label>
-                  <Input
-                    id="ciudad"
-                    name="ciudad"
-                    value={form.ciudad}
-                    onChange={handleChange}
-                    placeholder="Ingrese la ciudad"
+                  <Select
+                    value={form.region}
+                    onValueChange={handleRegionChange}
                     disabled={!isEditing}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una región" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regiones.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.region && (
+                    <span className="text-red-500 text-sm">
+                      {errors.region}
+                    </span>
+                  )}
                 </div>
+                <div>
+                  <label htmlFor="provincia" className="block font-medium mb-1">
+                    Provincia
+                  </label>
+                  <Select
+                    value={form.provincia}
+                    onValueChange={handleProvinciaChange}
+                    disabled={!isEditing || !form.region}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una provincia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinciasFiltradas.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.provincia && (
+                    <span className="text-red-500 text-sm">
+                      {errors.provincia}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="distrito" className="block font-medium mb-1">
+                    Distrito
+                  </label>
+                  <Select
+                    value={form.distrito}
+                    onValueChange={handleDistritoChange}
+                    disabled={!isEditing || !form.provincia}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un distrito" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {distritosFiltrados.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.distrito && (
+                    <span className="text-red-500 text-sm">
+                      {errors.distrito}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="codigo-postal"
@@ -618,19 +893,6 @@ function EditarUsuario() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="distrito" className="block font-medium mb-1">
-                    Distrito
-                  </label>
-                  <Input
-                    id="distrito"
-                    name="distrito"
-                    value={form.distrito}
-                    onChange={handleChange}
-                    placeholder="Seleccione un distrito"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
                   <label htmlFor="calle" className="block font-medium mb-1">
                     Calle/ Avenida
                   </label>
@@ -639,7 +901,7 @@ function EditarUsuario() {
                     name="calle"
                     value={form.calle}
                     onChange={handleChange}
-                    placeholder="Núm"
+                    placeholder="Ingrese la dirección completa"
                     disabled={!isEditing}
                   />
                 </div>
@@ -647,32 +909,57 @@ function EditarUsuario() {
             </Card>
           )}
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={handleCancel}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={
+                isEditing
+                  ? () => {
+                      setForm(initialValues);
+                      setErrors({
+                        correo: '',
+                        celular: '',
+                        tipoDoc: '',
+                        nombres: '',
+                        primerApellido: '',
+                        numDoc: '',
+                        fechaNacimiento: '',
+                        region: '',
+                        provincia: '',
+                        distrito: '',
+                      });
+                      setIsEditing(false);
+                    }
+                  : () => navigate({ to: '/usuarios' })
+              }
+            >
               {isEditing ? 'Cancelar' : 'Volver'}
             </Button>
             <Button
               variant="default"
               type="submit"
               disabled={
-                updateUserMutation.isPending ||
-                updateOnboardingMutation.isPending ||
-                createOnboardingMutation.isPending ||
-                (isEditing && !hasChanges)
+                isEditing &&
+                (!hasChanges ||
+                  updateUserMutation.isPending ||
+                  updateOnboardingMutation.isPending ||
+                  createOnboardingMutation.isPending)
               }
+              onClick={() => {
+                if (!isEditing) setIsEditing(true);
+              }}
             >
-              {updateUserMutation.isPending ||
-              updateOnboardingMutation.isPending ||
-              createOnboardingMutation.isPending
-                ? 'Guardando...'
-                : isEditing
-                  ? 'Guardar'
-                  : 'Editar'}
+              {isEditing
+                ? updateUserMutation.isPending ||
+                  updateOnboardingMutation.isPending ||
+                  createOnboardingMutation.isPending
+                  ? 'Guardando...'
+                  : 'Guardar'
+                : 'Editar'}
             </Button>
           </div>
         </form>
       </div>
-
-      {/* Diálogo de confirmación */}
       <AlertDialog
         open={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
@@ -702,4 +989,4 @@ function EditarUsuario() {
   );
 }
 
-export default EditarUsuario;
+export default VerUsuario;

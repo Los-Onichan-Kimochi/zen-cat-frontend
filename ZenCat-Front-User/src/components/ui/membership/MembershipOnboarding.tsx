@@ -18,9 +18,12 @@ export function MembershipOnboarding({
 }: MembershipOnboardingProps) {
   const { state, setCommunity } = useMembershipOnboarding();
 
+  // Solo actualiza en contexto si la comunidad cambia realmente (por id)
   useEffect(() => {
-    setCommunity(community);
-  }, [community, setCommunity]);
+    if (state?.community?.id !== community.id) {
+      setCommunity(community);
+    }
+  }, [community.id, state?.community?.id, setCommunity]);
 
   const stepLabels = [
     'Seleccionar plan',

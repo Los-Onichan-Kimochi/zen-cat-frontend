@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 import { Community } from '@/components/communities/CommunityCard';
+import { MembershipState } from '@/types/membership';
+import { UpdateUserRequest, User } from '@/types/user';
 
 // ========================
 // TIPOS DE DATOS
@@ -40,7 +42,7 @@ export interface Membership {
   description: string;
   start_date: string;
   end_date: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
+  status: MembershipState;
   community: CommunityData;
   plan: MembershipPlan;
 }
@@ -82,6 +84,33 @@ export const userCommunitiesService = {
     );
     return response;
   },
+
+  /**
+   * Update user profile
+   */
+  async updateUser(
+    userId: string,
+    userData: Partial<UpdateUserRequest>
+  ): Promise<User> {
+    try {
+      // Ensure we include the updated_by field
+      const dataWithUpdatedBy = {
+        ...userData,
+        updated_by: userId, // Always include who's making the update
+      };
+
+      const response = await apiClient.patch<User>(
+        API_ENDPOINTS.USERS.BY_ID(userId),
+        dataWithUpdatedBy
+      );
+
+      return response;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+  
 };
 
 // ========================
@@ -92,12 +121,13 @@ export const userCommunitiesService = {
  * Map API membership status to frontend status
  */
 function mapMembershipStatus(
-  apiStatus: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED',
-): 'active' | 'suspended' | 'expired' {
+  apiStatus: MembershipState,
+): 'active' | 'suspended' | 'expired' | 'cancelled' {
   const statusMap = {
-    ACTIVE: 'active' as const,
-    SUSPENDED: 'suspended' as const,
-    EXPIRED: 'expired' as const,
+    [MembershipState.ACTIVE]: 'active' as const,
+    [MembershipState.SUSPENDED]: 'suspended' as const,
+    [MembershipState.EXPIRED]: 'expired' as const,
+    [MembershipState.CANCELLED]: 'cancelled' as const, // Tratamos canceladas como expiradas para el frontend
   };
 
   return statusMap[apiStatus];
@@ -113,9 +143,12 @@ export function transformMembershipsToFrontend(
     return [];
   }
 
-  return memberships.map((membership) => {
-    return {
-      id: membership.community.id,
+  const communityMap = new Map<string, Community>();
+
+  memberships.forEach((membership) => {
+    const communityId = membership.community.id;
+    const transformedCommunity = {
+      id: communityId,
       name: membership.community.name,
       image: membership.community.image_url,
       type: membership.community.purpose,
@@ -127,19 +160,30 @@ export function transformMembershipsToFrontend(
       fee: membership.plan.fee,
       reservationLimit: membership.plan.reservation_limit,
     };
+
+    // Prioritize active memberships if a community is already in the map
+    if (
+      !communityMap.has(communityId) &&
+      transformedCommunity.status === 'active'
+    ) {
+      communityMap.set(communityId, transformedCommunity);
+    }
   });
+
+  return Array.from(communityMap.values());
 }
 
 /**
  * Get status display text in Spanish
  */
 export function getStatusDisplayText(
-  status: 'active' | 'suspended' | 'expired',
+  status: 'active' | 'suspended' | 'expired' | 'cancelled',
 ): string {
   const statusText = {
     active: 'Membresía activa',
     suspended: 'Membresía suspendida',
     expired: 'Membresía vencida',
+    cancelled: 'Membresía cancelada',
   };
 
   return statusText[status];

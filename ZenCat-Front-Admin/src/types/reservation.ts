@@ -26,6 +26,7 @@ export interface CreateReservationRequest {
   state: ReservationState;
   user_id: string;
   session_id: string;
+  membership_id?: string;
 }
 
 export interface UpdateReservationRequest {
