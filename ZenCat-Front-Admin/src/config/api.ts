@@ -126,6 +126,9 @@ export const API_ENDPOINTS = {
   MEMBERSHIPS: {
     BASE: '/membership/',
     BY_USER: (userId: string) => `/membership/user/${userId}/`,
+    USERS_BY_COMMUNITY: (communityId: string) => `/membership/community/${communityId}/users`,
+    BY_USER_AND_COMMUNITY: (userId: string, communityId: string) => 
+      `/membership/user/${userId}/community/${communityId}`,
   },
 } as const;
 
