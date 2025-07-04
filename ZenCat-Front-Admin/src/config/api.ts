@@ -119,6 +119,12 @@ export const API_ENDPOINTS = {
     SERVICES: '/reports/services',
     // Aquí podemos agregar mas si da el tiempo :c
   },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
+  },
 } as const;
 
 // HTTP Status Codes

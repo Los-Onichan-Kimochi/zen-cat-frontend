@@ -19,6 +19,8 @@ export interface User {
     phoneNumber?: string;
     birthDate?: string;
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    region?: string;
+    province?: string;
     city?: string;
     postalCode?: string;
     district?: string;
@@ -45,6 +47,8 @@ export interface CreateUserPayload {
     phoneNumber?: string;
     birthDate?: string;
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    region?: string;
+    province?: string;
     city?: string;
     postalCode?: string;
     district?: string;

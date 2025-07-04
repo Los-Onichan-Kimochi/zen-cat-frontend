@@ -1,0 +1,1 @@
+export { membershipService } from './membership';
