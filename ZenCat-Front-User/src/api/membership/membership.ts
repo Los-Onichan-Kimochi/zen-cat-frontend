@@ -53,6 +53,23 @@ export const membershipService = {
   },
 
   /**
+   * Gets all memberships for a specific user
+   * @param userId - The ID of the user
+   * @returns Promise<Membership[]>
+   */
+  async getMembershipsByUserId(userId: string): Promise<Membership[]> {
+    try {
+      const data = await apiClient.get<{ memberships: Membership[] }>(
+        API_ENDPOINTS.MEMBERSHIPS.BY_USER(userId)
+      );
+      return data.memberships || [];
+    } catch (error) {
+      console.error(`Error fetching memberships for user ${userId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Creates a new membership for a specific user
    * @param userId - The ID of the user
    * @param membershipData - The membership data to create
@@ -63,18 +80,12 @@ export const membershipService = {
     membershipData: CreateMembershipRequest,
   ): Promise<Membership> {
     try {
-      console.log('🎯 Creating membership for user:', userId);
-      console.log('📦 Membership data:', membershipData);
-
       const response = await apiClient.post<Membership>(
         API_ENDPOINTS.MEMBERSHIPS.CREATE_FOR_USER(userId),
         membershipData,
       );
-
-      console.log('✅ Membership created successfully:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error creating membership:', error);
       throw error;
     }
   },

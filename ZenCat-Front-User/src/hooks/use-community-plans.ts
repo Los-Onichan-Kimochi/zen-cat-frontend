@@ -11,6 +11,36 @@ interface UseCommunityPlansState {
   error: string | null;
 }
 
+// Función para transformar un plan de la API al formato esperado por el frontend
+const transformPlan = (apiPlan: any): MembershipPlan => {
+  const apiType = (apiPlan.type || '').toUpperCase().trim();
+
+  const type =
+    apiType === 'MONTHLY'
+      ? 'Mensual'
+      : apiType === 'ANUAL'
+      ? 'Anual'
+      : 'Mensual'; // Fallback
+
+  return {
+    id: apiPlan.id,
+    name:
+      apiPlan.name || (type === 'Mensual' ? 'Plan Mensual' : 'Plan Anual'),
+    type: type,
+    price: apiPlan.fee || apiPlan.price || 0, // Soporte para ambos campos
+    duration: type === 'Mensual' ? '/mes' : '/año',
+    features: apiPlan.features || [
+      'Acceso a la comunidad',
+      'Reserva de espacios',
+      apiPlan.reservation_limit
+        ? `Límite de ${apiPlan.reservation_limit} reservas`
+        : 'Reservas ilimitadas',
+    ],
+    reservationLimit: apiPlan.reservation_limit,
+    description: apiPlan.description || '',
+  };
+};
+
 export function useCommunityPlans() {
   const [state, setState] = useState<UseCommunityPlansState>({
     communityPlans: [],
@@ -21,84 +51,25 @@ export function useCommunityPlans() {
 
   /**
    * Fetches community plans for a specific community and extracts the actual plans
-   * Falls back to all plans if community-specific plans are not available
    */
   const fetchCommunityPlans = useCallback(
     async (communityId: string): Promise<MembershipPlan[]> => {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        console.log('🎯 Fetching community plans for community:', communityId);
+        // 1. Get the list of plan associations for the community
+        const communityPlans =
+          await communityPlansApi.getCommunityPlansByCommunityId(communityId);
 
-        let plans: MembershipPlan[] = [];
-        let communityPlans: CommunityPlan[] = [];
+        // 2. Fetch the full details for each plan in parallel
+        const planPromises = communityPlans.map((cp) =>
+          plansApi.getPlanById(cp.plan_id),
+        );
 
-        try {
-          // First, try to get community-specific plans
-          communityPlans =
-            await communityPlansApi.getCommunityPlansByCommunityId(communityId);
+        const resolvedPlans = await Promise.all(planPromises);
 
-          // Extract the actual plans from community plans
-          // NOTE: This assumes the backend returns the plan relation populated
-          plans = communityPlans
-            .filter((cp) => cp.plan) // Only include community plans with populated plan
-            .map((cp) => cp.plan as MembershipPlan)
-            .filter((plan) => {
-              // Temporary: exclude specific problematic plans
-              const excludedIds = [
-                '9f9ad18d-ba25-4f83-bfe0-7266e490c857', // 70 amount plan
-                'c39b3250-e9e8-450a-a1f2-7faea528f3c2', // 1000 amount plan
-              ];
-              return !excludedIds.includes(plan.id);
-            });
-
-          console.log('✅ Community plans and extracted plans:', {
-            communityPlans,
-            extractedPlans: plans,
-          });
-        } catch (communityPlansError) {
-          console.warn(
-            '⚠️ Could not fetch community-specific plans, falling back to all plans',
-          );
-          console.warn('Community plans error:', communityPlansError);
-
-          // Fallback: Get all available plans
-          const allPlans = await plansApi.getAllPlans();
-
-          // Apply the same filter to all plans
-          plans = allPlans.filter((plan) => {
-            const excludedIds = [
-              '9f9ad18d-ba25-4f83-bfe0-7266e490c857', // 70 amount plan
-              'c39b3250-e9e8-450a-a1f2-7faea528f3c2', // 1000 amount plan
-            ];
-            return !excludedIds.includes(plan.id);
-          });
-
-          console.log('✅ Fallback: Using filtered plans:', plans);
-        }
-
-        // If we still don't have plans, try the fallback
-        if (plans.length === 0) {
-          console.warn(
-            '⚠️ No community-specific plans found, trying fallback to all plans...',
-          );
-          try {
-            const allPlans = await plansApi.getAllPlans();
-
-            // Apply the same filter
-            plans = allPlans.filter((plan) => {
-              const excludedIds = [
-                '9f9ad18d-ba25-4f83-bfe0-7266e490c857', // 70 amount plan
-                'c39b3250-e9e8-450a-a1f2-7faea528f3c2', // 1000 amount plan
-              ];
-              return !excludedIds.includes(plan.id);
-            });
-
-            console.log('✅ Second fallback: Got filtered plans:', plans);
-          } catch (fallbackError) {
-            console.error('❌ Fallback also failed:', fallbackError);
-          }
-        }
+        // 3. Transform the plans into the format the frontend expects
+        const plans = resolvedPlans.map(transformPlan);
 
         setState((prev) => ({
           ...prev,
@@ -113,7 +84,6 @@ export function useCommunityPlans() {
           error instanceof Error
             ? error.message
             : 'Error al obtener planes de la comunidad';
-        console.error('❌ Error in fetchCommunityPlans:', error);
 
         setState((prev) => ({
           ...prev,

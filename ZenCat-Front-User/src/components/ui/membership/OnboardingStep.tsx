@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Select, SelectItem } from '@/components/ui/select';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
 import { CreateOnboardingRequest, DocumentType, Gender } from '@/types/onboarding';
 import { useAuth } from '@/context/AuthContext';
+import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
 import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
 import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
@@ -47,9 +48,10 @@ interface FormErrors {
 export function OnboardingStep() {
   const { state, setOnboardingData, nextStep, prevStep } = useMembershipOnboarding();
   const { user } = useAuth();
+  const { onboardingData, isLoading: onboardingLoading, error: onboardingError } = useUserOnboarding();
 
-  const [formData, setFormData] = useState<OnboardingFormData>({
-    // Required fields
+  // Estado inicial del formulario
+  const initialFormData: OnboardingFormData = {
     document_type: '',
     document_number: '',
     phone_number: '',
@@ -58,12 +60,11 @@ export function OnboardingStep() {
     district: '',
     province: '',
     region: '',
-    
-    // Optional fields
     birth_date: '',
     gender: '',
-  });
+  };
 
+  const [formData, setFormData] = useState<OnboardingFormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({
     document_type: '',
     document_number: '',
@@ -75,6 +76,153 @@ export function OnboardingStep() {
     region: '',
     birth_date: '',
   });
+
+  // Efecto para cargar datos del usuario cuando estén disponibles
+  useEffect(() => {
+    if (onboardingData && user?.id) {
+      // Convert OnboardingResponse to CreateOnboardingRequest
+      const requestData: CreateOnboardingRequest = {
+        document_type: onboardingData.document_type,
+        document_number: onboardingData.document_number,
+        phone_number: onboardingData.phone_number,
+        postal_code: onboardingData.postal_code,
+        address: onboardingData.address,
+        district: onboardingData.district,
+        province: onboardingData.province,
+        region: onboardingData.region,
+        updated_by: user.id,
+        birth_date: onboardingData.birth_date || undefined,
+        gender: onboardingData.gender || undefined,
+      };
+
+      // Set the data in the global context
+      setOnboardingData(requestData);
+
+      // Try to match by ID first, then by name (case-insensitive)
+      let regionId = onboardingData.region || '';
+      if (!regiones.find((r) => r.id === regionId)) {
+        const regionByName = regiones.find(
+          (r) => r.name.toLowerCase() === (onboardingData.region || '').toLowerCase(),
+        );
+        regionId = regionByName?.id || '';
+      }
+
+      // Province mapping
+      let provinceId = onboardingData.province || '';
+      if (!provincias.find((p) => p.id === provinceId)) {
+        const provinceByName = provincias.find(
+          (p) =>
+            p.name.toLowerCase() === (onboardingData.province || '').toLowerCase() &&
+            p.department_id === regionId,
+        );
+        provinceId = provinceByName?.id || '';
+      }
+
+      // District mapping
+      let districtId = onboardingData.district || '';
+      if (!distritos.find((d) => d.id === districtId)) {
+        const districtByName = distritos.find(
+          (d) =>
+            d.name.toLowerCase() === (onboardingData.district || '').toLowerCase() &&
+            d.department_id === regionId &&
+            d.province_id === provinceId,
+        );
+        districtId = districtByName?.id || '';
+      }
+
+      // Format birth_date to YYYY-MM-DD for the date input
+      const formattedBirthDate = onboardingData.birth_date
+        ? onboardingData.birth_date.split('T')[0]
+        : '';
+
+      const normalizedDocumentType = (onboardingData.document_type || '').toUpperCase();
+      const normalizedGender = (onboardingData.gender || '').toUpperCase();
+
+      setFormData({
+        document_type: normalizedDocumentType as DocumentType | '',
+        document_number: onboardingData.document_number || '',
+        phone_number: onboardingData.phone_number || '',
+        postal_code: onboardingData.postal_code || '',
+        address: onboardingData.address || '',
+        district: districtId,
+        province: provinceId,
+        region: regionId,
+        birth_date: formattedBirthDate,
+        gender: normalizedGender as Gender | '',
+      });
+    }
+  }, [onboardingData, setOnboardingData, user?.id]);
+
+  // Mostrar resumen en modo solo-lectura si ya existe onboarding
+  if (!onboardingLoading && onboardingData) {
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Datos ya registrados</CardTitle>
+            <p className="text-center text-gray-600 text-sm">
+              Ya contamos con tu información de identificación, verifica que sea correcta y continúa
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <p><strong>Tipo de Documento:</strong> {onboardingData.document_type}</p>
+              <p><strong>Número de Documento:</strong> {onboardingData.document_number}</p>
+              <p><strong>Teléfono:</strong> {onboardingData.phone_number}</p>
+              <p><strong>Código Postal:</strong> {onboardingData.postal_code}</p>
+              <p><strong>Fecha de Nacimiento:</strong> {onboardingData.birth_date?.split('T')[0]}</p>
+              <p><strong>Género:</strong> {onboardingData.gender}</p>
+              <p><strong>Región:</strong> {onboardingData.region}</p>
+              <p><strong>Provincia:</strong> {onboardingData.province}</p>
+              <p><strong>Distrito:</strong> {onboardingData.district}</p>
+              <p className="md:col-span-2"><strong>Dirección:</strong> {onboardingData.address}</p>
+            </div>
+
+            <div className="flex justify-end pt-6">
+              <Button onClick={nextStep} className="px-8 bg-black text-white hover:bg-gray-800">
+                Continuar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Mostrar loading mientras se cargan los datos
+  if (onboardingLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando datos...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Mostrar error si ocurrió alguno
+  if (onboardingError) {
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <Card className="border-red-500 border-2">
+          <CardHeader>
+            <CardTitle className="text-red-600">Error al cargar los datos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 mb-4">{onboardingError}</p>
+            <Button onClick={() => window.location.reload()} className="bg-black text-white">
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Cálculos para los dropdowns de ubigeo
   const selectedRegion = regiones.find(region => region.id === formData.region);

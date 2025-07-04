@@ -9,7 +9,7 @@ import { CreateOnboardingRequest } from '@/types/onboarding';
 
 interface MembershipOnboardingContextType {
   state: MembershipOnboardingState;
-  setSelectedPlan: (plan: MembershipPlan) => void;
+  setSelectedPlan: (plan: MembershipPlan | null) => void;
   setOnboardingData: (data: CreateOnboardingRequest) => void;
   setPaymentData: (data: PaymentData) => void;
   setCommunity: (community: Community) => void;
@@ -34,8 +34,8 @@ export function MembershipOnboardingProvider({
     currentStep: 1,
   });
 
-  const setSelectedPlan = (plan: MembershipPlan) => {
-    setState((prev) => ({ ...prev, selectedPlan: plan }));
+  const setSelectedPlan = (plan: MembershipPlan | null) => {
+    setState((prev) => ({ ...prev, selectedPlan: plan || undefined }));
   };
 
   const setOnboardingData = (data: CreateOnboardingRequest) => {

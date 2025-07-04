@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
     BASE: '/user/',
     BY_ID: (id: string) => `/user/${id}/`,
     BULK_DELETE: '/user/bulk-delete/',
+    ONBOARDING: (userId: string) => `/user/${userId}/onboarding/`,
   },
 
   // Professional endpoints
@@ -92,7 +93,7 @@ export const API_ENDPOINTS = {
   COMMUNITY_PLANS: {
     BASE: '/community-plan/',
     BY_COMMUNITY_ID: (communityId: string) =>
-      `/community-plan/${communityId}/`,
+      `/community-plan/?communityId=${communityId}`,
     BY_ID: (id: string) => `/community-plan/${id}/`,
   },
 

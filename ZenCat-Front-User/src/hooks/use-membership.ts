@@ -52,10 +52,6 @@ export function useMembership() {
           plan_id: plan.id,
         };
 
-        console.log('📅 Membership dates calculated:');
-        console.log('- Start:', startDate.toISOString());
-        console.log('- End:', endDate.toISOString());
-
         const response = await membershipService.createMembershipForUser(
           userId,
           membershipData,
