@@ -2,7 +2,6 @@ import {
   BulkCreateCommunityPayload,
   BulkDeleteCommunityPayload,
   Community,
-  CommunityWithImage,
   CreateCommunityPayload,
   UpdateCommunityPayload,
 } from '@/types/community';
@@ -39,12 +38,6 @@ export const communitiesApi = {
 
   getCommunityById: async (id: string): Promise<Community> => {
     return apiClient.get<Community>(API_ENDPOINTS.COMMUNITIES.BY_ID(id));
-  },
-
-  getCommunityWithImage: async (id: string): Promise<CommunityWithImage> => {
-    return apiClient.get<CommunityWithImage>(
-      API_ENDPOINTS.COMMUNITIES.WITH_IMAGE(id),
-    );
   },
 
   updateCommunity: async (

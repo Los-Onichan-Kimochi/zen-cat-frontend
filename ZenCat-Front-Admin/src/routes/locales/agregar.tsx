@@ -26,6 +26,7 @@ import { Local, CreateLocalPayload } from '@/types/local';
 import { Plus, ChevronLeft } from 'lucide-react';
 import { Form, FormProvider, useForm } from 'react-hook-form';
 import '../../index.css';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/locales/agregar')({
   component: AddLocalPageComponent,
@@ -53,30 +54,28 @@ function AddLocalPageComponent() {
   });
 
   const onSubmit = async (data: any) => {
-    const imageUrl = 'https://via.placeholder.com/150';
-    if (imageFile) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Subida simulada de imagen completada');
-    }
     try {
-      const newLocal = await createLocalMutation.mutateAsync({
-        local_name: data.local_name,
-        street_name: data.street_name,
-        building_number: data.building_number,
-        district: data.district,
-        province: data.province,
-        region: data.region,
-        reference: data.reference,
-        capacity: data.capacity,
-        image_url: data.image_url,
-      });
+      const payload: CreateLocalPayload = {
+        ...data,
+        image_url: data.image_url || '',
+      };
+
+      if (imageFile) {
+        // Asignar el nombre del archivo a image_url
+        payload.image_url = imageFile.name;
+        // Convertir el archivo a base64 y asignarlo a image_bytes
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      }
+
+      await createLocalMutation.mutateAsync(payload);
+
       toast.success('Local creado correctamente');
       queryClient.invalidateQueries({ queryKey: ['locals'] });
       navigate({ to: '/locales' });
     } catch (err: any) {
       toast.error('Error al crear local', { description: err.message });
     }
-    //createLocalMutation.mutate(payload);
   };
   return (
     <div className="p-2 md:p-6 h-full flex flex-col font-montserrat">

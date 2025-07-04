@@ -429,4 +429,33 @@ export const usuariosApi = {
       throw error;
     }
   },
+  //carga masiva
+  bulkCreateUsuarios: async (payload: {
+    users: CreateUserPayload[];
+  }): Promise<void> => {
+    try {
+      const transformedUsers = payload.users.map(transformPayloadToBackend);
+
+      const response = await fetch(`${API_BASE_URL}/user/bulk-create/`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ users: transformedUsers }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          `Error creando usuarios en masa: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      console.log('Usuarios cargados exitosamente');
+    } catch (error) {
+      console.error('Error en bulkCreateUsuarios:', error);
+      throw error;
+    }
+  },
 };
+
+// Export alias for backward compatibility
+export const userService = usuariosApi;

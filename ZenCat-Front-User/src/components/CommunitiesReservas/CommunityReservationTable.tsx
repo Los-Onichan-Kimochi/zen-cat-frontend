@@ -30,27 +30,27 @@ interface ReservationsTableProps {
 
 const getStateColor = (state: ReservationState) => {
   switch (state) {
-    case ReservationState.DONE:
-      return 'bg-blue-100 text-blue-800';
-    case ReservationState.CANCELLED:
-      return 'bg-red-100 text-red-800';
-    case ReservationState.ONGOING:
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
+  case ReservationState.DONE:
+    return 'bg-blue-100 text-blue-800';
+  case ReservationState.CANCELLED:
+    return 'bg-red-100 text-red-800';
+  case ReservationState.ONGOING:
+    return 'bg-yellow-100 text-yellow-800';
+  default:
+    return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getStateLabel = (state: ReservationState) => {
   switch (state) {
-    case ReservationState.DONE:
-      return 'Completada';
-    case ReservationState.CANCELLED:
-      return 'Cancelada';
-    case ReservationState.ONGOING:
-      return 'En proceso';
-    default:
-      return String(state);
+  case ReservationState.DONE:
+    return 'Completada';
+  case ReservationState.CANCELLED:
+    return 'Cancelada';
+  case ReservationState.ONGOING:
+    return 'En proceso';
+  default:
+    return String(state);
   }
 };
 

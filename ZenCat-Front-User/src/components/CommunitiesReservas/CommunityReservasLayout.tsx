@@ -13,7 +13,7 @@ import { Reservation, ReservationState } from '@/types/reservation'; // Importa 
 import {} from '@/api/reservations/reservations';
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
-    from: '/mis-comunidades/$communityId/reservas/historial',
+    from: '/historial-reservas/$communityId',
   });
 
   const { search } = useLocation();

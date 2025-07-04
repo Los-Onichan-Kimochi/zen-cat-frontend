@@ -1,12 +1,15 @@
 import {
+  BulkCreateLocalPayload,
+  BulkDeleteLocalPayload,
   Local,
   CreateLocalPayload,
   UpdateLocalPayload,
-  BulkCreateLocalPayload,
-  BulkDeleteLocalPayload,
+  LocalWithImage,
 } from '@/types/local';
+
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const localsApi = {
   getLocals: async (): Promise<Local[]> => {
@@ -22,6 +25,10 @@ export const localsApi = {
 
   getLocalById: async (id: string): Promise<Local> => {
     return apiClient.get<Local>(API_ENDPOINTS.LOCALS.BY_ID(id));
+  },
+
+  getLocalWithImage: async (id: string): Promise<LocalWithImage> => {
+    return apiClient.get<LocalWithImage>(API_ENDPOINTS.LOCALS.WITH_IMAGE(id));
   },
 
   createLocal: async (payload: CreateLocalPayload): Promise<Local> => {
@@ -46,10 +53,19 @@ export const localsApi = {
   bulkCreateLocals: async (
     payload: BulkCreateLocalPayload,
   ): Promise<Local[]> => {
-    const data = await apiClient.post<any>(
-      API_ENDPOINTS.LOCALS.BULK_CREATE,
-      payload,
-    );
-    return data.locals || data;
+    const response = await fetch(`${API_BASE_URL}/local/bulk-create/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      //throw new Error('Error bulk creating locals');
+      // para corroborar
+      const text = await response.text();
+      throw new Error(text);
+    }
+    return response.json();
   },
 };
