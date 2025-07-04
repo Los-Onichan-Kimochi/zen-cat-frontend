@@ -578,7 +578,7 @@ function SesionesComponent() {
             <a
               href={
                 uploadMode === 'virtual'
-                  ? '/plantillas/plantilla-carga-sesiones.xlsx'
+                  ? '/plantillas/plantilla-carga-sesiones-virtual.xlsx'
                   : '/plantillas/plantilla-carga-sesiones-presencial.xlsx'
               }
               className="text-blue-600 hover:underline"
