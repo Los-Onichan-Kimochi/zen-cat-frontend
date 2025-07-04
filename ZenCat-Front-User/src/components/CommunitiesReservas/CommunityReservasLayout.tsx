@@ -8,15 +8,21 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { ChevronDown, Calendar } from 'lucide-react';
 import { ReservationsTable } from './CommunityReservationTable';
 import { Reservation, ReservationState } from '@/types/reservation'; // Importa el enum actualizado
-import {} from '@/api/reservations/reservations';
+import { reservationsApi } from '@/api/reservations/reservations';
+import { professionalsApi } from '@/api/professionals/professionals';
+import { localsApi } from '@/api/locals/locals';
+import { useAuth } from '@/context/AuthContext';
+
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
     from: '/historial-reservas/$communityId',
   });
 
   const { search } = useLocation();
+  const { user } = useAuth();
   const queryParams = new URLSearchParams(search);
   let communityName = queryParams.get('name');
 
@@ -54,83 +60,62 @@ const CommunityReservasLayout = () => {
       setLoadingReservations(true);
       setErrorReservations(null);
       try {
-        // --- SIMULACIÓN DE DATOS DUMMY ---
-        const dummyData: Reservation[] = [
-          {
-            id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-            name: 'Clase de Yoga Matutina',
-            user_name: 'Juan Pérez',
-            teacher: 'Ana García',
-            place: 'Pabellón A',
-            reservation_time: '2025-06-20T09:00:00Z', // Hoy
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'b2c3d4e5-f6a7-8901-2345-67890abcdef0',
-            name: 'Consulta Pediátrica',
-            user_name: 'María López',
-            teacher: 'Dr. Luis Martínez',
-            place: 'Edificio Central',
-            reservation_time: '2025-06-19T14:30:00Z', // Ayer
-            state: 'DONE', // Completada
-          },
-          {
-            id: 'c3d4e5f6-a7b8-9012-3456-7890abcdef01',
-            name: 'Acceso a Gimnasio',
-            user_name: 'Carlos Sánchez',
-            teacher: null,
-            place: 'Gimnasio Principal',
-            reservation_time: '2025-06-15T18:00:00Z', // Dentro de la última semana
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'd4e5f6a7-b8c9-0123-4567-890abcdef012',
-            name: 'Clase de Pilates',
-            user_name: 'Laura Torres',
-            teacher: 'Elena Ruiz',
-            place: 'Salón de Usos Múltiples',
-            reservation_time: '2025-06-10T10:00:00Z', // Más antigua que la última semana
-            state: 'DONE', // Completada
-          },
-          {
-            id: 'e5f6a7b8-c9d0-1234-5678-90abcdef0123',
-            name: 'Sesión de Mindfulness',
-            user_name: 'Pedro Gómez',
-            teacher: null,
-            place: 'Área Recreativa',
-            reservation_time: '2025-06-05T16:00:00Z', // Más antigua
-            state: 'CANCELLED', // Cancelada
-          },
-          {
-            id: 'f6a7b8c9-d0e1-2345-6789-0abcdef01234',
-            name: 'Entrenamiento Funcional',
-            user_name: 'Ana Morales',
-            teacher: 'Ricardo Castro',
-            place: 'Zona Deportiva',
-            reservation_time: '2025-06-20T17:00:00Z', // Hoy
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'a0b1c2d3-e4f5-6789-0123-456789abcdef',
-            name: 'Clase de Zumba',
-            user_name: 'Sofía Díaz',
-            teacher: 'Carolina Vega',
-            place: 'Pabellón A',
-            reservation_time: '2025-06-17T19:00:00Z', // Dentro de la última semana
-            state: 'DONE', // Completada
-          },
-        ];
+        const userId = user?.id;
+        
+        if (!userId) {
+          throw new Error('No se pudo obtener el ID del usuario');
+        }
 
-        setAllReservations(dummyData);
-        // --- FIN SIMULACIÓN DE DATOS DUMMY ---
+        // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
+        const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
+        
+        // Enriquecer las reservas con información de profesor y lugar
+        const reservationsWithDetails = await Promise.all(
+          response.map(async (reservation: Reservation) => {
+            const session = reservation.session;
+            
+            let teacherName = "";
+            let placeName = "";
+            
+            const communityService = await communityServicesApi.getCommunityService(reservation.community_service_id);
 
-        // Comenta o elimina la llamada real al backend durante el desarrollo con dummy data
-        // const response = await fetch(`/api/communities/${communityId}/reservations`);
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! status: ${response.status}`);
-        // }
-        // const data: Reservation[] = await response.json();
-        // setAllReservations(data);
+            // Obtener información del profesor si es necesario
+            if (session && session.professional_id && !reservation.teacher) {
+              try {
+                const professionalData = await professionalsApi.getProfessional(session.professional_id);
+                teacherName = professionalData.name;
+              } catch (error) {
+                console.warn(`No se pudo obtener información del profesor: ${error}`);
+                teacherName = session.title || `Profesor ID: ${session.professional_id}`;
+              }
+            } else if (reservation.teacher) {
+              // Si ya tenemos el nombre del profesor en la reserva, usarlo directamente
+              teacherName = reservation.teacher;
+            }
+            
+            // Obtener información del local si es necesario
+            if (session && session.local_id && !reservation.place) {
+              try {
+                const localData = await localsApi.getLocal(session.local_id);
+                placeName = localData.local_name;
+              } catch (error) {
+                console.warn(`No se pudo obtener información del local: ${error}`);
+                placeName = `Local ID: ${session.local_id}`;
+              }
+            } else if (reservation.place) {
+              placeName = reservation.place;
+            }
+            
+            // Devolver la reserva con la información adicional
+            return {
+              ...reservation,
+              teacher: teacherName || reservation.teacher,
+              place: placeName || reservation.place
+            };
+          })
+        );
+        
+        setAllReservations(reservationsWithDetails);
       } catch (err) {
         console.error('Error al cargar reservas:', err);
         setErrorReservations(
@@ -142,7 +127,7 @@ const CommunityReservasLayout = () => {
     };
 
     fetchReservations();
-  }, [communityId]);
+  }, [communityId, user]);
 
   // Filtra las reservas basado en los estados de filtro
   const filteredReservations = useMemo(() => {
@@ -153,9 +138,9 @@ const CommunityReservasLayout = () => {
       currentReservations = currentReservations.filter(
         (res) =>
           res.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.user_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.teacher?.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.place?.toLowerCase().includes(lowerCaseSearchTerm),
+          (res.user_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.teacher?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm),
       );
     }
 
@@ -194,8 +179,14 @@ const CommunityReservasLayout = () => {
           return true;
         }
         if (
-          filterByStatus === 'en proceso' &&
-          stateEnumValue === ReservationState.ONGOING
+          filterByStatus === 'confirmada' &&
+          stateEnumValue === ReservationState.CONFIRMED
+        ) {
+          return true;
+        }
+        if (
+          filterByStatus === 'anulada' &&
+          stateEnumValue === ReservationState.ANULLED
         ) {
           return true;
         }
@@ -267,8 +258,10 @@ const CommunityReservasLayout = () => {
           {/* Filtro por fecha */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 Filtrar por fecha
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -288,8 +281,9 @@ const CommunityReservasLayout = () => {
           {/* Filtro por estado */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 Filtrar por estado
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -311,8 +305,9 @@ const CommunityReservasLayout = () => {
           {/* Filtro por lugar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 Filtrar por lugar
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
