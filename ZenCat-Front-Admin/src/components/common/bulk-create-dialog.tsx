@@ -31,6 +31,7 @@ interface BulkCreateDialogProps {
   validateUniqueNames?: boolean; // Si se deben validar los nombres como únicos
   children?: React.ReactNode; //para sesiones
   module?: 'sessions' | string;
+  mode?: 'virtual' | 'presencial'; // NUEVO
   existingSessions?: {
     date: string;
     start_time: string;
@@ -38,6 +39,7 @@ interface BulkCreateDialogProps {
     professional_id: string;
   }[];
   canContinue?: () => true | string; // <- esto permite retornar un error
+  selectedLocalCapacity?: number;
 }
 
 export function BulkCreateDialog({
@@ -51,8 +53,10 @@ export function BulkCreateDialog({
   validateUniqueNames = false,
   children,
   module = '',
+  mode,
   existingSessions = [],
   canContinue,
+  selectedLocalCapacity = Infinity, // ← Valor por defecto para virtual
 }: BulkCreateDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null); // Referencia al input de archivo oculto
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Archivo seleccionado
@@ -209,7 +213,7 @@ export function BulkCreateDialog({
 
         if (module === 'sessions') {
           const invalidHourRows: number[] = [];
-          const invalidCapacityRows: number[] = [];
+          const invalidCapacityRows: string[] = [];
 
           finalData.forEach((row, index) => {
             //adaptacion para que soporte formatos de fechas del excel
@@ -231,8 +235,13 @@ export function BulkCreateDialog({
               invalidHourRows.push(index + 2);
             }
 
+
             if (isNaN(capacity) || capacity <= 0) {
-              invalidCapacityRows.push(index + 2);
+              invalidCapacityRows.push(`Fila ${index + 2}: capacidad inválida (<= 0)`);
+            } else if (mode === 'presencial' && capacity > selectedLocalCapacity) {
+              invalidCapacityRows.push(
+                `Fila ${index + 2}: capacidad (${capacity}) excede la del local (${selectedLocalCapacity})`
+              );
             }
           });
 
@@ -244,7 +253,7 @@ export function BulkCreateDialog({
 
           if (invalidCapacityRows.length > 0) {
             combinedErrors.push(
-              `Las siguientes filas tienen capacidad inválida (debe ser mayor a 0): ${invalidCapacityRows.join(', ')}`,
+              `Las siguientes filas tienen capacidad inválida:\n${invalidCapacityRows.join('\n')}`
             );
           }
           // Sesiones cruces | Conflictos internos (entre filas del Excel)
@@ -337,10 +346,10 @@ export function BulkCreateDialog({
               debugRows.push(debugInfo.join('\n'));
             });
 
-            // 🔍 Mostrar todo en el modal
+            //  Mostrar todo en el modal
             if (externalConflicts.length > 0) {
               combinedErrors.push(
-                `🧠 Debug:\n${debugRows.join('\n\n')}\n\n🚨 Conflictos:\n${externalConflicts
+                ` Debug:\n${debugRows.join('\n\n')}\n\n Conflictos:\n${externalConflicts
                   .map((e) => `• ${e}`)
                   .join('\n')}`,
               );

@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
     BULK_CREATE: '/community/bulk-create/',
     BULK_DELETE: '/community/bulk-delete/',
     BY_ID: (id: string) => `/community/${id}/`,
+    WITH_IMAGE: (id: string) => `/community/${id}/image/`,
   },
 
   // User endpoints
@@ -52,6 +53,7 @@ export const API_ENDPOINTS = {
     BASE: '/service/',
     BY_ID: (id: string) => `/service/${id}/`,
     BULK_DELETE: '/service/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/service/${id}/image/`,
   },
 
   // Local endpoints
