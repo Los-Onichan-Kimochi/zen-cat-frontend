@@ -149,6 +149,7 @@ function EditCommunityPage() {
         queryKey: ['community', id, 'withImage'],
       });
       await queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
+      await queryClient.invalidateQueries({ queryKey: ['community-services', id] });
       navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
