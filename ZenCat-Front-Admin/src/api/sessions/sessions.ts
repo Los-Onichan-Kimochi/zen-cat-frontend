@@ -11,18 +11,57 @@ import { API_ENDPOINTS } from '@/config/api';
 
 // Función para convertir hora de Lima (UTC-5) a UTC
 export const convertLimaToUTC = (limaDateTimeString: string): string => {
-  // Interpretar la fecha como hora de Lima (UTC-5)
-  // Si en Lima son las 08:00, en UTC son las 13:00 (08:00 + 5 horas)
-  const [datePart, timePart] = limaDateTimeString.split('T');
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hour, minute, second = 0] = timePart.split(':').map(Number);
+  if (!limaDateTimeString) {
+    throw new Error('Invalid date string provided to convertLimaToUTC');
+  }
 
-  // Crear fecha en UTC considerando que la hora original es de Lima (UTC-5)
-  const utcDate = new Date(
-    Date.UTC(year, month - 1, day, hour + 5, minute, second),
-  );
-
-  return utcDate.toISOString();
+  try {
+    console.log('Original date string:', limaDateTimeString);
+    
+    // Primero creamos una fecha en la zona horaria local del navegador
+    const localDate = new Date(limaDateTimeString);
+    
+    if (isNaN(localDate.getTime())) {
+      // Si falla la conversión directa, intentamos el método manual
+      const [datePart, timePart] = limaDateTimeString.split('T');
+      if (!datePart) {
+        throw new Error(`Invalid date format: ${limaDateTimeString}`);
+      }
+      
+      const [year, month, day] = datePart.split('-').map(Number);
+      
+      let hour = 0, minute = 0, second = 0;
+      if (timePart) {
+        const timeParts = timePart.split(':').map(Number);
+        hour = timeParts[0] || 0;
+        minute = timeParts[1] || 0;
+        second = timeParts[2] || 0;
+      }
+      
+      // Creamos la fecha en la zona horaria local
+      const date = new Date(year, month - 1, day, hour, minute, second);
+      
+      // Ajustamos 5 horas para convertir de Lima (UTC-5) a UTC
+      date.setHours(date.getHours() + 5);
+      
+      // Convertimos a ISO string
+      const isoString = date.toISOString();
+      console.log('Converted ISO string (manual):', isoString);
+      return isoString;
+    }
+    
+    // Si la fecha tiene un formato válido, ajustamos la hora
+    const limaOffset = -5 * 60 * 60 * 1000; // Lima UTC-5 en milisegundos
+    const utcTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60 * 1000 + limaOffset);
+    
+    const isoString = utcTime.toISOString();
+    console.log('Converted ISO string:', isoString);
+    return isoString;
+  } catch (error) {
+    console.error('Error in convertLimaToUTC:', error, limaDateTimeString);
+    // Si ocurre un error, devolvemos la cadena original para evitar bloqueos
+    return limaDateTimeString;
+  }
 };
 
 export interface CheckConflictRequest {
@@ -112,34 +151,120 @@ export const sessionsApi = {
   ): Promise<Session> => {
     console.log('Original update payload:', payload);
 
-    // Convertir fechas a formato UTC si están presentes
-    const backendPayload: UpdateSessionPayload = {
-      ...payload,
-    };
-
-    // Convertir las fechas si están presentes
+    // Creamos un nuevo objeto para evitar modificar el original
+    const backendPayload: UpdateSessionPayload = {};
+    
+    // Preparamos todas las fechas primero para asegurar consistencia
+    let dateStr = "";
+    let hasDateInfo = false;
+    
+    // Procesamos la fecha base primero si existe
     if (payload.date) {
-      // Si la fecha no tiene formato ISO completo, asumimos que es solo la fecha
-      if (!payload.date.includes('T')) {
-        backendPayload.date = `${payload.date}T00:00:00Z`;
+      hasDateInfo = true;
+      try {
+        // Normalizamos la fecha para uso posterior
+        dateStr = payload.date.includes('T') ? 
+          payload.date.split('T')[0] : 
+          payload.date;
+          
+        // Almacenamos en el payload solo la parte de fecha
+        backendPayload.date = convertLimaToUTC(`${dateStr}T00:00:00`);
+        console.log('Date converted to:', backendPayload.date);
+      } catch (error) {
+        console.error('Error processing date:', error);
+        return Promise.reject(new Error('Error en el formato de fecha'));
+      }
+    }
+    
+    // Procesamos start_time 
+    if (payload.start_time) {
+      try {
+        // Aseguramos que start_time tenga la misma fecha base que date si existe
+        if (hasDateInfo && !payload.start_time.includes(dateStr)) {
+          backendPayload.start_time = convertLimaToUTC(`${dateStr}T${payload.start_time}`);
+        } else {
+          backendPayload.start_time = convertLimaToUTC(payload.start_time);
+        }
+        console.log('Start time converted to:', backendPayload.start_time);
+      } catch (error) {
+        console.error('Error processing start_time:', error);
+        return Promise.reject(new Error('Error en el formato de hora de inicio'));
       }
     }
 
-    // Asegurarnos que las fechas de inicio y fin estén en formato ISO
-    if (payload.start_time && !payload.start_time.endsWith('Z')) {
-      backendPayload.start_time = new Date(payload.start_time).toISOString();
+    // Procesamos end_time
+    if (payload.end_time) {
+      try {
+        // Aseguramos que end_time tenga la misma fecha base que date si existe
+        if (hasDateInfo && !payload.end_time.includes(dateStr)) {
+          backendPayload.end_time = convertLimaToUTC(`${dateStr}T${payload.end_time}`);
+        } else {
+          backendPayload.end_time = convertLimaToUTC(payload.end_time);
+        }
+        console.log('End time converted to:', backendPayload.end_time);
+      } catch (error) {
+        console.error('Error processing end_time:', error);
+        return Promise.reject(new Error('Error en el formato de hora de fin'));
+      }
     }
-
-    if (payload.end_time && !payload.end_time.endsWith('Z')) {
-      backendPayload.end_time = new Date(payload.end_time).toISOString();
-    }
+    
+    // Ahora agregamos el resto de los campos
+    if (payload.title !== undefined) backendPayload.title = payload.title;
+    if (payload.capacity !== undefined) backendPayload.capacity = payload.capacity;
+    if (payload.professional_id !== undefined) backendPayload.professional_id = payload.professional_id;
+    if (payload.local_id !== undefined) backendPayload.local_id = payload.local_id;
+    if (payload.session_link !== undefined) backendPayload.session_link = payload.session_link;
+    if (payload.state !== undefined) backendPayload.state = payload.state;
+    if (payload.community_service_id !== undefined) backendPayload.community_service_id = payload.community_service_id;
 
     console.log('Processed update payload:', backendPayload);
 
-    return apiClient.patch<Session>(
-      API_ENDPOINTS.SESSIONS.BY_ID(id),
-      backendPayload,
-    );
+    // Verificar que tenemos los datos mínimos necesarios para actualizar
+    if (Object.keys(backendPayload).length === 0) {
+      console.error('No hay campos para actualizar');
+      return Promise.reject(new Error('No hay campos para actualizar'));
+    }
+
+    try {
+      // Primer intento con el payload procesado
+      return await apiClient.patch<Session>(
+        API_ENDPOINTS.SESSIONS.BY_ID(id),
+        backendPayload,
+      );
+    } catch (error: any) {
+      console.error('Error en updateSession:', error);
+      
+      // Si es un error de conflicto (409), intentamos una segunda estrategia
+      if (error.message && error.message.includes('409')) {
+        console.warn('Detectado error de conflicto 409. Intentando estrategia alternativa...');
+        
+        // Si el error es por conflicto, intentemos otra estrategia:
+        // 1. Eliminamos las horas y solo actualizamos los otros campos
+        const retryPayload = { ...backendPayload };
+        delete retryPayload.date;
+        delete retryPayload.start_time;
+        delete retryPayload.end_time;
+        
+        // Si aún tenemos campos para actualizar
+        if (Object.keys(retryPayload).length > 0) {
+          console.log('Intentando actualizar solo campos no temporales:', retryPayload);
+          try {
+            return await apiClient.patch<Session>(
+              API_ENDPOINTS.SESSIONS.BY_ID(id),
+              retryPayload
+            );
+          } catch (retryError) {
+            console.error('Error en el segundo intento de updateSession:', retryError);
+            throw new Error('No se pudo actualizar la sesión después de múltiples intentos. Verifique que no haya conflictos de horario.');
+          }
+        } else {
+          throw new Error('Se detectó un conflicto de horario con otra sesión existente. Por favor seleccione otra fecha u horario.');
+        }
+      }
+      
+      // Si no es error 409 o falla el segundo intento
+      throw error;
+    }
   },
 
   deleteSession: async (id: string): Promise<void> => {
