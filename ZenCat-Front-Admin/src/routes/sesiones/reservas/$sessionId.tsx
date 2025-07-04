@@ -9,6 +9,8 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
 import { userService } from '@/api/usuarios/usuarios';
+import { communityServicesApi } from '@/api/communities/community-services';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { Reservation } from '@/types/reservation';
 import { User } from '@/types/user';
 
@@ -53,16 +55,39 @@ function SessionReservationsComponent() {
     queryKey: ['session', sessionId],
     queryFn: () => sessionsApi.getSessionById(sessionId),
   });
+  
+  // Fetch community service data to get the community ID
+  const { data: communityServiceData, isLoading: isLoadingCommunityService } = useQuery({
+    queryKey: ['community-service', sessionData?.community_service_id],
+    queryFn: () => communityServicesApi.getCommunityServiceById(sessionData?.community_service_id || ''),
+    enabled: !!sessionData?.community_service_id,
+  });
+  
+  // Extract the community ID
+  const communityId = communityServiceData?.community_id;
+  
+  // Fetch users with memberships in the community
+  const { data: membershipsResponse, isLoading: isLoadingMemberships } = useQuery<{
+    users: User[];
+  }>({
+    queryKey: ['users-with-memberships', communityId],
+    queryFn: () => membershipsApi.getUsersByCommunity(communityId || ''),
+    enabled: !!communityId,
+  });
 
-  // Fetch users data
+  // Fetch all users as a fallback
   const { data: usersResponse, isLoading: isLoadingUsers } = useQuery<{
     users: User[];
   }>({
     queryKey: ['usuarios'],
     queryFn: () => userService.getAll(),
+    enabled: !communityId || !membershipsResponse,
   });
 
-  const usersData = usersResponse?.users || [];
+  // Use users with memberships if available, otherwise fall back to all users
+  const usersData = communityId && membershipsResponse?.users ? 
+    membershipsResponse.users : 
+    usersResponse?.users || [];
 
   // Fetch reservations for this session
   const {
@@ -159,7 +184,7 @@ function SessionReservationsComponent() {
     setSelectedReservation(null);
   };
 
-  if (isLoadingSession || isLoadingReservations || isLoadingUsers) {
+  if (isLoadingSession || isLoadingReservations || isLoadingUsers || isLoadingCommunityService || isLoadingMemberships) {
     return (
       <div className="p-6 h-full flex flex-col font-montserrat">
         <div className="flex justify-center items-center h-64">
@@ -205,6 +230,8 @@ function SessionReservationsComponent() {
 
   console.log('Users Data:', {
     count: users.length,
+    withMembership: membershipsResponse ? membershipsResponse.users.length : 'N/A',
+    communityId: communityId,
     users,
   });
 
@@ -282,6 +309,7 @@ function SessionReservationsComponent() {
         sessionId={sessionId}
         users={users}
         sessionName={session?.title || ''}
+        communityId={communityId || ''}
       />
 
       {/* Edit Modal */}

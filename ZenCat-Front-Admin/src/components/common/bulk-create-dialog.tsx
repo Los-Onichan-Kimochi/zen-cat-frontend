@@ -23,7 +23,10 @@ interface BulkCreateDialogProps {
   dbFieldNames: string[]; // Nombres de los campos como se usan en la BD
   //onParsedData: (data: any[]) => void;
   //onParsedData: (data: any[], setError?: (message: string) => void) => void;
-  onParsedData: (data: any[], setError?: (message: string) => void) => Promise<boolean>;
+  onParsedData: (
+    data: any[],
+    setError?: (message: string) => void,
+  ) => Promise<boolean>;
   existingNames?: string[]; // Lista de nombres ya existentes para validar duplicados
   validateUniqueNames?: boolean; // Si se deben validar los nombres como únicos
   children?: React.ReactNode; //para sesiones
@@ -191,10 +194,8 @@ export function BulkCreateDialog({
           finalData.forEach((row, index) => {
             //adaptacion para que soporte formatos de fechas del excel
 
-
             const start = normalizeTime(row.start_time);
             const end = normalizeTime(row.end_time);
-
 
             const capacity = Number(row.capacity);
 
@@ -217,13 +218,13 @@ export function BulkCreateDialog({
 
           if (invalidHourRows.length > 0) {
             combinedErrors.push(
-              `Las siguientes filas tienen hora de fin menor o igual a la hora de inicio: ${invalidHourRows.join(', ')}`
+              `Las siguientes filas tienen hora de fin menor o igual a la hora de inicio: ${invalidHourRows.join(', ')}`,
             );
           }
 
           if (invalidCapacityRows.length > 0) {
             combinedErrors.push(
-              `Las siguientes filas tienen capacidad inválida (debe ser mayor a 0): ${invalidCapacityRows.join(', ')}`
+              `Las siguientes filas tienen capacidad inválida (debe ser mayor a 0): ${invalidCapacityRows.join(', ')}`,
             );
           }
           // Sesiones cruces | Conflictos internos (entre filas del Excel)
@@ -255,7 +256,9 @@ export function BulkCreateDialog({
                   (aStart <= bStart && aEnd >= bEnd));
 
               if (overlap) {
-                internalConflicts.push(`Conflicto interno de horarios entre fila ${i + 2} y ${j + 2}`);
+                internalConflicts.push(
+                  `Conflicto interno de horarios entre fila ${i + 2} y ${j + 2}`,
+                );
               }
             }
           }
@@ -270,23 +273,28 @@ export function BulkCreateDialog({
             const debugRows: string[] = [];
 
             finalData.forEach((row, index) => {
-              const newStart = getMinutes(row.date, normalizeTime(row.start_time));
+              const newStart = getMinutes(
+                row.date,
+                normalizeTime(row.start_time),
+              );
               const newEnd = getMinutes(row.date, normalizeTime(row.end_time));
 
               const debugInfo: string[] = [`[Fila ${index + 2}]`];
               debugInfo.push(`Row date: ${row.date}`);
-              debugInfo.push(`Start: ${normalizeTime(row.start_time)} → ${newStart}`);
+              debugInfo.push(
+                `Start: ${normalizeTime(row.start_time)} → ${newStart}`,
+              );
               debugInfo.push(`End: ${normalizeTime(row.end_time)} → ${newEnd}`);
 
               const overlap = existingSessions.some((session) => {
                 const sessionStart = new Date(session.start_time).getTime();
                 const sessionEnd = new Date(session.end_time).getTime();
                 const sessionDate = session.date?.split('T')[0];
-                
+
                 const rowDate =
-  typeof row.date === 'string'
-    ? row.date.split('T')[0]
-    : new Date(row.date).toISOString().split('T')[0];
+                  typeof row.date === 'string'
+                    ? row.date.split('T')[0]
+                    : new Date(row.date).toISOString().split('T')[0];
 
                 debugInfo.push(`Comparando con sesión:`);
                 debugInfo.push(`→ session.date: ${sessionDate}`);
@@ -301,7 +309,9 @@ export function BulkCreateDialog({
               });
 
               if (overlap) {
-                externalConflicts.push(`Fila ${index + 2} se cruza con una sesión ya registrada`);
+                externalConflicts.push(
+                  `Fila ${index + 2} se cruza con una sesión ya registrada`,
+                );
               }
 
               debugRows.push(debugInfo.join('\n'));
@@ -312,11 +322,10 @@ export function BulkCreateDialog({
               combinedErrors.push(
                 `🧠 Debug:\n${debugRows.join('\n\n')}\n\n🚨 Conflictos:\n${externalConflicts
                   .map((e) => `• ${e}`)
-                  .join('\n')}`
+                  .join('\n')}`,
               );
             }
           }
-
         }
         if (combinedErrors.length > 0) {
           setError?.(combinedErrors.join('\n')); //  Esto muestra TODO en el modal
@@ -390,7 +399,7 @@ export function BulkCreateDialog({
         //const success = await onParsedData(finalData, setError)
         const success = await onParsedData(finalData, (message) => {
           // Si ya hay error mostrado, combinamos ambos
-          setError((prev) => prev ? prev + '\n' + message : message);
+          setError((prev) => (prev ? prev + '\n' + message : message));
         });
         if (success) {
           setSelectedFile(null);
@@ -407,7 +416,9 @@ export function BulkCreateDialog({
       } catch (err) {
         //setError('Ocurrió un error inesperado procesando el archivo.');
         console.error('Detalles del error bulk:', err);
-        setError(err.message || 'Ocurrió un error inesperado al crear las sesiones.');
+        setError(
+          err.message || 'Ocurrió un error inesperado al crear las sesiones.',
+        );
         //console.error(err);
       }
     };
