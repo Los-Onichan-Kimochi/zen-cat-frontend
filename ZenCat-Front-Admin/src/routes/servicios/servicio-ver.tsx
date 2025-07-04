@@ -91,11 +91,6 @@ export function SeeServicePageComponent() {
       ? localStorage.getItem('currentService')
       : null;
 
-  if (!id) {
-    navigate({ to: '/servicios' });
-    return null;
-  }
-
   const {
     data: ser,
     isLoading,
@@ -103,6 +98,7 @@ export function SeeServicePageComponent() {
   } = useQuery({
     queryKey: ['service', id],
     queryFn: () => servicesApi.getServiceById(id!),
+    enabled: !!id,
   });
 
   const {
@@ -111,52 +107,16 @@ export function SeeServicePageComponent() {
   } = useQuery({
     queryKey: ['service-professionals', id],
     queryFn: () =>
-      serviceProfessionalApi.fetchServiceProfessionals({ serviceId: id }),
+      serviceProfessionalApi.fetchServiceProfessionals({ serviceId: id! }),
     enabled: !!id,
   });
 
   const { data: asociacionesLocales, isLoading: loadingAsociacionesLocales } =
     useQuery({
       queryKey: ['service-locals', id],
-      queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id }),
+      queryFn: () => serviceLocalApi.fetchServiceLocals({ serviceId: id! }),
       enabled: !!id,
     });
-
-  async function deleteServiceProfessional(professionalId: string) {
-    try {
-      // Llama a tu API para eliminar la asociación
-      await serviceProfessionalApi.deleteServiceProfessional(
-        id!,
-        professionalId,
-      );
-      toast.success('Profesional Desvinculado', {
-        description:
-          'El profesional ha sido desvinculado del servicio exitosamente.',
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['service-professionals', id],
-      });
-    } catch (error: any) {
-      toast.error('Error al Desvincular Profesional', {
-        description: error.message || 'No se pudo desvincular el profesional.',
-      });
-    }
-  }
-
-  async function deleteServiceLocal(localId: string) {
-    try {
-      // Llama a tu API para eliminar la asociación
-      await serviceLocalApi.deleteServiceLocal(id!, localId);
-      toast.success('Local Desvinculado', {
-        description: 'El local ha sido desvinculado del servicio exitosamente.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['service-locals', id] });
-    } catch (error: any) {
-      toast.error('Error al Desvincular Local', {
-        description: error.message || 'No se pudo desvincular el local.',
-      });
-    }
-  }
 
   // inicializar estados al cargar prof
   useEffect(() => {
@@ -189,18 +149,6 @@ export function SeeServicePageComponent() {
       setLocalesSeleccionados([]);
     }
   }, [ser, initialValues.name, asociacionesProfesionales, asociacionesLocales]);
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const columnsProfesionales = [
     {
@@ -313,6 +261,59 @@ export function SeeServicePageComponent() {
     columns: columnsLocales,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (!id) {
+    navigate({ to: '/servicios' });
+    return null;
+  }
+
+  async function deleteServiceProfessional(professionalId: string) {
+    try {
+      // Llama a tu API para eliminar la asociación
+      await serviceProfessionalApi.deleteServiceProfessional(
+        id!,
+        professionalId,
+      );
+      toast.success('Profesional Desvinculado', {
+        description:
+          'El profesional ha sido desvinculado del servicio exitosamente.',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['service-professionals', id],
+      });
+    } catch (error: any) {
+      toast.error('Error al Desvincular Profesional', {
+        description: error.message || 'No se pudo desvincular el profesional.',
+      });
+    }
+  }
+
+  async function deleteServiceLocal(localId: string) {
+    try {
+      // Llama a tu API para eliminar la asociación
+      await serviceLocalApi.deleteServiceLocal(id!, localId);
+      toast.success('Local Desvinculado', {
+        description: 'El local ha sido desvinculado del servicio exitosamente.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['service-locals', id] });
+    } catch (error: any) {
+      toast.error('Error al Desvincular Local', {
+        description: error.message || 'No se pudo desvincular el local.',
+      });
+    }
+  }
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -591,9 +592,10 @@ export function SeeServicePageComponent() {
                       : initialValues.image,
                   });
                   setInitialValues({
+                    name: name,
                     description: description,
-                    isVirtual: isVirtual === 'Sí',
-                    image_url: imageFile
+                    isVirtual: isVirtual === 'Sí' ? 'true' : 'false',
+                    image: imageFile
                       ? URL.createObjectURL(imageFile)
                       : initialValues.image,
                   });

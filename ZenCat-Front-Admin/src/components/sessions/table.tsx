@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from '@tanstack/react-table';
+import { useNavigate } from '@tanstack/react-router';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
@@ -34,6 +35,7 @@ export function SessionsTable({
   onRefresh,
   isRefreshing = false,
 }: SessionsTableProps) {
+  const navigate = useNavigate();
   const {
     sorting,
     setSorting,
@@ -53,6 +55,12 @@ export function SessionsTable({
     onEdit,
     onDelete,
     onView,
+    onNavigateToReservations: (sessionId: string) => {
+      navigate({
+        to: '/sesiones/reservas/$sessionId',
+        params: { sessionId },
+      });
+    },
   });
 
   const table = useReactTable({
