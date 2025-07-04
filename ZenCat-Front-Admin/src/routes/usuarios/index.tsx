@@ -32,7 +32,6 @@ export const Route = createFileRoute('/usuarios/')({
 function UsuariosComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { modal, error, closeModal } = useModalNotifications();
   const toast = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -269,7 +268,7 @@ function UsuariosComponent() {
               email: item.email?.toString().trim(),
               name: item.name?.toString().trim(),
               password: '12345678', // Password fijo para todos (puedes personalizarlo)
-              role: 'user',
+              rol: 'user' as const,
               avatar: item.avatar?.toString().trim(),
               onboarding: {}, // Se deja vacío si no se usa
               first_last_name: item.firstLastName?.toString().trim(),
@@ -281,10 +280,12 @@ function UsuariosComponent() {
             queryClient.invalidateQueries({ queryKey: ['usuarios'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
+            return true;
           } catch (error: any) {
             toast.error('Error durante la carga masiva', {
               description: error.message,
             });
+            return false;
           }
         }}
       />
