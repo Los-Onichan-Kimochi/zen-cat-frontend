@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh/',
     LOGOUT: '/auth/logout/',
     ME: '/me/',
+    GOOGLE_LOGIN: '/login/google/',
   },
 
   // Community endpoints
