@@ -261,7 +261,7 @@ function ProfessionalDetail({ id }: { id: string }) {
               <Label htmlFor="profileImageFile" className="mb-2 self-start">
                 Foto de perfil
               </Label>
-              <div className="relative w-full flex-grow border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50">
+              <div className="relative w-full h-96 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50">
                 {imagePreviewUrl ? (
                   <img
                     src={imagePreviewUrl}
