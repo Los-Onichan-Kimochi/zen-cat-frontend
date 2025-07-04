@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, UploadCloud } from 'lucide-react';
 import {
   createFileRoute,
   useNavigate,
@@ -36,6 +36,7 @@ import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
 import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
 import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
 import { Region, Provincia, Distrito } from '@/types/local';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 const regiones: Region[] = rawRegiones;
 const provincias: Provincia[] = rawProvincias;
@@ -58,11 +59,13 @@ function VerUsuario() {
   const userId = search.id;
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Query para obtener el usuario
   const { data: user, isLoading } = useQuery({
-    queryKey: ['usuario', userId],
-    queryFn: () => usuariosApi.getUsuarioById(userId),
+    queryKey: ['usuario', userId, 'withImage'],
+    queryFn: () => usuariosApi.getUsuarioWithImage(userId),
   });
 
   // Mutation para actualizar usuario
@@ -226,6 +229,13 @@ function VerUsuario() {
     return filtrados;
   }, [distritos, selectedRegion, selectedProvincia, form.distrito]);
 
+  const finalImagePreview = useMemo(() => {
+    if (imagePreview) return imagePreview;
+    if (user?.image_bytes) return `data:image/jpeg;base64,${user.image_bytes}`;
+    if (user?.image_url) return user.image_url;
+    return null;
+  }, [imagePreview, user]);
+
   // Cargar datos del usuario
   useEffect(() => {
     if (user) {
@@ -256,11 +266,11 @@ function VerUsuario() {
         ? distritos.find((d) => d.name === user.onboarding?.district)?.id || ''
         : '';
 
-      const newForm = {
+      const initialFormState = {
         nombres,
         primerApellido,
         segundoApellido,
-        correo: user.email,
+        correo: user.email || '',
         celular: user.onboarding?.phoneNumber || '',
         tipoDoc: user.onboarding?.documentType || '',
         numDoc: user.onboarding?.documentNumber || '',
@@ -273,23 +283,12 @@ function VerUsuario() {
         calle: user.onboarding?.address || '',
       };
 
-      setForm(newForm);
-      setInitialValues(newForm);
-
-      // Enable onboarding section if user has any onboarding data
-      const hasOnboardingData = !!user.onboarding;
-      setOnboardingEnabled(hasOnboardingData);
-      setOriginallyHadOnboarding(hasOnboardingData);
-
-      console.log('User onboarding data loaded:', {
-        hasOnboarding: hasOnboardingData,
-        region: user.onboarding?.region,
-        province: user.onboarding?.province,
-        district: user.onboarding?.district,
-        convertedIds: { regionId, provinciaId, distritoId },
-      });
+      setForm(initialFormState);
+      setInitialValues(initialFormState);
+      setOnboardingEnabled(!!user.onboarding);
+      setOriginallyHadOnboarding(!!user.onboarding);
     }
-  }, [user, regiones, provincias, distritos]);
+  }, [user]);
 
   // Handlers
   const handleCancel = () => {
@@ -439,6 +438,23 @@ function VerUsuario() {
   };
 
   const confirmUpdate = async () => {
+    // Determine which mutation to use
+    const userPayload: UpdateUserPayload = {};
+
+    // Check for user data changes
+    const newName = `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim();
+    if (newName !== user?.name) userPayload.name = newName;
+    if (form.correo !== user?.email) userPayload.email = form.correo;
+
+    if (imageFile) {
+      userPayload.image_url = imageFile.name;
+      userPayload.image_bytes = await fileToBase64(imageFile);
+    }
+
+    // Determine if user data has changed
+    const hasUserChanges = Object.keys(userPayload).length > 0;
+
+    // Check for onboarding data changes
     const basicUserFieldsChanged =
       form.nombres !== initialValues.nombres ||
       form.primerApellido !== initialValues.primerApellido ||
@@ -484,34 +500,21 @@ function VerUsuario() {
 
     try {
       if (!originallyHadOnboarding && onboardingEnabled) {
-        if (basicUserFieldsChanged) {
-          await updateUserMutation.mutateAsync({
-            name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
-            email: form.correo,
-          });
+        if (hasUserChanges) {
+          await updateUserMutation.mutateAsync(userPayload);
         }
         createOnboardingMutation.mutate(onboardingPayload!);
       } else if (
         originallyHadOnboarding &&
         onboardingFieldsChanged &&
-        !basicUserFieldsChanged &&
+        !hasUserChanges &&
         onboardingEnabled
       ) {
-        updateOnboardingMutation.mutate(onboardingPayload!);
-      } else if (basicUserFieldsChanged) {
-        const userPayload: UpdateUserPayload = {
-          name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
-          email: form.correo,
-        };
-        if (
-          onboardingFieldsChanged &&
-          onboardingEnabled &&
-          originallyHadOnboarding
-        ) {
-          await updateUserMutation.mutateAsync(userPayload);
+        await updateOnboardingMutation.mutate(onboardingPayload!);
+      } else if (hasUserChanges) {
+        await updateUserMutation.mutateAsync(userPayload);
+        if (onboardingFieldsChanged && onboardingEnabled) {
           updateOnboardingMutation.mutate(onboardingPayload!);
-        } else {
-          updateUserMutation.mutate(userPayload);
         }
       } else if (
         onboardingFieldsChanged &&
@@ -555,6 +558,14 @@ function VerUsuario() {
     setErrors((prev) => ({ ...prev, distrito: '' }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-full">
@@ -564,7 +575,7 @@ function VerUsuario() {
 
   const hasChanges = (Object.keys(form) as Array<keyof typeof form>).some(
     (key) => form[key] !== initialValues[key],
-  );
+  ) || !!imageFile;
 
   return (
     <div className="min-h-screen bg-[#fafbfc] w-full">
@@ -598,7 +609,7 @@ function VerUsuario() {
                     name="nombres"
                     value={form.nombres}
                     onChange={handleChange}
-                    placeholder="Ingrese los nombres del usuario"
+                    placeholder="Ej. Juan"
                     disabled={!isEditing}
                   />
                   {errors.nombres && (
@@ -619,7 +630,7 @@ function VerUsuario() {
                     name="primerApellido"
                     value={form.primerApellido}
                     onChange={handleChange}
-                    placeholder="Ingrese el primer apellido del usuario"
+                    placeholder="Ej. Pérez"
                     disabled={!isEditing}
                   />
                   {errors.primerApellido && (
@@ -640,7 +651,7 @@ function VerUsuario() {
                     name="segundoApellido"
                     value={form.segundoApellido}
                     onChange={handleChange}
-                    placeholder="Ingrese el segundo apellido del usuario"
+                    placeholder="Ej. Gómez"
                     disabled={!isEditing}
                   />
                 </div>
@@ -653,7 +664,7 @@ function VerUsuario() {
                     name="correo"
                     value={form.correo}
                     onChange={handleChange}
-                    placeholder="Ingrese el correo electrónico"
+                    placeholder="ejemplo@correo.com"
                     type="email"
                     disabled={!isEditing}
                   />
@@ -664,15 +675,53 @@ function VerUsuario() {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="font-semibold mb-2">Foto de perfil</label>
-                <div className="flex flex-col items-center justify-center border border-neutral-300 rounded-lg h-40 mb-2 bg-white">
-                  <Upload className="w-16 h-16 text-neutral-400" />
+              <div className="flex flex-col items-center justify-center p-4 space-y-2">
+                <label htmlFor="profileImageFile" className="mb-2 self-start font-semibold">
+                  Foto de perfil
+                </label>
+                <div className="relative w-48 h-48 border-2 border-dashed rounded-lg flex items-center justify-center bg-white">
+                  {finalImagePreview ? (
+                    <img
+                      src={finalImagePreview}
+                      alt="Vista previa del usuario"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-center text-gray-400 flex flex-col items-center justify-center w-full">
+                      <UploadCloud size={48} className="mx-auto" />
+                      <p>
+                        {isEditing
+                          ? 'Arrastre o seleccione una imagen'
+                          : 'No hay imagen disponible'}
+                      </p>
+                    </div>
+                  )}
+                  {isEditing && (
+                    <Input
+                      id="profileImageFile"
+                      type="file"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      tabIndex={-1}
+                    />
+                  )}
                 </div>
-                <Input type="file" disabled={!isEditing} />
-                <span className="text-sm text-neutral-500">
-                  Sin archivos seleccionados
-                </span>
+                {/* Botón y descripción solo en edición */}
+                {isEditing && (
+                  <>
+                    <button
+                      type="button"
+                      className="mt-3 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+                      onClick={() => document.getElementById('profileImageFile')?.click()}
+                    >
+                      Subir imagen
+                    </button>
+                    <span className="text-xs text-gray-500 mt-1 text-center">
+                      Formatos permitidos: JPG, PNG. Tamaño máximo: 2MB
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </Card>
@@ -702,8 +751,8 @@ function VerUsuario() {
                     name="celular"
                     value={form.celular}
                     onChange={handleChange}
-                    placeholder="Ingrese el número de teléfono"
-                    disabled={!isEditing}
+                    placeholder="Ej. 987654321"
+                    disabled={!isEditing || !onboardingEnabled}
                   />
                   {errors.celular && (
                     <span className="text-red-500 text-sm">
@@ -715,21 +764,22 @@ function VerUsuario() {
                   <label htmlFor="tipo-doc" className="block font-medium mb-1">
                     Tipo de documento
                   </label>
-                  <select
-                    id="tipo-doc"
-                    name="tipoDoc"
+                  <Select
                     value={form.tipoDoc}
-                    onChange={handleChange}
-                    className="w-full h-10 px-3 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
+                    onValueChange={(value) => setForm({ ...form, tipoDoc: value })}
+                    disabled={!isEditing || !onboardingEnabled}
                   >
-                    <option value="">Seleccione un tipo</option>
-                    <option value="DNI">DNI</option>
-                    <option value="FOREIGNER_CARD">
-                      Carnet de Extranjería
-                    </option>
-                    <option value="PASSPORT">Pasaporte</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DNI">DNI</SelectItem>
+                      <SelectItem value="FOREIGNER_CARD">
+                        Carnet de Extranjería
+                      </SelectItem>
+                      <SelectItem value="PASSPORT">Pasaporte</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {errors.tipoDoc && (
                     <span className="text-red-500 text-sm">
                       {errors.tipoDoc}
@@ -745,8 +795,8 @@ function VerUsuario() {
                     name="numDoc"
                     value={form.numDoc}
                     onChange={handleChange}
-                    placeholder="Ingrese el número del documento"
-                    disabled={!isEditing}
+                    placeholder="Ej. 76543210"
+                    disabled={!isEditing || !onboardingEnabled}
                   />
                   {errors.numDoc && (
                     <span className="text-red-500 text-sm">
@@ -767,7 +817,7 @@ function VerUsuario() {
                     type="date"
                     value={form.fechaNacimiento}
                     onChange={handleChange}
-                    disabled={!isEditing}
+                    disabled={!isEditing || !onboardingEnabled}
                   />
                   {errors.fechaNacimiento && (
                     <span className="text-red-500 text-sm">
@@ -779,19 +829,21 @@ function VerUsuario() {
                   <label htmlFor="genero" className="block font-medium mb-1">
                     Género
                   </label>
-                  <select
-                    id="genero"
+                  <Select
                     name="genero"
                     value={form.genero}
-                    onChange={handleChange}
-                    className="w-full h-10 px-3 border border-gray-300 rounded-md"
-                    disabled={!isEditing}
+                    onValueChange={(value) => setForm({ ...form, genero: value })}
+                    disabled={!isEditing || !onboardingEnabled}
                   >
-                    <option value="">Seleccione un género</option>
-                    <option value="MALE">Masculino</option>
-                    <option value="FEMALE">Femenino</option>
-                    <option value="OTHER">Otro</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Masculino</SelectItem>
+                      <SelectItem value="FEMALE">Femenino</SelectItem>
+                      <SelectItem value="OTHER">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="mb-4 font-semibold">Dirección</div>
@@ -801,17 +853,18 @@ function VerUsuario() {
                     Región / Departamento
                   </label>
                   <Select
+                    name="region"
                     value={form.region}
                     onValueChange={handleRegionChange}
-                    disabled={!isEditing}
+                    disabled={!isEditing || !onboardingEnabled}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una región" />
+                      <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                     <SelectContent>
-                      {regiones.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.name}
+                      {regiones.map((region) => (
+                        <SelectItem key={region.id} value={region.id}>
+                          {region.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -827,17 +880,20 @@ function VerUsuario() {
                     Provincia
                   </label>
                   <Select
+                    name="provincia"
                     value={form.provincia}
                     onValueChange={handleProvinciaChange}
-                    disabled={!isEditing || !form.region}
+                    disabled={
+                      !isEditing || !onboardingEnabled || !provinciasFiltradas.length
+                    }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una provincia" />
+                      <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                     <SelectContent>
-                      {provinciasFiltradas.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name}
+                      {provinciasFiltradas.map((prov) => (
+                        <SelectItem key={prov.id} value={prov.id}>
+                          {prov.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -853,17 +909,20 @@ function VerUsuario() {
                     Distrito
                   </label>
                   <Select
+                    name="distrito"
                     value={form.distrito}
-                    onValueChange={handleDistritoChange}
-                    disabled={!isEditing || !form.provincia}
+                    onValue-change={handleDistritoChange}
+                    disabled={
+                      !isEditing || !onboardingEnabled || !distritosFiltrados.length
+                    }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un distrito" />
+                      <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                     <SelectContent>
-                      {distritosFiltrados.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
+                      {distritosFiltrados.map((dist) => (
+                        <SelectItem key={dist.id} value={dist.id}>
+                          {dist.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -888,8 +947,8 @@ function VerUsuario() {
                     name="codigoPostal"
                     value={form.codigoPostal}
                     onChange={handleChange}
-                    placeholder="Ingrese el código postal"
-                    disabled={!isEditing}
+                    placeholder="Ej. 15001"
+                    disabled={!isEditing || !onboardingEnabled}
                   />
                 </div>
                 <div>
@@ -901,8 +960,8 @@ function VerUsuario() {
                     name="calle"
                     value={form.calle}
                     onChange={handleChange}
-                    placeholder="Ingrese la dirección completa"
-                    disabled={!isEditing}
+                    placeholder="Ej. Av. Principal 123"
+                    disabled={!isEditing || !onboardingEnabled}
                   />
                 </div>
               </div>
