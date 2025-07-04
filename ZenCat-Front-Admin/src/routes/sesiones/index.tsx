@@ -36,6 +36,9 @@ import { professionalsApi } from '@/api/professionals/professionals'; // ajusta 
 import { Professional } from '@/types/professional';
 import { Label } from '@/components/ui/label';
 //fin
+//nuevos para locales
+import { localsApi } from '@/api/locals/locals'; // ajusta el path si es diferente
+import { Local } from '@/types/local';
 
 export const Route = createFileRoute('/sesiones/')({
   component: SesionesComponent,
@@ -93,12 +96,22 @@ function SesionesComponent() {
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<
     string | undefined
   >();
+  const [uploadMode, setUploadMode] = useState<'virtual' | 'presencial'>('virtual');
 
   const { data: professionals = [] } = useQuery<Professional[]>({
     queryKey: ['professionals'],
     queryFn: professionalsApi.getProfessionals,
   });
   //fin ---------------------------------------------------------------
+  //para seleccion de locales
+  //const [selectedLocalId, setSelectedLocalId] = useState<string | undefined>();
+  const [selectedLocal, setSelectedLocal] = useState<Local | null>(null);
+  const { data: locals = [] } = useQuery<Local[]>({
+    queryKey: ['locals'],
+    queryFn: localsApi.getLocals,
+  });
+  //const [selectedLocalCapacity, setSelectedLocalCapacity] = useState<number>(0);
+
   const {
     data: sessionsData,
     isLoading: isLoadingSessions,
@@ -264,7 +277,10 @@ function SesionesComponent() {
 
         <ViewToolbar
           onAddClick={() => navigate({ to: '/sesiones/agregar' })}
-          onBulkUploadClick={() => setShowUploadDialog(true)} // Activa el diálogo carga masiva
+          onBulkUploadClick={() => {
+            setUploadMode('virtual');
+            setShowUploadDialog(true);
+          }}// Activa el diálogo carga masiva
           addButtonText="Agregar"
           bulkUploadButtonText="Carga Masiva"
         />
@@ -330,43 +346,44 @@ function SesionesComponent() {
             setShowUploadDialog(open);
             if (!open) {
               setSelectedProfessionalId(undefined); // Limpia profesional al cerrar
+              setSelectedLocal(null);
             }
           }}
+          mode={uploadMode}
+          selectedLocalCapacity={Number(selectedLocal?.capacity) || Infinity}
+          module="sessions" // Activa validaciones especiales
+          expectedExcelColumns={
+            uploadMode === 'virtual'
+              ? ['Título', 'Fecha', 'Hora de inicio', 'Hora de fin', 'Capacidad', 'Enlace de sesión']
+              : ['Título', 'Fecha', 'Hora de inicio', 'Hora de fin', 'Capacidad']
+          }
+          dbFieldNames={
+            uploadMode === 'virtual'
+              ? ['title', 'date', 'start_time', 'end_time', 'capacity', 'session_link']
+              : ['title', 'date', 'start_time', 'end_time', 'capacity']
+          }
+          existingSessions={
+            sessionsData?.filter((s) =>
+              uploadMode === 'virtual'
+                ? s.professional_id === selectedProfessionalId
+                : s.local_id === selectedLocal?.id
+            ) || []
+          }
           canContinue={() => {
-            if (!selectedProfessionalId) {
+            if (uploadMode === 'virtual' && !selectedProfessionalId)
               return 'Selecciona un profesional antes de cargar.';
-            }
+            if (uploadMode === 'presencial' && !selectedLocal)
+              return 'Selecciona un local antes de cargar.';
             return true;
           }}
           title="Carga Masiva de Sesiones"
-          module="sessions" // Activa validaciones especiales
-          expectedExcelColumns={[
-            'Título',
-            'Fecha',
-            'Hora de inicio',
-            'Hora de fin',
-            'Capacidad',
-            'Enlace de sesión',
-          ]}
-          dbFieldNames={[
-            'title',
-            'date',
-            'start_time',
-            'end_time',
-            'capacity',
-            'session_link',
-          ]}
-          existingSessions={
-            sessionsData?.filter(
-              (s) => s.professional_id === selectedProfessionalId,
-            ) || []
-          } // Esta es la línea nueva
+
+
+
           onParsedData={async (data, setError) => {
-            if (!selectedProfessionalId) {
-              //setError('Selecciona un profesional antes de cargar.');
+            if (uploadMode === 'virtual' && !selectedProfessionalId) {
               setError?.('Selecciona un profesional antes de cargar.');
-              //toast.error
-              return false; // <- Para que bulk-dialog sepa que hubo error
+              return false;
             }
 
             try {
@@ -438,7 +455,8 @@ function SesionesComponent() {
                   end_time: new Date(`${dateString}T${endTimeStr}:00-05:00`).toISOString(),
                   capacity: Number(item.capacity),
                   session_link: item.session_link || null,
-                  professional_id: selectedProfessionalId,
+                  professional_id: uploadMode === 'virtual' ? selectedProfessionalId : '00ca3624-2fee-4aea-bd30-7ff3e30c2701',
+                  local_id: uploadMode === 'presencial' ? selectedLocal?.id : null,
                 };
               });
 
@@ -457,46 +475,93 @@ function SesionesComponent() {
               //});
               //setError(err.message || 'Ocurrió un error inesperado al crear las sesiones.');
               //comentar:
+              await sessionsApi.bulkCreateSessions(data);
+              if (err.response?.status === 409) {
+                const message = err.response.data?.message || 'Conflicto: sesión duplicada.';
+                setError?.(`Error 409: ${message}`);
+              } else {
+                setError?.('Ocurrió un error inesperado al crear las sesiones.');
+              }
               //const mensaje =
-              //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
+                //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
 
               //setError?.(error ? `${error}\n${mensaje}` : mensaje);
               // NO CIERRES EL MODAL
-              return false;
+              //return false;
             }
           }}
         >
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Selecciona un profesional
-            </label>
-            <Select
-              value={selectedProfessionalId || ''}
-              onValueChange={setSelectedProfessionalId}
-            >
+            <label className="block text-sm font-medium mb-1">Modalidad</label>
+            <Select value={uploadMode} onValueChange={(value) => setUploadMode(value as any)}>
               <SelectTrigger>
-                <SelectValue placeholder="Profesional" />
+                <SelectValue placeholder="Modalidad" />
               </SelectTrigger>
               <SelectContent>
-                {professionals.map((pro) => (
-                  <SelectItem key={pro.id} value={pro.id}>
-                    {pro.name} {pro.first_last_name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="virtual">Virtual</SelectItem>
+                <SelectItem value="presencial">Presencial</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {uploadMode === 'virtual' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Selecciona un profesional</label>
+              <Select
+                value={selectedProfessionalId || ''}
+                onValueChange={setSelectedProfessionalId}
+              >
+                <SelectTrigger><SelectValue placeholder="Profesional" /></SelectTrigger>
+                <SelectContent>
+                  {professionals.map((pro) => (
+                    <SelectItem key={pro.id} value={pro.id}>
+                      {pro.name} {pro.first_last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {uploadMode === 'presencial' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Selecciona un local</label>
+              <Select
+                value={selectedLocal?.id || ''}
+                onValueChange={(value) => {
+                  const local = locals.find((l) => l.id === value);
+                  setSelectedLocal(local || null);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Local" /></SelectTrigger>
+                <SelectContent>
+                  {locals.map((local) => (
+                    <SelectItem key={local.id} value={local.id}>
+                      {local.local_name} - Capacidad: {local.capacity}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
             <p>
               El archivo debe contener las siguientes columnas (en este orden):
               <br />
               <strong>
-                Título, Fecha, Hora de inicio, Hora de fin, Capacidad, Enlace de
-                sesión
+                {uploadMode === 'virtual' ? (
+                  <>Título, Fecha, Hora de inicio, Hora de fin, Capacidad, Enlace de sesión</>
+                ) : (
+                  <>Título, Fecha, Hora de inicio, Hora de fin, Capacidad</>
+                )}
               </strong>
             </p>
             <a
-              href="/plantillas/plantilla-carga-sesiones.xlsx"
+              href={
+                uploadMode === 'virtual'
+                  ? '/plantillas/plantilla-carga-sesiones.xlsx'
+                  : '/plantillas/plantilla-carga-sesiones-presencial.xlsx'
+              }
               className="text-blue-600 hover:underline"
               download
             >
