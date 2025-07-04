@@ -118,6 +118,7 @@ export const API_ENDPOINTS = {
   // Report endpoints
   REPORTS: {
     SERVICES: '/reports/services',
+    COMMUNITIES: '/reports/communities',
     // Aquí podemos agregar mas si da el tiempo :c
   },
 
