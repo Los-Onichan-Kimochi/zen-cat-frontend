@@ -11,6 +11,9 @@ export interface TimeSlotCalendarProps {
     end: string;
     title?: string;
     type?: 'professional' | 'local';
+    sessionId?: string;
+    isUserReserved?: boolean;
+    isFullyBooked?: boolean;
     sessionInfo?: {
       title: string;
       professional: string;
@@ -90,8 +93,49 @@ export function TimeSlotCalendar({
   // Manejar selección de sesión
   const handleSessionSelect = useCallback((date: string, session: any) => {
     if (disabled) return;
+    
+    // No permitir seleccionar sesiones donde el usuario ya tiene reserva
+    if (session.isUserReserved) {
+      return;
+    }
+    
+    // No permitir seleccionar sesiones llenas
+    if (session.isFullyBooked) {
+      return;
+    }
+    
     onRangeSelect({ start: session.start, end: session.end }, date);
   }, [disabled, onRangeSelect]);
+
+  // Determinar el estilo de la sesión basado en su estado
+  const getSessionStyle = useCallback((session: any, isSelected: boolean) => {
+    if (session.isUserReserved === true) {
+      return "bg-red-100 border-red-300 text-red-800 cursor-not-allowed";
+    }
+    
+    if (session.isFullyBooked === true) {
+      return "bg-gray-200 border-gray-300 text-gray-600 cursor-not-allowed";
+    }
+    
+    if (isSelected) {
+      return "bg-black text-white border-black";
+    }
+    
+    return "bg-green-100 border-green-300 text-green-800 hover:bg-green-200 cursor-pointer";
+  }, []);
+
+  // Obtener el texto de estado para el hover
+  const getStatusText = useCallback((session: any) => {
+    if (session.isUserReserved === true) {
+      return "Ya tienes una reserva en este horario";
+    }
+    
+    if (session.isFullyBooked === true) {
+      return "Sesión llena";
+    }
+    
+    return "Disponible para reservar";
+  }, []);
 
   const totalHours = endHour - startHour + 1;
   const gridHeight = totalHours * 60; // 60px por hora
@@ -156,19 +200,20 @@ export function TimeSlotCalendar({
                   {/* Sesiones para este día */}
                   {getSessionsForDate(date.label).map((session, sessionIdx) => {
                     const { top, height } = getSessionPosition(session.start, session.end);
-                    const isSelected = selectedRange && 
+                    const isSelected = !!(selectedRange && 
                                       selectedDate === date.label && 
-                                      selectedRange.start === session.start;
+                                      selectedRange.start === session.start);
+                    
+                    const sessionStyle = getSessionStyle(session, isSelected);
+                    const statusText = getStatusText(session);
 
                     return (
                       <HoverCard key={sessionIdx}>
                         <HoverCardTrigger asChild>
                           <div
                             className={cn(
-                              "absolute left-1 right-1 rounded cursor-pointer border text-xs font-medium p-1 flex items-center justify-center overflow-hidden",
-                              isSelected 
-                                ? "bg-black text-white border-black" 
-                                : "bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200"
+                              "absolute left-1 right-1 rounded border text-xs font-medium p-1 flex items-center justify-center overflow-hidden transition-colors",
+                              sessionStyle
                             )}
                             style={{ 
                               top, 
@@ -191,12 +236,26 @@ export function TimeSlotCalendar({
                                 <p><span className="font-medium">Profesional:</span> {session.sessionInfo.professional}</p>
                                 <p><span className="font-medium">Lugar:</span> {session.sessionInfo.location}</p>
                                 <p><span className="font-medium">Disponibilidad:</span> {session.sessionInfo.capacity - session.sessionInfo.registered}/{session.sessionInfo.capacity}</p>
+                                <p className={cn("font-medium", {
+                                  "text-red-600": session.isUserReserved === true,
+                                  "text-gray-600": session.isFullyBooked === true,
+                                  "text-green-600": session.isUserReserved !== true && session.isFullyBooked !== true
+                                })}>
+                                  <span className="font-medium">Estado:</span> {statusText}
+                                </p>
                               </div>
                             </div>
                           ) : (
                             <div>
                               <p className="font-medium">{session.title || 'Sesión'}</p>
                               <p className="text-xs text-gray-500 mt-1">Horario: {session.start} - {session.end}</p>
+                              <p className={cn("text-xs mt-1", {
+                                "text-red-600": session.isUserReserved === true,
+                                "text-gray-600": session.isFullyBooked === true,
+                                "text-green-600": session.isUserReserved !== true && session.isFullyBooked !== true
+                              })}>
+                                {statusText}
+                              </p>
                             </div>
                           )}
                         </HoverCardContent>

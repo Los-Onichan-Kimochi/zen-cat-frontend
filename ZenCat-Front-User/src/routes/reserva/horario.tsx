@@ -16,6 +16,10 @@ import { professionalsApi } from '@/api/professionals/professionals';
 import { serviceProfessionalsApi } from '@/api/service-professionals/service-professionals';
 import { TimeSlotCalendar } from '@/components/ui/time-slot-calendar';
 import { localsApi } from '@/api/locals/locals';
+import { communityServicesApi } from '@/api/communities/community-services';
+import { CommunityService } from '@/types/community-service';
+import { reservationsApi } from '@/api/reservations/reservations';
+import { Reservation } from '@/types/reservation';
 
 export const Route = createFileRoute(ReservaHorarioRoute)({
   component: ScheduleStepComponent,
@@ -92,25 +96,61 @@ function ScheduleStepComponent() {
     queryKey: ['locals'],
     queryFn: () => localsApi.getLocals(),
   });
+  
+  // Obtener el community service único basado en community_id y service_id
+  const { data: communityServiceData = [], isLoading: isLoadingCommunityService, error: errorCommunityService } = useQuery<CommunityService[], Error>({
+    queryKey: ['communityService', reservationData.communityId, reservationData.service?.id],
+    queryFn: () => communityServicesApi.getCommunityServices([reservationData.communityId!], [reservationData.service?.id!]),
+    enabled: !!reservationData.communityId && !!reservationData.service?.id,
+  });
 
-  // Fetch all sessions
+  // Obtener el community_service_id único
+  const communityServiceId = communityServiceData.length > 0 ? communityServiceData[0].id : null;
+
+  // Fetch sessions basado en el community_service_id único
   const {
     data: sessionsData = [],
     isLoading: isLoadingSessions,
     error,
   } = useQuery<Session[], Error>({
-    queryKey: ['sessions'],
-    queryFn: sessionsApi.getSessions,
+    queryKey: ['sessions', communityServiceId],
+    queryFn: () => sessionsApi.getSessions(),
+    enabled: !!communityServiceId,
+  });
+
+  // Fetch user reservations para identificar sesiones donde ya tiene reservas
+  const { data: userReservations = [], isLoading: isLoadingReservations } = useQuery<Reservation[], Error>({
+    queryKey: ['user-reservations', reservationData.communityId, user?.id],
+    queryFn: () => {
+      if (!reservationData.communityId || !user?.id) {
+        throw new Error('Missing required parameters');
+      }
+      return reservationsApi.getReservationsByCommunityAndUser(
+        reservationData.communityId,
+        user.id
+      );
+    },
+    enabled: !!reservationData.communityId && !!user?.id,
   });
   
   const isLoading =
     isLoadingServiceProfessionals ||
     isLoadingProfessionals ||
     isLoadingLocals ||
-    isLoadingSessions;
+    isLoadingSessions ||
+    isLoadingCommunityService ||
+    isLoadingReservations;
 
-  // Filter sessions by location and service-professional associations
-  const filteredSessions = sessionsData.filter((session) => {
+  // Filter sessions by community_service_id, location and service-professional associations
+  console.log("Filtrar");
+  const filteredSessions = sessionsData.filter((session: Session) => {
+    // Filtrar por community_service_id si está disponible
+    if (communityServiceId && session.community_service_id) {
+      if (session.community_service_id !== communityServiceId) {
+        return false;
+      }
+    }
+
     // Filter by location if selected
     if (reservationData.location?.id && session.local_id) {
       if (session.local_id !== reservationData.location.id) {
@@ -118,16 +158,24 @@ function ScheduleStepComponent() {
       }
     }
 
+    console.log("Session:", session);
     // Filter by service-professional associations if service is selected
     if (reservationData.service?.id && session.professional_id) {
       if (!availableProfessionalIds.includes(session.professional_id)) {
         return false;
       }
     }
-
     return true;
   });
-  console.log(filteredSessions);
+
+  console.log("Sessions filtradas: ", filteredSessions);
+
+  // Crear un Set de session_ids donde el usuario ya tiene reservas
+  const userReservedSessionIds = new Set(
+    userReservations
+      .filter(reservation => reservation.state === 'CONFIRMED') // Solo reservas confirmadas
+      .map(reservation => reservation.session_id)
+  );
 
   // Generar fechas disponibles (próximos 7 días)
   const getAvailableDates = () => {
@@ -174,11 +222,15 @@ function ScheduleStepComponent() {
   const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Ajustar para que lunes sea 0
 
   // Convertir las sesiones al formato requerido por TimeSlotCalendar
-  const convertedOccupiedSlots = filteredSessions.map((session) => {
+  const convertedOccupiedSlots = filteredSessions.map((session: Session) => {
     const professional = professionalsData.find(p => p.id === session.professional_id);
     const local = localsData.find(l => l.id === session.local_id);
     const sessionDate = new Date(session.date);
     const dateLabel = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Determinar el estado de la sesión
+    const isUserReserved = userReservedSessionIds.has(session.id);
+    const isFullyBooked = session.registered_count >= session.capacity;
     
     return {
       date: dateLabel,
@@ -186,6 +238,9 @@ function ScheduleStepComponent() {
       end: session.end_time.split('T')[1].substring(0, 5),
       title: session.title,
       type: 'professional' as const,
+      sessionId: session.id,
+      isUserReserved,
+      isFullyBooked,
       sessionInfo: {
         title: session.title,
         professional: professional ? `${professional.name} ${professional.first_last_name}` : 'No asignado',
@@ -211,14 +266,15 @@ function ScheduleStepComponent() {
     setSelectedDate(date);
     
     // Buscar la sesión que coincide con este horario y fecha
-    const matchingSession = filteredSessions.find(session => {
+    const matchingSession = filteredSessions.find((session: Session) => {
       const sessionDate = new Date(session.date);
       const sessionDateStr = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
       const sessionTime = session.start_time.split('T')[1].substring(0, 5);
       
       return sessionDateStr === date && sessionTime === range.start;
     });
-    console.log(range.start);
+    
+    console.log("Selected time:", range.start);
     if (matchingSession) {
       setSelectedSessionId(matchingSession.id);
       
@@ -321,17 +377,20 @@ function ScheduleStepComponent() {
     );
   }
 
-  if (error) {
+  if (error || errorCommunityService) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 mb-4">
-          Error al cargar los horarios: {error.message}
+          Error al cargar los horarios: {error?.message || errorCommunityService?.message}
         </p>
         <Button onClick={() => window.location.reload()}>Reintentar</Button>
       </div>
     );
   }
 
+  console.log("Reservation data service:", reservationData.service);
+  console.log("Reservation data location:", reservationData.location);
+  
   return (
     <div>
       {/* Mensaje informativo sobre filtros aplicados */}
@@ -419,12 +478,37 @@ function ScheduleStepComponent() {
             selectedRange={selectedTime ? { start: selectedTime, end: '' } : undefined}
             onRangeSelect={handleTimeRangeSelect}
             occupiedSlots={convertedOccupiedSlots}
-            startHour={5}
+            startHour={8}
             endHour={21}
             slotDuration={60}
             disabled={false}
             selectedDate={selectedDate || undefined}
           />
+        </div>
+      </div>
+
+      {/* Leyenda de colores */}
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+        <h4 className="font-semibold text-gray-800 mb-3">Leyenda:</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+            <span className="text-gray-700">Disponible</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-black text-white border border-black rounded flex items-center justify-center">
+              <span className="text-xs text-white">✓</span>
+            </div>
+            <span className="text-gray-700">Seleccionado</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+            <span className="text-gray-700">Ya reservado</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded"></div>
+            <span className="text-gray-700">Lleno</span>
+          </div>
         </div>
       </div>
 
