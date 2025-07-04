@@ -9,6 +9,7 @@ export interface Reservation {
   user_id: string;
   session_id: string;
   session: Session;
+  membership_id: string;
   // Extended fields for display (might come from joins)
   user_name?: string;
   user_email?: string;

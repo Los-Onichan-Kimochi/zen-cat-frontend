@@ -11,13 +11,14 @@ import {
 import { ChevronDown, Calendar } from 'lucide-react';
 import { ReservationsTable } from './CommunityReservationTable';
 import { ReservationDetailDialog } from './ReservationDetailDialog';
-import { Reservation, ReservationState } from '@/types/reservation'; // Importa el enum actualizado
+import { Reservation, ReservationState } from '@/types/reservation';
 import { reservationsApi } from '@/api/reservations/reservations';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
+import { membershipService } from '@/api/membership/membership';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -228,19 +229,67 @@ const CommunityReservasLayout = () => {
     setSelectedReservation(null);
   };
 
-  const handleCancelReservation = async (reservationId: string) => {
+  const handleCancelReservation = async (reservationOrId: Reservation | string) => {
     try {
-      // TODO: Implementar la llamada al endpoint para cancelar la reserva
-      console.log('Cancelando reserva:', reservationId);
-      // await reservationsApi.cancelReservation(reservationId);
+      // Determinar si recibimos una reserva completa o solo el ID
+      let reservation: Reservation;
       
-      // Actualizar la lista de reservas
-      // fetchReservations();
+      if (typeof reservationOrId === 'string') {
+        // Si recibimos un ID, buscar la reserva en el estado local
+        const foundReservation = allReservations.find(r => r.id === reservationOrId);
+        if (!foundReservation) {
+          console.error('Reserva no encontrada');
+          return;
+        }
+        reservation = foundReservation;
+      } else {
+        // Si recibimos el objeto completo
+        reservation = reservationOrId;
+      }
+
+      if (!reservation) {
+        console.error('Reserva no encontrada');
+        return;
+      }
+
+      // 1. Cancelar la reserva
+      await reservationsApi.updateReservation(reservation.id, {
+        state: ReservationState.CANCELLED,
+      });
       
-      alert('Funcionalidad de cancelar reserva pendiente de implementar');
+      // 2. Si hay membresía asociada, actualizar las reservas usadas
+      if (reservation.membership_id) {
+        console.log('Actualizando membresía:', reservation.membership_id);
+        
+        const membership = await membershipService.getMembershipById(reservation.membership_id);
+        
+        // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
+        if (membership.plan.reservation_limit !== null && 
+            typeof membership.reservations_used === 'number' && 
+            membership.reservations_used > 0) {
+          
+          await membershipService.updateMembership(membership.id, {
+            reservations_used: membership.reservations_used - 1,
+          });
+          
+          console.log('Reservas usadas actualizadas:', {
+            membresiaId: membership.id,
+            reservasAnteriores: membership.reservations_used,
+            reservasNuevas: membership.reservations_used - 1
+          });
+        }
+      }
+      
+      // 3. Actualizar el estado local cambiando el estado de la reserva
+      setAllReservations(prev => prev.map(r => 
+        r.id === reservation.id 
+          ? { ...r, state: ReservationState.CANCELLED }
+          : r
+      ));
+      
     } catch (error) {
       console.error('Error al cancelar reserva:', error);
-      alert('Error al cancelar la reserva');
+      alert('Error al cancelar la reserva. Por favor, inténtalo de nuevo.');
     }
   };
 
