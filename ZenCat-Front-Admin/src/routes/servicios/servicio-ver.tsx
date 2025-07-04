@@ -193,12 +193,11 @@ function ServiceView({ id }: { id: string }) {
     }
   }
 
-  // inicializar estados al cargar prof
+  // Sincronizar el estado del formulario con los datos del servicio
   useEffect(() => {
     if (ser) {
       setName(ser.name);
       setDescription(ser.description);
-      setIsVirtual(ser.is_virtual === true ? 'Sí' : 'No');
 
       if (ser.image_bytes) {
         setImagePreview(`data:image/jpeg;base64,${ser.image_bytes}`);
@@ -215,6 +214,10 @@ function ServiceView({ id }: { id: string }) {
         image: ser.image_url || '',
       });
     }
+  }, [ser]);
+
+  // Sincronizar profesionales asociados
+  useEffect(() => {
     if (asociacionesProfesionales) {
       Promise.all(
         asociacionesProfesionales.map((asc) =>
@@ -224,6 +227,10 @@ function ServiceView({ id }: { id: string }) {
     } else {
       setProfesionalesSeleccionados([]);
     }
+  }, [asociacionesProfesionales]);
+
+  // Sincronizar locales asociados
+  useEffect(() => {
     if (asociacionesLocales) {
       Promise.all(
         asociacionesLocales.map((asc) => localsApi.getLocalById(asc.local_id)),
@@ -231,7 +238,7 @@ function ServiceView({ id }: { id: string }) {
     } else {
       setLocalesSeleccionados([]);
     }
-  }, [ser, asociacionesProfesionales, asociacionesLocales]);
+  }, [asociacionesLocales]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -423,7 +430,9 @@ function ServiceView({ id }: { id: string }) {
                     type="radio"
                     name="is_virtual"
                     value="Sí"
-                    checked={isVirtual === 'Sí'}
+                    checked={
+                      isEditing ? isVirtual === 'Sí' : ser.is_virtual === true
+                    }
                     onChange={(e) => setIsVirtual(e.target.value)}
                     disabled={!isEditing}
                     className="form-radio"
@@ -435,7 +444,9 @@ function ServiceView({ id }: { id: string }) {
                     type="radio"
                     name="is_virtual"
                     value="No"
-                    checked={isVirtual === 'No'}
+                    checked={
+                      isEditing ? isVirtual === 'No' : ser.is_virtual === false
+                    }
                     onChange={(e) => setIsVirtual(e.target.value)}
                     disabled={!isEditing}
                     className="form-radio"
@@ -517,6 +528,7 @@ function ServiceView({ id }: { id: string }) {
                 setIsEditConfirmOpen(true);
               } else {
                 setIsEditing(true);
+                setIsVirtual(ser.is_virtual ? 'Sí' : 'No');
               }
             }}
           >
@@ -536,8 +548,10 @@ function ServiceView({ id }: { id: string }) {
                   localStorage.setItem('modoAgregarProfesional', 'editar');
                   localStorage.setItem('currentService', id);
                   localStorage.setItem(
-                    'profesionalesSeleccionados',
-                    JSON.stringify(profesionalesSeleccionados),
+                    'profesionalesAsociados',
+                    JSON.stringify(
+                      profesionalesSeleccionados.map((p) => p.id),
+                    ),
                   );
                   navigate({
                     to: '/servicios/agregar-profesionales',
@@ -565,8 +579,8 @@ function ServiceView({ id }: { id: string }) {
                   localStorage.setItem('modoAgregarLocal', 'editar');
                   localStorage.setItem('currentService', id);
                   localStorage.setItem(
-                    'localesSeleccionados',
-                    JSON.stringify(localesSeleccionados),
+                    'localesAsociados',
+                    JSON.stringify(localesSeleccionados.map((l) => l.id)),
                   );
                   navigate({ to: '/servicios/agregar-locales' });
                 }}

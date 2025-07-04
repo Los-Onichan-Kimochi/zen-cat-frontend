@@ -11,7 +11,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { serviceLocalApi } from '@/api/services/service_locals';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
@@ -56,6 +56,7 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
+  const queryClient = useQueryClient();
   const {
     data: localsData,
     isLoading: isLoadingLocals,
@@ -66,6 +67,24 @@ function ProfesionalesComponent() {
   });
 
   const navigate = useNavigate();
+  const serviceId = localStorage.getItem('currentService');
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: serviceLocalApi.bulkCreateServiceLocals,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['service-locals', serviceId],
+      });
+      navigate({ to: '/servicios/servicio-ver' });
+    },
+    onError: (error: any) => {
+      console.error('Error al asociar locales:', error);
+      alert(
+        `Error al asociar locales: ${error.message || 'Error desconocido'}`,
+      );
+      navigate({ to: '/servicios/servicio-ver' });
+    },
+  });
 
   const isLoadingCounts = isLoadingLocals;
   const modo = localStorage.getItem('modoAgregarLocal');
@@ -243,35 +262,35 @@ function ProfesionalesComponent() {
             </Button>
             <Button
               type="button"
-              disabled={isLoadingLocals || selectedLocals.length === 0}
-              onClick={async () => {
+              disabled={
+                isLoadingLocals ||
+                selectedLocals.length === 0 ||
+                bulkCreateMutation.isPending
+              }
+              onClick={() => {
                 localStorage.removeItem('modoAgregarLocal');
                 localStorage.removeItem('localesAsociados');
                 if (modo === 'editar') {
-                  // 1. Obtener IDs ya asociados y los seleccionados
-
                   const nuevos = selectedLocals.filter(
                     (loc) => !localesAsociados.includes(loc.id),
                   );
 
-                  // 2. Llamar a la API solo con los nuevos
                   if (nuevos.length > 0) {
-                    const serviceId = localStorage.getItem('currentService'); // o como tengas el id del servicio
                     if (!serviceId) {
-                      // Puedes mostrar un toast de error o retornar
                       alert('No se encontró el ID del servicio');
                       return;
                     }
-                    await serviceLocalApi.bulkCreateServiceLocals({
+                    const payload = {
                       service_locals: nuevos.map((loc) => ({
                         service_id: serviceId,
                         local_id: loc.id,
                       })),
-                    });
+                    };
+                    bulkCreateMutation.mutate(payload);
+                  } else {
+                    navigate({ to: '/servicios/servicio-ver' });
                   }
-                  navigate({ to: '/servicios/servicio-ver' });
                 } else {
-                  // 1. Guardar los seleccionados en el localStorage
                   localStorage.setItem(
                     'localesSeleccionados',
                     JSON.stringify(selectedLocals),
@@ -281,7 +300,7 @@ function ProfesionalesComponent() {
               }}
               className="w-full sm:w-auto"
             >
-              {isLoadingLocals && (
+              {(isLoadingLocals || bulkCreateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}{' '}
               Guardar
