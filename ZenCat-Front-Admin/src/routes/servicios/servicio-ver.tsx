@@ -108,8 +108,8 @@ function ServiceView({ id }: { id: string }) {
   const [initialValues, setInitialValues] = useState({
     name: '',
     description: '',
-    isVirtual: '',
-    image: '',
+    isVirtual: false,
+    image_url: '',
   });
 
   const {
@@ -149,6 +149,7 @@ function ServiceView({ id }: { id: string }) {
       queryClient.invalidateQueries({ queryKey: ['service', id, 'withImage'] });
       queryClient.invalidateQueries({ queryKey: ['services'] }); // para la tabla principal
       setIsEditing(false);
+      setIsEditConfirmOpen(false);
     },
     onError: (error: any) => {
       toast.error('Error al Actualizar', {
@@ -198,6 +199,7 @@ function ServiceView({ id }: { id: string }) {
     if (ser) {
       setName(ser.name);
       setDescription(ser.description);
+      setIsVirtual(ser.is_virtual ? 'Sí' : 'No');
 
       if (ser.image_bytes) {
         setImagePreview(`data:image/jpeg;base64,${ser.image_bytes}`);
@@ -210,8 +212,8 @@ function ServiceView({ id }: { id: string }) {
       setInitialValues({
         name: ser.name,
         description: ser.description,
-        isVirtual: ser.is_virtual ? 'Sí' : 'No',
-        image: ser.image_url || '',
+        isVirtual: ser.is_virtual,
+        image_url: ser.image_url || '',
       });
     }
   }, [ser]);
@@ -253,11 +255,13 @@ function ServiceView({ id }: { id: string }) {
   };
 
   const handleSave = async () => {
-    const payload: UpdateServicePayload = {
-      name,
-      description,
-      is_virtual: isVirtual === 'Sí',
-    };
+    const payload: UpdateServicePayload = {};
+
+    if (name !== initialValues.name) payload.name = name;
+    if (description !== initialValues.description)
+      payload.description = description;
+    if ((isVirtual === 'Sí') !== initialValues.isVirtual)
+      payload.is_virtual = isVirtual === 'Sí';
 
     if (imageFile) {
       payload.image_url = imageFile.name;
@@ -274,6 +278,12 @@ function ServiceView({ id }: { id: string }) {
     }
     updateServiceMutation.mutate({ id: id!, data: payload });
   };
+
+  const hasChanges =
+    name !== initialValues.name ||
+    description !== initialValues.description ||
+    (isVirtual === 'Sí') !== initialValues.isVirtual ||
+    imageFile !== null;
 
   const columnsProfesionales: ColumnDef<Professional>[] = [
     {
@@ -390,7 +400,7 @@ function ServiceView({ id }: { id: string }) {
   if (!ser) return <div>No se encontró el servicio.</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 font-montserrat">
       <HeaderDescriptor
         title={isEditing ? 'EDITAR SERVICIO' : 'VER SERVICIO'}
         subtitle="SERVICIOS"
@@ -408,8 +418,7 @@ function ServiceView({ id }: { id: string }) {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                readOnly={!isEditing}
-                className={!isEditing ? 'border-none pl-1' : ''}
+                disabled={!isEditing}
               />
             </div>
             <div>
@@ -418,8 +427,7 @@ function ServiceView({ id }: { id: string }) {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                readOnly={!isEditing}
-                className={!isEditing ? 'border-none pl-1' : ''}
+                disabled={!isEditing}
               />
             </div>
             <div>
@@ -461,7 +469,7 @@ function ServiceView({ id }: { id: string }) {
           <div className="flex flex-col">
             <Label>Imagen del Servicio</Label>
             <div
-              className="mt-2 w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50 text-gray-400"
+              className="relative mt-2 w-full h-96 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50"
               onClick={() =>
                 isEditing && document.getElementById('image-upload')?.click()
               }
@@ -470,10 +478,10 @@ function ServiceView({ id }: { id: string }) {
                 <img
                   src={imagePreview}
                   alt="Vista previa"
-                  className="h-full w-full object-cover rounded-lg"
+                  className="w-full h-full object-contain rounded-lg"
                 />
               ) : (
-                <div className="text-center">
+                <div className="text-center text-gray-400">
                   <UploadCloud className="mx-auto h-12 w-12" />
                   <span>
                     {isEditing
@@ -486,7 +494,7 @@ function ServiceView({ id }: { id: string }) {
                 <input
                   id="image-upload"
                   type="file"
-                  className="hidden"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   onChange={handleImageChange}
                   accept="image/*"
                 />
@@ -496,7 +504,7 @@ function ServiceView({ id }: { id: string }) {
         </CardContent>
         <CardFooter className="flex justify-end gap-2 pt-4">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => {
               if (isEditing) {
                 // Si está editando, cancelar resetea los cambios
@@ -504,6 +512,7 @@ function ServiceView({ id }: { id: string }) {
                   setName(ser.name);
                   setDescription(ser.description);
                   setIsVirtual(ser.is_virtual ? 'Sí' : 'No');
+                  setImageFile(null);
                   if (ser.image_bytes) {
                     setImagePreview(
                       `data:image/jpeg;base64,${ser.image_bytes}`,
@@ -525,7 +534,11 @@ function ServiceView({ id }: { id: string }) {
           <Button
             onClick={() => {
               if (isEditing) {
-                setIsEditConfirmOpen(true);
+                if (hasChanges) {
+                  setIsEditConfirmOpen(true);
+                } else {
+                  setIsEditing(false); // No hay cambios, solo salir del modo edición
+                }
               } else {
                 setIsEditing(true);
                 setIsVirtual(ser.is_virtual ? 'Sí' : 'No');

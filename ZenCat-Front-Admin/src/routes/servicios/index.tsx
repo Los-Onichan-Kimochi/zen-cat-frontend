@@ -383,13 +383,14 @@ function ServiciosComponent() {
               };
               await servicesApi.createService(payload);
             }
-
             queryClient.invalidateQueries({ queryKey: ['services'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
+            return true;
           } catch (error) {
             console.error(error);
             toast.error('Error durante la carga masiva de servicios');
+            return false;
           }
         }}
       />
