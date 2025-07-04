@@ -105,22 +105,30 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsModalOpen(false);
   };
 
-  const handleGoogleSuccess = (credentialResponse: any) => {
-    const decodedToken: any = jwtDecode(credentialResponse.credential);
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+  try {
+      const credential = credentialResponse.credential;
+      if (!credential) {
+        throw new Error("Token de Google no recibido");
+      }
+      console.log('Payload GoogleLogin:', { token: credentialResponse.credential });
+      // Llamar al backend para login/registro con Google
+      const response = await authService.googleLogin({ token: credentialResponse.credential });
 
-    // Extraer solo nombre y primer apellido
-    const fullName = decodedToken.name || '';
-    const nameParts = fullName.split(' ');
-    const shortName = nameParts[0] || fullName;
+      const user = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        imageUrl: response.user.image_url,
+        role: response.user.rol,
+        isAuthenticated: true,
+      };
 
-    login({
-      id: decodedToken.sub,
-      name: shortName,
-      email: decodedToken.email,
-      imageUrl: decodedToken.picture,
-    });
-
-    navigate({ to: '/' });
+      login(user); // desde tu AuthContext
+      navigate({ to: "/" });
+    } catch (error) {
+      console.error("Error en login con Google:", error);
+    }
   };
 
   return (

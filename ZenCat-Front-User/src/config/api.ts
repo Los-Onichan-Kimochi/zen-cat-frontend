@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh/',
     LOGOUT: '/auth/logout/',
     ME: '/me/',
+    GOOGLE_LOGIN: '/login/google/',
   },
 
   // Community endpoints
@@ -80,6 +81,10 @@ export const API_ENDPOINTS = {
     BASE: '/reservation/',
     BY_ID: (id: string) => `/reservation/${id}/`,
     BULK_DELETE: '/reservation/bulk-delete/',
+  },
+  // Contact endpoint
+  CONTACT: {
+    SEND: '/contact',
   },
 
   // Onboarding endpoints
