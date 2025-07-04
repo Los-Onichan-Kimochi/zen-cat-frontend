@@ -6,18 +6,17 @@ import {
 import { ReservaServiciosRoute } from '@/layouts/reservation-layout';
 import { ServiceCarousel } from '@/components/ui/reservation/service-carousel';
 import { Button } from '@/components/ui/button';
-//import gimnasioImage from '../../images/Carrousel/image 148(1).png';
-//import yogaImage from '../../images/Carrousel/image 150(1).png';
-//import funcionalImage from '../../images/Carrousel/image 151(2).png';
+import { Select, SelectItem } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
 import { Service } from '@/types/service';
 import { CommunityService } from '@/types/community-service';
 import { useReservation } from '@/context/reservation-context';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export const Route = createFileRoute(ReservaServiciosRoute)({
   component: ServiceStepComponent,
@@ -38,6 +37,12 @@ function ServiceStepComponent() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/reserva/servicios' });
   const { reservationData, updateReservation } = useReservation();
+  
+  // Estados para búsqueda, ordenamiento y paginación
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerPage] = useState(3);
 
   const selected = search.servicio ?? null;
 
@@ -107,7 +112,7 @@ function ServiceStepComponent() {
   });
 
   // Filtrar servicios que pertenecen a la comunidad usando useMemo para optimizar
-  const services: ServiceInfo[] = useMemo(() => {
+  const allServices: ServiceInfo[] = useMemo(() => {
     if (!servicesData.length || !communityServicesData.length) return [];
 
     const filtered = servicesData
@@ -125,17 +130,53 @@ function ServiceStepComponent() {
       })
       .filter((s): s is ServiceInfo => s !== null);
 
-    // Debug: Log para verificar los datos (removemos en producción)
-    console.log('Community ID:', communityId);
-    console.log('Filtered Services count:', filtered.length);
-
     return filtered;
   }, [servicesData, communityServicesData, communityId]);
 
+  // Filtrar y ordenar servicios
+  const filteredAndSortedServices = useMemo(() => {
+    let filtered = [...allServices];
+
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter((service) =>
+        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Aplicar ordenamiento
+    if (sortBy) {
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'a-z':
+            return a.title.localeCompare(b.title);
+          case 'z-a':
+            return b.title.localeCompare(a.title);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [allServices, searchTerm, sortBy]);
+
+  // Paginación
+  const totalPages = Math.ceil(filteredAndSortedServices.length / itemsPerPage);
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentServices = filteredAndSortedServices.slice(startIndex, endIndex);
+
+  // Reset página cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, sortBy]);
+
   // Actualizar el contexto cuando se selecciona un servicio
   useEffect(() => {
-    if (selected && services.length > 0) {
-      const selectedService = services.find((s) => s.title === selected);
+    if (selected && allServices.length > 0) {
+      const selectedService = allServices.find((s) => s.title === selected);
       if (selectedService) {
         updateReservation({
           service: {
@@ -147,7 +188,7 @@ function ServiceStepComponent() {
         });
       }
     }
-  }, [selected, services.length, updateReservation]); // updateReservation ahora es stable gracias a useCallback
+  }, [selected, allServices.length, updateReservation]);
 
   if (isLoadingCommunityServices || isLoadingServices || !communityId) {
     return (
@@ -178,44 +219,63 @@ function ServiceStepComponent() {
   return (
     <div>
       <div className="border p-6 rounded-md min-h-[430px] w-full">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col gap-6">
-            {/* Título */}
-            <h3 className="text-xl font-semibold text-center">
-              ¡Busca el servicio que más te guste!
-            </h3>
+            {/* Título mejorado */}
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                ¡Busca el servicio que más te guste!
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Explora nuestra variedad de servicios y encuentra el perfecto para ti
+              </p>
+            </div>
 
             {/* Barra de búsqueda y ordenamiento */}
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              <input
-                type="text"
-                placeholder="Buscar servicio ..."
-                className="w-full md:w-1/2 border
-                 border-gray-300 rounded-md px-4 py-2"
-              />
-              <select
-                className="w-full md:w-1/4 border
-                 border-gray-300 rounded-md px-4 py-2"
-              >
-                <option>Ordenar por</option>
-                <option value="a-z">A-Z</option>
-                <option value="z-a">Z-A</option>
-              </select>
+            <div className="flex flex-col md:flex-row justify-center gap-4">
+              <div className="relative w-full md:w-1/2">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Buscar servicio..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="w-full md:w-1/4">
+                <Select
+                  value={sortBy}
+                  onValueChange={setSortBy}
+                  placeholder="Ordenar por"
+                >
+                  <SelectItem value="">Sin ordenar</SelectItem>
+                  <SelectItem value="a-z">A-Z</SelectItem>
+                  <SelectItem value="z-a">Z-A</SelectItem>
+                </Select>
+              </div>
             </div>
 
-            <div className="text-center text-sm text-gray-600">
-              Resultados: {services.length} servicios
+            {/* Contador de resultados */}
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Resultados: {filteredAndSortedServices.length} servicios
+                {searchTerm && ` encontrados para "${searchTerm}"`}
+              </p>
             </div>
 
-            {/* Carousel */}
+            {/* ServiceCarousel con paginación integrada */}
             <ServiceCarousel
-              services={services.map((s) => ({
+              services={currentServices.map((s) => ({
                 title: s.title,
                 description: s.description,
                 imageUrl: s.imageUrl,
               }))}
               selected={selected}
               onSelect={handleSelect}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
           </div>
         </div>
