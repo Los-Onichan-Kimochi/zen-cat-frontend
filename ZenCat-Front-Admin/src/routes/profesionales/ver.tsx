@@ -2,7 +2,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { professionalsApi } from '@/api/professionals/professionals';
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import {
@@ -27,12 +27,37 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/context/ToastContext';
+import {
+  Professional,
+  UpdateProfessionalPayload,
+} from '@/types/professional';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/profesionales/ver')({
-  component: SeeProfessionalPageComponent,
+  component: ProfessionalPage,
 });
 
-export function SeeProfessionalPageComponent() {
+function ProfessionalPage() {
+  const navigate = useNavigate();
+  const id =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('currentProfessional')
+      : null;
+
+  useEffect(() => {
+    if (!id) {
+      navigate({ to: '/profesionales' });
+    }
+  }, [id, navigate]);
+
+  if (!id) {
+    return null;
+  }
+
+  return <ProfessionalDetail id={id} />;
+}
+
+function ProfessionalDetail({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -54,33 +79,44 @@ export function SeeProfessionalPageComponent() {
   const [specialty, setSpecialty] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-
-  const id =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('currentProfessional')
-      : null;
-
-  if (!id) {
-    navigate({ to: '/profesionales' });
-    return null;
-  }
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     data: prof,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['professional', id],
-    queryFn: () => professionalsApi.getProfessionalById(id!),
+    queryKey: ['professional', id, 'withImage'],
+    queryFn: () => professionalsApi.getProfessionalWithImage(id),
   });
 
+  const imagePreviewUrl = useMemo(() => {
+    if (imagePreview) {
+      return imagePreview;
+    }
+    if (prof && prof.image_bytes) {
+      return `data:image/jpeg;base64,${prof.image_bytes}`;
+    }
+    return null;
+  }, [prof, imagePreview]);
+
   const updateProfessionalMutation = useMutation({
-    mutationFn: (data: any) => professionalsApi.updateProfessional(id!, data),
+    mutationFn: async (data: UpdateProfessionalPayload) => {
+      const payload = data;
+      if (imageFile) {
+        payload.image_url = imageFile.name;
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      }
+      return professionalsApi.updateProfessional(id, payload);
+    },
     onSuccess: () => {
       toast.success('Profesional Actualizado', {
         description: 'El profesional ha sido actualizado exitosamente.',
       });
       queryClient.invalidateQueries({ queryKey: ['professional', id] });
+      queryClient.invalidateQueries({ queryKey: ['professionals'] });
       setIsEditing(false);
       setIsEditConfirmOpen(false);
     },
@@ -110,6 +146,18 @@ export function SeeProfessionalPageComponent() {
     }
   }, [prof, initialValues.name]);
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -117,9 +165,18 @@ export function SeeProfessionalPageComponent() {
       </div>
     );
   }
-  if (error || !prof) {
-    navigate({ to: '/profesionales' });
-    return null;
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-500 mb-4">
+          Error al cargar el profesional. Es posible que ya no exista.
+        </p>
+        <Button onClick={() => navigate({ to: '/profesionales' })}>
+          Volver a la lista
+        </Button>
+      </div>
+    );
   }
 
   const hasChanges =
@@ -200,12 +257,36 @@ export function SeeProfessionalPageComponent() {
                 />
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col space-y-2">
               <Label htmlFor="profileImageFile" className="mb-2 self-start">
                 Foto de perfil
               </Label>
-              <div className="w-full h-100 border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50 mb-4">
-                <UploadCloud size={48} className="text-gray-400" />
+              <div className="relative w-full flex-grow border-2 border-dashed rounded-md flex items-center justify-center bg-gray-50">
+                {imagePreviewUrl ? (
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Vista previa del profesional"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-center text-gray-400">
+                    <UploadCloud size={48} className="mx-auto" />
+                    <p>
+                      {isEditing
+                        ? 'Arrastre o seleccione una imagen'
+                        : 'No hay imagen disponible'}
+                    </p>
+                  </div>
+                )}
+                {isEditing && (
+                  <Input
+                    id="imageFile"
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
             </div>
           </CardContent>
@@ -221,8 +302,20 @@ export function SeeProfessionalPageComponent() {
               onClick={() => {
                 if (!isEditing) {
                   setIsEditing(true);
-                } else if (hasChanges) {
-                  setIsEditConfirmOpen(true);
+                } else if (hasChanges || imageFile) {
+                  const payload: UpdateProfessionalPayload = {};
+                  if (name !== initialValues.name) payload.name = name;
+                  if (firstLast !== initialValues.first_last_name)
+                    payload.first_last_name = firstLast;
+                  if (secondLast !== initialValues.second_last_name)
+                    payload.second_last_name = secondLast;
+                  if (specialty !== initialValues.specialty)
+                    payload.specialty = specialty;
+                  if (email !== initialValues.email) payload.email = email;
+                  if (phone !== initialValues.phone_number)
+                    payload.phone_number = phone;
+
+                  updateProfessionalMutation.mutate(payload);
                 } else {
                   setIsEditing(false);
                 }
@@ -269,10 +362,11 @@ export function SeeProfessionalPageComponent() {
                 }}
                 disabled={updateProfessionalMutation.isPending}
               >
-                {updateProfessionalMutation.isPending && (
+                {updateProfessionalMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  'Confirmar'
                 )}
-                Confirmar
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>

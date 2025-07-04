@@ -21,6 +21,7 @@ export interface Professional {
   phone_number: string;
   type: string; // Este campo usará ProfessionalType para la UI, pero se envía como string
   image_url: string;
+  image_bytes?: string;
 }
 
 // Tipos para los payloads de creación y actualización
@@ -33,6 +34,7 @@ export interface CreateProfessionalPayload {
   phone_number: string;
   type: string; // Debería ser un valor de ProfessionalType
   image_url: string;
+  image_bytes?: string;
 }
 
 export type UpdateProfessionalPayload = Partial<CreateProfessionalPayload>;
@@ -40,4 +42,12 @@ export type UpdateProfessionalPayload = Partial<CreateProfessionalPayload>;
 //carga masiva;BulkCreateCommunityPayload
 export interface BulkCreateProfessionalPayload {
   professionals: CreateProfessionalPayload[];
+}
+
+export interface BulkDeleteProfessionalPayload {
+  professionals: string[]; // array of professional IDs
+}
+
+export interface ProfessionalWithImage extends Professional {
+  image_bytes?: string;
 }
