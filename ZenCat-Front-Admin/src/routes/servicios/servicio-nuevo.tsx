@@ -27,6 +27,7 @@ import { CreateServicePayload } from '@/types/service';
 import { servicesApi } from '@/api/services/services';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
 import { serviceLocalApi } from '@/api/services/service_locals';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 import {
   ColumnDef,
@@ -165,20 +166,26 @@ function AddServicePageComponent() {
   }, []);
 
   const onSubmit = async (data: ServiceFormData) => {
-    const imageUrl = 'https://via.placeholder.com/150';
-    if (imageFile) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.info('Imagen Procesada', {
-        description: 'Subida de imagen simulada completada.',
-      });
-    }
-
     const payload: CreateServicePayload = {
       name: data.name,
       is_virtual: data.is_virtual === 'true',
       description: data.description,
-      image_url: imageUrl,
+      image_url: '', // Se llenará si hay imagen
     };
+
+    if (imageFile) {
+      payload.image_url = imageFile.name;
+      try {
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      } catch (error) {
+        toast.error('Error al Procesar Imagen', {
+          description:
+            'No se pudo convertir la imagen. Por favor, intente con otra.',
+        });
+        return;
+      }
+    }
 
     try {
       const newService = await servicesApi.createService(payload);

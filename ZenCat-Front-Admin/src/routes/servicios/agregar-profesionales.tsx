@@ -11,7 +11,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '@/api/services/services';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { serviceProfessionalApi } from '@/api/services/service_professionals';
@@ -55,6 +55,7 @@ function ProfesionalesComponent() {
     pageSize: 10,
   });
 
+  const queryClient = useQueryClient();
   const {
     data: professionalsData,
     isLoading: isLoadingProfessionals,
@@ -65,6 +66,24 @@ function ProfesionalesComponent() {
   });
 
   const navigate = useNavigate();
+  const serviceId = localStorage.getItem('currentService');
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: serviceProfessionalApi.bulkCreateServiceProfessionals,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['service-professionals', serviceId],
+      });
+      navigate({ to: '/servicios/servicio-ver' });
+    },
+    onError: (error: any) => {
+      console.error('Error al asociar profesionales:', error);
+      alert(
+        `Error al asociar profesionales: ${error.message || 'Error desconocido'}`,
+      );
+      navigate({ to: '/servicios/servicio-ver' });
+    },
+  });
 
   const isLoadingCounts = isLoadingProfessionals;
   const modo = localStorage.getItem('modoAgregarProfesional');
@@ -211,7 +230,9 @@ function ProfesionalesComponent() {
             showSortButton={true}
             showFilterButton={true}
             onFilterClick={() => {}}
-            enableDeleteButton={false}
+            isBulkDeleting={false}
+            onBulkDelete={() => {}}
+            showBulkDeleteButton={false}
           />
           <div className="flex-1 overflow-hidden rounded-md border">
             <DataTable table={table} columns={columns} />
@@ -237,38 +258,34 @@ function ProfesionalesComponent() {
             <Button
               type="button"
               disabled={
-                isLoadingProfessionals || selectedProfessionals.length === 0
+                isLoadingProfessionals ||
+                selectedProfessionals.length === 0 ||
+                bulkCreateMutation.isPending
               }
-              onClick={async () => {
+              onClick={() => {
                 localStorage.removeItem('modoAgregarProfesional');
                 localStorage.removeItem('profesionalesAsociados');
                 if (modo === 'editar') {
-                  // 1. Obtener IDs ya asociados y los seleccionados
-
                   const nuevos = selectedProfessionals.filter(
                     (prof) => !profesionalesAsociados.includes(prof.id),
                   );
 
-                  // 2. Llamar a la API solo con los nuevos
                   if (nuevos.length > 0) {
-                    const serviceId = localStorage.getItem('currentService'); // o como tengas el id del servicio
                     if (!serviceId) {
-                      // Puedes mostrar un toast de error o retornar
                       alert('No se encontró el ID del servicio');
                       return;
                     }
-                    await serviceProfessionalApi.bulkCreateServiceProfessionals(
-                      {
-                        service_professionals: nuevos.map((prof) => ({
-                          service_id: serviceId,
-                          professional_id: prof.id,
-                        })),
-                      },
-                    );
+                    const payload = {
+                      service_professionals: nuevos.map((prof) => ({
+                        service_id: serviceId,
+                        professional_id: prof.id,
+                      })),
+                    };
+                    bulkCreateMutation.mutate(payload);
+                  } else {
+                    navigate({ to: '/servicios/servicio-ver' });
                   }
-                  navigate({ to: '/servicios/servicio-ver' });
                 } else {
-                  // 1. Guardar los seleccionados en el localStorage
                   localStorage.setItem(
                     'profesionalesSeleccionados',
                     JSON.stringify(selectedProfessionals),
@@ -278,7 +295,7 @@ function ProfesionalesComponent() {
               }}
               className="w-full sm:w-auto"
             >
-              {isLoadingProfessionals && (
+              {(isLoadingProfessionals || bulkCreateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}{' '}
               Guardar

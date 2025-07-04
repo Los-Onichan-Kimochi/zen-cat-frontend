@@ -3,6 +3,7 @@ import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 import { Community } from '@/components/communities/CommunityCard';
 import { MembershipState } from '@/types/membership';
+import { UpdateUserRequest, User } from '@/types/user';
 
 // ========================
 // TIPOS DE DATOS
@@ -83,6 +84,33 @@ export const userCommunitiesService = {
     );
     return response;
   },
+
+  /**
+   * Update user profile
+   */
+  async updateUser(
+    userId: string,
+    userData: Partial<UpdateUserRequest>
+  ): Promise<User> {
+    try {
+      // Ensure we include the updated_by field
+      const dataWithUpdatedBy = {
+        ...userData,
+        updated_by: userId, // Always include who's making the update
+      };
+
+      const response = await apiClient.patch<User>(
+        API_ENDPOINTS.USERS.BY_ID(userId),
+        dataWithUpdatedBy
+      );
+
+      return response;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+  
 };
 
 // ========================

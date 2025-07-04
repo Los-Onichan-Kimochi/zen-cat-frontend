@@ -17,6 +17,7 @@ import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as SignupRouteRouteImport } from './routes/signup/route'
 import { Route as ReservaRouteRouteImport } from './routes/reserva/route'
+import { Route as ProfileRouteRouteImport } from './routes/profile/route'
 import { Route as PinRouteRouteImport } from './routes/pin/route'
 import { Route as LoginRouteRouteImport } from './routes/login/route'
 import { Route as HomeRouteRouteImport } from './routes/home/route'
@@ -73,6 +74,11 @@ const SignupRouteRoute = SignupRouteRouteImport.update({
 const ReservaRouteRoute = ReservaRouteRouteImport.update({
   id: '/reserva',
   path: '/reserva',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRouteRoute = ProfileRouteRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PinRouteRoute = PinRouteRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/pin': typeof PinRouteRoute
+  '/profile': typeof ProfileRouteRoute
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/pin': typeof PinRouteRoute
+  '/profile': typeof ProfileRouteRoute
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRouteRoute
   '/login': typeof LoginRouteRoute
   '/pin': typeof PinRouteRoute
+  '/profile': typeof ProfileRouteRoute
   '/reserva': typeof ReservaRouteRouteWithChildren
   '/signup': typeof SignupRouteRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -253,6 +262,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/login'
     | '/pin'
+    | '/profile'
     | '/reserva'
     | '/signup'
     | '/como-funciona'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/login'
     | '/pin'
+    | '/profile'
     | '/signup'
     | '/como-funciona'
     | '/contacto'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/login'
     | '/pin'
+    | '/profile'
     | '/reserva'
     | '/signup'
     | '/como-funciona'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   HomeRouteRoute: typeof HomeRouteRoute
   LoginRouteRoute: typeof LoginRouteRoute
   PinRouteRoute: typeof PinRouteRoute
+  ProfileRouteRoute: typeof ProfileRouteRoute
   ReservaRouteRoute: typeof ReservaRouteRouteWithChildren
   SignupRouteRoute: typeof SignupRouteRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/reserva'
       fullPath: '/reserva'
       preLoaderRoute: typeof ReservaRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pin': {
@@ -567,6 +587,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRouteRoute: HomeRouteRoute,
   LoginRouteRoute: LoginRouteRoute,
   PinRouteRoute: PinRouteRoute,
+  ProfileRouteRoute: ProfileRouteRoute,
   ReservaRouteRoute: ReservaRouteRouteWithChildren,
   SignupRouteRoute: SignupRouteRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
