@@ -339,12 +339,24 @@ function SessionDetailComponent() {
     },
     onSuccess: (data) => {
       console.log('Update successful. Response:', data);
+      
+      // Invalidate both the specific session and the sessions list
       queryClient.invalidateQueries({ queryKey: ['session', id] });
+      queryClient.invalidateQueries({ queryKey: ['sessions'] }); // Invalidate the sessions list to update it in real-time
+      
       refetch(); // Refetch the session data to ensure we have the latest
       setIsEditing(false);
-      toast.success('Sesión actualizada', {
-        description: 'Los cambios han sido guardados correctamente.',
-      });
+      
+      // Show special message if the session was cancelled
+      if (formData.state === SessionState.CANCELLED && session?.state !== SessionState.CANCELLED) {
+        toast.success('Sesión cancelada', {
+          description: 'La sesión ha sido cancelada y todas las reservas asociadas han sido anuladas automáticamente.',
+        });
+      } else {
+        toast.success('Sesión actualizada', {
+          description: 'Los cambios han sido guardados correctamente.',
+        });
+      }
     },
     onError: (error: any) => {
       console.error('Error updating session:', error);
@@ -388,6 +400,13 @@ function SessionDetailComponent() {
         description: 'No se puede cambiar la comunidad o servicio en una sesión existente.',
       });
       return;
+    }
+    
+    // Add warning if the session status is being changed to CANCELLED
+    if (name === 'state' && value === SessionState.CANCELLED) {
+      toast.warning('Advertencia: Cancelación de sesión', {
+        description: 'Al cambiar el estado a CANCELADO, todas las reservas asociadas a esta sesión serán automáticamente anuladas.',
+      });
     }
     
     setFormData({
@@ -520,6 +539,18 @@ function SessionDetailComponent() {
     // Validate form data
     if (!validateForm()) {
       return;
+    }
+    
+    // Add a second confirmation when changing to CANCELLED state
+    if (formData.state === SessionState.CANCELLED && session?.state !== SessionState.CANCELLED) {
+      // Use the browser's confirm dialog for a simple confirmation
+      const confirmCancel = window.confirm(
+        "IMPORTANTE: Al cancelar esta sesión, todas las reservas asociadas serán anuladas automáticamente.\n\n¿Estás seguro de que deseas continuar?"
+      );
+      
+      if (!confirmCancel) {
+        return;
+      }
     }
 
     // Creamos una copia de formData para evitar mutación directa
@@ -915,7 +946,8 @@ function SessionDetailComponent() {
                           <SelectItem value={SessionState.COMPLETED}>
                             Completada
                           </SelectItem>
-                          <SelectItem value={SessionState.CANCELLED}>
+                          <SelectItem value={SessionState.CANCELLED} className="flex items-center text-red-600">
+                            <AlertTriangle className="mr-2 h-4 w-4" />
                             Cancelada
                           </SelectItem>
                           <SelectItem value={SessionState.RESCHEDULED}>
