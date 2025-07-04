@@ -153,7 +153,7 @@ export function BulkCreateDialog({
           if (value instanceof Date) {
             return value.toTimeString().slice(0, 5); // HH:MM
           } else if (typeof value === 'number') {
-            // Excel time as fraction of 1 day
+            // Excel almacena horas como fracción de 1 día: 0.5 = 12:00
             const totalMinutes = Math.round(value * 24 * 60);
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
@@ -161,10 +161,30 @@ export function BulkCreateDialog({
               .toString()
               .padStart(2, '0')}`;
           } else if (typeof value === 'string') {
-            return value.slice(0, 5); // recorta a HH:MM
+            // 1. Intenta parsear formato con AM/PM (como “7:00 a. m.”)
+            const ampmMatch = value.match(/^(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)$/i);
+            if (ampmMatch) {
+              let [, hourStr, minStr, period] = ampmMatch;
+              let hour = parseInt(hourStr, 10);
+              const minute = parseInt(minStr, 10);
+              if (/p\.?m\.?/i.test(period) && hour < 12) hour += 12;
+              if (/a\.?m\.?/i.test(period) && hour === 12) hour = 0;
+              return `${hour.toString().padStart(2, '0')}:${minute
+                .toString()
+                .padStart(2, '0')}`;
+            }
+
+            // 2. Si ya está en HH:mm directamente
+            const basicMatch = value.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+            if (basicMatch) return value.slice(0, 5);
+
+            return value.slice(0, 5); // Fallback defensivo
           }
+
           return '';
         }
+
+
 
         function normalizeDate(input: any): string {
           if (input instanceof Date) {
