@@ -113,9 +113,12 @@ export function transformMembershipsToFrontend(
     return [];
   }
 
-  return memberships.map((membership) => {
-    return {
-      id: membership.community.id,
+  const communityMap = new Map<string, Community>();
+
+  memberships.forEach((membership) => {
+    const communityId = membership.community.id;
+    const transformedCommunity = {
+      id: communityId,
       name: membership.community.name,
       image: membership.community.image_url,
       type: membership.community.purpose,
@@ -127,7 +130,17 @@ export function transformMembershipsToFrontend(
       fee: membership.plan.fee,
       reservationLimit: membership.plan.reservation_limit,
     };
+
+    // Prioritize active memberships if a community is already in the map
+    if (
+      !communityMap.has(communityId) &&
+      transformedCommunity.status === 'active'
+    ) {
+      communityMap.set(communityId, transformedCommunity);
+    }
   });
+
+  return Array.from(communityMap.values());
 }
 
 /**

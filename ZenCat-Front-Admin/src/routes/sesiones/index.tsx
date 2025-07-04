@@ -85,10 +85,15 @@ function SesionesComponent() {
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  //
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   //adicion -------------------------------------------------------------
+  // adaprtar para limpiar seleccion
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<
-    string | null
-  >(null);
+    string | undefined
+  >();
+
   const { data: professionals = [] } = useQuery<Professional[]>({
     queryKey: ['professionals'],
     queryFn: professionalsApi.getProfessionals,
@@ -321,8 +326,20 @@ function SesionesComponent() {
       <>
         <BulkCreateDialog
           open={showUploadDialog}
-          onOpenChange={setShowUploadDialog}
+          onOpenChange={(open) => {
+            setShowUploadDialog(open);
+            if (!open) {
+              setSelectedProfessionalId(undefined); // Limpia profesional al cerrar
+            }
+          }}
+          canContinue={() => {
+            if (!selectedProfessionalId) {
+              return 'Selecciona un profesional antes de cargar.';
+            }
+            return true;
+          }}
           title="Carga Masiva de Sesiones"
+          module="sessions" // Activa validaciones especiales
           expectedExcelColumns={[
             'Título',
             'Fecha',
@@ -339,10 +356,17 @@ function SesionesComponent() {
             'capacity',
             'session_link',
           ]}
-          onParsedData={async (data) => {
+          existingSessions={
+            sessionsData?.filter(
+              (s) => s.professional_id === selectedProfessionalId,
+            ) || []
+          } // Esta es la línea nueva
+          onParsedData={async (data, setError) => {
             if (!selectedProfessionalId) {
-              toast.error('Selecciona un profesional antes de cargar.');
-              return;
+              //setError('Selecciona un profesional antes de cargar.');
+              setError?.('Selecciona un profesional antes de cargar.');
+              //toast.error
+              return false; // <- Para que bulk-dialog sepa que hubo error
             }
 
             try {
@@ -377,13 +401,23 @@ function SesionesComponent() {
                     `Tipo de dato de fecha no soportado: ${rawDate}`,
                   );
                 }
-
-                const startTimeStr = String(item.start_time)
-                  .padStart(5, '0')
-                  .trim();
-                const endTimeStr = String(item.end_time)
-                  .padStart(5, '0')
-                  .trim();
+                function normalizeTime(value: any): string {
+                  if (value instanceof Date) {
+                    return value.toTimeString().slice(0, 5); // "HH:MM"
+                  } else if (typeof value === 'number') {
+                    const totalMinutes = Math.round(value * 24 * 60);
+                    const hours = Math.floor(totalMinutes / 60);
+                    const minutes = totalMinutes % 60;
+                    return `${hours.toString().padStart(2, '0')}:${minutes
+                      .toString()
+                      .padStart(2, '0')}`;
+                  } else if (typeof value === 'string') {
+                    return value.slice(0, 5);
+                  }
+                  return '';
+                }
+                const startTimeStr = normalizeTime(item.start_time);
+                const endTimeStr = normalizeTime(item.end_time);
 
                 if (
                   !/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTimeStr) ||
@@ -410,11 +444,24 @@ function SesionesComponent() {
               await sessionsApi.bulkCreateSessions({ sessions });
               toast.success('Sesiones creadas correctamente');
               queryClient.invalidateQueries({ queryKey: ['sessions'] });
+              //setShowUploadDialog(false); // cerrar solo si todo está bien OJOOOOOOOOOOOOOOOO
+              //onOpenChange(false); // solo cerrar si todo va bien
+              //   El modal se cerrará automáticamente desde BulkCreateDialog
+              setShowUploadDialog(false); // SOLO acá debes cerrar SI ESTA TODO CORRECTO
+              return true;
             } catch (err: any) {
-              console.error('Detalles del error bulk:', err);
-              toast.error('Error al crear sesiones', {
-                description: err.message || 'Error bulk creating sessions',
-              });
+              //console.error('Detalles del error bulk:', err);
+              //toast.error('Error al crear sesiones', {
+              //description: err.message || 'Error bulk creating sessions',
+              //});
+              //setError(err.message || 'Ocurrió un error inesperado al crear las sesiones.');
+              //comentar:
+              //const mensaje =
+              //err?.response?.data?.message || err.message || 'Ocurrió un error inesperado al crear las sesiones.';
+
+              //setError?.(error ? `${error}\n${mensaje}` : mensaje);
+              // NO CIERRES EL MODAL
+              return false;
             }
           }}
         >

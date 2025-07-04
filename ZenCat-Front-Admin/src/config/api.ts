@@ -103,6 +103,7 @@ export const API_ENDPOINTS = {
       `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
+    BY_ID: (id: string) => `/community-service/id/${id}/`,
   },
 
   // Community-Plan association endpoints
@@ -119,6 +120,12 @@ export const API_ENDPOINTS = {
     SERVICES: '/reports/services',
     COMMUNITIES: '/reports/communities',
     // Aquí podemos agregar mas si da el tiempo :c
+  },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
   },
 } as const;
 

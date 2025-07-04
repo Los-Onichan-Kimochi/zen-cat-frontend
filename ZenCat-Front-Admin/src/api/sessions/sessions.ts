@@ -100,6 +100,7 @@ export const sessionsApi = {
       session_link: payload.session_link,
       professional_id: payload.professional_id,
       local_id: payload.local_id,
+      community_service_id: payload.community_service_id,
     };
 
     return apiClient.post<Session>(API_ENDPOINTS.SESSIONS.BASE, backendPayload);

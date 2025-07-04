@@ -24,6 +24,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
+import rawProvincias from '@/types/ubigeo_peru_2016_provincias.json';
+import rawDistritos from '@/types/ubigeo_peru_2016_distritos.json';
+import { Region, Provincia, Distrito } from '@/types/local';
+
+const regiones: Region[] = rawRegiones;
+const provincias: Provincia[] = rawProvincias;
+const distritos: Distrito[] = rawDistritos;
 
 export const Route = createFileRoute('/usuarios/agregar')({
   beforeLoad: async () => {
@@ -58,9 +73,10 @@ function AgregarUsuario() {
     numDoc: '',
     fechaNacimiento: '',
     genero: '',
-    ciudad: '',
-    codigoPostal: '',
+    region: '',
+    provincia: '',
     distrito: '',
+    codigoPostal: '',
     calle: '',
   });
 
@@ -71,9 +87,29 @@ function AgregarUsuario() {
     numDoc: '',
     nombres: '',
     primerApellido: '',
+    fechaNacimiento: '',
+    region: '',
+    provincia: '',
+    distrito: '',
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
+
+  // Cálculos para los dropdowns de ubigeo - usando IDs únicos
+  const selectedRegion = regiones.find((region) => region.id === form.region);
+  const selectedProvincia = provincias.find(
+    (prov) => prov.id === form.provincia,
+  );
+
+  const provinciasFiltradas = provincias.filter(
+    (prov) => prov.department_id === selectedRegion?.id,
+  );
+
+  const distritosFiltrados = distritos.filter(
+    (dist) =>
+      dist.department_id === selectedRegion?.id &&
+      dist.province_id === selectedProvincia?.id,
+  );
 
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserPayload) =>
@@ -85,9 +121,9 @@ function AgregarUsuario() {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       navigate({ to: '/usuarios' });
     },
-    onError: (error) => {
-      error('Error al crear usuario', {
-        description: error.message || 'No se pudo crear el usuario.',
+    onError: (err) => {
+      toast.error('Error al crear usuario', {
+        description: err.message || 'No se pudo crear el usuario.',
       });
     },
   });
@@ -107,6 +143,10 @@ function AgregarUsuario() {
       numDoc: '',
       nombres: '',
       primerApellido: '',
+      fechaNacimiento: '',
+      region: '',
+      provincia: '',
+      distrito: '',
     };
 
     // Validar nombres
@@ -145,6 +185,83 @@ function AgregarUsuario() {
       if (!form.numDoc.trim()) {
         newErrors.numDoc = 'El número de documento es requerido';
         valid = false;
+      } else {
+        // Validar formato según tipo
+        if (form.tipoDoc === 'DNI' && !form.numDoc.match(/^\d{8}$/)) {
+          newErrors.numDoc = 'El DNI debe tener 8 dígitos';
+          valid = false;
+        } else if (
+          form.tipoDoc === 'FOREIGNER_CARD' &&
+          !form.numDoc.match(/^\d{9}$/)
+        ) {
+          newErrors.numDoc = 'El Carnet de Extranjería debe tener 9 dígitos';
+          valid = false;
+        } else if (
+          form.tipoDoc === 'PASSPORT' &&
+          !form.numDoc.match(/^[A-Za-z0-9]{6,12}$/)
+        ) {
+          newErrors.numDoc =
+            'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
+          valid = false;
+        }
+      }
+
+      // Validación de fecha de nacimiento (obligatorio si el onboarding está habilitado)
+      if (!form.fechaNacimiento.trim()) {
+        newErrors.fechaNacimiento = 'La fecha de nacimiento es obligatoria';
+        valid = false;
+      } else {
+        const birthDate = new Date(form.fechaNacimiento);
+        if (
+          isNaN(birthDate.getTime()) ||
+          birthDate > new Date() ||
+          birthDate < new Date('1900-01-01')
+        ) {
+          newErrors.fechaNacimiento = 'Ingrese una fecha válida';
+          valid = false;
+        }
+      }
+
+      // Validaciones de ubicación geográfica
+      if (form.region && !form.provincia) {
+        newErrors.provincia = 'Seleccione una provincia';
+        valid = false;
+      }
+
+      if (form.provincia && !form.distrito) {
+        newErrors.distrito = 'Seleccione un distrito';
+        valid = false;
+      }
+
+      // Validar región
+      if (form.region && !regiones.find((r) => r.id === form.region)) {
+        newErrors.region = 'Región seleccionada no válida';
+        valid = false;
+      }
+
+      // Validar provincia
+      if (
+        form.provincia &&
+        !provincias.find(
+          (p) => p.id === form.provincia && p.department_id === form.region,
+        )
+      ) {
+        newErrors.provincia = 'Provincia seleccionada no válida';
+        valid = false;
+      }
+
+      // Validar distrito
+      if (
+        form.distrito &&
+        !distritos.find(
+          (d) =>
+            d.id === form.distrito &&
+            d.department_id === form.region &&
+            d.province_id === form.provincia,
+        )
+      ) {
+        newErrors.distrito = 'Distrito seleccionado no válido';
+        valid = false;
       }
     }
 
@@ -160,10 +277,21 @@ function AgregarUsuario() {
   };
 
   const confirmCreate = () => {
+    // Convert IDs back to names for the API
+    const regionName = form.region
+      ? regiones.find((r) => r.id === form.region)?.name || ''
+      : '';
+    const provinciaName = form.provincia
+      ? provincias.find((p) => p.id === form.provincia)?.name || ''
+      : '';
+    const distritoName = form.distrito
+      ? distritos.find((d) => d.id === form.distrito)?.name || ''
+      : '';
+
     const payload: CreateUserPayload = {
       name: `${form.nombres} ${form.primerApellido} ${form.segundoApellido}`.trim(),
       email: form.correo,
-      role: 'user',
+      rol: 'user',
       password: '123456', // Contraseña por defecto
       permissions: ['read'],
       avatar: '',
@@ -177,9 +305,10 @@ function AgregarUsuario() {
         phoneNumber: form.celular,
         birthDate: form.fechaNacimiento,
         gender: form.genero as 'MALE' | 'FEMALE' | 'OTHER',
-        city: form.ciudad,
+        region: regionName,
+        province: provinciaName,
         postalCode: form.codigoPostal,
-        district: form.distrito,
+        district: distritoName,
         address: form.calle,
       };
     }
@@ -191,7 +320,41 @@ function AgregarUsuario() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    // Clear error for the field when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  // Handlers específicos para los dropdowns de ubigeo
+  const handleRegionChange = (value: string) => {
+    setForm({
+      ...form,
+      region: value,
+      provincia: '', // Reset provincia cuando cambia región
+      distrito: '', // Reset distrito cuando cambia región
+    });
+    // Clear related errors
+    setErrors((prev) => ({ ...prev, region: '', provincia: '', distrito: '' }));
+  };
+
+  const handleProvinciaChange = (value: string) => {
+    setForm({
+      ...form,
+      provincia: value,
+      distrito: '', // Reset distrito cuando cambia provincia
+    });
+    // Clear related errors
+    setErrors((prev) => ({ ...prev, provincia: '', distrito: '' }));
+  };
+
+  const handleDistritoChange = (value: string) => {
+    setForm({ ...form, distrito: value });
+    // Clear error
+    setErrors((prev) => ({ ...prev, distrito: '' }));
   };
 
   return (
@@ -200,7 +363,7 @@ function AgregarUsuario() {
         <HeaderDescriptor title="USUARIOS" subtitle="AGREGAR USUARIO" />
         <div className="mb-4">
           <Button
-            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-neutral-100 hover:border-neutral-400 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-neutral-200 shadow-sm hover:shadow-md focus:shadow-md transition-all duration-200 ease-in-out flex items-center gap-2"
+            className="h-10 bg-white border border-neutral-300 text-black rounded-lg hover:bg-black hover:text-white hover:border-black hover:shadow-sm active:scale-95 transition-all duration-200 flex items-center gap-2"
             onClick={() => navigate({ to: '/usuarios' })}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -387,6 +550,11 @@ function AgregarUsuario() {
                     value={form.fechaNacimiento}
                     onChange={handleChange}
                   />
+                  {errors.fechaNacimiento && (
+                    <span className="text-red-500 text-sm">
+                      {errors.fechaNacimiento}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="genero" className="block font-medium mb-1">
@@ -409,16 +577,79 @@ function AgregarUsuario() {
               <div className="mb-4 font-semibold">Dirección</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="ciudad" className="block font-medium mb-1">
-                    Ciudad
+                  <label htmlFor="region" className="block font-medium mb-1">
+                    Región
                   </label>
-                  <Input
-                    id="ciudad"
-                    name="ciudad"
-                    value={form.ciudad}
-                    onChange={handleChange}
-                    placeholder="Ingrese la ciudad"
-                  />
+                  <Select
+                    value={form.region}
+                    onValueChange={handleRegionChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione una región" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regiones.map((region) => (
+                        <SelectItem key={region.id} value={region.id}>
+                          {region.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.region && (
+                    <span className="text-red-500 text-sm">
+                      {errors.region}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="provincia" className="block font-medium mb-1">
+                    Provincia
+                  </label>
+                  <Select
+                    value={form.provincia}
+                    onValueChange={handleProvinciaChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione una provincia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinciasFiltradas.map((prov) => (
+                        <SelectItem key={prov.id} value={prov.id}>
+                          {prov.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.provincia && (
+                    <span className="text-red-500 text-sm">
+                      {errors.provincia}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="distrito" className="block font-medium mb-1">
+                    Distrito
+                  </label>
+                  <Select
+                    value={form.distrito}
+                    onValueChange={handleDistritoChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione un distrito" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {distritosFiltrados.map((dist) => (
+                        <SelectItem key={dist.id} value={dist.id}>
+                          {dist.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.distrito && (
+                    <span className="text-red-500 text-sm">
+                      {errors.distrito}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label
@@ -433,18 +664,6 @@ function AgregarUsuario() {
                     value={form.codigoPostal}
                     onChange={handleChange}
                     placeholder="Ingrese el código postal"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="distrito" className="block font-medium mb-1">
-                    Distrito
-                  </label>
-                  <Input
-                    id="distrito"
-                    name="distrito"
-                    value={form.distrito}
-                    onChange={handleChange}
-                    placeholder="Seleccione un distrito"
                   />
                 </div>
                 <div>
