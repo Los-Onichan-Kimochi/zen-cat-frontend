@@ -81,4 +81,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/reservation/${id}/`,
     BULK_DELETE: '/reservation/bulk-delete/',
   },
+  // Contact endpoint
+  CONTACT: {
+    SEND: '/contact',
+  },
 } as const;
