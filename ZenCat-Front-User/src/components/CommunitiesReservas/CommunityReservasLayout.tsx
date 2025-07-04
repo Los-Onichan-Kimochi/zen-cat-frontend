@@ -10,11 +10,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown, Calendar } from 'lucide-react';
 import { ReservationsTable } from './CommunityReservationTable';
+import { ReservationDetailDialog } from './ReservationDetailDialog';
 import { Reservation, ReservationState } from '@/types/reservation'; // Importa el enum actualizado
 import { reservationsApi } from '@/api/reservations/reservations';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
+import { communityServicesApi } from '@/api/communities/community-services';
+import { servicesApi } from '@/api/services/services';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -48,6 +51,10 @@ const CommunityReservasLayout = () => {
   const [filterByDate, setFilterByDate] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
   const [filterByPlace, setFilterByPlace] = useState('');
+  
+  // Estados para el dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!communityId) {
@@ -68,29 +75,30 @@ const CommunityReservasLayout = () => {
 
         // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
         const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
-        
+        const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
         // Enriquecer las reservas con información de profesor y lugar
         const reservationsWithDetails = await Promise.all(
           response.map(async (reservation: Reservation) => {
             const session = reservation.session;
             
-            let teacherName = "";
+            let professionalName = "";
             let placeName = "";
             
-            const communityService = await communityServicesApi.getCommunityService(reservation.community_service_id);
-
+            const communityService = communityServices.find((service) => service.id === reservation.session.community_service_id);
+            const service = await servicesApi.getServiceById(communityService?.service_id as string);
+            
             // Obtener información del profesor si es necesario
-            if (session && session.professional_id && !reservation.teacher) {
+            if (session && session.professional_id && !reservation.professional) {
               try {
                 const professionalData = await professionalsApi.getProfessional(session.professional_id);
-                teacherName = professionalData.name;
+                professionalName = professionalData.name;
               } catch (error) {
                 console.warn(`No se pudo obtener información del profesor: ${error}`);
-                teacherName = session.title || `Profesor ID: ${session.professional_id}`;
+                professionalName = session.title || `Profesor ID: ${session.professional_id}`;
               }
-            } else if (reservation.teacher) {
+            } else if (reservation.professional) {
               // Si ya tenemos el nombre del profesor en la reserva, usarlo directamente
-              teacherName = reservation.teacher;
+              professionalName = reservation.professional;
             }
             
             // Obtener información del local si es necesario
@@ -109,8 +117,9 @@ const CommunityReservasLayout = () => {
             // Devolver la reserva con la información adicional
             return {
               ...reservation,
-              teacher: teacherName || reservation.teacher,
-              place: placeName || reservation.place
+              professional: professionalName || reservation.professional,
+              place: placeName || reservation.place,
+              service_name: service?.name || 'Servicio desconocido'
             };
           })
         );
@@ -139,7 +148,7 @@ const CommunityReservasLayout = () => {
         (res) =>
           res.name.toLowerCase().includes(lowerCaseSearchTerm) ||
           (res.user_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          (res.teacher?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
           (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm),
       );
     }
@@ -167,25 +176,25 @@ const CommunityReservasLayout = () => {
         const stateEnumValue = res.state;
         // Comparamos con el string que se configuró en setFilterByStatus
         if (
-          filterByStatus === 'completada' &&
+          filterByStatus === 'DONE' &&
           stateEnumValue === ReservationState.DONE
         ) {
           return true;
         }
         if (
-          filterByStatus === 'cancelada' &&
+          filterByStatus === 'CANCELLED' &&
           stateEnumValue === ReservationState.CANCELLED
         ) {
           return true;
         }
         if (
-          filterByStatus === 'confirmada' &&
+          filterByStatus === 'CONFIRMED' &&
           stateEnumValue === ReservationState.CONFIRMED
         ) {
           return true;
         }
         if (
-          filterByStatus === 'anulada' &&
+          filterByStatus === 'ANULLED' &&
           stateEnumValue === ReservationState.ANULLED
         ) {
           return true;
@@ -210,9 +219,29 @@ const CommunityReservasLayout = () => {
   ]);
 
   const handleViewReservation = (reservation: Reservation) => {
-    alert(
-      `Ver detalles de la reserva: ${reservation.name} (ID: ${reservation.id})`,
-    );
+    setSelectedReservation(reservation);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedReservation(null);
+  };
+
+  const handleCancelReservation = async (reservationId: string) => {
+    try {
+      // TODO: Implementar la llamada al endpoint para cancelar la reserva
+      console.log('Cancelando reserva:', reservationId);
+      // await reservationsApi.cancelReservation(reservationId);
+      
+      // Actualizar la lista de reservas
+      // fetchReservations();
+      
+      alert('Funcionalidad de cancelar reserva pendiente de implementar');
+    } catch (error) {
+      console.error('Error al cancelar reserva:', error);
+      alert('Error al cancelar la reserva');
+    }
   };
 
   return (
@@ -260,7 +289,9 @@ const CommunityReservasLayout = () => {
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Filtrar por fecha
+                {filterByDate === '' ? 'Filtrar por fecha' : 
+                 filterByDate === 'today' ? 'Hoy' : 
+                 filterByDate === 'week' ? 'Última semana' : 'Filtrar por fecha'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -282,7 +313,11 @@ const CommunityReservasLayout = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                Filtrar por estado
+                {filterByStatus === '' ? 'Filtrar por estado' : 
+                 filterByStatus === 'DONE' ? 'Finalizada' : 
+                 filterByStatus === 'CANCELLED' ? 'Cancelada' : 
+                 filterByStatus === 'CONFIRMED' ? 'Confirmada' : 
+                 filterByStatus === 'ANULLED' ? 'Anulada' : 'Filtrar por estado'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -290,14 +325,17 @@ const CommunityReservasLayout = () => {
               <DropdownMenuItem onClick={() => setFilterByStatus('')}>
                 Todos
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('en proceso')}>
-                En proceso
+              <DropdownMenuItem onClick={() => setFilterByStatus('CONFIRMED')}>
+                Confirmada
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('completada')}>
-                Completada
+              <DropdownMenuItem onClick={() => setFilterByStatus('DONE')}>
+                Finalizada
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('cancelada')}>
+              <DropdownMenuItem onClick={() => setFilterByStatus('CANCELLED')}>
                 Cancelada
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterByStatus('ANULLED')}>
+                Anulada
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -306,7 +344,7 @@ const CommunityReservasLayout = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                Filtrar por lugar
+                {filterByPlace === '' ? 'Filtrar por lugar' : filterByPlace}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -377,6 +415,15 @@ const CommunityReservasLayout = () => {
           </>
         )}
       </div>
+
+      {/* Dialog de detalles de reserva */}
+      <ReservationDetailDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        reservation={selectedReservation}
+        onCancelReservation={handleCancelReservation}
+        communityName={communityName || undefined}
+      />
     </div>
   );
 };

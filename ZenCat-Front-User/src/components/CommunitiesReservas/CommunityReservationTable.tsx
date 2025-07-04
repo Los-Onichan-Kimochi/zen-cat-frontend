@@ -11,7 +11,7 @@ import {
   type SortingState,
   type VisibilityState,
 } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -34,7 +34,7 @@ const getStateColor = (state: ReservationState) => {
     case ReservationState.CANCELLED:
       return 'bg-red-100 text-red-800';
     case ReservationState.CONFIRMED:
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-green-100 text-green-800';
     case ReservationState.ANULLED:
       return 'bg-gray-100 text-gray-800';
     default:
@@ -45,7 +45,7 @@ const getStateColor = (state: ReservationState) => {
 const getStateLabel = (state: ReservationState) => {
   switch (state) {
     case ReservationState.DONE:
-      return 'Completada';
+      return 'Finalizada';
     case ReservationState.CANCELLED:
       return 'Cancelada';
     case ReservationState.CONFIRMED:
@@ -57,6 +57,7 @@ const getStateLabel = (state: ReservationState) => {
   }
 };
 
+
 export function ReservationsTable({ data, onView }: ReservationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -64,10 +65,17 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
 
   const columns: ColumnDef<Reservation>[] = [
     {
-      accessorKey: 'name',
+      accessorKey: 'service_name',
       header: 'Servicio',
       cell: ({ row }) => (
-        <div className="font-medium text-center">{row.getValue('name')}</div>
+        <div className="text-sm text-center">{row.original.service_name || 'N/A'}</div>
+      ),
+    },
+    {
+      accessorKey: 'session.title',
+      header: 'Título de la sesión',
+      cell: ({ row }) => (
+        <div className="text-sm text-center">{row.original.session?.title || 'N/A'}</div>
       ),
     },
     {
@@ -107,27 +115,27 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       enableSorting: false,
     },
     {
-      accessorKey: 'teacher',
-      header: 'Profesor',
+      accessorKey: 'professional',
+      header: 'Profesional',
       cell: ({ row }) => {
-        const teacher = row.original.teacher;
-        return <div className="text-sm text-center">{teacher || 'N/A'}</div>;
+        const professional = row.original.professional;
+        return <div className="text-sm text-center">{professional || 'N/A'}</div>;
       },
       enableSorting: false,
     },
     {
       accessorKey: 'state',
       header: 'Estado',
-      cell: ({ row }) => {
-        const state = row.getValue('state') as ReservationState;
-        return (
-          <div className="flex justify-center">
-            <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
-          </div>
-        );
-      },
+              cell: ({ row }) => {
+          const state = row.original.state as ReservationState;
+          return (
+            <div className="flex justify-center">
+              <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
+            </div>
+          );
+        },
     },
-    {
+        {
       id: 'actions',
       header: () => <span className="sr-only">Ver</span>,
       cell: ({ row }) => {
@@ -135,12 +143,14 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
         return (
           <div className="flex justify-center">
             <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 px-3 py-1"
               onClick={() => onView(reservation)}
               aria-label={`Ver detalles de la reserva ${reservation.name}`}
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <Eye className="h-4 w-4" />
+              Ver detalle
             </Button>
           </div>
         );

@@ -9,14 +9,14 @@ export interface Reservation {
   user_id: string;
   session_id: string;
   session: Session;
-  community_service_id: string;
   // Extended fields for display (might come from joins)
   user_name?: string;
   user_email?: string;
   user_phone?: string;
   session_title?: string;
   place?: string;
-  teacher?: string;
+  professional?: string;
+  service_name?: string;
 }
 
 export enum ReservationState {
