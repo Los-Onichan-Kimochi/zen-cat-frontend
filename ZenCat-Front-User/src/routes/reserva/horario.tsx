@@ -6,6 +6,7 @@ import {
 import { ReservaHorarioRoute } from '@/layouts/reservation-layout';
 import { z } from 'zod';
 import { useReservation } from '@/context/reservation-context';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -13,6 +14,8 @@ import { useQuery } from '@tanstack/react-query';
 import { sessionsApi, Session } from '@/api/sessions/sessions';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { serviceProfessionalsApi } from '@/api/service-professionals/service-professionals';
+import { TimeSlotCalendar } from '@/components/ui/time-slot-calendar';
+import { localsApi } from '@/api/locals/locals';
 
 export const Route = createFileRoute(ReservaHorarioRoute)({
   component: ScheduleStepComponent,
@@ -51,13 +54,13 @@ function ScheduleStepComponent() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/reserva/horario' });
   const { reservationData, updateReservation } = useReservation();
-
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
   );
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 6)); // Julio 2025
+  const [currentMonth, setCurrentMonth] = useState(() => new Date()); // Usar la fecha actual
 
   // Fetch service-professional associations if a service is selected
   const {
@@ -84,6 +87,12 @@ function ScheduleStepComponent() {
       queryFn: () => professionalsApi.getProfessionals(),
     });
 
+  // Fetch all locals
+  const { data: localsData = [], isLoading: isLoadingLocals } = useQuery({
+    queryKey: ['locals'],
+    queryFn: () => localsApi.getLocals(),
+  });
+
   // Fetch all sessions
   const {
     data: sessionsData = [],
@@ -93,10 +102,11 @@ function ScheduleStepComponent() {
     queryKey: ['sessions'],
     queryFn: sessionsApi.getSessions,
   });
-
+  
   const isLoading =
     isLoadingServiceProfessionals ||
     isLoadingProfessionals ||
+    isLoadingLocals ||
     isLoadingSessions;
 
   // Filter sessions by location and service-professional associations
@@ -117,103 +127,116 @@ function ScheduleStepComponent() {
 
     return true;
   });
+  console.log(filteredSessions);
 
-  const today = new Date();
+  // Generar fechas disponibles (próximos 7 días)
+  const getAvailableDates = () => {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push({
+        day: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+        label: `${date.getDate()}/${String(date.getMonth() + 1).padStart(2, '0')}`,
+        fullDate: `${date.getDate()}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`,
+      });
+    }
+    
+    return dates;
+  };
+
+  const availableDates = getAvailableDates();
+
+  // Verificar si una fecha está entre las disponibles (próximos 7 días)
+  const isDateAvailable = (day: number, month: number) => {
+    return availableDates.some(
+      (date) => date.day === day && date.month === month
+    );
+  };
+
+  // Calcular días del mes actual para el calendario
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
     0,
   ).getDate();
+  
   const firstDayOfMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth(),
     1,
   ).getDay();
+  
   const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Ajustar para que lunes sea 0
 
-  // Generate time slots for the selected date
-  const getTimeSlotsForDate = (dateStr: string): TimeSlot[] => {
-    if (!dateStr) return [];
-
-    const [day, month] = dateStr.split('/');
-    const year = currentMonth.getFullYear();
-    const targetDate = new Date(year, parseInt(month) - 1, parseInt(day));
-    const targetDateStr = targetDate.toISOString().split('T')[0];
-
-    // Find sessions for this date
-    const sessionsForDate = filteredSessions.filter((session) => {
-      const sessionDate = new Date(session.date).toISOString().split('T')[0];
-      return sessionDate === targetDateStr;
-    });
-
-    // Generate time slots from 5:00 to 13:00
-    const timeSlots: TimeSlot[] = [];
-    for (let hour = 5; hour <= 13; hour++) {
-      const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-
-      // Check if there's a session at this time
-      const sessionAtTime = sessionsForDate.find((session) => {
-        const sessionHour = new Date(session.start_time).getHours();
-        return sessionHour === hour;
-      });
-
-      // Get professional name if session exists
-      let professionalName = '';
-      if (sessionAtTime?.professional_id) {
-        const professional = professionalsData.find(
-          (p) => p.id === sessionAtTime.professional_id,
-        );
-        professionalName = professional
-          ? `${professional.name} ${professional.first_last_name}`
-          : '';
+  // Convertir las sesiones al formato requerido por TimeSlotCalendar
+  const convertedOccupiedSlots = filteredSessions.map((session) => {
+    const professional = professionalsData.find(p => p.id === session.professional_id);
+    const local = localsData.find(l => l.id === session.local_id);
+    const sessionDate = new Date(session.date);
+    const dateLabel = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    return {
+      date: dateLabel,
+      start: session.start_time.split('T')[1].substring(0, 5),
+      end: session.end_time.split('T')[1].substring(0, 5),
+      title: session.title,
+      type: 'professional' as const,
+      sessionInfo: {
+        title: session.title,
+        professional: professional ? `${professional.name} ${professional.first_last_name}` : 'No asignado',
+        location: local ? local.local_name : 'No especificado',
+        capacity: session.capacity,
+        registered: session.registered_count
       }
-
-      timeSlots.push({
-        time: timeStr,
-        available:
-          !!sessionAtTime &&
-          sessionAtTime.registered_count < sessionAtTime.capacity,
-        sessionId: sessionAtTime?.id,
-        capacity: sessionAtTime?.capacity,
-        registeredCount: sessionAtTime?.registered_count,
-        professionalName,
-        sessionTitle: sessionAtTime?.title,
-      });
-    }
-
-    return timeSlots;
-  };
+    };
+  });
 
   const handleDateSelect = (day: number) => {
+    // Solo permitir seleccionar fechas de los próximos 7 días
+    if (!isDateAvailable(day, currentMonth.getMonth() + 1)) return;
+
     const dateStr = `${day}/${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
     setSelectedDate(dateStr);
     setSelectedTime(null);
     setSelectedSessionId(null);
   };
 
-  const handleTimeSelect = (timeSlot: TimeSlot) => {
-    if (!timeSlot.available || !timeSlot.sessionId) return;
-
-    setSelectedTime(timeSlot.time);
-    setSelectedSessionId(timeSlot.sessionId);
-
-    // Find the full session data
-    const session = filteredSessions.find((s) => s.id === timeSlot.sessionId);
-    if (session) {
+  const handleTimeRangeSelect = (range: { start: string; end: string }, date: string) => {
+    setSelectedTime(range.start);
+    setSelectedDate(date);
+    
+    // Buscar la sesión que coincide con este horario y fecha
+    const matchingSession = filteredSessions.find(session => {
+      const sessionDate = new Date(session.date);
+      const sessionDateStr = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
+      const sessionTime = session.start_time.split('T')[1].substring(0, 5);
+      
+      return sessionDateStr === date && sessionTime === range.start;
+    });
+    console.log(range.start);
+    if (matchingSession) {
+      setSelectedSessionId(matchingSession.id);
+      
       updateReservation({
-        date: selectedDate || '',
-        time: timeSlot.time,
+        date: date,
+        time: range.start,
         session: {
-          id: session.id,
-          title: session.title,
-          date: session.date,
-          startTime: session.start_time,
-          endTime: session.end_time,
-          capacity: session.capacity,
-          registeredCount: session.registered_count,
-          professionalId: session.professional_id,
-          localId: session.local_id,
+          id: matchingSession.id,
+          title: matchingSession.title,
+          date: matchingSession.date,
+          startTime: matchingSession.start_time,
+          endTime: matchingSession.end_time,
+          capacity: matchingSession.capacity,
+          registeredCount: matchingSession.registered_count,
+          professionalId: matchingSession.professional_id,
+          localId: matchingSession.local_id,
         },
+        userId: user?.id,
       });
     }
   };
@@ -244,9 +267,6 @@ function ScheduleStepComponent() {
       }
       return newDate;
     });
-    setSelectedDate(null);
-    setSelectedTime(null);
-    setSelectedSessionId(null);
   };
 
   const renderCalendarDays = () => {
@@ -254,49 +274,40 @@ function ScheduleStepComponent() {
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < adjustedFirstDay; i++) {
-      days.push(<div key={`empty-${i}`} className=""></div>);
+      days.push(<div key={`empty-${i}`} className="w-8 h-8" />);
     }
 
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
+      const isAvailable = isDateAvailable(day, currentMonth.getMonth() + 1);
       const dateStr = `${day}/${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
       const isSelected = selectedDate === dateStr;
-      const isToday = day === 15; // Highlighting day 15 as shown in the image
+      
+      // Verificar si es hoy
+      const today = new Date();
+      const isToday = day === today.getDate() && 
+                     currentMonth.getMonth() === today.getMonth() &&
+                     currentMonth.getFullYear() === today.getFullYear();
 
       days.push(
         <button
           key={day}
           onClick={() => handleDateSelect(day)}
+          disabled={!isAvailable}
           className={`
             w-8 h-8 flex items-center justify-center text-sm rounded-md
             ${isSelected ? 'bg-black text-white' : ''}
             ${isToday && !isSelected ? 'bg-gray-200' : ''}
-            hover:bg-gray-100 transition-colors
+            ${isAvailable ? 'hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}
+            transition-colors
           `}
         >
           {day}
-        </button>,
+        </button>
       );
     }
 
     return days;
-  };
-
-  const generateDates = () => {
-    const dates = [];
-    const currentDate = new Date();
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(currentDate);
-      date.setDate(currentDate.getDate() + i);
-      dates.push({
-        day: date.getDate(),
-        month: date.getMonth() + 1,
-        label: `${date.getDate()}/${String(date.getMonth() + 1).padStart(2, '0')}`,
-      });
-    }
-
-    return dates;
   };
 
   if (isLoading) {
@@ -320,8 +331,6 @@ function ScheduleStepComponent() {
       </div>
     );
   }
-
-  const timeSlots = selectedDate ? getTimeSlotsForDate(selectedDate) : [];
 
   return (
     <div>
@@ -357,118 +366,65 @@ function ScheduleStepComponent() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Calendario */}
-        <div className="border p-6 rounded-md">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">Fechas disponibles</h3>
-            <p className="text-sm text-gray-600">
-              Puedes hacer reservas hasta con
-              <br />7 días de anticipación
+        <div className="border p-4 rounded-md flex flex-col w-full h-[450px] bg-white">
+          <div className="mb-4 w-full text-center">
+            <h3 className="text-2xl font-bold mb-2">Fechas disponibles</h3>
+            <p className="text-xs text-gray-600">
+              Puedes hacer reservas hasta con<br />7 días de anticipación
             </p>
           </div>
 
           {/* Navegación del mes */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 w-full">
             <button
               onClick={() => navigateMonth('prev')}
               className="p-1 hover:bg-gray-100 rounded"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <h4 className="font-semibold">
+            <h4 className="font-semibold text-sm">
               {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h4>
             <button
               onClick={() => navigateMonth('next')}
               className="p-1 hover:bg-gray-100 rounded"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Días de la semana */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-1 mb-2 w-full">
             {daysOfWeek.map((day) => (
               <div
                 key={day}
-                className="text-center text-sm font-medium text-gray-600 py-2"
+                className="text-center text-xs font-medium text-gray-600 py-1"
               >
                 {day}
               </div>
             ))}
           </div>
 
-          {/* Días del calendario */}
-          <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
+          {/* Días del calendario - ocupar el espacio restante */}
+          <div className="grid grid-cols-7 gap-1 w-full flex-1 content-start">
+            {renderCalendarDays()}
+          </div>
         </div>
 
-        {/* Horarios */}
-        <div className="border p-6 rounded-md">
-          <h3 className="text-lg font-semibold mb-4">Horarios disponibles</h3>
-
-          {/* Header de fechas */}
-          <div className="grid grid-cols-8 gap-1 mb-4">
-            <div className="text-sm font-medium text-center">Hora</div>
-            {generateDates().map((date, index) => (
-              <div key={index} className="text-xs text-center font-medium">
-                {date.label}
-              </div>
-            ))}
-          </div>
-
-          {/* Horarios */}
-          <div className="space-y-1">
-            {timeSlots.map((slot) => (
-              <div
-                key={slot.time}
-                className="grid grid-cols-8 gap-1 items-center"
-              >
-                <div className="text-sm font-medium text-center">
-                  {slot.time} h
-                </div>
-                {generateDates().map((date, index) => (
-                  <div
-                    key={index}
-                    className="h-8 flex items-center justify-center"
-                  >
-                    {slot.available ? (
-                      <button
-                        onClick={() => handleTimeSelect(slot)}
-                        className={`w-full h-full text-xs rounded text-center flex flex-col items-center justify-center p-1
-                          ${
-                            selectedTime === slot.time &&
-                            selectedDate === date.label
-                              ? 'bg-black text-white'
-                              : 'bg-green-100 hover:bg-green-200 border border-green-300'
-                          }`}
-                        title={`${slot.sessionTitle || 'Sesión disponible'}
-Profesional: ${slot.professionalName || 'No asignado'}
-Capacidad: ${slot.capacity}, Reservados: ${slot.registeredCount}
-Disponibles: ${slot.capacity && slot.registeredCount ? slot.capacity - slot.registeredCount : 'N/A'}`}
-                      >
-                        <div className="font-medium">
-                          {slot.capacity && slot.registeredCount
-                            ? `${slot.capacity - slot.registeredCount}`
-                            : '✓'}
-                        </div>
-                        {slot.professionalName && (
-                          <div className="text-[10px] truncate w-full">
-                            {slot.professionalName.split(' ')[0]}
-                          </div>
-                        )}
-                      </button>
-                    ) : (
-                      <div
-                        className="w-full h-full bg-gray-100 rounded border border-gray-200"
-                        title="No disponible"
-                      ></div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+        {/* Tabla de horarios con altura igual al calendario */}
+        <div className="col-span-2 h-[450px]">
+          <TimeSlotCalendar
+            selectedRange={selectedTime ? { start: selectedTime, end: '' } : undefined}
+            onRangeSelect={handleTimeRangeSelect}
+            occupiedSlots={convertedOccupiedSlots}
+            startHour={5}
+            endHour={21}
+            slotDuration={60}
+            disabled={false}
+            selectedDate={selectedDate || undefined}
+          />
         </div>
       </div>
 

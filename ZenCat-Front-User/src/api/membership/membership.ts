@@ -4,6 +4,7 @@ import {
   Membership,
   MembershipsResponse,
   CreateMembershipRequest,
+  UpdateMembershipRequest,
 } from '@/types/membership';
 
 export const membershipService = {
@@ -98,7 +99,7 @@ export const membershipService = {
    */
   async updateMembership(
     membershipId: string,
-    updateData: Partial<CreateMembershipRequest>,
+    updateData: UpdateMembershipRequest,
   ): Promise<Membership> {
     return await apiClient.patch<Membership>(
       API_ENDPOINTS.MEMBERSHIPS.BY_ID(membershipId),

@@ -1,5 +1,3 @@
-// src/components/CommunitiesReservas/ReservationsTable.tsx
-
 import { useState } from 'react';
 import {
   getCoreRowModel,
@@ -11,78 +9,38 @@ import {
   type SortingState,
   type VisibilityState,
 } from '@tanstack/react-table';
-import { Eye, Calendar, Clock, MapPin, User } from 'lucide-react';
+import { Eye, Calendar, CreditCard, BarChart3, Award } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import { Reservation, ReservationState } from '@/types/reservation';
+import { Membership, MembershipState } from '@/types/membership';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TablePagination } from '@/components/common/TablePagination';
+import { mapMembershipStateToSpanish, getStatusColor } from '@/utils/membership-utils';
 
-import { CommunityReservasDataTable } from './CommunityReservasDataTable';
+import { CommunityMembershipsDataTable } from './CommunityMembershipsDataTable';
 
-interface ReservationsTableProps {
-  data: Reservation[];
-  onView: (reservation: Reservation) => void;
+interface MembershipsTableProps {
+  data: Membership[];
+  onView: (membership: Membership) => void;
 }
 
-const getStateColor = (state: ReservationState) => {
-  switch (state) {
-    case ReservationState.DONE:
-      return 'bg-blue-100 text-blue-800';
-    case ReservationState.CANCELLED:
-      return 'bg-red-100 text-red-800';
-    case ReservationState.CONFIRMED:
-      return 'bg-green-100 text-green-800';
-    case ReservationState.ANULLED:
-      return 'bg-gray-100 text-gray-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
+const getStateLabel = (state: MembershipState) => {
+  return mapMembershipStateToSpanish(state);
 };
 
-const getStateLabel = (state: ReservationState) => {
-  switch (state) {
-    case ReservationState.DONE:
-      return 'Finalizada';
-    case ReservationState.CANCELLED:
-      return 'Cancelada';
-    case ReservationState.CONFIRMED:
-      return 'Confirmada';
-    case ReservationState.ANULLED:
-      return 'Anulada';
-    default:
-      return String(state);
-  }
-};
-
-
-export function ReservationsTable({ data, onView }: ReservationsTableProps) {
+export function MembershipsTable({ data, onView }: MembershipsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [currentPage, setCurrentPage] = useState(0);
 
-  const columns: ColumnDef<Reservation>[] = [
+  const columns: ColumnDef<Membership>[] = [
     {
-      accessorKey: 'service_name',
-      header: 'Servicio',
-      cell: ({ row }) => (
-        <div className="text-sm text-center font-medium">{row.original.service_name || 'N/A'}</div>
-      ),
-    },
-    {
-      accessorKey: 'session.title',
-      header: 'Título de la sesión',
-      cell: ({ row }) => (
-        <div className="text-sm text-center">{row.original.session?.title || 'N/A'}</div>
-      ),
-    },
-    {
-      accessorKey: 'reservation_time',
-      header: 'Fecha',
+      accessorKey: 'start_date',
+      header: 'Fecha de inicio',
       cell: ({ row }) => {
-        const date = new Date(row.getValue('reservation_time'));
+        const date = new Date(row.getValue('start_date'));
         return (
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
@@ -94,16 +52,75 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       },
     },
     {
-      accessorKey: 'time_range',
-      header: 'Horario',
+      accessorKey: 'end_date',
+      header: 'Fecha de fin',
       cell: ({ row }) => {
-        const reservationTime = new Date(row.original.reservation_time);
-        const endTime = new Date(reservationTime.getTime() + 60 * 60 * 1000);
+        const date = new Date(row.getValue('end_date'));
         return (
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
-              <Clock className="h-3 w-3 text-gray-500" />
-              {format(reservationTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
+              <Calendar className="h-3 w-3 text-gray-500" />
+              {format(date, 'dd/MM/yyyy', { locale: es })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'plan.type',
+      header: 'Plan seleccionado',
+      cell: ({ row }) => {
+        const planType = row.original.plan.type;
+        const planName = planType === 'MONTHLY' ? 'Básico' : 'Anual';
+        return (
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Award className="h-3 w-3 text-gray-500" />
+              <span className="font-medium">{planName}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'plan.fee',
+      header: 'Monto pagado',
+      cell: ({ row }) => {
+        const amount = row.original.plan.fee;
+        return (
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <CreditCard className="h-3 w-3 text-gray-500" />
+              <span className="font-semibold text-green-700">S/. {amount.toFixed(2)}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'reservations_used',
+      header: 'Reservas usadas',
+      cell: ({ row }) => {
+        const used = row.original.reservations_used || 0;
+        const limit = row.original.plan.reservation_limit;
+        
+        // Si limit es null o 0, significa sin límite
+        const hasLimit = limit !== null && limit > 0;
+        const limitText = hasLimit ? limit.toString() : 'Sin límite';
+        const percentage = hasLimit ? (used / limit) * 100 : 0;
+        const isNearLimit = hasLimit && percentage > 80;
+        
+        return (
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <BarChart3 className="h-3 w-3 text-gray-500" />
+              <span className="font-medium">{used}</span>
+              <span className="text-gray-500">/ {limitText}</span>
+              {hasLimit && (
+                <span className={`ml-1 text-xs ${isNearLimit ? 'text-orange-600' : 'text-gray-400'}`}>
+                  ({Math.round(percentage)}%)
+                </span>
+              )}
             </div>
           </div>
         );
@@ -111,45 +128,16 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       enableSorting: false,
     },
     {
-      accessorKey: 'place',
-      header: 'Lugar',
-      cell: ({ row }) => {
-        const place = row.original.place;
-        return (
-          <div className="text-sm text-center">
-            <div className="flex items-center justify-center gap-1">
-              <MapPin className="h-3 w-3 text-gray-500" />
-              {place || 'N/A'}
-            </div>
-          </div>
-        );
-      },
-      enableSorting: false,
-    },
-    {
-      accessorKey: 'professional',
-      header: 'Profesional',
-      cell: ({ row }) => {
-        const professional = row.original.professional;
-        return (
-          <div className="text-sm text-center">
-            <div className="flex items-center justify-center gap-1">
-              <User className="h-3 w-3 text-gray-500" />
-              {professional || 'N/A'}
-            </div>
-          </div>
-        );
-      },
-      enableSorting: false,
-    },
-    {
-      accessorKey: 'state',
+      accessorKey: 'status',
       header: 'Estado',
       cell: ({ row }) => {
-        const state = row.original.state as ReservationState;
+        const status = row.original.status;
+        const statusText = getStateLabel(status);
         return (
           <div className="flex justify-center">
-            <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
+            <Badge className={getStatusColor(status)}>
+              {statusText}
+            </Badge>
           </div>
         );
       },
@@ -158,15 +146,15 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       id: 'actions',
       header: () => <span className="sr-only">Ver</span>,
       cell: ({ row }) => {
-        const reservation = row.original;
+        const membership = row.original;
         return (
           <div className="flex justify-center">
             <Button
               variant="outline"
               size="sm"
               className="flex items-center gap-2 px-3 py-1 hover:bg-gray-50"
-              onClick={() => onView(reservation)}
-              aria-label={`Ver detalles de la reserva ${reservation.name}`}
+              onClick={() => onView(membership)}
+              aria-label={`Ver detalles de la membresía ${membership.id}`}
             >
               <Eye className="h-4 w-4" />
               Ver detalle
@@ -193,7 +181,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       columnVisibility,
       pagination: {
         pageIndex: currentPage,
-        pageSize: 5, // Ajusta según necesites
+        pageSize: 5, // Mismo tamaño que reservas
       },
     },
   });
@@ -205,7 +193,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
 
   return (
     <div className="space-y-4">
-      <CommunityReservasDataTable table={table} columns={columns} />
+      <CommunityMembershipsDataTable table={table} columns={columns} />
       <TablePagination
         currentPage={currentPage}
         totalPages={table.getPageCount()}
@@ -213,4 +201,4 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       />
     </div>
   );
-}
+} 

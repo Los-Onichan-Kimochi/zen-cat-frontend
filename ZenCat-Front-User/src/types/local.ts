@@ -1,18 +1,54 @@
-// Tipos para el ubigeo de Perú
-export interface Region {
+export interface Local {
   id: string;
-  name: string;
+  local_name: string;
+  street_name: string;
+  building_number: string;
+  district: string;
+  province: string;
+  region: string;
+  reference: string;
+  capacity: number;
+  image_url: string;
 }
 
-export interface Provincia {
+// Tipos para los payloads de creación y actualización
+export interface CreateLocalPayload {
+  //id: string;
+  local_name: string;
+  street_name: string;
+  building_number: string;
+  district: string;
+  province: string;
+  region: string;
+  reference: string;
+  capacity: number;
+  image_url: string;
+}
+
+export type UpdateLocalPayload = Partial<CreateLocalPayload>;
+
+export interface BulkCreateLocalPayload {
+  locals: CreateLocalPayload[];
+}
+
+export interface BulkDeleteLocalPayload {
+  locals: string[]; // array of locals IDs
+}
+
+export type Region = {
+  id: string;
+  name: string;
+};
+
+export type Provincia = {
   id: string;
   name: string;
   department_id: string;
-}
+};
 
-export interface Distrito {
+export type Distrito = {
   id: string;
   name: string;
-  department_id: string;
   province_id: string;
-} 
+  department_id: string;
+};

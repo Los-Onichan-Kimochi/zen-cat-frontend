@@ -1,5 +1,3 @@
-// src/components/CommunitiesReservas/CommunityReservasDataTable.tsx
-
 import { flexRender, Table as ReactTableType } from '@tanstack/react-table';
 
 import {
@@ -9,17 +7,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'; // Asegúrate de tener este componente de tabla de shadcn/ui
+} from '@/components/ui/table';
 
-interface CommunityReservasDataTableProps<TData> {
+interface CommunityMembershipsDataTableProps<TData> {
   table: ReactTableType<TData>;
   columns: any[]; // ColumnDef<TData>[]
 }
 
-export function CommunityReservasDataTable<TData>({
+export function CommunityMembershipsDataTable<TData>({
   table,
   columns,
-}: CommunityReservasDataTableProps<TData>) {
+}: CommunityMembershipsDataTableProps<TData>) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -59,7 +57,7 @@ export function CommunityReservasDataTable<TData>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
-                No hay reservas disponibles.
+                No hay membresías disponibles.
               </TableCell>
             </TableRow>
           )}
@@ -67,4 +65,4 @@ export function CommunityReservasDataTable<TData>({
       </Table>
     </div>
   );
-}
+} 

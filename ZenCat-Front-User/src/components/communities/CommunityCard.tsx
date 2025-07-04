@@ -4,7 +4,7 @@ export interface Community {
   id: string;
   name: string;
   image: string;
-  status: 'active' | 'suspended' | 'expired';
+  status: 'active' | 'suspended' | 'expired' | 'cancelled';
   type: string;
   membershipId?: string;
   startDate?: string;
@@ -41,6 +41,15 @@ const statusConfig = {
   },
   expired: {
     label: 'Membresía vencida',
+    textColor: 'text-black',
+    bgColor: 'bg-gray-100',
+    buttonText: 'Ver más',
+    selectedText: 'Seleccionado',
+    buttonStyle: 'bg-black text-white hover:bg-gray-800',
+    selectedStyle: 'bg-white text-black',
+  },
+  cancelled: {
+    label: 'Membresía cancelada',
     textColor: 'text-black',
     bgColor: 'bg-gray-100',
     buttonText: 'Ver más',
