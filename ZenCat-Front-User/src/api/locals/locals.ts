@@ -1,7 +1,7 @@
 import {
   Local,
-  CreateLocalRequest,
-  UpdateLocalRequest,
+  CreateLocalPayload,
+  UpdateLocalPayload,
   BulkCreateLocalPayload,
   BulkDeleteLocalPayload,
 } from '@/types/local';

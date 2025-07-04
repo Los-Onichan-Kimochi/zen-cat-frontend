@@ -4,6 +4,37 @@ import { API_ENDPOINTS } from '@/config/api';
 import { Service } from '@/types/service';
 
 export const communityServicesApi = {
+
+  // Get all community services with optional filters
+  getCommunityServices: async (
+    communityIds?: string[],
+    serviceIds?: string[],
+  ): Promise<CommunityService[]> => {
+    const params = new URLSearchParams();
+
+    if (serviceIds && serviceIds.length > 0) {
+      params.append('serviceId', serviceIds.join(','));
+    }
+
+    if (communityIds && communityIds.length > 0) {
+      params.append('communityId', communityIds.join(','));
+    }
+    
+    const endpoint = `/community-service/?${params}`;
+    const data = await apiClient.get<{
+      community_services: CommunityService[];
+    }>(endpoint);
+    
+    if (data && typeof data === 'object' && 'community_services' in data) {
+      return data.community_services;
+    }
+    console.error(
+      'Unexpected data structure from /community-service/ endpoint:',
+      data,
+    );
+    throw new Error('Unexpected data structure from community-services API');
+  },
+
   getCommunityServicesByCommunityId: async (
     communityId: string,
   ): Promise<CommunityService[]> => {
