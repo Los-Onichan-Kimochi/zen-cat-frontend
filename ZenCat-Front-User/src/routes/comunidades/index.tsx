@@ -15,7 +15,7 @@ import Pagination from '@/components/communities-noauth/Pagination';
 import { Community } from '@/types/community';
 
 // Define the route for '/communities'
-export const Route = createFileRoute('/comunidades')({
+export const Route = createFileRoute('/comunidades/')({
   // This is where you fetch your data from the API
   loader: async () => {
     try {
@@ -102,7 +102,6 @@ function CommunitiesPage() {
           </p>
         </div>
       </div>
-
       {/* Main Content Area */}
       <main className="container mx-auto px-4 py-8">
         <CommunitySearchBar
@@ -119,13 +118,13 @@ function CommunitiesPage() {
         />
 
         {totalPages > 1 && ( // Only show pagination if there's more than one page
-          <Pagination
+          (<Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-          />
+          />)
         )}
       </main>
     </div>
-  );
+  )
 }
