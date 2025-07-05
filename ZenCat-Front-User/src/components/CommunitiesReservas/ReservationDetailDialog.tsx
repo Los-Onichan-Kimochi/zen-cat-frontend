@@ -100,10 +100,22 @@ export function ReservationDetailDialog({
 
   if (!reservation) return null;
 
-  const reservationDate = new Date(reservation.reservation_time);
-  const endTime = new Date(reservationDate.getTime() + 60 * 60 * 1000);
+  // Combinar correctamente la fecha de la sesión con la hora de inicio
+  const sessionDate = new Date(reservation.session.date);
+  const sessionStartTime = new Date(reservation.session.start_time);
+  
+  // Crear la fecha y hora completa de inicio de la sesión
+  const sessionDateTime = new Date(
+    sessionDate.getFullYear(),
+    sessionDate.getMonth(),
+    sessionDate.getDate(),
+    sessionStartTime.getHours(),
+    sessionStartTime.getMinutes(),
+    sessionStartTime.getSeconds()
+  );
+  
   const now = new Date();
-  const hoursUntilReservation = differenceInHours(reservationDate, now);
+  const hoursUntilReservation = differenceInHours(sessionDateTime, now);
   const canCancel = hoursUntilReservation >= 24;
 
   const handleCancelReservation = () => {
@@ -142,7 +154,7 @@ export function ReservationDetailDialog({
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Fecha</span>
                 <span className="font-medium text-right">
-                  {format(reservationDate, 'dd/MM/yyyy', { locale: es })}
+                  {format(sessionDate, 'dd/MM/yyyy', { locale: es })}
                 </span>
               </div>
               
@@ -180,7 +192,7 @@ export function ReservationDetailDialog({
               <div className="flex justify-between">
                 <span className="text-gray-600">Horario</span>
                 <span className="font-medium text-right">
-                  {format(reservationDate, 'HH:mm', { locale: es })} h - {format(endTime, 'HH:mm', { locale: es })} h
+                  {format(reservation.session.start_time, 'HH:mm', { locale: es })} h - {format(reservation.session.end_time, 'HH:mm', { locale: es })} h
                 </span>
               </div>
               

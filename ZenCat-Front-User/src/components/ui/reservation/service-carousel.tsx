@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { SelectableCard } from '@/components/ui/selectable-card';
+import { TablePagination } from '@/components/common/TablePagination';
 
 type Service = {
   title: string;
@@ -11,98 +11,73 @@ type Props = {
   services: Service[];
   onSelect: (title: string) => void;
   selected?: string | null;
+  // Props para paginación
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 };
 
-const itemsPerPage = 3;
-
-export function ServiceCarousel({ services, onSelect, selected }: Props) {
-  const [currentPage, setCurrentPage] = useState(0);
-  const pages = Math.ceil(services.length / itemsPerPage);
-
-  const handleScroll = (pageIndex: number) => {
-    setCurrentPage(pageIndex);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 0) handleScroll(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < pages - 1) handleScroll(currentPage + 1);
-  };
-
+export function ServiceCarousel({ 
+  services, 
+  onSelect, 
+  selected,
+  currentPage,
+  totalPages,
+  onPageChange 
+}: Props) {
   return (
-    <>
-      {/* Contenedor visible */}
-      <div className="overflow-hidden w-full flex justify-center">
-        {/* Track de páginas */}
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{
-            transform: `translateX(-${currentPage * 100}%)`,
-            width: `${pages * 100}%`,
-          }}
-        >
-          {Array.from({ length: pages }, (_, pageIndex) => (
-            <div
-              key={pageIndex}
-              className="flex justify-center items-stretch min-w-full gap-6 px-1"
-            >
-              {services
-                .slice(
-                  pageIndex * itemsPerPage,
-                  pageIndex * itemsPerPage + itemsPerPage,
-                )
-                .map((service) => (
-                  <div key={service.title} className="w-[250px] shrink-0">
-                    <SelectableCard
-                      title={service.title}
-                      description={service.description}
-                      imageUrl={service.imageUrl}
-                      selected={selected === service.title}
-                      onClick={() => onSelect(service.title)}
-                    />
-                  </div>
-                ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Paginación */}
-      <div className="flex justify-center gap-3 items-center text-sm pt-4">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 0}
-          className="px-2 py-1 disabled:opacity-40"
-        >
-          &lt; Anterior
-        </button>
-
-        {Array.from({ length: pages }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => handleScroll(i)}
-            className={`px-2 py-1 border rounded ${
-              currentPage === i
-                ? 'font-semibold border-gray-800'
-                : 'text-gray-600'
-            }`}
-          >
-            {i + 1}
-          </button>
+    <div className="w-full space-y-4">
+      {/* Grid de servicios mejorado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+        {services.map((service) => (
+          <div key={service.title} className="h-full">
+            <SelectableCard
+              title={service.title}
+              description={service.description}
+              imageUrl={service.imageUrl}
+              selected={selected === service.title}
+              onClick={() => onSelect(service.title)}
+            />
+          </div>
         ))}
-
-        {pages > 3 && <span className="text-gray-400">…</span>}
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === pages - 1}
-          className="px-2 py-1 disabled:opacity-40"
-        >
-          Siguiente &gt;
-        </button>
       </div>
-    </>
+
+      {/* Mensaje cuando no hay servicios */}
+      {services.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="mx-auto h-16 w-16"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <p className="text-gray-500 text-lg font-medium">
+            No hay servicios disponibles
+          </p>
+          <p className="text-gray-400 text-sm mt-2">
+            Intenta ajustar tus filtros de búsqueda
+          </p>
+        </div>
+      )}
+
+      {/* Paginación integrada */}
+      <div className="flex justify-center">
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      </div>
+    </div>
   );
 }

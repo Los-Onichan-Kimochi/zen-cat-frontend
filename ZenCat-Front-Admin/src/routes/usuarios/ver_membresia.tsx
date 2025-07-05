@@ -83,6 +83,7 @@ function VerMembresia() {
       case 'active':
         return 'bg-green-100 text-green-700';
       case 'suspended':
+      case 'on_hold':
         return 'bg-yellow-100 text-yellow-700';
       case 'expired':
         return 'bg-red-100 text-red-700';
@@ -99,6 +100,7 @@ function VerMembresia() {
       case 'active':
         return 'Activo';
       case 'suspended':
+      case 'on_hold':
         return 'Suspendido';
       case 'expired':
         return 'Expirado';
