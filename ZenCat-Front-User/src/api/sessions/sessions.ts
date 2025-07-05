@@ -13,6 +13,7 @@ export interface Session {
   session_link?: string;
   professional_id: string;
   local_id?: string;
+  community_service_id: string;
 }
 
 export interface SessionsResponse {

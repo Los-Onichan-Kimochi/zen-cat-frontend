@@ -53,9 +53,22 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user' | 'guest';
+  role: 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
   password: string;
   isAuthenticated: boolean;
   permissions?: string[];
   avatar?: string;
 }
+
+export interface UpdateUserRequest {
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
+  password?: string;
+  isAuthenticated?: boolean;
+  permissions?: string[];
+  avatar?: string;
+}
+
+

@@ -20,7 +20,7 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
   if (!community) {
     return <div>No hay información disponible</div>;
   }
-
+  console.log("Community:", community);
   const handleNewReservation = () => {
     // Navegar a la página de servicios pasando el communityId como search param
     navigate({
@@ -30,10 +30,21 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
       },
     });
   };
-  const handleViewReservation = () => {
-    // Navegar a la página de servicios pasando el communityId como search param
+  const handleViewReservations = () => {
+    // Navegar a la página de reservas pasando el communityId como search param
     navigate({
       to: '/historial-reservas/$communityId',
+      params: {
+        communityId: community.id,
+      },
+      search: { name: community.name },
+    });
+  };
+
+  const handleViewMemberships = () => {
+    // Navegar a la página de membresías pasando el communityId como search param
+    navigate({
+      to: '/historial-membresias/$communityId',
       params: {
         communityId: community.id,
       },
@@ -93,11 +104,14 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
             </Button>
             <Button
               className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
-              onClick={handleViewReservation}
+              onClick={handleViewReservations}
             >
               Ver reservas
             </Button>
-            <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+            <Button 
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              onClick={handleViewMemberships}
+            >
               Ver membresías
             </Button>
             <Button
@@ -129,12 +143,22 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas disponibles:</p>
-                <p></p>
+                <p className="font-medium">
+                  {community.reservationsUsed === null 
+                    ? 'Sin límite' 
+                    : `${(community.reservationLimit || 0) - (community.reservationsUsed || 0)}`
+                  }
+                </p>
               </div>
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas usadas:</p>
-                <p></p>
+                <p className="font-medium">
+                  {community.reservationsUsed === null 
+                    ? 'Sin límite' 
+                    : community.reservationsUsed || 0
+                  }
+                </p>
               </div>
 
               <div className="flex justify-between">

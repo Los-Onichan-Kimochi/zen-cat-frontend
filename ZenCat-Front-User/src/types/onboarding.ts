@@ -1,8 +1,24 @@
+
 // Document types that match the backend enum
 export type DocumentType = 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
 
 // Gender types that match the backend enum
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
+
+export interface UpdateOnboardingRequest {
+  document_type?: DocumentType;
+  document_number?: string;
+  phone_number?: string;
+  postal_code?: string;
+  address?: string;
+  updated_by?: string;
+  district?: string;
+  province?: string;
+  region?: string;
+  birth_date?: string | null;
+  gender?: Gender | null;
+}
 
 // Request interface for creating onboarding data - matching Go backend
 export interface CreateOnboardingRequest {

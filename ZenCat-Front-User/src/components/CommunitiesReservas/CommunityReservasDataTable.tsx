@@ -28,7 +28,7 @@ export function CommunityReservasDataTable<TData>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="text-center text-black font-semibold text-base">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -47,9 +47,10 @@ export function CommunityReservasDataTable<TData>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
+                className="hover:bg-gray-50"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="text-center py-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -57,8 +58,8 @@ export function CommunityReservasDataTable<TData>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No hay resultados.
+              <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                No hay reservas disponibles.
               </TableCell>
             </TableRow>
           )}

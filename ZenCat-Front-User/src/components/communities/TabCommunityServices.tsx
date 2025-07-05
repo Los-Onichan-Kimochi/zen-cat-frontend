@@ -2,15 +2,10 @@ import { useState, useMemo } from 'react';
 import { Service } from '@/types/service';
 import { Community } from './CommunityCard';
 import { CommunityServiceCard } from './CommunityServiceCard';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from '@/components/ui/pagination';
 import { SearchInput } from '@/components/communities/SearchInput';
 import { FilterControls } from '@/components/communities/FilterControls';
 import { useNavigate } from '@tanstack/react-router';
+import { TablePagination } from '@/components/common/TablePagination';
 
 interface TabCommunityServicesProps {
   community: Community | null;
@@ -56,19 +51,8 @@ export function TabCommunityServices({
   const endIndex = startIndex + itemsPerPage;
   const currentServices = filteredServices.slice(startIndex, endIndex);
 
-  const canGoPrevious = currentPage > 0;
-  const canGoNext = currentPage < totalPages - 1;
-
-  const handlePrevious = () => {
-    if (canGoPrevious) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (canGoNext) {
-      setCurrentPage(currentPage + 1);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleServiceReservation = (communityId: string, serviceId: string) => {
@@ -147,46 +131,11 @@ export function TabCommunityServices({
       </div>
 
       {/* Paginación */}
-      <div className="flex justify-center mt-6">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <button
-                onClick={handlePrevious}
-                disabled={!canGoPrevious}
-                className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
-              >
-                Anterior
-              </button>
-            </PaginationItem>
-
-            {Array.from({ length: totalPages }).map((_, index) => (
-              <PaginationItem key={index}>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCurrentPage(index);
-                  }}
-                  isActive={currentPage === index}
-                >
-                  {index + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <button
-                onClick={handleNext}
-                disabled={!canGoNext}
-                className="px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
-              >
-                Siguiente
-              </button>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
