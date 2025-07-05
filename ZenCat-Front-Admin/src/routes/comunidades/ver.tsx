@@ -2,9 +2,8 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
-import { showImageUpdateProcessing } from '@/utils/image-toast-helpers';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { CommunityForm } from '@/components/community/community-basic-form';
 import { CommunityServiceTable } from '@/components/community/community-service-table';
@@ -17,7 +16,6 @@ import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { communityMembershipPlansApi } from '@/api/communities/community-membership-plans';
 import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
-import { base64ToImageUrl } from '@/utils/handleImageFile';
 
 import HeaderDescriptor from '@/components/common/header-descriptor';
 import { Button } from '@/components/ui/button';
@@ -31,12 +29,16 @@ import {
 
 import { Service } from '@/types/service';
 import { MembershipPlan } from '@/types/membership-plan';
-import { UpdateCommunityPayload, CommunityWithImage } from '@/types/community';
+import { UpdateCommunityPayload } from '@/types/community';
 import { Plus, ChevronLeft } from 'lucide-react';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/comunidades/ver')({
   validateSearch: (search) => ({ id: search.id as string }),
-  component: EditCommunityPage,
+  component: function EditCommunityPageRoute() {
+    const { id } = Route.useSearch();
+    return <EditCommunityPage key={id} />;
+  },
 });
 
 function EditCommunityPage() {
@@ -62,19 +64,11 @@ function EditCommunityPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['community', id],
-    queryFn: () => communitiesApi.getCommunityById(id),
-  });
-
-  // Separate query for community with image when needed
-  const { data: communityWithImage, isLoading: isLoadingImage } = useQuery({
-    queryKey: ['community-with-image', id],
+    queryKey: ['community', id, 'withImage'],
     queryFn: () => communitiesApi.getCommunityWithImage(id),
-    enabled: !!id, // Load image data whenever we have an ID
   });
 
   console.log('Comunidad: ', community);
-  console.log('Comunidad con imagen: ', communityWithImage);
   const { data: initialServices } = useQuery({
     queryKey: ['community-services', id],
     queryFn: () => communityServicesApi.getCommunityServices(id),
@@ -94,13 +88,17 @@ function EditCommunityPage() {
     watch,
     imageFile,
     imagePreview,
-    imageBytes,
-    setImageFile,
     setImagePreview,
-    setImageBytes,
     handleImageChange,
     reset,
   } = useCommunityForm();
+
+  const imagePreviewUrl = useMemo(() => {
+    if (community && community.image_bytes) {
+      return `data:image/jpeg;base64,${community.image_bytes}`;
+    }
+    return community?.image_url ?? null;
+  }, [community]);
 
   useEffect(() => {
     if (community && id) {
@@ -110,32 +108,9 @@ function EditCommunityPage() {
         name: community.name,
         purpose: community.purpose,
       });
+      setImagePreview(imagePreviewUrl ?? null);
     }
-  }, [community, id]);
-
-  // Effect to handle image display from S3
-  useEffect(() => {
-    // Only update preview from S3 if no new image has been selected
-    if (!imageFile) {
-      if (
-        communityWithImage?.image_bytes &&
-        communityWithImage.image_bytes.length > 0
-      ) {
-        try {
-          const imageUrl = base64ToImageUrl(communityWithImage.image_bytes);
-          setImagePreview(imageUrl);
-        } catch (error) {
-          console.error('Error al convertir Base64 a URL:', error);
-        }
-      } else if (
-        community?.image_url &&
-        community.image_url !== 'default-community-image.jpg'
-      ) {
-        // Fallback to image_url if no bytes available
-        setImagePreview(community.image_url);
-      }
-    }
-  }, [communityWithImage, community, imageFile]);
+  }, [community, reset, setImagePreview, imagePreviewUrl]);
 
   useEffect(() => {
     const loadAssociations = async () => {
@@ -165,19 +140,17 @@ function EditCommunityPage() {
     mutationFn: async (data: UpdateCommunityPayload) => {
       return communitiesApi.updateCommunity(id, data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Comunidad Actualizada', {
         description: 'La comunidad ha sido actualizada correctamente.',
       });
-      queryClient.invalidateQueries({ queryKey: ['community', id] });
-      queryClient.invalidateQueries({ queryKey: ['community-with-image', id] });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-      setIsEditing(false);
-      // Clear selected image after successful update
-      setImageFile(null);
-      setImageBytes(null);
-      // Optionally navigate away or stay on the page
-      // navigate({ to: '/comunidades' });
+      await queryClient.invalidateQueries({ queryKey: ['communities'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['community', id, 'withImage'],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
+      await queryClient.invalidateQueries({ queryKey: ['community-services', id] });
+      navigate({ to: '/comunidades' });
     },
     onError: (err: any) => {
       toast.error('Error al Actualizar', {
@@ -187,27 +160,16 @@ function EditCommunityPage() {
   });
 
   const onSubmit = async (data: any) => {
-    let imageUrl = community?.image_url || 'default-community-image.jpg';
-
-    // Generate new filename if image was changed
-    if (imageFile) {
-      const timestamp = Date.now();
-      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
-      imageUrl = `community-${timestamp}.${fileExtension}`;
-
-      showImageUpdateProcessing(toast);
-    }
-
     try {
       const payload: UpdateCommunityPayload = {
         name: data.name,
         purpose: data.purpose,
-        image_url: imageUrl,
       };
 
-      // Add image bytes if a new image was selected
-      if (imageBytes && imageBytes.length > 0) {
-        payload.image_bytes = imageBytes;
+      if (imageFile) {
+        payload.image_url = imageFile.name;
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
       }
 
       await updateMutation.mutateAsync(payload);
@@ -242,15 +204,22 @@ function EditCommunityPage() {
   });
 
   const bulkDeleteServiceMutation = useMutation({
-    mutationFn: (ids: string[]) =>
-      communityServicesApi.bulkDeleteCommunityServices({
-        community_services: ids,
-      }),
-    onSuccess: (_, ids) => {
+    mutationFn: (serviceIds: string[]) => {
+      const payload = {
+        community_services: serviceIds.map((serviceId) => ({
+          community_id: id,
+          service_id: serviceId,
+        })),
+      };
+      return communityServicesApi.bulkDeleteCommunityServices(payload);
+    },
+    onSuccess: (_, serviceIds) => {
       toast.success('Servicios Desvinculados', {
-        description: `${ids.length} servicios desvinculados exitosamente.`,
+        description: `${serviceIds.length} servicios desvinculados exitosamente.`,
       });
-      setSelectedServices((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedServices((prev) =>
+        prev.filter((s) => !serviceIds.includes(s.id)),
+      );
       queryClient.invalidateQueries({ queryKey: ['community-services', id] });
     },
     onError: (err) => {
@@ -288,16 +257,23 @@ function EditCommunityPage() {
   });
 
   const bulkDeleteMembershipPlanMutation = useMutation({
-    mutationFn: (ids: string[]) =>
-      communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans({
-        community_plans: ids,
-      }),
-    onSuccess: (_, ids) => {
+    mutationFn: (planIds: string[]) => {
+      const payload = {
+        community_plans: planIds.map((planId) => ({
+          community_id: id,
+          plan_id: planId,
+        })),
+      };
+      return communityMembershipPlansApi.bulkDeleteCommunityMembershipPlans(
+        payload,
+      );
+    },
+    onSuccess: (_, planIds) => {
       toast.success('Planes Desvinculados', {
-        description: `${ids.length} planes desvinculados exitosamente.`,
+        description: `${planIds.length} planes desvinculados exitosamente.`,
       });
       setSelectedMembershipPlans((prev) =>
-        prev.filter((p) => !ids.includes(p.id)),
+        prev.filter((p) => !planIds.includes(p.id)),
       );
       queryClient.invalidateQueries({ queryKey: ['community-plans', id] });
     },
@@ -378,9 +354,9 @@ function EditCommunityPage() {
                 setServiceToDelete(service);
                 setShowServiceConfirmDialog(true);
               }}
-              onBulkDelete={(ids) => bulkDeleteServiceMutation.mutate(ids)}
+              onBulkDelete={bulkDeleteServiceMutation.mutate}
               isBulkDeleting={bulkDeleteServiceMutation.isPending}
-              disableConfirmBulkDelete={false}
+              disableConfirmBulkDelete={!isEditing}
               isEditing={isEditing}
             />
           </CardContent>
@@ -425,11 +401,9 @@ function EditCommunityPage() {
                 setPlanToDelete(plan);
                 setShowPlanConfirmDialog(true);
               }}
-              onBulkDelete={(ids) =>
-                bulkDeleteMembershipPlanMutation.mutate(ids)
-              }
+              onBulkDelete={bulkDeleteMembershipPlanMutation.mutate}
               isBulkDeleting={bulkDeleteMembershipPlanMutation.isPending}
-              disableConfirmBulkDelete={false}
+              disableConfirmBulkDelete={!isEditing}
               isEditing={isEditing}
             />
           </CardContent>
@@ -441,29 +415,18 @@ function EditCommunityPage() {
             className="h-10 w-30 text-base"
             onClick={() => {
               if (isEditing) {
-                // Reset form and clear selected image
+                setIsEditing(false);
                 reset({
                   name: community?.name,
                   purpose: community?.purpose,
                 });
-                setImageFile(null);
-                setImageBytes(null);
-                setIsEditing(false);
-                // Force reload of S3 image after clearing states
-                setTimeout(() => {
-                  if (communityWithImage?.image_bytes) {
-                    const imageUrl = base64ToImageUrl(
-                      communityWithImage.image_bytes,
-                    );
-                    setImagePreview(imageUrl);
-                  }
-                }, 100);
+                setImagePreview(imagePreviewUrl ?? null);
               } else {
                 navigate({ to: '/comunidades' });
               }
             }}
           >
-            {isEditing ? 'Cancelar Edición' : 'Cancelar'}
+            Cancelar
           </Button>
           <Button
             type="button"
@@ -472,14 +435,16 @@ function EditCommunityPage() {
                 handleSubmit(onSubmit)();
               } else {
                 setIsEditing(true);
-                // Clear any previously selected image when entering edit mode
-                setImageFile(null);
-                setImageBytes(null);
               }
             }}
             className="h-10 w-30 bg-black text-white text-base hover:bg-gray-800"
+            disabled={updateMutation.isPending}
           >
-            {isEditing ? 'Guardar' : 'Editar'}
+            {isEditing
+              ? updateMutation.isPending
+                ? 'Guardando...'
+                : 'Guardar'
+              : 'Editar'}
           </Button>
         </div>
       </form>

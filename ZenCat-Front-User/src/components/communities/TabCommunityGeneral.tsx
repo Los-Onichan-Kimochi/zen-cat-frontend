@@ -9,6 +9,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 interface TabCommunityGeneralProps {
   community: Community | null;
+  onViewReservations?: () => void;
 }
 
 export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
@@ -27,6 +28,27 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
       search: {
         communityId: community.id,
       },
+    });
+  };
+  const handleViewReservations = () => {
+    // Navegar a la página de reservas pasando el communityId como search param
+    navigate({
+      to: '/historial-reservas/$communityId',
+      params: {
+        communityId: community.id,
+      },
+      search: { name: community.name },
+    });
+  };
+
+  const handleViewMemberships = () => {
+    // Navegar a la página de membresías pasando el communityId como search param
+    navigate({
+      to: '/historial-membresias/$communityId',
+      params: {
+        communityId: community.id,
+      },
+      search: { name: community.name },
     });
   };
 
@@ -80,10 +102,16 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
             >
               Nueva reserva
             </Button>
-            <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+            <Button
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              onClick={handleViewReservations}
+            >
               Ver reservas
             </Button>
-            <Button className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
+            <Button 
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              onClick={handleViewMemberships}
+            >
               Ver membresías
             </Button>
             <Button

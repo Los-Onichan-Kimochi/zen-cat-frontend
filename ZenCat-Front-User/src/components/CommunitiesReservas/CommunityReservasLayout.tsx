@@ -8,15 +8,25 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { ChevronDown, Calendar } from 'lucide-react';
 import { ReservationsTable } from './CommunityReservationTable';
-import { Reservation, ReservationState } from '@/types/reservation'; // Importa el enum actualizado
-import {} from '@/api/reservations/reservations';
+import { ReservationDetailDialog } from './ReservationDetailDialog';
+import { Reservation, ReservationState } from '@/types/reservation';
+import { reservationsApi } from '@/api/reservations/reservations';
+import { professionalsApi } from '@/api/professionals/professionals';
+import { localsApi } from '@/api/locals/locals';
+import { useAuth } from '@/context/AuthContext';
+import { communityServicesApi } from '@/api/communities/community-services';
+import { servicesApi } from '@/api/services/services';
+import { membershipService } from '@/api/membership/membership';
+
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
-    from: '/mis-comunidades/$communityId/reservas/historial',
+    from: '/historial-reservas/$communityId',
   });
 
   const { search } = useLocation();
+  const { user } = useAuth();
   const queryParams = new URLSearchParams(search);
   let communityName = queryParams.get('name');
 
@@ -42,6 +52,10 @@ const CommunityReservasLayout = () => {
   const [filterByDate, setFilterByDate] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
   const [filterByPlace, setFilterByPlace] = useState('');
+  
+  // Estados para el dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!communityId) {
@@ -54,83 +68,64 @@ const CommunityReservasLayout = () => {
       setLoadingReservations(true);
       setErrorReservations(null);
       try {
-        // --- SIMULACIÓN DE DATOS DUMMY ---
-        const dummyData: Reservation[] = [
-          {
-            id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-            name: 'Clase de Yoga Matutina',
-            user_name: 'Juan Pérez',
-            teacher: 'Ana García',
-            place: 'Pabellón A',
-            reservation_time: '2025-06-20T09:00:00Z', // Hoy
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'b2c3d4e5-f6a7-8901-2345-67890abcdef0',
-            name: 'Consulta Pediátrica',
-            user_name: 'María López',
-            teacher: 'Dr. Luis Martínez',
-            place: 'Edificio Central',
-            reservation_time: '2025-06-19T14:30:00Z', // Ayer
-            state: 'DONE', // Completada
-          },
-          {
-            id: 'c3d4e5f6-a7b8-9012-3456-7890abcdef01',
-            name: 'Acceso a Gimnasio',
-            user_name: 'Carlos Sánchez',
-            teacher: null,
-            place: 'Gimnasio Principal',
-            reservation_time: '2025-06-15T18:00:00Z', // Dentro de la última semana
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'd4e5f6a7-b8c9-0123-4567-890abcdef012',
-            name: 'Clase de Pilates',
-            user_name: 'Laura Torres',
-            teacher: 'Elena Ruiz',
-            place: 'Salón de Usos Múltiples',
-            reservation_time: '2025-06-10T10:00:00Z', // Más antigua que la última semana
-            state: 'DONE', // Completada
-          },
-          {
-            id: 'e5f6a7b8-c9d0-1234-5678-90abcdef0123',
-            name: 'Sesión de Mindfulness',
-            user_name: 'Pedro Gómez',
-            teacher: null,
-            place: 'Área Recreativa',
-            reservation_time: '2025-06-05T16:00:00Z', // Más antigua
-            state: 'CANCELLED', // Cancelada
-          },
-          {
-            id: 'f6a7b8c9-d0e1-2345-6789-0abcdef01234',
-            name: 'Entrenamiento Funcional',
-            user_name: 'Ana Morales',
-            teacher: 'Ricardo Castro',
-            place: 'Zona Deportiva',
-            reservation_time: '2025-06-20T17:00:00Z', // Hoy
-            state: 'ONGOING', // En proceso
-          },
-          {
-            id: 'a0b1c2d3-e4f5-6789-0123-456789abcdef',
-            name: 'Clase de Zumba',
-            user_name: 'Sofía Díaz',
-            teacher: 'Carolina Vega',
-            place: 'Pabellón A',
-            reservation_time: '2025-06-17T19:00:00Z', // Dentro de la última semana
-            state: 'DONE', // Completada
-          },
-        ];
+        const userId = user?.id;
+        
+        if (!userId) {
+          throw new Error('No se pudo obtener el ID del usuario');
+        }
 
-        setAllReservations(dummyData);
-        // --- FIN SIMULACIÓN DE DATOS DUMMY ---
-
-        // Comenta o elimina la llamada real al backend durante el desarrollo con dummy data
-        // const response = await fetch(`/api/communities/${communityId}/reservations`);
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! status: ${response.status}`);
-        // }
-        // const data: Reservation[] = await response.json();
-        // setAllReservations(data);
+        // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
+        const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
+        const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
+        // Enriquecer las reservas con información de profesor y lugar
+        const reservationsWithDetails = await Promise.all(
+          response.map(async (reservation: Reservation) => {
+            const session = reservation.session;
+            
+            let professionalName = "";
+            let placeName = "";
+            
+            const communityService = communityServices.find((service) => service.id === reservation.session.community_service_id);
+            const service = await servicesApi.getServiceById(communityService?.service_id as string);
+            
+            // Obtener información del profesor si es necesario
+            if (session && session.professional_id && !reservation.professional) {
+              try {
+                const professionalData = await professionalsApi.getProfessional(session.professional_id);
+                professionalName = professionalData.name;
+              } catch (error) {
+                console.warn(`No se pudo obtener información del profesor: ${error}`);
+                professionalName = session.title || `Profesor ID: ${session.professional_id}`;
+              }
+            } else if (reservation.professional) {
+              // Si ya tenemos el nombre del profesor en la reserva, usarlo directamente
+              professionalName = reservation.professional;
+            }
+            
+            // Obtener información del local si es necesario
+            if (session && session.local_id && !reservation.place) {
+              try {
+                const localData = await localsApi.getLocal(session.local_id);
+                placeName = localData.local_name;
+              } catch (error) {
+                console.warn(`No se pudo obtener información del local: ${error}`);
+                placeName = `Local ID: ${session.local_id}`;
+              }
+            } else if (reservation.place) {
+              placeName = reservation.place;
+            }
+            
+            // Devolver la reserva con la información adicional
+            return {
+              ...reservation,
+              professional: professionalName || reservation.professional,
+              place: placeName || reservation.place,
+              service_name: service?.name || 'Servicio desconocido'
+            };
+          })
+        );
+        
+        setAllReservations(reservationsWithDetails);
       } catch (err) {
         console.error('Error al cargar reservas:', err);
         setErrorReservations(
@@ -142,7 +137,7 @@ const CommunityReservasLayout = () => {
     };
 
     fetchReservations();
-  }, [communityId]);
+  }, [communityId, user]);
 
   // Filtra las reservas basado en los estados de filtro
   const filteredReservations = useMemo(() => {
@@ -153,9 +148,9 @@ const CommunityReservasLayout = () => {
       currentReservations = currentReservations.filter(
         (res) =>
           res.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.user_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.teacher?.toLowerCase().includes(lowerCaseSearchTerm) ||
-          res.place?.toLowerCase().includes(lowerCaseSearchTerm),
+          (res.user_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm),
       );
     }
 
@@ -182,20 +177,26 @@ const CommunityReservasLayout = () => {
         const stateEnumValue = res.state;
         // Comparamos con el string que se configuró en setFilterByStatus
         if (
-          filterByStatus === 'completada' &&
+          filterByStatus === 'DONE' &&
           stateEnumValue === ReservationState.DONE
         ) {
           return true;
         }
         if (
-          filterByStatus === 'cancelada' &&
+          filterByStatus === 'CANCELLED' &&
           stateEnumValue === ReservationState.CANCELLED
         ) {
           return true;
         }
         if (
-          filterByStatus === 'en proceso' &&
-          stateEnumValue === ReservationState.ONGOING
+          filterByStatus === 'CONFIRMED' &&
+          stateEnumValue === ReservationState.CONFIRMED
+        ) {
+          return true;
+        }
+        if (
+          filterByStatus === 'ANULLED' &&
+          stateEnumValue === ReservationState.ANULLED
         ) {
           return true;
         }
@@ -219,9 +220,77 @@ const CommunityReservasLayout = () => {
   ]);
 
   const handleViewReservation = (reservation: Reservation) => {
-    alert(
-      `Ver detalles de la reserva: ${reservation.name} (ID: ${reservation.id})`,
-    );
+    setSelectedReservation(reservation);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedReservation(null);
+  };
+
+  const handleCancelReservation = async (reservationOrId: Reservation | string) => {
+    try {
+      // Determinar si recibimos una reserva completa o solo el ID
+      let reservation: Reservation;
+      
+      if (typeof reservationOrId === 'string') {
+        // Si recibimos un ID, buscar la reserva en el estado local
+        const foundReservation = allReservations.find(r => r.id === reservationOrId);
+        if (!foundReservation) {
+          console.error('Reserva no encontrada');
+          return;
+        }
+        reservation = foundReservation;
+      } else {
+        // Si recibimos el objeto completo
+        reservation = reservationOrId;
+      }
+
+      if (!reservation) {
+        console.error('Reserva no encontrada');
+        return;
+      }
+
+      // 1. Cancelar la reserva
+      await reservationsApi.updateReservation(reservation.id, {
+        state: ReservationState.CANCELLED,
+      });
+      
+      // 2. Si hay membresía asociada, actualizar las reservas usadas
+      if (reservation.membership_id) {
+        console.log('Actualizando membresía:', reservation.membership_id);
+        
+        const membership = await membershipService.getMembershipById(reservation.membership_id);
+        
+        // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
+        if (membership.plan.reservation_limit !== null && 
+            typeof membership.reservations_used === 'number' && 
+            membership.reservations_used > 0) {
+          
+          await membershipService.updateMembership(membership.id, {
+            reservations_used: membership.reservations_used - 1,
+          });
+          
+          console.log('Reservas usadas actualizadas:', {
+            membresiaId: membership.id,
+            reservasAnteriores: membership.reservations_used,
+            reservasNuevas: membership.reservations_used - 1
+          });
+        }
+      }
+      
+      // 3. Actualizar el estado local cambiando el estado de la reserva
+      setAllReservations(prev => prev.map(r => 
+        r.id === reservation.id 
+          ? { ...r, state: ReservationState.CANCELLED }
+          : r
+      ));
+      
+    } catch (error) {
+      console.error('Error al cancelar reserva:', error);
+      alert('Error al cancelar la reserva. Por favor, inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -267,8 +336,12 @@ const CommunityReservasLayout = () => {
           {/* Filtro por fecha */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
-                Filtrar por fecha
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                {filterByDate === '' ? 'Filtrar por fecha' : 
+                 filterByDate === 'today' ? 'Hoy' : 
+                 filterByDate === 'week' ? 'Última semana' : 'Filtrar por fecha'}
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -288,22 +361,30 @@ const CommunityReservasLayout = () => {
           {/* Filtro por estado */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
-                Filtrar por estado
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
+                {filterByStatus === '' ? 'Filtrar por estado' : 
+                 filterByStatus === 'DONE' ? 'Finalizada' : 
+                 filterByStatus === 'CANCELLED' ? 'Cancelada' : 
+                 filterByStatus === 'CONFIRMED' ? 'Confirmada' : 
+                 filterByStatus === 'ANULLED' ? 'Anulada' : 'Filtrar por estado'}
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setFilterByStatus('')}>
                 Todos
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('en proceso')}>
-                En proceso
+              <DropdownMenuItem onClick={() => setFilterByStatus('CONFIRMED')}>
+                Confirmada
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('completada')}>
-                Completada
+              <DropdownMenuItem onClick={() => setFilterByStatus('DONE')}>
+                Finalizada
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('cancelada')}>
+              <DropdownMenuItem onClick={() => setFilterByStatus('CANCELLED')}>
                 Cancelada
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterByStatus('ANULLED')}>
+                Anulada
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -311,8 +392,9 @@ const CommunityReservasLayout = () => {
           {/* Filtro por lugar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white">
-                Filtrar por lugar
+              <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
+                {filterByPlace === '' ? 'Filtrar por lugar' : filterByPlace}
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -382,6 +464,15 @@ const CommunityReservasLayout = () => {
           </>
         )}
       </div>
+
+      {/* Dialog de detalles de reserva */}
+      <ReservationDetailDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        reservation={selectedReservation}
+        onCancelReservation={handleCancelReservation}
+        communityName={communityName || undefined}
+      />
     </div>
   );
 };

@@ -8,6 +8,7 @@ import {
   FaEnvelope,
   FaWhatsapp,
 } from 'react-icons/fa';
+import { contactApi } from '@/api/contact/contact';
 
 export default function ContactSection() {
   // Estados para controlar el envío y mostrar mensaje inline
@@ -23,32 +24,26 @@ export default function ContactSection() {
     setErrorMensaje('');
 
     const form = e.currentTarget;
+
     const formData = new FormData(form);
 
-    try {
-      const response = await fetch('https://formspree.io/f/xblydjkn', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-        },
-        body: formData,
-      });
+    const data = {
+        name: formData.get('name')?.toString() || '',
+        email: formData.get('email')?.toString() || '',
+        phone: formData.get('phone')?.toString() || '',
+        subject: formData.get('subject')?.toString() || '',
+        message: formData.get('message')?.toString() || '',
+    };
 
-      if (response.ok) {
-        setEstadoEnvio('exito');
-        form.reset(); // limpia los campos
-        setTimeout(() => setEstadoEnvio('idle'), 5000);
-      } else {
-        const data = await response.json();
-        const msg =
-          data?.errors?.length > 0
-            ? data.errors.map((err: any) => err.message).join(', ')
-            : 'Error al enviar el formulario.';
-        setErrorMensaje(msg);
-        setEstadoEnvio('error');
-      }
-    } catch {
-      setErrorMensaje('Ocurrió un error de red. Intenta nuevamente más tarde.');
+    try {
+      await contactApi.sendMessage(data);
+      setEstadoEnvio('exito');
+      form.reset();
+      setTimeout(() => setEstadoEnvio('idle'), 5000);
+    } catch (error: any) {
+      const msg =
+        error?.message || 'Ocurrió un error al enviar el mensaje.';
+      setErrorMensaje(msg);
       setEstadoEnvio('error');
     }
   };

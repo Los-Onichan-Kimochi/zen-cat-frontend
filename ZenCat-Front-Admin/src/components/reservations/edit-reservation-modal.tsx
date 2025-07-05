@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { ModalNotifications } from '@/components/custom/common/modal-notifications';
 import { useModalNotifications } from '@/hooks/use-modal-notifications';
 import { useToast } from '@/context/ToastContext';
@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ import {
 import { Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
-import { userService } from '@/api/usuarios/usuarios';
+import { membershipsApi } from '@/api/memberships/memberships';
 import {
   Reservation,
   UpdateReservationRequest,
@@ -44,226 +44,262 @@ export function EditReservationModal({
   onSuccess,
   reservation,
 }: EditReservationModalProps) {
-  const [formData, setFormData] = useState<UpdateReservationRequest>({
-    name: '',
-    reservation_time: '',
-    state: ReservationState.CONFIRMED,
-    user_id: '',
-  });
-  const { modal, error, closeModal } = useModalNotifications();
+  // State for form data (solo nombre y estado)
+  const [name, setName] = useState('');
+  const [reservationState, setReservationState] = useState<ReservationState>(ReservationState.CONFIRMED);
+  const [isLoading, setIsLoading] = useState(false);
+  const [membershipReservationsUsed, setMembershipReservationsUsed] = useState<number | null>(null);
+  
+  // Hooks
+  const { modal, closeModal } = useModalNotifications();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
-  // Initialize form when reservation changes
+  // Obtener la información de membresía si tenemos un ID de usuario y comunidad
   useEffect(() => {
-    if (reservation) {
-      setFormData({
-        name: reservation.name,
-        reservation_time: new Date(reservation.reservation_time)
-          .toISOString()
-          .slice(0, 16), // Convert to YYYY-MM-DDTHH:mm format
-        state: reservation.state,
-        user_id: reservation.user_id,
-      });
+    if (reservation && reservation.user_id && reservation.session_id) {
+      // Primero, obtener el ID de la comunidad desde la sesión
+      const fetchMembershipData = async () => {
+        try {
+          setIsLoading(true);
+          // Este es un enfoque simplificado, deberías adaptar esta lógica a tu estructura de API
+          const sessionResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/session/${reservation.session_id}`);
+          if (!sessionResponse.ok) throw new Error("Error obteniendo sesión");
+          const sessionData = await sessionResponse.json();
+          
+          if (sessionData.community_service_id) {
+            // Ahora conseguimos el servicio de comunidad para obtener el ID de comunidad
+            const serviceResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/community-service/${sessionData.community_service_id}`);
+            if (!serviceResponse.ok) throw new Error("Error obteniendo servicio de comunidad");
+            const serviceData = await serviceResponse.json();
+            
+            if (serviceData.community_id) {
+              // Finalmente obtenemos la membresía
+              try {
+                const membership = await membershipsApi.getMembershipByUserAndCommunity(
+                  reservation.user_id,
+                  serviceData.community_id
+                );
+                console.log('Membership data for edit:', membership);
+                
+                // Determinar si es un plan ilimitado o con límite
+                if (membership.plan?.reservation_limit === null || 
+                    membership.plan?.reservation_limit === 0) {
+                  setMembershipReservationsUsed(null); // Plan ilimitado
+                } else {
+                  setMembershipReservationsUsed(membership.reservations_used);
+                }
+              } catch (membershipErr) {
+                console.warn('No se pudo obtener datos de membresía:', membershipErr);
+                setMembershipReservationsUsed(null);
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error obteniendo datos para membership_reservations_used:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchMembershipData();
     }
   }, [reservation]);
 
-  // Fetch users for the select
-  const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['usuarios'],
-    queryFn: () => userService.getAll(),
-    enabled: isOpen, // Only fetch when modal is open
-  });
+  // Initialize form with reservation data when it changes (solo nombre y estado)
+  useEffect(() => {
+    if (reservation) {
+      console.log('Reservation data received:', reservation);
+      setName(reservation.name || '');
+      setReservationState(reservation.state || ReservationState.CONFIRMED);
+    } else {
+      // Reset form if no reservation is provided
+      setName('');
+      setReservationState(ReservationState.CONFIRMED);
+    }
+  }, [reservation]);
 
-  const usersData = usersResponse?.users || [];
+  // Ya no necesitamos cargar usuarios porque no vamos a cambiar el usuario
 
-  const { mutate: updateReservation, isPending: isUpdating } = useMutation({
-    mutationFn: (data: UpdateReservationRequest) => {
-      // Convert reservation_time to ISO format for backend
-      const updatedData = {
-        ...data,
-        // Only include reservation_time if it's provided and valid
-        ...(data.reservation_time && {
-          reservation_time: new Date(data.reservation_time).toISOString(),
-        }),
-      };
-      return reservationsApi.updateReservation(reservation!.id, updatedData);
+  // Update mutation
+  const updateReservationMutation = useMutation({
+    mutationFn: async (data: UpdateReservationRequest) => {
+      if (!reservation?.id) {
+        throw new Error('No reservation ID provided');
+      }
+      console.log('Updating reservation with ID:', reservation.id);
+      return reservationsApi.updateReservation(reservation.id, data);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      console.log('Reservation updated successfully with data:', variables);
       toast.success('Reserva Actualizada', {
         description: 'La reserva ha sido actualizada exitosamente.',
       });
+      
+      // Invalidar consultas para actualizar la UI
+      if (reservation?.session_id) {
+        queryClient.invalidateQueries({ queryKey: ['reservations', 'session', reservation.session_id] });
+      }
+      
+      // Resetear estado y cerrar modal
+      setIsLoading(false);
+      handleClose();
       onSuccess();
-      onClose();
     },
     onError: (err: any) => {
-      error('Error al actualizar la reserva', {
+      console.error('Error updating reservation:', err);
+      toast.error('Error al actualizar la reserva', {
         description: err.message || 'No se pudo actualizar la reserva',
       });
+      setIsLoading(false);
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    if (!formData.name?.trim()) {
-      error('Error de validación', {
+    // Validaciones
+    if (!name.trim()) {
+      toast.error('Validación', {
         description: 'El nombre es requerido',
       });
+      setIsLoading(false);
       return;
     }
 
-    if (!formData.user_id) {
-      error('Error de validación', {
-        description: 'Debe seleccionar un usuario',
-      });
-      return;
-    }
+    try {
+      // Solo enviamos nombre y estado
+      const updateData: UpdateReservationRequest = {
+        name: name.trim(),
+        state: reservationState,
+      };
 
-    updateReservation(formData);
+      console.log('Enviando datos de actualización:', updateData);
+      await updateReservationMutation.mutateAsync(updateData);
+    } catch (err) {
+      console.error('Error en la actualización de la reserva:', err);
+      setIsLoading(false);
+    }
   };
 
-  if (!reservation) return null;
+  const handleClose = () => {
+    if (!isLoading) {
+      // Reset form state (solo nombre y estado)
+      setName('');
+      setReservationState(ReservationState.CONFIRMED);
+      // Call parent onClose
+      onClose();
+    }
+    // Eliminamos el toast para no mostrar ningún mensaje cuando se intenta cerrar durante la carga
+  };
 
-  // Find the current user for display
-  const currentUser = usersData.find((user) => user.id === reservation.user_id);
-  const currentUserDisplay = currentUser
-    ? `${currentUser.name}${currentUser.email ? ` (${currentUser.email})` : ''}`
-    : 'Usuario no encontrado';
+  // Ensure we have a reservation object to work with
+  if (!isOpen || !reservation) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <DialogTitle className="text-xl font-bold">
-            Editar Reserva
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Nombre de la Reserva</Label>
-            <Input
-              id="name"
-              value={formData.name || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Ingrese el nombre de la reserva"
-              required
-              className="border-gray-200"
-            />
-          </div>
-
-          {/* Current User Display (read-only) */}
-          <div className="space-y-1.5">
-            <Label htmlFor="current-user">Usuario Actual</Label>
-            <Input
-              id="current-user"
-              value={currentUserDisplay}
-              disabled
-              className="bg-gray-50 border-gray-200"
-            />
-          </div>
-
-          {/* User Selection */}
-          <div className="space-y-1.5">
-            <Label htmlFor="user">Cambiar Usuario</Label>
-            {isLoadingUsers ? (
-              <div className="flex items-center gap-2 p-2.5 bg-gray-50 border border-gray-200 rounded text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Cargando usuarios...</span>
-              </div>
-            ) : (
-              <Select
-                value={formData.user_id || ''}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, user_id: value })
-                }
-              >
-                <SelectTrigger className="border-gray-200">
-                  <SelectValue placeholder="Seleccionar usuario" />
-                </SelectTrigger>
-                <SelectContent>
-                  {usersData.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      <div className="flex flex-col">
-                        <span>{user.name}</span>
-                        <span className="text-xs text-gray-500">
-                          {user.email}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          {/* Reservation Time */}
-          <div className="space-y-1.5">
-            <Label htmlFor="reservation_time">Fecha y Hora de Reserva</Label>
-            <Input
-              id="reservation_time"
-              type="datetime-local"
-              value={formData.reservation_time || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, reservation_time: e.target.value })
-              }
-              required
-              className="border-gray-200"
-            />
-          </div>
-
-          {/* State */}
-          <div className="space-y-1.5">
-            <Label htmlFor="state">Estado</Label>
-            <Select
-              value={formData.state || ReservationState.CONFIRMED}
-              onValueChange={(value) =>
-                setFormData({ ...formData, state: value as ReservationState })
-              }
-            >
-              <SelectTrigger className="border-gray-200">
-                <SelectValue placeholder="Seleccionar estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ReservationState.CONFIRMED}>
-                  Confirmada
-                </SelectItem>
-                <SelectItem value={ReservationState.DONE}>
-                  Completada
-                </SelectItem>
-                <SelectItem value={ReservationState.CANCELLED}>
-                  Cancelada
-                </SelectItem>
-                <SelectItem value={ReservationState.ANULLED}>
-                  Anulada
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isUpdating}>
-              {isUpdating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Actualizando...
-                </>
-              ) : (
-                'Actualizar Reserva'
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-
+    <>
       <ModalNotifications modal={modal} onClose={closeModal} />
-    </Dialog>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Reserva</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Título
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="state" className="text-right">
+                  Estado
+                </Label>
+                <Select
+                  value={reservationState}
+                  onValueChange={(value) => setReservationState(value as ReservationState)}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ReservationState.CONFIRMED}>
+                      Confirmada
+                    </SelectItem>
+                    <SelectItem value={ReservationState.DONE}>
+                      Completada
+                    </SelectItem>
+                    <SelectItem value={ReservationState.CANCELLED}>
+                      Cancelada
+                    </SelectItem>
+                    <SelectItem value={ReservationState.ANULLED}>
+                      Anulada
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Sesión</Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {reservation.session_title || 'Sesión'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Usuario</Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {reservation.user_name || 'Usuario'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Reservas usadas</Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {isLoading ? "Cargando..." : (
+                    membershipReservationsUsed === null ? 
+                    "Ilimitado" : 
+                    membershipReservationsUsed.toString()
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Fecha y Hora</Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {reservation.reservation_time ? new Date(reservation.reservation_time).toLocaleString('es-ES') : 'No disponible'}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Actualizando...
+                  </>
+                ) : 'Actualizar'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

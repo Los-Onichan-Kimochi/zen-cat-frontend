@@ -14,6 +14,11 @@ export interface BulkCreateCommunityServicePayload {
   community_services: CreateCommunityServicePayload[];
 }
 
+export interface DeleteCommunityServicePayload {
+  community_id: string;
+  service_id: string;
+}
+
 export interface BulkDeleteCommunityServicePayload {
-  community_services: string[];
+  community_services: DeleteCommunityServicePayload[];
 }

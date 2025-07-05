@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
   SearchInput,
@@ -29,6 +29,7 @@ function ComunidadesComponent() {
 
   // Obtener el usuario del contexto de autenticación (igual que en perfil.tsx)
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch user communities usando el ID del usuario autenticado
   const { communities, loading, error } = useUserCommunities(user?.id);

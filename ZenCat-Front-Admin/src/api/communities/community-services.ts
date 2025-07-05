@@ -3,6 +3,7 @@ import {
   BulkCreateCommunityServicePayload,
   BulkDeleteCommunityServicePayload,
 } from '@/types/community-service';
+import { Service } from '@/types/service';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
@@ -30,18 +31,26 @@ export const communityServicesApi = {
     payload: BulkDeleteCommunityServicePayload,
   ): Promise<void> => {
     return apiClient.delete<void>(
-      API_ENDPOINTS.COMMUNITY_PLANS.BULK_DELETE,
+      API_ENDPOINTS.COMMUNITY_SERVICES.BULK_DELETE,
       payload,
     );
+  },
+
+  getCommunityServiceById: async (id: string): Promise<CommunityService> => {
+    const endpoint = API_ENDPOINTS.COMMUNITY_SERVICES.BY_ID(id);
+    const data = await apiClient.get<CommunityService>(endpoint);
+    return data;
   },
 
   getCommunityServices: async (
     communityId?: string,
     serviceId?: string,
+    id?: string,
   ): Promise<CommunityService[]> => {
     const queryParams = new URLSearchParams();
     if (communityId) queryParams.append('communityId', communityId);
     if (serviceId) queryParams.append('serviceId', serviceId);
+    if (id) queryParams.append('id', id);
 
     const endpoint = `${API_ENDPOINTS.COMMUNITY_SERVICES.BASE}?${queryParams.toString()}`;
     const data = await apiClient.get<any>(endpoint);
@@ -52,5 +61,20 @@ export const communityServicesApi = {
       return data;
     }
     throw new Error('Unexpected data structure from community-service API');
+  },
+
+  getServicesByCommunityId: async (communityId: string): Promise<Service[]> => {
+    const endpoint =
+      API_ENDPOINTS.COMMUNITY_SERVICES.BY_COMMUNITY_ID(communityId);
+    const data = await apiClient.get<any>(endpoint);
+
+    if (data && Array.isArray(data.services)) {
+      return data.services;
+    } else if (Array.isArray(data)) {
+      return data;
+    }
+    throw new Error(
+      'Unexpected data structure from services by community ID API',
+    );
   },
 };

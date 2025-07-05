@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   USERS: {
     BASE: '/user/',
     BY_ID: (id: string) => `/user/${id}/`,
+    WITH_IMAGE: (id: string) => `/user/${id}/image/`,
     BULK_DELETE: '/user/bulk-delete/',
   },
 
@@ -38,6 +39,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/professional/${id}/`,
     BULK_CREATE: '/professional/bulk-create/',
     BULK_DELETE: '/professional/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/professional/${id}/image/`,
   },
 
   // Session endpoints
@@ -52,6 +54,7 @@ export const API_ENDPOINTS = {
     BASE: '/service/',
     BY_ID: (id: string) => `/service/${id}/`,
     BULK_DELETE: '/service/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/service/${id}/image/`,
   },
 
   // Local endpoints
@@ -60,6 +63,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/local/${id}/`,
     BULK_CREATE: '/local/bulk-create/',
     BULK_DELETE: '/local/bulk-delete/',
+    WITH_IMAGE: (id: string) => `/local/${id}/image/`,
   },
 
   // Plan endpoints
@@ -98,8 +102,11 @@ export const API_ENDPOINTS = {
     BASE: '/community-service/',
     BULK_CREATE: '/community-service/bulk-create/',
     BULK_DELETE: '/community-service/bulk-delete/',
+    BY_COMMUNITY_ID: (communityId: string) =>
+      `/community-service/${communityId}/`,
     BY_IDS: (communityId: string, serviceId: string) =>
       `/community-service/${communityId}/${serviceId}/`,
+    BY_ID: (id: string) => `/community-service/id/${id}/`,
   },
 
   // Community-Plan association endpoints
@@ -109,6 +116,22 @@ export const API_ENDPOINTS = {
     BULK_DELETE: '/community-plan/bulk-delete/',
     BY_IDS: (communityId: string, planId: string) =>
       `/community-plan/${communityId}/${planId}/`,
+  },
+
+  // Report endpoints
+  REPORTS: {
+    SERVICES: '/reports/services',
+    COMMUNITIES: '/reports/communities',
+    // Aquí podemos agregar mas si da el tiempo :c
+  },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
+    USERS_BY_COMMUNITY: (communityId: string) => `/membership/community/${communityId}/users`,
+    BY_USER_AND_COMMUNITY: (userId: string, communityId: string) => 
+      `/membership/user/${userId}/community/${communityId}`,
   },
 } as const;
 

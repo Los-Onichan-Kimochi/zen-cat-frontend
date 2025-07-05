@@ -43,6 +43,7 @@ import { FormProvider } from 'react-hook-form';
 import { useLocalForm } from '@/hooks/use-local-basic-form';
 import { LocalForm } from '@/components/locals/local-basic-form';
 import { toast } from 'sonner';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 const regiones: Region[] = rawRegiones;
 const provincias: Provincia[] = rawProvincias;
@@ -122,6 +123,16 @@ function EditLocalComponent() {
    */
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
   useEffect(() => {
     if (local) {
       form.reset({
@@ -135,31 +146,29 @@ function EditLocalComponent() {
         capacity: local.capacity || 0,
         image_url: local.image_url || null,
       });
+      if (local.image_url) {
+        setImagePreview(local.image_url);
+      }
     }
   }, [local, form]);
+
   const updateMutation = useMutation({
-    mutationFn: async (
-      data: UpdateLocalPayload & { imageFile?: File | null },
-    ) => {
-      const imageUrl = data.imageFile
-        ? URL.createObjectURL(data.imageFile)
-        : local?.image_url || 'https://via.placeholder.com/150';
-      return localsApi.updateLocal(id!, {
-        local_name: data.local_name,
-        street_name: data.street_name,
-        building_number: data.building_number,
-        region: data.region,
-        province: data.province,
-        district: data.district,
-        reference: data.reference,
-        capacity: data.capacity,
-        image_url: imageUrl,
-      });
+    mutationFn: async (data: UpdateLocalPayload) => {
+      const payload: UpdateLocalPayload = { ...data };
+
+      if (imageFile) {
+        payload.image_url = imageFile.name;
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
+      }
+
+      return localsApi.updateLocal(id!, payload);
     },
     onSuccess: () => {
       toast.success('Local Actualizado', {
         description: 'El local ha sido actualizado exitosamente.',
       });
+      queryClient.invalidateQueries({ queryKey: ['locals'] });
       queryClient.invalidateQueries({ queryKey: ['local', id] });
       //setIsEditing(false);
       navigate({ to: '/locales' });
@@ -203,12 +212,12 @@ function EditLocalComponent() {
         <form
           className="space-y-2"
           onSubmit={form.handleSubmit((data) => {
-            updateMutation.mutate({ ...data, imageFile });
+            updateMutation.mutate(data);
           })}
         >
           <LocalForm
-            imagePreview={local.image_url}
-            handleImageChange={() => {}}
+            imagePreview={imagePreview}
+            handleImageChange={handleImageChange}
             isReadOnly={false}
             description="Edite los datos del local y guarde los cambios"
           />

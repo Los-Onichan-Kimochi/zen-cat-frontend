@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh/',
     LOGOUT: '/auth/logout/',
     ME: '/me/',
+    GOOGLE_LOGIN: '/login/google/',
   },
 
   // Community endpoints
@@ -35,6 +36,7 @@ export const API_ENDPOINTS = {
     BASE: '/user/',
     BY_ID: (id: string) => `/user/${id}/`,
     BULK_DELETE: '/user/bulk-delete/',
+    ONBOARDING: (userId: string) => `/user/${userId}/onboarding/`,
   },
 
   // Professional endpoints
@@ -79,5 +81,42 @@ export const API_ENDPOINTS = {
     BASE: '/reservation/',
     BY_ID: (id: string) => `/reservation/${id}/`,
     BULK_DELETE: '/reservation/bulk-delete/',
+  },
+  // Contact endpoint
+  CONTACT: {
+    SEND: '/contact',
+  },
+
+  // Onboarding endpoints
+  ONBOARDING: {
+    GET_BY_USER: (userId: string) => `/onboarding/user/${userId}/`,
+    CREATE_FOR_USER: (userId: string) => `/onboarding/user/${userId}/`,
+    UPDATE_FOR_USER: (userId: string) => `/onboarding/user/${userId}/`,
+  },
+
+  // Community Plans endpoints
+  COMMUNITY_PLANS: {
+    BASE: '/community-plan/',
+    BY_COMMUNITY_ID: (communityId: string) =>
+      `/community-plan/?communityId=${communityId}`,
+    BY_ID: (id: string) => `/community-plan/${id}/`,
+  },
+
+  // Membership endpoints
+  MEMBERSHIPS: {
+    BASE: '/membership/',
+    BY_ID: (id: string) => `/membership/${id}/`,
+    BY_USER: (userId: string) => `/membership/user/${userId}/`,
+    BY_COMMUNITY: (communityId: string) =>
+      `/membership/community/${communityId}/`,
+    CREATE_FOR_USER: (userId: string) => `/membership/user/${userId}/`,
+    CREATE_FOR_COMMUNITY: (communityId: string) =>
+      `/membership/community/${communityId}/`,
+    UPDATE_FOR_USER: (userId: string) => `/membership/user/${userId}/`,
+    UPDATE_FOR_COMMUNITY: (communityId: string) =>
+      `/membership/community/${communityId}/`,
+    DELETE_FOR_USER: (userId: string) => `/membership/user/${userId}/`,
+    DELETE_FOR_COMMUNITY: (communityId: string) =>
+      `/membership/community/${communityId}/`,
   },
 } as const;

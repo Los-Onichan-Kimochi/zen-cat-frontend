@@ -3,10 +3,12 @@ import {
   Service,
   CreateServicePayload,
   UpdateServicePayload,
+  ServiceWithImage,
 } from '@/types/service';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const servicesApi = {
   bulkCreateServices: async (
     payload: BulkCreateServicePayload,
@@ -45,6 +47,12 @@ export const servicesApi = {
 
   getServiceById: async (id: string): Promise<Service> => {
     return apiClient.get<Service>(API_ENDPOINTS.SERVICES.BY_ID(id));
+  },
+
+  getServiceWithImage: async (id: string): Promise<ServiceWithImage> => {
+    return apiClient.get<ServiceWithImage>(
+      API_ENDPOINTS.SERVICES.WITH_IMAGE(id),
+    );
   },
 
   createService: async (payload: CreateServicePayload): Promise<Service> => {
