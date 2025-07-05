@@ -21,6 +21,7 @@ export interface UserMembership {
   start_date: string;
   end_date: string;
   status: 'active' | 'inactive' | 'suspended' | 'expired';
+  reservations_used?: number | null;
   plan?: {
     id: string;
     type: string;

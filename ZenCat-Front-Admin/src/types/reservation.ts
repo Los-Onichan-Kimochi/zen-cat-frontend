@@ -11,6 +11,8 @@ export interface Reservation {
   user_email?: string;
   user_phone?: string;
   session_title?: string;
+  // Campo para las reservas usadas de la membresía
+  membership_reservations_used?: number | null;
 }
 
 export enum ReservationState {

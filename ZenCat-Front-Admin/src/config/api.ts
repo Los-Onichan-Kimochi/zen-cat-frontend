@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   USERS: {
     BASE: '/user/',
     BY_ID: (id: string) => `/user/${id}/`,
+    WITH_IMAGE: (id: string) => `/user/${id}/image/`,
     BULK_DELETE: '/user/bulk-delete/',
   },
 

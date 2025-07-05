@@ -154,6 +154,14 @@ function SessionReservationsComponent() {
   };
 
   const handleEdit = (reservation: Reservation) => {
+    // Verificar si la sesión está cancelada
+    if (session?.state === 'CANCELLED') {
+      toast.error('Acción no permitida', {
+        description: 'No se pueden editar reservas de una sesión cancelada.'
+      });
+      return;
+    }
+    
     // Enriquecer la reserva seleccionada con datos de usuario
     const user = (usersData || []).find((u) => u.id === reservation.user_id);
     const enrichedReservation = {
@@ -258,7 +266,7 @@ function SessionReservationsComponent() {
       {/* Session info card */}
       {session && (
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <div className="text-sm text-gray-600">Título</div>
               <div className="font-medium">{session.title}</div>
@@ -276,15 +284,48 @@ function SessionReservationsComponent() {
                 {reservations.length}/{session.capacity} reservas
               </div>
             </div>
+            <div>
+              <div className="text-sm text-gray-600">Estado</div>
+              <div className={`font-medium ${
+                session.state === 'CANCELLED' ? 'text-red-600' : 
+                session.state === 'COMPLETED' ? 'text-gray-600' : 
+                session.state === 'ONGOING' ? 'text-green-600' : 
+                'text-blue-600'
+              }`}>
+                {session.state === 'SCHEDULED' ? 'Programada' :
+                 session.state === 'ONGOING' ? 'En curso' :
+                 session.state === 'COMPLETED' ? 'Completada' :
+                 session.state === 'CANCELLED' ? 'Cancelada' :
+                 session.state === 'RESCHEDULED' ? 'Reprogramada' : 
+                 session.state}
+              </div>
+            </div>
           </div>
+          {session.state === 'CANCELLED' && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center">
+              <div className="text-red-600">
+                <strong>Sesión cancelada:</strong> No se pueden agregar ni modificar reservas para esta sesión.
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Actions */}
       <div className="flex justify-end mb-4">
         <Button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => {
+            if (session?.state === 'CANCELLED') {
+              toast.error('Acción no permitida', {
+                description: 'No se pueden agregar reservas a una sesión cancelada.'
+              });
+              return;
+            }
+            setIsCreateModalOpen(true);
+          }}
           className="flex items-center gap-2"
+          disabled={session?.state === 'CANCELLED'}
+          title={session?.state === 'CANCELLED' ? "No se pueden agregar reservas para sesiones canceladas" : ""}
         >
           <Plus className="h-4 w-4" />
           Nueva Reserva
@@ -299,6 +340,7 @@ function SessionReservationsComponent() {
         onDelete={handleDelete}
         onBulkDelete={handleBulkDelete}
         isBulkDeleting={isBulkDeleting}
+        disableEditing={session?.state === 'CANCELLED'}
       />
 
       {/* Create Modal */}
