@@ -40,6 +40,22 @@ const CommunityReservasLayout = () => {
     navigate({ to: `/mis-comunidades` });
   };
 
+  // Función para traducir estados de reserva al español
+  const translateReservationState = (state: ReservationState): string => {
+    switch (state) {
+      case ReservationState.CONFIRMED:
+        return 'confirmada';
+      case ReservationState.DONE:
+        return 'finalizada';
+      case ReservationState.CANCELLED:
+        return 'cancelada';
+      case ReservationState.ANULLED:
+        return 'anulada';
+      default:
+        return String(state).toLowerCase();
+    }
+  };
+
   // --- Lógica para las Reservaciones ---
   const [allReservations, setAllReservations] = useState<Reservation[]>([]);
   const [loadingReservations, setLoadingReservations] = useState(true);
@@ -147,10 +163,11 @@ const CommunityReservasLayout = () => {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       currentReservations = currentReservations.filter(
         (res) =>
-          res.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          (res.user_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.service_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.session.title?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
           (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm),
+          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          translateReservationState(res.state).includes(lowerCaseSearchTerm)
       );
     }
 
