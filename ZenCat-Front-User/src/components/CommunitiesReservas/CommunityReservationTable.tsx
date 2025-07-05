@@ -10,16 +10,15 @@ import {
   type ColumnDef,
   type SortingState,
   type VisibilityState,
-  type RowSelectionState,
 } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, Calendar, Clock, MapPin, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 import { Reservation, ReservationState } from '@/types/reservation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { TablePagination } from '@/components/common/TablePagination';
 
 import { CommunityReservasDataTable } from './CommunityReservasDataTable';
 
@@ -30,90 +29,66 @@ interface ReservationsTableProps {
 
 const getStateColor = (state: ReservationState) => {
   switch (state) {
-  case ReservationState.DONE:
-    return 'bg-blue-100 text-blue-800';
-  case ReservationState.CANCELLED:
-    return 'bg-red-100 text-red-800';
-  case ReservationState.ONGOING:
-    return 'bg-yellow-100 text-yellow-800';
-  default:
-    return 'bg-gray-100 text-gray-800';
+    case ReservationState.DONE:
+      return 'bg-blue-100 text-blue-800';
+    case ReservationState.CANCELLED:
+      return 'bg-red-100 text-red-800';
+    case ReservationState.CONFIRMED:
+      return 'bg-green-100 text-green-800';
+    case ReservationState.ANULLED:
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getStateLabel = (state: ReservationState) => {
   switch (state) {
-  case ReservationState.DONE:
-    return 'Completada';
-  case ReservationState.CANCELLED:
-    return 'Cancelada';
-  case ReservationState.ONGOING:
-    return 'En proceso';
-  default:
-    return String(state);
+    case ReservationState.DONE:
+      return 'Finalizada';
+    case ReservationState.CANCELLED:
+      return 'Cancelada';
+    case ReservationState.CONFIRMED:
+      return 'Confirmada';
+    case ReservationState.ANULLED:
+      return 'Anulada';
+    default:
+      return String(state);
   }
 };
+
 
 export function ReservationsTable({ data, onView }: ReservationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [currentPage, setCurrentPage] = useState(0);
 
   const columns: ColumnDef<Reservation>[] = [
     {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => {
-            if (value) {
-              if (table.getFilteredSelectedRowModel().rows.length > 0) {
-                table.toggleAllPageRowsSelected(false);
-              } else {
-                table.toggleAllPageRowsSelected(true);
-              }
-            } else {
-              table.toggleAllPageRowsSelected(false);
-            }
-          }}
-          aria-label="Seleccionar todo"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => {
-            if (value) {
-              table.resetRowSelection();
-              row.toggleSelected(true);
-            } else {
-              row.toggleSelected(false);
-            }
-          }}
-          aria-label="Seleccionar fila"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: 'name',
+      accessorKey: 'service_name',
       header: 'Servicio',
       cell: ({ row }) => (
-        <div className="font-medium">{row.getValue('name')}</div>
+        <div className="text-sm text-center font-medium">{row.original.service_name || 'N/A'}</div>
+      ),
+    },
+    {
+      accessorKey: 'session.title',
+      header: 'Título de la sesión',
+      cell: ({ row }) => (
+        <div className="text-sm text-center">{row.original.session?.title || 'N/A'}</div>
       ),
     },
     {
       accessorKey: 'reservation_time',
       header: 'Fecha',
       cell: ({ row }) => {
-        const date = new Date(row.getValue('reservation_time'));
+        const date = new Date(row.original.session.date);
         return (
-          <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Calendar className="h-3 w-3 text-gray-500" />
+              {format(date, 'dd/MM/yyyy', { locale: es })}
+            </div>
           </div>
         );
       },
@@ -122,12 +97,14 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       accessorKey: 'time_range',
       header: 'Horario',
       cell: ({ row }) => {
-        const reservationTime = new Date(row.original.reservation_time);
-        const endTime = new Date(reservationTime.getTime() + 60 * 60 * 1000);
+        const startTime = new Date(row.original.session.start_time);
+        const endTime = new Date(row.original.session.end_time);
         return (
-          <div className="text-sm">
-            {format(reservationTime, 'HH:mm', { locale: es })} h -{' '}
-            {format(endTime, 'HH:mm', { locale: es })} h
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Clock className="h-3 w-3 text-gray-500" />
+              {format(startTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
+            </div>
           </div>
         );
       },
@@ -138,16 +115,30 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       header: 'Lugar',
       cell: ({ row }) => {
         const place = row.original.place;
-        return <div className="text-sm">{place || 'N/A'}</div>;
+        return (
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <MapPin className="h-3 w-3 text-gray-500" />
+              {place || 'N/A'}
+            </div>
+          </div>
+        );
       },
       enableSorting: false,
     },
     {
-      accessorKey: 'teacher',
-      header: 'Profesor',
+      accessorKey: 'professional',
+      header: 'Profesional',
       cell: ({ row }) => {
-        const teacher = row.original.teacher;
-        return <div className="text-sm">{teacher || 'N/A'}</div>;
+        const professional = row.original.professional;
+        return (
+          <div className="text-sm text-center">
+            <div className="flex items-center justify-center gap-1">
+              <User className="h-3 w-3 text-gray-500" />
+              {professional || 'N/A'}
+            </div>
+          </div>
+        );
       },
       enableSorting: false,
     },
@@ -155,9 +146,11 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       accessorKey: 'state',
       header: 'Estado',
       cell: ({ row }) => {
-        const state = row.getValue('state') as ReservationState;
+        const state = row.original.state as ReservationState;
         return (
-          <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
+          <div className="flex justify-center">
+            <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
+          </div>
         );
       },
     },
@@ -167,14 +160,18 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       cell: ({ row }) => {
         const reservation = row.original;
         return (
-          <Button
-            variant="ghost"
-            className="h-8 w-8 p-0"
-            onClick={() => onView(reservation)}
-            aria-label={`Ver detalles de la reserva ${reservation.name}`}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 px-3 py-1 hover:bg-gray-50"
+              onClick={() => onView(reservation)}
+              aria-label={`Ver detalles de la reserva ${reservation.name}`}
+            >
+              <Eye className="h-4 w-4" />
+              Ver detalle
+            </Button>
+          </div>
         );
       },
       enableSorting: false,
@@ -187,24 +184,6 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
     columns,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: (updater) => {
-      const newSelection =
-        typeof updater === 'function' ? updater(rowSelection) : updater;
-      const selectedKeys = Object.keys(newSelection);
-
-      if (selectedKeys.length > 1) {
-        const latestSelectedKey = selectedKeys.find(
-          (key) => !rowSelection[key],
-        );
-        if (latestSelectedKey) {
-          setRowSelection({ [latestSelectedKey]: true });
-        } else {
-          setRowSelection({});
-        }
-      } else {
-        setRowSelection(newSelection);
-      }
-    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -212,72 +191,26 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
+      pagination: {
+        pageIndex: currentPage,
+        pageSize: 5, // Ajusta según necesites
+      },
     },
   });
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    table.setPageIndex(page);
+  };
 
   return (
     <div className="space-y-4">
       <CommunityReservasDataTable table={table} columns={columns} />
-
-      {/* Contenedor principal para la paginación y el botón "Ver más" */}
-      <div className="flex flex-col items-center justify-center mt-6">
-        {/* Controles de paginación centrados */}
-        <div className="flex items-center space-x-2 mb-4">
-          {' '}
-          {/* Añadido mb-4 para separar del botón Ver más */}
-          <Button
-            variant="ghost"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="text-gray-600 hover:text-black"
-          >
-            Anterior
-          </Button>
-          <div className="flex gap-1">
-            {Array.from({ length: table.getPageCount() }, (_, i) => (
-              <Button
-                key={i}
-                size="sm"
-                onClick={() => table.setPageIndex(i)}
-                className={
-                  table.getState().pagination.pageIndex === i
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }
-              >
-                {i + 1}
-              </Button>
-            ))}
-          </div>
-          <Button
-            variant="ghost"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="text-gray-600 hover:text-black"
-          >
-            Siguiente
-          </Button>
-        </div>
-
-        {/* Botón "Ver más" - Se activa si solo una fila está seleccionada */}
-        <div className="flex justify-center">
-          {' '}
-          {/* Este div ya estaba bien, mantiene el botón centrado */}
-          <Button
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            disabled={table.getFilteredSelectedRowModel().rows.length !== 1}
-            onClick={() => {
-              const selectedRows = table.getFilteredSelectedRowModel().rows;
-              if (selectedRows.length === 1) {
-                onView(selectedRows[0].original);
-              }
-            }}
-          >
-            Ver más
-          </Button>
-        </div>
-      </div>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={table.getPageCount()}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

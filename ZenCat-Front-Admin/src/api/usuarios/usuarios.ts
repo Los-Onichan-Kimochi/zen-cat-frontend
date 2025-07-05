@@ -1,5 +1,13 @@
-import { User, CreateUserPayload, UpdateUserPayload } from '@/types/user';
+import {
+  User,
+  CreateUserPayload,
+  UpdateUserPayload,
+  UserWithImage,
+} from '@/types/user';
 import Cookies from 'js-cookie';
+import { API_ENDPOINTS } from '@/config/api';
+import { apiClient } from '@/lib/api-client';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -26,7 +34,7 @@ const mapBackendUserToUser = (backendUser: any): User => {
     password: backendUser.password || '',
     isAuthenticated: false,
     permissions: backendUser.permissions || [],
-    avatar: backendUser.image_url,
+    image_url: backendUser.image_url,
     address: backendUser.address,
     district: backendUser.district,
     phone: backendUser.phone,
@@ -39,6 +47,8 @@ const mapBackendUserToUser = (backendUser: any): User => {
           phoneNumber: backendUser.onboarding.phone_number,
           birthDate: backendUser.onboarding.birth_date,
           gender: backendUser.onboarding.gender,
+          region: backendUser.onboarding.region,
+          province: backendUser.onboarding.province,
           city: backendUser.onboarding.city,
           postalCode: backendUser.onboarding.postal_code,
           district: backendUser.onboarding.district,
@@ -47,6 +57,15 @@ const mapBackendUserToUser = (backendUser: any): User => {
           updatedAt: backendUser.onboarding.updated_at,
         }
       : undefined,
+  };
+};
+
+// Función para mapear los datos del backend (con imagen) a nuestro tipo UserWithImage
+const mapBackendUserToUserWithImage = (backendUser: any): UserWithImage => {
+  const user = mapBackendUserToUser(backendUser);
+  return {
+    ...user,
+    image_bytes: backendUser.image_bytes,
   };
 };
 
@@ -59,7 +78,8 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
     email: payload.email,
     rol: payload.rol, // Backend usa "rol"
     password: payload.password,
-    image_url: payload.avatar || '',
+    image_url: payload.image_url || '',
+    image_bytes: payload.image_bytes,
   };
 
   // Solo agregar campos de onboarding si están presentes
@@ -78,6 +98,8 @@ const transformPayloadToBackend = (payload: CreateUserPayload): any => {
       phone_number: payload.onboarding.phoneNumber,
       birth_date: formattedBirthDate,
       gender: payload.onboarding.gender,
+      region: payload.onboarding.region,
+      province: payload.onboarding.province,
       city: payload.onboarding.city,
       postal_code: payload.onboarding.postalCode,
       district: payload.onboarding.district,
@@ -99,7 +121,10 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
   if (payload.email) backendPayload.email = payload.email;
   if (payload.rol) backendPayload.rol = payload.rol;
   if (payload.password) backendPayload.password = payload.password;
-  if (payload.avatar !== undefined) backendPayload.image_url = payload.avatar;
+  if (payload.image_url !== undefined)
+    backendPayload.image_url = payload.image_url;
+  if (payload.image_bytes !== undefined)
+    backendPayload.image_bytes = payload.image_bytes;
 
   // Solo agregar campos de onboarding si están presentes
   if (payload.onboarding) {
@@ -117,6 +142,8 @@ const transformUpdatePayloadToBackend = (payload: UpdateUserPayload): any => {
       phone_number: payload.onboarding.phoneNumber,
       birth_date: formattedBirthDate,
       gender: payload.onboarding.gender,
+      region: payload.onboarding.region,
+      province: payload.onboarding.province,
       city: payload.onboarding.city,
       postal_code: payload.onboarding.postalCode,
       district: payload.onboarding.district,
@@ -151,6 +178,12 @@ const transformOnboardingPayloadToBackend = (onboardingData: any): any => {
   }
   if (onboardingData.gender) {
     backendPayload.gender = onboardingData.gender;
+  }
+  if (onboardingData.region) {
+    backendPayload.region = onboardingData.region;
+  }
+  if (onboardingData.province) {
+    backendPayload.province = onboardingData.province;
   }
   if (onboardingData.city) {
     backendPayload.city = onboardingData.city;
@@ -214,28 +247,24 @@ export const usuariosApi = {
 
   getUsuarioById: async (id: string): Promise<User> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${id}/`, {
-        headers: getHeaders(),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error('Error response:', response.status, errorData);
-        throw new Error(
-          `Error fetching usuario with id ${id}: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const rawUser = await response.json();
+      const rawUser = await apiClient.get<any>(API_ENDPOINTS.USERS.BY_ID(id));
       console.log('Raw user data:', rawUser);
-
-      // Mapear el usuario individual
-      const mappedUser = mapBackendUserToUser(rawUser);
-      console.log('Mapped single user:', mappedUser);
-
-      return mappedUser;
+      return mapBackendUserToUser(rawUser);
     } catch (error) {
       console.error('Error in getUsuarioById:', error);
+      throw error;
+    }
+  },
+
+  getUsuarioWithImage: async (id: string): Promise<UserWithImage> => {
+    try {
+      const rawUser = await apiClient.get<any>(
+        API_ENDPOINTS.USERS.WITH_IMAGE(id),
+      );
+      console.log('Raw user data with image:', rawUser);
+      return mapBackendUserToUserWithImage(rawUser);
+    } catch (error) {
+      console.error('Error in getUsuarioWithImage:', error);
       throw error;
     }
   },

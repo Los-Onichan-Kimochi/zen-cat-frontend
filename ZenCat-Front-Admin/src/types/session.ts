@@ -18,6 +18,7 @@ export interface Session {
   session_link?: string | null;
   professional_id: string;
   local_id?: string | null;
+  community_service_id?: string; // Added to match CreateSessionPayload
 }
 
 export interface CreateSessionPayload {
@@ -29,6 +30,7 @@ export interface CreateSessionPayload {
   session_link?: string | null;
   professional_id: string;
   local_id?: string | null;
+  community_service_id: string;
 }
 
 export interface UpdateSessionPayload {
@@ -41,6 +43,7 @@ export interface UpdateSessionPayload {
   session_link?: string | null;
   professional_id?: string;
   local_id?: string | null;
+  community_service_id?: string; // Added to match CreateSessionPayload
 }
 
 export interface BulkCreateSessionPayload {

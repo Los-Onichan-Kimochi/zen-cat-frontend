@@ -21,10 +21,25 @@ interface BulkCreateDialogProps {
   title?: string;
   expectedExcelColumns: string[]; // Columnas esperadas en el archivo Excel
   dbFieldNames: string[]; // Nombres de los campos como se usan en la BD
-  onParsedData: (data: any[]) => void;
+  //onParsedData: (data: any[]) => void;
+  //onParsedData: (data: any[], setError?: (message: string) => void) => void;
+  onParsedData: (
+    data: any[],
+    setError?: (message: string) => void,
+  ) => Promise<boolean>;
   existingNames?: string[]; // Lista de nombres ya existentes para validar duplicados
   validateUniqueNames?: boolean; // Si se deben validar los nombres como únicos
   children?: React.ReactNode; //para sesiones
+  module?: 'sessions' | string;
+  mode?: 'virtual' | 'presencial'; // NUEVO
+  existingSessions?: {
+    date: string;
+    start_time: string;
+    end_time: string;
+    professional_id: string;
+  }[];
+  canContinue?: () => true | string; // <- esto permite retornar un error
+  selectedLocalCapacity?: number;
 }
 
 export function BulkCreateDialog({
@@ -37,6 +52,11 @@ export function BulkCreateDialog({
   existingNames = [],
   validateUniqueNames = false,
   children,
+  module = '',
+  mode,
+  existingSessions = [],
+  canContinue,
+  selectedLocalCapacity = Infinity, // ← Valor por defecto para virtual
 }: BulkCreateDialogProps) {
   const inputRef = useRef<HTMLInputElement>(null); // Referencia al input de archivo oculto
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Archivo seleccionado
@@ -86,13 +106,21 @@ export function BulkCreateDialog({
   };
 
   const handleConfirm = () => {
+    if (typeof canContinue === 'function') {
+      const result = canContinue();
+      if (result !== true) {
+        setError(result); // Muestra el mensaje dentro del modal
+        return; // Evita continuar
+      }
+    }
+
     if (!selectedFile) {
       setError('Debe seleccionar un archivo .xlsx antes de continuar');
       return;
     }
 
     const reader = new FileReader(); // Lector de archivos
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' }); // Leer Excel
@@ -123,9 +151,216 @@ export function BulkCreateDialog({
 
         const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '' }); // Leer todos los datos
         const finalData = mapDataWithColumns(rawData); // Convertir formato
+        //definimos ya no es necesario pq lo definimos en bulkcreate
+        //const existingSessions = props.existingSessions || [];
+        function normalizeTime(value: any): string {
+          if (value instanceof Date) {
+            return value.toTimeString().slice(0, 5); // HH:MM
+          } else if (typeof value === 'number') {
+            // Excel almacena horas como fracción de 1 día: 0.5 = 12:00
+            const totalMinutes = Math.round(value * 24 * 60);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes
+              .toString()
+              .padStart(2, '0')}`;
+          } else if (typeof value === 'string') {
+            // 1. Intenta parsear formato con AM/PM (como “7:00 a. m.”)
+            const ampmMatch = value.match(/^(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)$/i);
+            if (ampmMatch) {
+              let [, hourStr, minStr, period] = ampmMatch;
+              let hour = parseInt(hourStr, 10);
+              const minute = parseInt(minStr, 10);
+              if (/p\.?m\.?/i.test(period) && hour < 12) hour += 12;
+              if (/a\.?m\.?/i.test(period) && hour === 12) hour = 0;
+              return `${hour.toString().padStart(2, '0')}:${minute
+                .toString()
+                .padStart(2, '0')}`;
+            }
 
+            // 2. Si ya está en HH:mm directamente
+            const basicMatch = value.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+            if (basicMatch) return value.slice(0, 5);
+
+            return value.slice(0, 5); // Fallback defensivo
+          }
+
+          return '';
+        }
+
+
+
+        function normalizeDate(input: any): string {
+          if (input instanceof Date) {
+            return input.toISOString().split('T')[0];
+          }
+          if (typeof input === 'string') {
+            if (input.includes('T')) return input.split('T')[0];
+            if (input.includes('/')) {
+              const [d, m, y] = input.split('/');
+              return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            }
+            return input; // asume yyyy-mm-dd
+          }
+          return '';
+        }
+        //para sesiones  MODIFICADO A MODULE
+        // Validar que la hora de fin sea mayor que la de inicio
+        //const invalidHourRows: number[] = [];
+        // para comunidades
         // Validar duplicados contra nombres existentes si se habilita
         const combinedErrors: string[] = [];
+
+        if (module === 'sessions') {
+          const invalidHourRows: number[] = [];
+          const invalidCapacityRows: string[] = [];
+
+          finalData.forEach((row, index) => {
+            //adaptacion para que soporte formatos de fechas del excel
+
+            const start = normalizeTime(row.start_time);
+            const end = normalizeTime(row.end_time);
+
+            const capacity = Number(row.capacity);
+
+            const [h1, m1] = start?.split(':')?.map(Number) || [];
+            const [h2, m2] = end?.split(':')?.map(Number) || [];
+
+            const startMinutes = h1 * 60 + m1;
+            const endMinutes = h2 * 60 + m2;
+
+            if (isNaN(startMinutes) || isNaN(endMinutes)) {
+              invalidHourRows.push(index + 2);
+            } else if (endMinutes <= startMinutes) {
+              invalidHourRows.push(index + 2);
+            }
+
+
+            if (isNaN(capacity) || capacity <= 0) {
+              invalidCapacityRows.push(`Fila ${index + 2}: capacidad inválida (<= 0)`);
+            } else if (mode === 'presencial' && capacity > selectedLocalCapacity) {
+              invalidCapacityRows.push(
+                `Fila ${index + 2}: capacidad (${capacity}) excede la del local (${selectedLocalCapacity})`
+              );
+            }
+          });
+
+          if (invalidHourRows.length > 0) {
+            combinedErrors.push(
+              `Las siguientes filas tienen hora de fin menor o igual a la hora de inicio: ${invalidHourRows.join(', ')}`,
+            );
+          }
+
+          if (invalidCapacityRows.length > 0) {
+            combinedErrors.push(
+              `Las siguientes filas tienen capacidad inválida:\n${invalidCapacityRows.join('\n')}`
+            );
+          }
+          // Sesiones cruces | Conflictos internos (entre filas del Excel)
+          const getMinutes = (date: string, time: string) => {
+            const [h, m] = time.split(':').map(Number);
+            const d = new Date(date);
+            d.setHours(h);
+            d.setMinutes(m);
+            return d.getTime();
+          };
+
+          const internalConflicts: string[] = [];
+
+          for (let i = 0; i < finalData.length; i++) {
+            const a = finalData[i];
+            const aStart = getMinutes(a.date, normalizeTime(a.start_time));
+            const aEnd = getMinutes(a.date, normalizeTime(a.end_time));
+
+            for (let j = i + 1; j < finalData.length; j++) {
+              const b = finalData[j];
+              const bStart = getMinutes(b.date, normalizeTime(b.start_time));
+              const bEnd = getMinutes(b.date, normalizeTime(b.end_time));
+
+              const sameDate = a.date === b.date;
+              const overlap =
+                sameDate &&
+                ((aStart >= bStart && aStart < bEnd) ||
+                  (aEnd > bStart && aEnd <= bEnd) ||
+                  (aStart <= bStart && aEnd >= bEnd));
+
+              if (overlap) {
+                internalConflicts.push(
+                  `Conflicto interno de horarios entre fila ${i + 2} y ${j + 2}`,
+                );
+              }
+            }
+          }
+
+          if (internalConflicts.length > 0) {
+            combinedErrors.push(...internalConflicts);
+          }
+
+          // Sesiones cruces | Conflicto con sesiones ya registradas (requiere existingSessions prop)
+          if (existingSessions?.length > 0) {
+            const externalConflicts: string[] = [];
+            const debugRows: string[] = [];
+
+            finalData.forEach((row, index) => {
+              const newStart = getMinutes(
+                row.date,
+                normalizeTime(row.start_time),
+              );
+              const newEnd = getMinutes(row.date, normalizeTime(row.end_time));
+
+              const debugInfo: string[] = [`[Fila ${index + 2}]`];
+              debugInfo.push(`Row date: ${row.date}`);
+              debugInfo.push(
+                `Start: ${normalizeTime(row.start_time)} → ${newStart}`,
+              );
+              debugInfo.push(`End: ${normalizeTime(row.end_time)} → ${newEnd}`);
+
+              const overlap = existingSessions.some((session) => {
+                const sessionStart = new Date(session.start_time).getTime();
+                const sessionEnd = new Date(session.end_time).getTime();
+                const sessionDate = session.date?.split('T')[0];
+
+                const rowDate =
+                  typeof row.date === 'string'
+                    ? row.date.split('T')[0]
+                    : new Date(row.date).toISOString().split('T')[0];
+
+                debugInfo.push(`Comparando con sesión:`);
+                debugInfo.push(`→ session.date: ${sessionDate}`);
+                debugInfo.push(`→ sessionStart: ${sessionStart}`);
+                debugInfo.push(`→ sessionEnd: ${sessionEnd}`);
+
+                return (
+                  rowDate === sessionDate &&
+                  newStart < sessionEnd &&
+                  newEnd > sessionStart
+                );
+              });
+
+              if (overlap) {
+                externalConflicts.push(
+                  `Fila ${index + 2} se cruza con una sesión ya registrada`,
+                );
+              }
+
+              debugRows.push(debugInfo.join('\n'));
+            });
+
+            //  Mostrar todo en el modal
+            if (externalConflicts.length > 0) {
+              combinedErrors.push(
+                ` Debug:\n${debugRows.join('\n\n')}\n\n Conflictos:\n${externalConflicts
+                  .map((e) => `• ${e}`)
+                  .join('\n')}`,
+              );
+            }
+          }
+        }
+        if (combinedErrors.length > 0) {
+          setError?.(combinedErrors.join('\n')); //  Esto muestra TODO en el modal
+          return false; // <-- Frena acá
+        }
+        //validaciones de comunidades combinedErrors
 
         if (validateUniqueNames) {
           // 1. Validar duplicados internos del Excel
@@ -190,14 +425,30 @@ export function BulkCreateDialog({
           setError(combinedErrors.join('\n')); // Mostrar todos los errores encontrados
           return;
         }
+        //const success = await onParsedData(finalData, setError)
+        const success = await onParsedData(finalData, (message) => {
+          // Si ya hay error mostrado, combinamos ambos
+          setError((prev) => (prev ? prev + '\n' + message : message));
+        });
+        if (success) {
+          setSelectedFile(null);
+          setError(null);
+          onOpenChange(false); // ← Solo cierra si todo está OK
+        }
 
-        onParsedData(finalData); // Enviar datos limpios al padre
-        setSelectedFile(null);
-        setError(null);
-        onOpenChange(false);
+        //solo los 4
+        //await onParsedData(finalData, setError);
+        //setSelectedFile(null);
+        //setError(null);
+        //onOpenChange(false);
+        //onOpenChange(false);
       } catch (err) {
-        setError('Ocurrió un error inesperado procesando el archivo.');
-        console.error(err);
+        //setError('Ocurrió un error inesperado procesando el archivo.');
+        console.error('Detalles del error bulk:', err);
+        setError(
+          err.message || 'Ocurrió un error inesperado al crear las sesiones.',
+        );
+        //console.error(err);
       }
     };
     reader.readAsArrayBuffer(selectedFile); // Leer archivo como buffer

@@ -12,7 +12,7 @@ import {
   Users,
   ExternalLink,
 } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,14 +33,15 @@ interface GetSessionColumnsProps {
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
   onView: (session: Session) => void;
+  onNavigateToReservations?: (sessionId: string) => void;
 }
 
 export function getSessionColumns({
   onEdit,
   onDelete,
   onView,
+  onNavigateToReservations,
 }: GetSessionColumnsProps): ColumnDef<Session>[] {
-  const navigate = useNavigate();
   return [
     {
       id: 'select',
@@ -213,10 +214,9 @@ export function getSessionColumns({
               className="h-8 px-3 bg-black text-white hover:bg-gray-800 font-medium"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate({
-                  to: '/sesiones/reservas/$sessionId',
-                  params: { sessionId: session.id },
-                });
+                if (onNavigateToReservations) {
+                  onNavigateToReservations(session.id);
+                }
               }}
             >
               <ExternalLink className="mr-1 h-3 w-3" />

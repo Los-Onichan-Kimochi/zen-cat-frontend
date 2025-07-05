@@ -144,10 +144,6 @@ function ServiciosComponent() {
 
   const isLoadingCounts = isLoadingServices;
 
-  const handleEdit = (service: Service) => {
-    navigate({ to: '/servicios/servicio-editar', search: { id: service.id } });
-  };
-
   const handleView = (service: Service) => {
     localStorage.setItem('currentService', service.id);
     navigate({ to: `/servicios/servicio-ver` });
@@ -161,10 +157,7 @@ function ServiciosComponent() {
   const handleRefresh = async () => {
     const startTime = Date.now();
 
-    const [servicesResult, countsResult] = await Promise.all([
-      refetchServices(),
-      refetchCounts(),
-    ]);
+    await refetchServices();
 
     // Asegurar que pase al menos 1 segundo
     const elapsedTime = Date.now() - startTime;
@@ -173,8 +166,6 @@ function ServiciosComponent() {
     if (remainingTime > 0) {
       await new Promise((resolve) => setTimeout(resolve, remainingTime));
     }
-
-    return { servicesResult, countsResult };
   };
 
   const columns = useMemo<ColumnDef<Service>[]>(
@@ -349,7 +340,6 @@ function ServiciosComponent() {
         ) : (
           <ServicesTable
             data={servicesData || []}
-            onEdit={handleEdit}
             onDelete={handleDelete}
             onView={handleView}
             onBulkDelete={handleBulkDelete}
@@ -393,13 +383,14 @@ function ServiciosComponent() {
               };
               await servicesApi.createService(payload);
             }
-
             queryClient.invalidateQueries({ queryKey: ['services'] });
             setShowUploadDialog(false);
             setShowSuccess(true);
+            return true;
           } catch (error) {
             console.error(error);
             toast.error('Error durante la carga masiva de servicios');
+            return false;
           }
         }}
       />

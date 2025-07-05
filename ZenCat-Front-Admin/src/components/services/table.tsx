@@ -15,7 +15,6 @@ import { getServiceColumns } from './columns';
 
 interface ServicesTableProps {
   data: Service[];
-  onEdit: (service: Service) => void;
   onDelete: (service: Service) => void;
   onView: (service: Service) => void;
   onBulkDelete?: (services: Service[]) => void;
@@ -26,7 +25,6 @@ interface ServicesTableProps {
 
 export function ServicesTable({
   data,
-  onEdit,
   onDelete,
   onView,
   onBulkDelete,
@@ -49,7 +47,7 @@ export function ServicesTable({
     setPagination,
   } = useDataTable();
 
-  const columns = getServiceColumns({ onEdit, onDelete, onView });
+  const columns = getServiceColumns({ onDelete, onView });
 
   const table = useReactTable({
     data,

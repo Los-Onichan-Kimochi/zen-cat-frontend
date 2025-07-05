@@ -5,10 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PaymentData } from '@/types/membership';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
+import YapeImg from '@/assets/yape.png';
+import PlinImg from '@/assets/plin.png';
 
 export function PaymentStep() {
   const { state, setPaymentData, nextStep, prevStep } =
     useMembershipOnboarding();
+
+  // Método de pago seleccionado: 'Tarjeta', 'Yape', 'Plin'
+  const [paymentMethod, setPaymentMethod] = useState<'Tarjeta' | 'Yape' | 'Plin'>('Tarjeta');
+
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState<PaymentData>(
@@ -87,7 +93,7 @@ export function PaymentStep() {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>DNI</span>
-                        <span>{state.onboardingData.documentNumber}</span>
+                        <span>{state.onboardingData.document_number}</span>
                       </div>
                     </div>
                   )}
@@ -101,61 +107,96 @@ export function PaymentStep() {
         <div className="lg:col-span-2">
           {/* Pestañas de método de pago */}
           <div className="flex mb-6">
-            <button className="px-6 py-2 bg-gray-100 text-black rounded-l-lg border border-gray-300">
-              Tarjeta
-            </button>
-            <button className="px-6 py-2 bg-white text-gray-500 rounded-r-lg border border-l-0 border-gray-300">
-              Paypal
-            </button>
+            {(['Tarjeta', 'Yape', 'Plin'] as const).map((method, idx) => (
+              <button
+                key={method}
+                className={`px-6 py-2 border border-gray-300 first:rounded-l-lg last:rounded-r-lg -ml-px ${
+                  paymentMethod === method
+                    ? 'bg-gray-100 text-black'
+                    : 'bg-white text-gray-500 hover:text-black'
+                } ${idx === 0 ? 'border-l' : ''}`}
+                onClick={() => setPaymentMethod(method)}
+              >
+                {method}
+              </button>
+            ))}
           </div>
 
           <Card>
             <CardContent className="p-6">
-              {/* Icono de herramientas */}
-              <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-12 h-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+              {paymentMethod === 'Tarjeta' && (
+                <div className="space-y-6">
+                  {/* Icono de tarjeta grande */}
+                  <div className="flex justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-20 w-20 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                       strokeWidth={1}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 7H21M3 11H21M6 15H6.01M9 15H9.01M12 15H12.01M15 15H15.01M18 15H18.01M3 18H21C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V18"
+                      />
+                    </svg>
+                  </div>
+                  {/* Formulario simple de tarjeta */}
+                  <Input
+                    placeholder="Número de tarjeta"
+                    value={formData.cardNumber}
+                    onChange={(e) => handleInputChange('cardNumber', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="MM/AA"
+                      value={formData.expiryDate}
+                      onChange={(e) => handleInputChange('expiryDate', e.target.value)}
                     />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    <Input
+                      placeholder="CVV"
+                      value={formData.cvv}
+                      onChange={(e) => handleInputChange('cvv', e.target.value)}
                     />
-                  </svg>
+                  </div>
+                  <Input
+                    placeholder="Nombre del titular"
+                    value={formData.cardholderName}
+                    onChange={(e) => handleInputChange('cardholderName', e.target.value)}
+                  />
                 </div>
-              </div>
+              )}
 
-              <div className="text-center">
-                {isProcessing ? (
-                  <>
-                    <div className="flex justify-center mb-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-                    </div>
-                    <p className="text-gray-600 mb-6">Procesando pago...</p>
-                  </>
-                ) : (
-                  <p className="text-gray-600 mb-6">
-                    Implementación en progreso...
+              {paymentMethod !== 'Tarjeta' && (
+                <div className="text-center space-y-6">
+                  <div className="flex justify-center">
+                    <img
+                      src={paymentMethod === 'Yape' ? YapeImg : PlinImg}
+                      alt={paymentMethod}
+                      className="w-100 h-auto rounded-lg shadow"
+                    />
+                  </div>
+                  <p className="text-gray-600">
+                    Escanee el código QR con {paymentMethod} y confirme su envío.
                   </p>
-                )}
+                </div>
+              )}
+
+              <div className="text-center mt-8">
+                {isProcessing ? (
+                  <div className="flex justify-center mb-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                  </div>
+                ) : null}
 
                 <Button
                   onClick={handleContinue}
                   disabled={isProcessing}
                   className="w-full py-3 bg-black text-white hover:bg-gray-800 disabled:bg-gray-400"
                 >
-                  {isProcessing ? 'Procesando...' : 'Pagar'}
+                  {isProcessing ? 'Procesando...' : 'Confirmar pago'}
                 </Button>
               </div>
             </CardContent>

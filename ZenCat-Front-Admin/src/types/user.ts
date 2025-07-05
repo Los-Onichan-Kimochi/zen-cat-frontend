@@ -6,7 +6,7 @@ export interface User {
   password: string;
   isAuthenticated: boolean;
   permissions?: string[];
-  avatar?: string;
+  image_url?: string;
   address?: string;
   district?: string;
   city?: string;
@@ -19,6 +19,8 @@ export interface User {
     phoneNumber?: string;
     birthDate?: string;
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    region?: string;
+    province?: string;
     city?: string;
     postalCode?: string;
     district?: string;
@@ -34,7 +36,8 @@ export interface CreateUserPayload {
   rol: 'admin' | 'user' | 'guest' | 'ADMINISTRATOR' | 'CLIENT' | 'GUEST';
   password: string;
   permissions?: string[];
-  avatar?: string;
+  image_url?: string;
+  image_bytes?: string;
   address?: string;
   district?: string;
   phone?: string;
@@ -45,6 +48,8 @@ export interface CreateUserPayload {
     phoneNumber?: string;
     birthDate?: string;
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    region?: string;
+    province?: string;
     city?: string;
     postalCode?: string;
     district?: string;
@@ -53,3 +58,7 @@ export interface CreateUserPayload {
 }
 
 export type UpdateUserPayload = Partial<CreateUserPayload>;
+
+export interface UserWithImage extends User {
+  image_bytes?: string;
+}

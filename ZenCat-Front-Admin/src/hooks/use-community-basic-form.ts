@@ -1,27 +1,20 @@
 'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useEffect, useState } from 'react';
-import { handleImageFileWithBytes } from '@/utils/handleImageFile';
+import { handleImageFile } from '@/utils/handleImageFile';
 
 export const communityFormSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
   purpose: z.string().min(1, { message: 'El propósito es requerido.' }),
   profileImageFile: z.any().optional(),
 });
-
 export type CommunityFormData = z.infer<typeof communityFormSchema>;
 
 export function useCommunityForm() {
-  // Representaciones de la imagen:
-  // 1. File: Objeto File original del navegadorl
-  // 2. Preview: Data URL para mostrar en la UI
-  // 3. Bytes: Array numérico para enviar al backend
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageBytes, setImageBytes] = useState<number[] | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     register,
@@ -29,7 +22,7 @@ export function useCommunityForm() {
     control,
     formState: { errors },
     watch,
-    reset: formReset,
+    reset,
   } = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
     defaultValues: {
@@ -39,30 +32,18 @@ export function useCommunityForm() {
   });
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleImageFileWithBytes(
-      event,
-      setImagePreview,
-      setImageFile,
-      setImageBytes,
-    );
+    handleImageFile(event, setImagePreview, setImageFile);
   };
 
   useEffect(() => {
     const draftCommunity = sessionStorage.getItem('draftCommunity');
     if (draftCommunity) {
       const values = JSON.parse(draftCommunity);
+      console.log('Resetean valores?');
+      console.log('Values: ', values);
       reset(values);
     }
-  }, []);
-
-  const reset = (data?: Partial<CommunityFormData>) => {
-    formReset(data);
-    if (!data) {
-      setImageFile(null);
-      setImagePreview(null);
-      setImageBytes(null);
-    }
-  };
+  }, [reset]);
 
   return {
     register,
@@ -70,13 +51,10 @@ export function useCommunityForm() {
     control,
     errors,
     watch,
+    reset,
     imageFile,
     imagePreview,
-    imageBytes,
-    setImageFile,
-    setImagePreview,
-    setImageBytes,
     handleImageChange,
-    reset,
+    setImagePreview,
   };
 }

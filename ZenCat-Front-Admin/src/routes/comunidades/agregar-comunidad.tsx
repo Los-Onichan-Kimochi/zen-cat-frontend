@@ -2,7 +2,6 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/context/ToastContext';
-import { showImageUploadProcessing } from '@/utils/image-toast-helpers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useCommunityForm } from '@/hooks/use-community-basic-form';
@@ -30,6 +29,7 @@ import { CreateCommunityPayload } from '@/types/community';
 
 import { useEffect, useState } from 'react';
 import { Plus, ChevronLeft } from 'lucide-react';
+import { fileToBase64 } from '@/utils/imageUtils';
 
 export const Route = createFileRoute('/comunidades/agregar-comunidad')({
   component: AddCommunityPage,
@@ -46,7 +46,6 @@ function AddCommunityPage() {
     errors,
     imageFile,
     imagePreview,
-    imageBytes,
     watch,
     reset,
     handleImageChange,
@@ -77,45 +76,38 @@ function AddCommunityPage() {
   });
 
   const onSubmit = async (data: any) => {
-    // Generate a unique filename for S3
-    let imageUrl = 'default-community-image.jpg';
-    if (imageFile) {
-      const timestamp = Date.now();
-      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
-      imageUrl = `community-${timestamp}.${fileExtension}`;
-
-      showImageUploadProcessing(toast);
-    }
-
     try {
       const payload: CreateCommunityPayload = {
         name: data.name,
         purpose: data.purpose,
-        image_url: imageUrl,
+        image_url: '',
       };
 
-      // Add image bytes if available
-      if (imageBytes && imageBytes.length > 0) {
-        payload.image_bytes = imageBytes;
+      if (imageFile) {
+        payload.image_url = imageFile.name;
+        const base64Image = await fileToBase64(imageFile);
+        payload.image_bytes = base64Image;
       }
 
       const newCommunity = await createCommunityMutation.mutateAsync(payload);
 
       if (selectedServices.length > 0) {
-        const payload = selectedServices.map((s) => ({
+        const servicesPayload = selectedServices.map((s) => ({
           community_id: newCommunity.id,
           service_id: s.id,
         }));
-        await communityServicesApi.bulkCreateCommunityServices(payload);
+        await communityServicesApi.bulkCreateCommunityServices({
+          community_services: servicesPayload,
+        });
       }
 
       if (selectedMembershipPlans.length > 0) {
-        const payload = selectedMembershipPlans.map((p) => ({
+        const plansPayload = selectedMembershipPlans.map((p) => ({
           community_id: newCommunity.id,
           plan_id: p.id,
         }));
         await communityMembershipPlansApi.bulkCreateCommunityMembershipPlans({
-          community_plans: payload,
+          community_plans: plansPayload,
         });
       }
 

@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { membershipPlansApi } from '@/api/membership-plans/membership-plans';
 import { MembershipPlan } from '@/types/membership-plan';
+import { MembershipPlanType } from '@/types/membership-plan';
 import { ConfirmDeleteSingleDialog } from '@/components/common/confirm-delete-dialogs';
 import { BulkCreateDialog } from '@/components/common/bulk-create-dialog';
 import { SuccessDialog } from '@/components/common/success-bulk-create-dialog';
@@ -112,6 +113,9 @@ function PlanesMembresiaComponent() {
     (plan) =>
       plan.reservation_limit !== null && plan.reservation_limit !== undefined,
   ).length;
+  //validar tipos de membresias
+   const tiposValidos = Object.values(MembershipPlanType).join(', ');
+
   if (error) return <p>Error cargando planes: {error.message}</p>;
 
   return (
@@ -195,23 +199,79 @@ function PlanesMembresiaComponent() {
       <BulkCreateDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
-        title="Carga Masiva de Comunidades"
-        expectedExcelColumns={['Nombre', 'Propósito', 'Logo']}
-        dbFieldNames={['name', 'purpose', 'image_url']}
-        onParsedData={async (data) => {
+        title="Carga Masiva de Planes de Membresía"
+        expectedExcelColumns={['Tipo', 'Tarifa', '¿Tiene Límite?', 'Límite de Reservas']}
+        dbFieldNames={['type', 'fee', 'has_limit', 'reservation_limit']}
+        onParsedData={async (data, setError) => {
           try {
-            //await communitiesApi.bulkCreateCommunities(data);
+            const validTypes = Object.values(MembershipPlanType); // ['Mensual', 'Anual']
+
+            const errors: string[] = [];
+
+            const plans = data.map((row, index) => {
+              const fee = Number(row.fee);
+              const type = row.type?.toString().trim();
+              const hasLimitStr = row.has_limit?.toString().toLowerCase();
+              const limit = row.reservation_limit;
+
+              const hasLimit = hasLimitStr === 'sí' || hasLimitStr === 'si';
+
+              if (!validTypes.includes(type)) {
+                errors.push(`Fila ${index + 2}: tipo inválido "${type}".`);
+              }
+
+              if (isNaN(fee) || fee <= 0) {
+                errors.push(`Fila ${index + 2}: tarifa inválida "${row.fee}".`);
+              }
+
+              if (hasLimit && (isNaN(Number(limit)) || Number(limit) <= 0)) {
+                errors.push(`Fila ${index + 2}: límite inválido "${limit}".`);
+              }
+
+              return {
+                type,
+                fee,
+                reservation_limit: hasLimit ? Number(limit) : null,
+              };
+            });
+
+            if (errors.length > 0) {
+              setError?.(errors.join('\n'));
+              return false;
+            }
+
+            await membershipPlansApi.bulkCreateMembershipPlans({ plans });
             setShowUploadDialog(false);
             setShowSuccess(true);
-            queryClient.invalidateQueries({ queryKey: ['communities'] });
-          } catch (error) {
-            console.error(error);
-            toast.error('Error en Carga Masiva', {
-              description: 'No se pudieron crear los planes.',
-            });
+            queryClient.invalidateQueries({ queryKey: ['membershipPlans'] });
+            return true;
+          } catch (err) {
+            console.error(err);
+            setError?.('Ocurrió un error inesperado procesando los datos.');
+            return false;
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p className="text-xs text-gray-500 mt-2">
+            El archivo debe contener las siguientes columnas (en este orden): <br />
+            <strong>Tipo, Tarifa, ¿Tiene Límite?, Límite de Reservas</strong><br />
+            Tipos válidos: <strong>{tiposValidos}</strong><br />
+            <a
+              href="/plantillas/plantilla-carga-membresias.xlsx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              Descargar plantilla de ejemplo
+            </a>
+          </p>
+        </div>
+
+
+      </BulkCreateDialog>
+
+
 
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}

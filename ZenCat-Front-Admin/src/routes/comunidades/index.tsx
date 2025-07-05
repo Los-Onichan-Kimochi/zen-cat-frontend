@@ -180,11 +180,13 @@ function ComunidadesComponent() {
             // ...old,
             //...data,
             //]);
+            return true;
           } catch (error) {
             console.error(error);
             toast.error('Error en Carga Masiva', {
               description: 'No se pudieron crear las comunidades.',
             });
+            return false;
           }
         }}
       />

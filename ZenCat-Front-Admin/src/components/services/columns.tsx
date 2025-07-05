@@ -12,13 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface GetServiceColumnsProps {
-  onEdit: (service: Service) => void;
   onDelete: (service: Service) => void;
   onView: (service: Service) => void;
 }
 
 export function getServiceColumns({
-  onEdit,
   onDelete,
   onView,
 }: GetServiceColumnsProps): ColumnDef<Service>[] {
@@ -114,40 +112,16 @@ export function getServiceColumns({
         const service = row.original;
         return (
           <div className="flex items-center justify-center space-x-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
-                  title="Más opciones"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onView(service);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Ver servicio
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(service);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar servicio
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+            <Button
+              className="h-8 w-8 p-0 bg-white text-black border border-black rounded-full flex items-center justify-center hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(service);
+              }}
+              title="Ver detalles"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             <Button
               className="h-8 w-8 p-0 bg-white text-red-600 border border-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:shadow-md transition-all duration-200"
               onClick={(e) => {

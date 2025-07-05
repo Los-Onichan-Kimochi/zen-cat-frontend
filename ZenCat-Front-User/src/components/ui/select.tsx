@@ -43,6 +43,11 @@ export function Select({
     };
   }, []);
 
+  // Sync internal state with external value prop
+  React.useEffect(() => {
+    setSelectedValue(value || '');
+  }, [value]);
+
   const handleValueChange = (newValue: string) => {
     setSelectedValue(newValue);
     onValueChange?.(newValue);
