@@ -20,7 +20,7 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
   if (!community) {
     return <div>No hay información disponible</div>;
   }
-
+  console.log("Community:", community);
   const handleNewReservation = () => {
     // Navegar a la página de servicios pasando el communityId como search param
     navigate({
@@ -143,12 +143,22 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas disponibles:</p>
-                <p></p>
+                <p className="font-medium">
+                  {community.reservationsUsed === null 
+                    ? 'Sin límite' 
+                    : `${(community.reservationLimit || 0) - (community.reservationsUsed || 0)}`
+                  }
+                </p>
               </div>
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas usadas:</p>
-                <p></p>
+                <p className="font-medium">
+                  {community.reservationsUsed === null 
+                    ? 'Sin límite' 
+                    : community.reservationsUsed || 0
+                  }
+                </p>
               </div>
 
               <div className="flex justify-between">

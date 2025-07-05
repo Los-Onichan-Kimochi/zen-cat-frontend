@@ -11,6 +11,7 @@ export interface Community {
   endDate?: string;
   planType?: 'MONTHLY' | 'ANNUAL';
   fee?: number;
+  reservationsUsed?: number;
   reservationLimit?: number;
 }
 

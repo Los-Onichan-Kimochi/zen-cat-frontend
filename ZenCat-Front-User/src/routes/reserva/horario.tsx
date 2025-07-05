@@ -158,7 +158,6 @@ function ScheduleStepComponent() {
       }
     }
 
-    console.log("Session:", session);
     // Filter by service-professional associations if service is selected
     if (reservationData.service?.id && session.professional_id) {
       if (!availableProfessionalIds.includes(session.professional_id)) {
@@ -274,7 +273,6 @@ function ScheduleStepComponent() {
       return sessionDateStr === date && sessionTime === range.start;
     });
     
-    console.log("Selected time:", range.start);
     if (matchingSession) {
       setSelectedSessionId(matchingSession.id);
       
@@ -387,9 +385,6 @@ function ScheduleStepComponent() {
       </div>
     );
   }
-
-  console.log("Reservation data service:", reservationData.service);
-  console.log("Reservation data location:", reservationData.location);
   
   return (
     <div>
