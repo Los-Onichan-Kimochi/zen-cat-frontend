@@ -43,6 +43,7 @@ export interface Membership {
   start_date: string;
   end_date: string;
   status: MembershipState;
+  reservations_used: number;
   community: CommunityData;
   plan: MembershipPlan;
 }
@@ -159,8 +160,9 @@ export function transformMembershipsToFrontend(
       planType: membership.plan.type,
       fee: membership.plan.fee,
       reservationLimit: membership.plan.reservation_limit,
+      reservationsUsed: membership.reservations_used,
     };
-
+    //console.log("HOLA", communityId, transformedCommunity);
     // Prioritize active memberships if a community is already in the map
     if (
       !communityMap.has(communityId) &&

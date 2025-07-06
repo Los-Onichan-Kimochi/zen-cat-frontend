@@ -7,7 +7,7 @@ import {
   UpdateMembershipRequest,
 } from '@/types/membership';
 
-export const membershipService = {
+export const membershipsApi = {
   /**
    * Gets all memberships
    * @returns Promise<MembershipsResponse> - All memberships

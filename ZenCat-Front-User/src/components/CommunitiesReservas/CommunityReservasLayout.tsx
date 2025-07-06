@@ -18,7 +18,7 @@ import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -38,6 +38,22 @@ const CommunityReservasLayout = () => {
 
   const handleGoBack = () => {
     navigate({ to: `/mis-comunidades` });
+  };
+
+  // Función para traducir estados de reserva al español
+  const translateReservationState = (state: ReservationState): string => {
+    switch (state) {
+      case ReservationState.CONFIRMED:
+        return 'confirmada';
+      case ReservationState.DONE:
+        return 'finalizada';
+      case ReservationState.CANCELLED:
+        return 'cancelada';
+      case ReservationState.ANULLED:
+        return 'anulada';
+      default:
+        return String(state).toLowerCase();
+    }
   };
 
   // --- Lógica para las Reservaciones ---
@@ -147,10 +163,11 @@ const CommunityReservasLayout = () => {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       currentReservations = currentReservations.filter(
         (res) =>
-          res.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          (res.user_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.service_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.session.title?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
           (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm),
+          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          translateReservationState(res.state).includes(lowerCaseSearchTerm)
       );
     }
 
@@ -261,14 +278,14 @@ const CommunityReservasLayout = () => {
       if (reservation.membership_id) {
         console.log('Actualizando membresía:', reservation.membership_id);
         
-        const membership = await membershipService.getMembershipById(reservation.membership_id);
+        const membership = await membershipsApi.getMembershipById(reservation.membership_id);
         
         // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
         if (membership.plan.reservation_limit !== null && 
             typeof membership.reservations_used === 'number' && 
             membership.reservations_used > 0) {
           
-          await membershipService.updateMembership(membership.id, {
+          await membershipsApi.updateMembership(membership.id, {
             reservations_used: membership.reservations_used - 1,
           });
           

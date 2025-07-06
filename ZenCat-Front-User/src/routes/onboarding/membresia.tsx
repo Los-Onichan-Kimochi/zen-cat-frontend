@@ -6,13 +6,15 @@ import { useCommunities } from '@/hooks/use-communities';
 import { useCommunityPlans } from '@/hooks/use-community-plans';
 import { useEffect, useState, useMemo } from 'react';
 import {
-  MembershipPlan,
   Community as MembershipCommunity,
+  MembershipState,
 } from '@/types/membership';
 import { Community as APICommunity } from '@/types/community';
 import { useUserMemberships } from '@/hooks/use-user-memberships';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { membershipsApi } from '@/api/memberships/memberships';
+import { Membership } from '@/types/membership';
 
 export const Route = createFileRoute('/onboarding/membresia')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -48,15 +50,27 @@ function OnboardingMembresiaComponent() {
     useState<APICommunity | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
+  const [onHoldMembership, setOnHoldMembership] = useState<Membership | null>(null);
+  const [reactivating, setReactivating] = useState(false);
 
   useEffect(() => {
     if (!membershipsLoading && communityId) {
       const activeMembership = memberships.find(
-        (m) => m.community.id === communityId && m.status === 'ACTIVE',
+        (m) => m.community.id === communityId && m.status === MembershipState.ACTIVE,
       );
+
       if (activeMembership) {
         setIsMember(true);
+        setOnHoldMembership(null);
       } else {
+        const hold = memberships.find(
+          (m) => m.community.id === communityId && m.status === MembershipState.SUSPENDED,
+        );
+        if (hold) {
+          setOnHoldMembership(hold);
+        } else {
+          setOnHoldMembership(null);
+        }
         setIsMember(false);
       }
     }
@@ -69,7 +83,7 @@ function OnboardingMembresiaComponent() {
       communities &&
       communities.length > 0 &&
       !isInitialized &&
-      isMember === false // Only initialize if not a member
+      isMember === false && !onHoldMembership // Only initialize if not a member nor on hold
     ) {
       let targetCommunity: APICommunity | undefined;
 
@@ -104,6 +118,7 @@ function OnboardingMembresiaComponent() {
     isInitialized,
     communityId,
     isMember,
+    onHoldMembership,
     fetchCommunityPlans,
   ]); // REMOVIDO fetchCommunityPlans para evitar loops
 
@@ -143,6 +158,55 @@ function OnboardingMembresiaComponent() {
             >
               Ir a mis comunidades
             </Button>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // Si la membresía está suspendida
+  if (onHoldMembership) {
+    const handleReactivate = async () => {
+      setReactivating(true);
+      try {
+        await membershipsApi.updateMembership(onHoldMembership.id, {
+          status: MembershipState.ACTIVE,
+        });
+        navigate({ to: '/mis-comunidades' });
+      } catch (err) {
+        console.error('Error reactivando membresía', err);
+        alert('No se pudo reactivar la membresía. Intenta nuevamente.');
+      } finally {
+        setReactivating(false);
+      }
+    };
+
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Tu membresía está suspendida
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Reactiva tu membresía para volver a disfrutar de los beneficios.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={handleReactivate}
+                disabled={reactivating}
+                className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50"
+              >
+                {reactivating ? 'Procesando...' : 'Reactivar membresía'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => navigate({ to: '/mis-comunidades' })}
+                className="px-6 py-2"
+              >
+                Cancelar
+              </Button>
+            </div>
           </div>
         </div>
       </ProtectedRoute>

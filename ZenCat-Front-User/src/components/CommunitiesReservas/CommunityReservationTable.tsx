@@ -82,7 +82,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       accessorKey: 'reservation_time',
       header: 'Fecha',
       cell: ({ row }) => {
-        const date = new Date(row.getValue('reservation_time'));
+        const date = new Date(row.original.session.date);
         return (
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
@@ -97,13 +97,13 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       accessorKey: 'time_range',
       header: 'Horario',
       cell: ({ row }) => {
-        const reservationTime = new Date(row.original.reservation_time);
-        const endTime = new Date(reservationTime.getTime() + 60 * 60 * 1000);
+        const startTime = new Date(row.original.session.start_time);
+        const endTime = new Date(row.original.session.end_time);
         return (
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
               <Clock className="h-3 w-3 text-gray-500" />
-              {format(reservationTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
+              {format(startTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
             </div>
           </div>
         );
