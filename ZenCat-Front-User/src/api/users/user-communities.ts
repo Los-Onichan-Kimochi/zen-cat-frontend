@@ -162,7 +162,7 @@ export function transformMembershipsToFrontend(
       reservationLimit: membership.plan.reservation_limit,
       reservationsUsed: membership.reservations_used,
     };
-    console.log("HOLA", communityId, transformedCommunity);
+    //console.log("HOLA", communityId, transformedCommunity);
     // Prioritize active memberships if a community is already in the map
     if (
       !communityMap.has(communityId) &&

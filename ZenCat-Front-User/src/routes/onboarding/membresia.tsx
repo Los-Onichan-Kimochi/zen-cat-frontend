@@ -13,7 +13,7 @@ import { Community as APICommunity } from '@/types/community';
 import { useUserMemberships } from '@/hooks/use-user-memberships';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { Membership } from '@/types/membership';
 
 export const Route = createFileRoute('/onboarding/membresia')({
@@ -169,7 +169,7 @@ function OnboardingMembresiaComponent() {
     const handleReactivate = async () => {
       setReactivating(true);
       try {
-        await membershipService.updateMembership(onHoldMembership.id, {
+        await membershipsApi.updateMembership(onHoldMembership.id, {
           status: MembershipState.ACTIVE,
         });
         navigate({ to: '/mis-comunidades' });

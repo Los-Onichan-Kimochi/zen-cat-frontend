@@ -5,7 +5,7 @@ import { useUserMemberships } from '@/hooks/use-user-memberships';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { Membership, MembershipState } from '@/types/membership';
 
 export const Route = createFileRoute('/perfil')({
@@ -35,7 +35,7 @@ function PerfilComponent() {
     const newStatus = m.status === MembershipState.ACTIVE ? MembershipState.SUSPENDED : MembershipState.ACTIVE;
     setUpdatingIds((prev) => new Set(prev).add(m.id));
     try {
-      await membershipService.updateMembership(m.id, { status: newStatus });
+      await membershipsApi.updateMembership(m.id, { status: newStatus });
       // Actualizar localmente
       setMembershipList((prev) =>
         prev.map((item) => (item.id === m.id ? { ...item, status: newStatus } : item)),

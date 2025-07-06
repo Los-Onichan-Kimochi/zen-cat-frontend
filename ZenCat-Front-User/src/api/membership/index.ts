@@ -1,1 +1,0 @@
-export { membershipService } from './membership';

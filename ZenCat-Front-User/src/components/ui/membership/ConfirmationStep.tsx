@@ -5,7 +5,7 @@ import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/context/AuthContext';
 import { onboardingService } from '@/api/onboarding';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { OnboardingResponse } from '@/types/onboarding';
 import { Membership, CreateMembershipRequest, MembershipState } from '@/types/membership';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
@@ -112,7 +112,7 @@ export function ConfirmationStep() {
         }
 
         const membershipResponse =
-          await membershipService.createMembershipForUser(
+          await membershipsApi.createMembershipForUser(
             user.id,
             membershipRequest,
           );

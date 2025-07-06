@@ -7,23 +7,28 @@ import { SuspendMembershipDialog } from './SuspendMembershipDialog';
 import { CancelMembershipDialog } from './CancelMembershipDialog';
 import { useNavigate } from '@tanstack/react-router';
 import { useToast } from '@/components/ui/Toast';
+import { MembershipState, UpdateMembershipRequest } from '@/types/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 
 interface TabCommunityGeneralProps {
   community: Community | null;
   onViewReservations?: () => void;
+  onRefresh?: () => void;
 }
 
-export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
+export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGeneralProps) {
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isProcessingReservation, setIsProcessingReservation] = useState(false);
+  const [isProcessingMembership, setIsProcessingMembership] = useState(false);
   const navigate = useNavigate();
-  const { error: showErrorToast, ToastContainer } = useToast();
+  const { error: showErrorToast, success: showSuccessToast, ToastContainer } = useToast();
 
   if (!community) {
     return <div>No hay información disponible</div>;
   }
   console.log("Community:", community);
+  
   const handleNewReservation = useCallback(() => {
     // Evitar múltiples clics rápidos
     if (isProcessingReservation) {
@@ -55,6 +60,7 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
     // Resetear el estado después de navegar
     setTimeout(() => setIsProcessingReservation(false), 500);
   }, [isProcessingReservation, community, navigate, showErrorToast]);
+
   const handleViewReservations = () => {
     // Navegar a la página de reservas pasando el communityId como search param
     navigate({
@@ -77,18 +83,56 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
     });
   };
 
-  const handleSuspendMembership = () => {
-    // Aquí iría la lógica para suspender la membresía en la BD
-    console.log(`Suspendiendo membresía para comunidad: ${community?.id}`);
-    setShowSuspendDialog(false);
-    // Aquí podrías actualizar el estado o redirigir a otra página
+  const handleSuspendMembership = async () => {
+    if (!community.membershipId || isProcessingMembership) {
+      return;
+    }
+
+    try {
+      setIsProcessingMembership(true);
+      await membershipsApi.updateMembership(community.membershipId, { 
+        status: MembershipState.SUSPENDED 
+      });
+      
+      showSuccessToast('Membresía suspendida exitosamente');
+      setShowSuspendDialog(false);
+      
+      // Refrescar los datos después de suspender
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error suspendiendo membresía:', error);
+      showErrorToast('Error al suspender la membresía');
+    } finally {
+      setIsProcessingMembership(false);
+    }
   };
 
-  const handleCancelMembership = () => {
-    // Aquí iría la lógica para cancelar la membresía en la BD
-    console.log(`Cancelando membresía para comunidad: ${community?.id}`);
-    setShowCancelDialog(false);
-    // Aquí podrías actualizar el estado o redirigir a otra página
+  const handleCancelMembership = async () => {
+    if (!community.membershipId || isProcessingMembership) {
+      return;
+    }
+
+    try {
+      setIsProcessingMembership(true);
+      await membershipsApi.updateMembership(community.membershipId, { 
+        status: MembershipState.CANCELLED 
+      });
+      
+      showSuccessToast('Membresía cancelada exitosamente');
+      setShowCancelDialog(false);
+      
+      // Refrescar los datos después de cancelar
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error cancelando membresía:', error);
+      showErrorToast('Error al cancelar la membresía');
+    } finally {
+      setIsProcessingMembership(false);
+    }
   };
 
   return (
@@ -143,17 +187,18 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
               Ver membresías
             </Button>
             <Button
-              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => setShowSuspendDialog(true)}
-              disabled={community.status !== 'active'}
+              disabled={community.status !== 'active' || isProcessingMembership}
             >
-              Suspender membresía
+              {isProcessingMembership ? 'Procesando...' : 'Suspender membresía'}
             </Button>
             <Button
-              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => setShowCancelDialog(true)}
+              disabled={isProcessingMembership}
             >
-              Cancelar membresía
+              {isProcessingMembership ? 'Procesando...' : 'Cancelar membresía'}
             </Button>
           </div>
           {/* Bloque de información de membresía */}
