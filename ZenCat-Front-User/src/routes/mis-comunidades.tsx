@@ -30,7 +30,7 @@ function ComunidadesComponent() {
   const { user } = useAuth();
 
   // Fetch user communities usando el ID del usuario autenticado
-  const { communities, loading, error } = useUserCommunities(user?.id);
+  const { communities, loading, error, refreshUserData } = useUserCommunities(user?.id);
 
   // Si hay error al cargar las comunidades
   if (error) {
@@ -71,6 +71,15 @@ function ComunidadesComponent() {
       );
       setServices(services); // Guardar los servicios asociados en el estado
     }
+  };
+
+  // Función para refrescar datos después de cambios en membresía
+  const handleRefresh = async () => {
+    await refreshUserData();
+    
+    // Deseleccionar la comunidad para que los tabs desaparezcan
+    setSelectedCommunity(null);
+    setServices([]);
   };
 
   return (
@@ -119,6 +128,7 @@ function ComunidadesComponent() {
               <InformationCommunity
                 community={selectedCommunity}
                 services={services}
+                onRefresh={handleRefresh}
               />
             </div>
           </div>

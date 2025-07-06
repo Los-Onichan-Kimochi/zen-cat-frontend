@@ -5,8 +5,8 @@ import { useUserMemberships } from '@/hooks/use-user-memberships';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { membershipService } from '@/api/membership/membership';
-import { Membership } from '@/types/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
+import { Membership, MembershipState } from '@/types/membership';
 
 export const Route = createFileRoute('/perfil')({
   component: PerfilComponent,
@@ -32,13 +32,13 @@ function PerfilComponent() {
   }, [memberships]);
 
   const toggleSuspend = async (m: Membership) => {
-    const newStatus = m.status === 'ACTIVE' ? 'ON_HOLD' : 'ACTIVE';
+    const newStatus = m.status === MembershipState.ACTIVE ? MembershipState.SUSPENDED : MembershipState.ACTIVE;
     setUpdatingIds((prev) => new Set(prev).add(m.id));
     try {
-      await membershipService.updateMembership(m.id, { status: newStatus as any });
+      await membershipsApi.updateMembership(m.id, { status: newStatus });
       // Actualizar localmente
       setMembershipList((prev) =>
-        prev.map((item) => (item.id === m.id ? { ...item, status: newStatus as any } : item)),
+        prev.map((item) => (item.id === m.id ? { ...item, status: newStatus } : item)),
       );
     } catch (err) {
       console.error('Error actualizando membresía', err);
@@ -53,24 +53,22 @@ function PerfilComponent() {
 
   const toggleHistory = () => setShowHistory((prev) => !prev);
 
-  const statusPriority: Record<string, number> = {
-    ACTIVE: 1,
-    ON_HOLD: 2,
-    SUSPENDED: 2,
-    INACTIVE: 3,
-    EXPIRED: 3,
-    CANCELLED: 4,
+  const statusPriority: Record<MembershipState, number> = {
+    [MembershipState.ACTIVE]: 1,
+    [MembershipState.SUSPENDED]: 2,
+    [MembershipState.EXPIRED]: 3,
+    [MembershipState.CANCELLED]: 4,
   };
 
   const visibleMemberships = showHistory
     ? [...membershipList].sort((a, b) => {
-        const pa = statusPriority[a.status as string] ?? 5;
-        const pb = statusPriority[b.status as string] ?? 5;
+        const pa = statusPriority[a.status] ?? 5;
+        const pb = statusPriority[b.status] ?? 5;
         if (pa !== pb) return pa - pb;
         // si misma prioridad ordenar por fecha inicio descendente
         return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
       })
-    : membershipList.filter((m) => m.status === 'ACTIVE');
+    : membershipList.filter((m) => m.status === MembershipState.ACTIVE);
 
   /* =====================================
    * Derived data for quick statistics
@@ -93,7 +91,7 @@ function PerfilComponent() {
 
   // Active communities are memberships in ACTIVE status
   const activeCommunitiesCount = membershipList.filter(
-    (m) => m.status === 'ACTIVE',
+    (m) => m.status === MembershipState.ACTIVE,
   ).length;
 
   // "Miembro desde" is the earliest start_date of the memberships
@@ -258,13 +256,11 @@ function PerfilComponent() {
                       ANNUAL: 'Plan anual',
                     };
 
-                    const statusMap: Record<string, string> = {
-                      ACTIVE: 'Activa',
-                      ON_HOLD: 'Suspendida',
-                      SUSPENDED: 'Suspendida',
-                      INACTIVE: 'Inactiva',
-                      EXPIRED: 'Expirada',
-                      CANCELLED: 'Cancelada',
+                    const statusMap: Record<MembershipState, string> = {
+                      [MembershipState.ACTIVE]: 'Activa',
+                      [MembershipState.SUSPENDED]: 'Suspendida',
+                      [MembershipState.EXPIRED]: 'Expirada',
+                      [MembershipState.CANCELLED]: 'Cancelada',
                     };
 
                     const statusText =
@@ -286,10 +282,9 @@ function PerfilComponent() {
                       'Plan';
 
                     const isInactiveCard = ![
-                      'ACTIVE',
-                      'ON_HOLD',
-                      'SUSPENDED',
-                    ].includes(membership.status as string);
+                      MembershipState.ACTIVE,
+                      MembershipState.SUSPENDED,
+                    ].includes(membership.status);
 
                     return (
                       <div
@@ -332,13 +327,13 @@ function PerfilComponent() {
                         </p>
 
                         {/* Toggle suspensión */}
-                        {(membership.status as any) === 'ACTIVE' ||
-                        (membership.status as any) === 'ON_HOLD' ? (
+                        {membership.status === MembershipState.ACTIVE ||
+                        membership.status === MembershipState.SUSPENDED ? (
                           <button
                             onClick={() => toggleSuspend(membership)}
                             disabled={updatingIds.has(membership.id)}
                             className={`mt-3 px-3 py-1 text-sm rounded-lg border transition-all ${
-                              membership.status === 'ACTIVE'
+                              membership.status === MembershipState.ACTIVE
                                 ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-600'
                                 : 'bg-green-50 text-green-700 hover:bg-green-100 border-green-600'
                             } ${
@@ -349,7 +344,7 @@ function PerfilComponent() {
                           >
                             {updatingIds.has(membership.id)
                               ? 'Procesando...'
-                              : membership.status === 'ACTIVE'
+                              : membership.status === MembershipState.ACTIVE
                               ? 'Suspender'
                               : 'Reactivar'}
                           </button>

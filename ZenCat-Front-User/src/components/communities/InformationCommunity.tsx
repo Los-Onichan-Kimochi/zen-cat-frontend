@@ -7,11 +7,13 @@ import { Service } from '@/types/service';
 interface InformationCommunityProps {
   community: Community | null;
   services: Service[] | null;
+  onRefresh?: () => void;
 }
 
 export function InformationCommunity({
   community,
   services,
+  onRefresh,
 }: InformationCommunityProps) {
   if (community == null) {
     // Si no hay comunidad, mostramos solo la imagen de AstroCat dentro de un div estilizado como Card
@@ -52,7 +54,7 @@ export function InformationCommunity({
 
         {/* Contenido de las pestañas */}
         <TabsContent value="general" className="mt-2">
-          <TabCommunityGeneral community={community} />
+          <TabCommunityGeneral community={community} onRefresh={onRefresh} />
         </TabsContent>
 
         <TabsContent value="servicios" className="mt-2">
