@@ -15,7 +15,6 @@ interface CommunityGridProps {
 
 const CommunityGrid: React.FC<CommunityGridProps> = ({
   communities,
-  onCardViewMore,
 }) => {
   return (
     <section>
@@ -23,10 +22,10 @@ const CommunityGrid: React.FC<CommunityGridProps> = ({
         {communities.map((community) => (
           <CommunityCard
             key={community.id}
+            communityId={community.id}
             imageUrl={community.image_url}
             title={community.name}
             description={community.purpose}
-            onViewMore={() => onCardViewMore(community.id)}
           />
         ))}
       </div>

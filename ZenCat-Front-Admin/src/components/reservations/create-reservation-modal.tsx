@@ -91,6 +91,20 @@ export function CreateReservationModal({
     }
 
     try {
+      // Verificar si ya existe una reserva para este usuario y sesión
+      const existingReservations = await reservationsApi.fetchReservations({
+        userIds: [selectedUserId],
+        sessionIds: [sessionId],
+        states: ['CONFIRMED', 'DONE'] // Solo verificar estados activos
+      });
+
+      if (existingReservations.reservations && existingReservations.reservations.length > 0) {
+        toast.error('Reserva duplicada', {
+          description: 'El usuario ya tiene una reserva para esta sesión.',
+        });
+        setIsLoading(false);
+        return;
+      }
       // Obtener el ID de la membresía para el usuario y comunidad
       let membershipId = null;
 

@@ -92,8 +92,10 @@ function SesionesComponent() {
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // We don't need a manual effect for refetching anymore
-  // The useQuery hook is configured to automatically refetch data
+  useEffect(() => {
+    // Invalidar queries cuando el componente se monta o cuando regresas
+    queryClient.invalidateQueries({ queryKey: ['sessions'] });
+  }, []);
 
   //adicion -------------------------------------------------------------
   // adaprtar para limpiar seleccion
@@ -128,6 +130,8 @@ function SesionesComponent() {
     // Enable automatic refetching
     refetchOnMount: true,      // Refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus   
+    staleTime: 0,                // Los datos se consideran obsoletos inmediatamente
+    gcTime: 5 * 60 * 1000,      // Garbage collection después de 5 minutos
   });
 
   // Mock data for reservations - you should replace this with actual API call
