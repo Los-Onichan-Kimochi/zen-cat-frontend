@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Community } from './CommunityCard';
 import { format } from 'date-fns';
@@ -6,6 +6,7 @@ import { es } from 'date-fns/locale';
 import { SuspendMembershipDialog } from './SuspendMembershipDialog';
 import { CancelMembershipDialog } from './CancelMembershipDialog';
 import { useNavigate } from '@tanstack/react-router';
+import { useToast } from '@/components/ui/Toast';
 
 interface TabCommunityGeneralProps {
   community: Community | null;
@@ -15,13 +16,34 @@ interface TabCommunityGeneralProps {
 export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isProcessingReservation, setIsProcessingReservation] = useState(false);
   const navigate = useNavigate();
+  const { error: showErrorToast, ToastContainer } = useToast();
 
   if (!community) {
     return <div>No hay información disponible</div>;
   }
   console.log("Community:", community);
-  const handleNewReservation = () => {
+  const handleNewReservation = useCallback(() => {
+    // Evitar múltiples clics rápidos
+    if (isProcessingReservation) {
+      return;
+    }
+
+    // Calcular reservas disponibles
+    const reservasDisponibles = community.reservationsUsed === null 
+      ? null // Sin límite
+      : (community.reservationLimit || 0) - (community.reservationsUsed || 0);
+
+    // Verificar si hay reservas disponibles
+    if (reservasDisponibles !== null && reservasDisponibles <= 0) {
+      showErrorToast('No tienes reservas disponibles');
+      return;
+    }
+
+    // Bloquear temporalmente para evitar múltiples navegaciones
+    setIsProcessingReservation(true);
+
     // Navegar a la página de servicios pasando el communityId como search param
     navigate({
       to: '/reserva/servicios',
@@ -29,7 +51,10 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
         communityId: community.id,
       },
     });
-  };
+
+    // Resetear el estado después de navegar
+    setTimeout(() => setIsProcessingReservation(false), 500);
+  }, [isProcessingReservation, community, navigate, showErrorToast]);
   const handleViewReservations = () => {
     // Navegar a la página de reservas pasando el communityId como search param
     navigate({
@@ -79,7 +104,9 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
                 ? 'Membresía activa'
                 : community.status === 'suspended'
                   ? 'Membresía suspendida'
-                  : 'Membresía vencida'}
+                  : community.status === 'expired'
+                    ? 'Membresía vencida'
+                    : 'Membresía cancelada'}
             </p>
           </div>
         </div>
@@ -97,10 +124,11 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
           <div className="space-y-2 px-4 border-r border-l border-gray-500">
             <h2 className="font-bold text-2xl">Acciones</h2>
             <Button
-              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+              className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleNewReservation}
+              disabled={isProcessingReservation}
             >
-              Nueva reserva
+              {isProcessingReservation ? 'Procesando...' : 'Nueva reserva'}
             </Button>
             <Button
               className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
@@ -205,6 +233,9 @@ export function TabCommunityGeneral({ community }: TabCommunityGeneralProps) {
         onCancel={handleCancelMembership}
         communityName={community.name}
       />
+      
+      {/* Toast Container */}
+      <ToastContainer />
     </>
   );
 }

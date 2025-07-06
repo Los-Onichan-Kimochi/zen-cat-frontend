@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { onboardingService } from '@/api/onboarding';
 import { membershipService } from '@/api/membership/membership';
 import { OnboardingResponse } from '@/types/onboarding';
-import { Membership, CreateMembershipRequest } from '@/types/membership';
+import { Membership, CreateMembershipRequest, MembershipState } from '@/types/membership';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 
 export function ConfirmationStep() {
@@ -98,7 +98,7 @@ export function ConfirmationStep() {
           description: `Membresía ${state.selectedPlan.name} - ${state.selectedPlan.type} para ${state.community.name}`,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
-          status: 'ACTIVE',
+          status: MembershipState.ACTIVE,
         };
         // Verificar que las fechas sean válidas
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
