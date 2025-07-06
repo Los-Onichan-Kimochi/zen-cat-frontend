@@ -28,6 +28,7 @@ import {
   getSessionStateColor,
   getSessionStateLabel,
 } from '@/utils/session-status';
+import { convertUTCToLima } from '@/api/sessions/sessions';
 
 interface GetSessionColumnsProps {
   onEdit: (session: Session) => void;
@@ -91,13 +92,16 @@ export function getSessionColumns({
       cell: ({ row }) => {
         const date = row.getValue('date') as string;
         try {
+          // Convertir la fecha UTC a hora de Lima para mostrar
+          const limaDate = convertUTCToLima(date);
           return (
             <div className="flex items-center justify-center">
               <Calendar className="mr-2 h-4 w-4 text-gray-500" />
-              {format(new Date(date), 'dd/MM/yyyy', { locale: es })}
+              {format(limaDate, 'dd/MM/yyyy', { locale: es })}
             </div>
           );
         } catch (error) {
+          console.error('Error formatting date:', error);
           return <div className="text-center">Fecha inválida</div>;
         }
       },
@@ -115,8 +119,11 @@ export function getSessionColumns({
         const startTime = row.original.start_time;
         const endTime = row.original.end_time;
         try {
-          const start = format(new Date(startTime), 'HH:mm');
-          const end = format(new Date(endTime), 'HH:mm');
+          // Convertir las horas UTC a hora de Lima para mostrar
+          const limaStartTime = convertUTCToLima(startTime);
+          const limaEndTime = convertUTCToLima(endTime);
+          const start = format(limaStartTime, 'HH:mm');
+          const end = format(limaEndTime, 'HH:mm');
           return (
             <div className="flex items-center justify-center">
               <Clock className="mr-2 h-4 w-4 text-gray-500" />
@@ -126,6 +133,7 @@ export function getSessionColumns({
             </div>
           );
         } catch (error) {
+          console.error('Error formatting time range:', error);
           return <div className="text-center">Horario inválido</div>;
         }
       },

@@ -87,7 +87,7 @@ export interface CreateMembershipRequest {
   description?: string;
   start_date: string;
   end_date: string;
-  status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+  status: MembershipState;
   reservations_used?: number | null;
 }
 

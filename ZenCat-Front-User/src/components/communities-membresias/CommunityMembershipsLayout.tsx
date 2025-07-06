@@ -13,7 +13,7 @@ import { MembershipsTable } from './CommunityMembershipTable';
 import { MembershipDetailDialog } from './MembershipDetailDialog';
 import { Membership, MembershipState } from '@/types/membership';
 import { useAuth } from '@/context/AuthContext';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { mapMembershipStateToSpanish } from '@/utils/membership-utils';
 
 const CommunityMembershipsLayout = () => {
@@ -63,7 +63,7 @@ const CommunityMembershipsLayout = () => {
       try {
  
         // Obtener las membresías del usuario
-        const response = await membershipService.getMembershipsByUser(user.id!);
+        const response = await membershipsApi.getMembershipsByUser(user.id!);
         
         // Filtrar solo las membresías de la comunidad actual
         const communityMemberships = response.memberships.filter(

@@ -9,58 +9,56 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 
-// Función para convertir hora de Lima (UTC-5) a UTC
+// Función para convertir fecha de Lima (UTC-5) a UTC - simplificada
 export const convertLimaToUTC = (limaDateTimeString: string): string => {
   if (!limaDateTimeString) {
     throw new Error('Invalid date string provided to convertLimaToUTC');
   }
 
   try {
-    console.log('Original date string:', limaDateTimeString);
+    console.log('Original Lima date string:', limaDateTimeString);
     
-    // Primero creamos una fecha en la zona horaria local del navegador
-    const localDate = new Date(limaDateTimeString);
+    // Parsear la fecha como si fuera en zona horaria local
+    const limaDate = new Date(limaDateTimeString);
     
-    if (isNaN(localDate.getTime())) {
-      // Si falla la conversión directa, intentamos el método manual
-      const [datePart, timePart] = limaDateTimeString.split('T');
-      if (!datePart) {
-        throw new Error(`Invalid date format: ${limaDateTimeString}`);
-      }
-      
-      const [year, month, day] = datePart.split('-').map(Number);
-      
-      let hour = 0, minute = 0, second = 0;
-      if (timePart) {
-        const timeParts = timePart.split(':').map(Number);
-        hour = timeParts[0] || 0;
-        minute = timeParts[1] || 0;
-        second = timeParts[2] || 0;
-      }
-      
-      // Creamos la fecha en la zona horaria local
-      const date = new Date(year, month - 1, day, hour, minute, second);
-      
-      // Ajustamos 5 horas para convertir de Lima (UTC-5) a UTC
-      date.setHours(date.getHours() + 5);
-      
-      // Convertimos a ISO string
-      const isoString = date.toISOString();
-      console.log('Converted ISO string (manual):', isoString);
-      return isoString;
+    if (isNaN(limaDate.getTime())) {
+      throw new Error(`Invalid date format: ${limaDateTimeString}`);
     }
     
-    // Si la fecha tiene un formato válido, ajustamos la hora
-    const limaOffset = -5 * 60 * 60 * 1000; // Lima UTC-5 en milisegundos
-    const utcTime = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60 * 1000 + limaOffset);
+    // Agregar 5 horas para convertir de Lima (UTC-5) a UTC
+    const utcDate = new Date(limaDate.getTime());
     
-    const isoString = utcTime.toISOString();
-    console.log('Converted ISO string:', isoString);
+    const isoString = utcDate.toISOString();
+    console.log('Converted to UTC:', isoString);
     return isoString;
+    
   } catch (error) {
     console.error('Error in convertLimaToUTC:', error, limaDateTimeString);
-    // Si ocurre un error, devolvemos la cadena original para evitar bloqueos
-    return limaDateTimeString;
+    throw error;
+  }
+};
+
+// Función para convertir fechas UTC a hora de Lima para mostrar en la UI
+export const convertUTCToLima = (utcDateTimeString: string): Date => {
+  if (!utcDateTimeString) {
+    throw new Error('Invalid UTC date string provided');
+  }
+
+  try {
+    const utcDate = new Date(utcDateTimeString);
+    
+    if (isNaN(utcDate.getTime())) {
+      throw new Error(`Cannot parse UTC date: ${utcDateTimeString}`);
+    }
+    
+    // Convertir UTC a Lima (UTC-5)
+    const limaTime = new Date(utcDate.getTime());
+    
+    return limaTime;
+  } catch (error) {
+    console.error('Error in convertUTCToLima:', error, utcDateTimeString);
+    // Si hay error, devolvemos la fecha original
+    return new Date(utcDateTimeString);
   }
 };
 
@@ -130,6 +128,8 @@ export const sessionsApi = {
 
   createSession: async (payload: CreateSessionPayload): Promise<Session> => {
     // Convertir fechas de Lima (UTC-5) a UTC para el backend
+
+    console.log (convertLimaToUTC(payload.start_time))
     const backendPayload = {
       title: payload.title,
       date: convertLimaToUTC(payload.date),

@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
-import { membershipService } from '@/api/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import {
   Membership,
   MembershipsResponse,
   CreateMembershipRequest,
   MembershipPlan,
+  MembershipState,
 } from '@/types/membership';
 
 interface UseMembershipState {
@@ -47,12 +48,12 @@ export function useMembership() {
           description: customDescription || `${plan.name} - ${plan.type}`,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
-          status: 'ACTIVE',
+          status: MembershipState.ACTIVE,
           community_id: communityId,
           plan_id: plan.id,
         };
 
-        const response = await membershipService.createMembershipForUser(
+        const response = await membershipsApi.createMembershipForUser(
           userId,
           membershipData,
         );
@@ -88,7 +89,7 @@ export function useMembership() {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const response = await membershipService.getMembershipsByUser(userId);
+        const response = await membershipsApi.getMembershipsByUser(userId);
 
         setState((prev) => ({
           ...prev,
@@ -124,7 +125,7 @@ export function useMembership() {
 
       try {
         const response =
-          await membershipService.getMembershipById(membershipId);
+          await membershipsApi.getMembershipById(membershipId);
 
         setState((prev) => ({
           ...prev,
