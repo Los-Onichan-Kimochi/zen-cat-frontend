@@ -940,12 +940,6 @@ function SessionDetailComponent() {
                           <SelectItem value={SessionState.SCHEDULED}>
                             Programada
                           </SelectItem>
-                          <SelectItem value={SessionState.ONGOING}>
-                            En curso
-                          </SelectItem>
-                          <SelectItem value={SessionState.COMPLETED}>
-                            Completada
-                          </SelectItem>
                           <SelectItem value={SessionState.CANCELLED} className="flex items-center text-red-600">
                             <AlertTriangle className="mr-2 h-4 w-4" />
                             Cancelada
