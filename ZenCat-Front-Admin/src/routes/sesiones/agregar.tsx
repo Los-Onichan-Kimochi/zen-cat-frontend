@@ -347,20 +347,20 @@ function AddSessionComponent() {
     }
 
     const dateString = format(data.date, 'yyyy-MM-dd');
-    const localStartTime = `${dateString}T${data.start_time}:00`;
-    const localEndTime = `${dateString}T${data.end_time}:00`;
-    const localDate = `${dateString}T00:00:00`;
+    const startTimeString = `${dateString}T${data.start_time}:00`;
+    const endTimeString = `${dateString}T${data.end_time}:00`;
+    const dateTimeString = `${dateString}T00:00:00`;
 
     const payload: CreateSessionPayload = {
       title: data.title,
-      date: localDate,
-      start_time: localStartTime,
-      end_time: localEndTime,
+      date: dateTimeString,
+      start_time: startTimeString,
+      end_time: endTimeString,
       capacity: data.capacity,
       professional_id: data.professional_id,
       local_id: data.is_virtual ? null : data.local_id || null,
       session_link:
-        data.is_virtual && data.session_link ? data.session_link : null,
+      data.is_virtual && data.session_link ? data.session_link : null,
       community_service_id: data.community_service_id,
     };
 
