@@ -245,8 +245,18 @@ const ProfileSection: React.FC = () => {
           Bienvenido, {name}
         </h2>
 
-        <div className="flex items-center justify-center bg-blue-100 rounded-full w-54 h-54 mb-2 mx-auto">
-          <img src="/ico-astrocat.svg" alt="logo" className="w-50 h-50" />
+        <div className="flex items-center justify-center bg-blue-100 rounded-full w-54 h-54 mb-2 mx-auto overflow-hidden">
+          {authUser?.image_url || authUser?.imageUrl ? (
+            <img
+              src={authUser.image_url || authUser.imageUrl}
+              alt="Foto de perfil"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-500">
+              <span className="text-6xl">👤</span>
+            </div>
+          )}
         </div>
       </div>
       {/* 2. Contenedor de Tabs */}
