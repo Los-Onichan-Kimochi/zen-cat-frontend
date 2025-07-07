@@ -1,10 +1,8 @@
-
 // Document types that match the backend enum
 export type DocumentType = 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
 
 // Gender types that match the backend enum
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
-
 
 export interface UpdateOnboardingRequest {
   document_type?: DocumentType;

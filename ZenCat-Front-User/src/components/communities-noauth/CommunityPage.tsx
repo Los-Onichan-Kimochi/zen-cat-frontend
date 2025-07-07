@@ -1,4 +1,4 @@
-import { useParams,useNavigate } from '@tanstack/react-router';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { communitiesApi } from '@/api/communities/communities';
@@ -18,26 +18,29 @@ export default function CommunityPage() {
   const navigate = useNavigate();
 
   const handleInscribirme = () => {
-  navigate({
-    to: '/onboarding/membresia',
-    search: { communityId: communityId }
-  });
-};
+    navigate({
+      to: '/onboarding/membresia',
+      search: { communityId: communityId },
+    });
+  };
 
   useEffect(() => {
     const fetchCommunityAndServices = async () => {
       try {
         // Obtener datos de la comunidad
-        const fetchedCommunity = await communitiesApi.getCommunityById(communityId);
+        const fetchedCommunity =
+          await communitiesApi.getCommunityById(communityId);
         setCommunity(fetchedCommunity);
 
         // Obtener los community-services
         const communityServices: CommunityService[] =
-          await communityServicesApi.getCommunityServicesByCommunityId(communityId);
+          await communityServicesApi.getCommunityServicesByCommunityId(
+            communityId,
+          );
 
         // Obtener los services completos en paralelo
         const servicePromises = communityServices.map((cs) =>
-          servicesApi.getServiceById(cs.service_id)
+          servicesApi.getServiceById(cs.service_id),
         );
         const services = await Promise.all(servicePromises);
         setServices(services);
@@ -53,15 +56,21 @@ export default function CommunityPage() {
     fetchCommunityAndServices();
   }, [communityId]);
 
-  if (loading) return <p className="text-center mt-10">Cargando comunidad...</p>;
-  if (!community) return <p className="text-center mt-10 text-red-500">Comunidad no encontrada</p>;
+  if (loading)
+    return <p className="text-center mt-10">Cargando comunidad...</p>;
+  if (!community)
+    return (
+      <p className="text-center mt-10 text-red-500">Comunidad no encontrada</p>
+    );
 
   return (
     <div className="min-h-screen pt-6 pb-12 px-4 max-w-6xl mx-auto">
       <Button>Retroceder</Button>
 
       <section className="text-center mb-8">
-        <h2 className="uppercase text-sm font-medium text-gray-500">Comunidad</h2>
+        <h2 className="uppercase text-sm font-medium text-gray-500">
+          Comunidad
+        </h2>
         <h1 className="text-4xl font-bold mb-3">{community.name}</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">{community.purpose}</p>
 
@@ -79,10 +88,14 @@ export default function CommunityPage() {
       </div>
 
       <section>
-        <h2 className="text-2xl font-bold text-center mb-6">Actividades y servicios disponibles</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Actividades y servicios disponibles
+        </h2>
 
         {services.length === 0 ? (
-          <p className="text-center text-gray-500">Esta comunidad aún no tiene servicios disponibles.</p>
+          <p className="text-center text-gray-500">
+            Esta comunidad aún no tiene servicios disponibles.
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
             {services.map((service) => (

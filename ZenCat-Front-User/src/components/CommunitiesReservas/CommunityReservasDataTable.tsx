@@ -28,7 +28,10 @@ export function CommunityReservasDataTable<TData>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="text-center text-black font-semibold text-base">
+                  <TableHead
+                    key={header.id}
+                    className="text-center text-black font-semibold text-base"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -58,7 +61,10 @@ export function CommunityReservasDataTable<TData>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-gray-500"
+              >
                 No hay reservas disponibles.
               </TableCell>
             </TableRow>

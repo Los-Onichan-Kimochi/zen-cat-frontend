@@ -1,4 +1,4 @@
-import { MembershipState } from "./membership";
+import { MembershipState } from './membership';
 
 export interface UserOnboarding {
   id: string;
@@ -72,5 +72,3 @@ export interface UpdateUserRequest {
   permissions?: string[];
   avatar?: string;
 }
-
-

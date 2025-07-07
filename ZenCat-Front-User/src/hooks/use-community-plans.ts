@@ -19,13 +19,12 @@ const transformPlan = (apiPlan: any): MembershipPlan => {
     apiType === 'MONTHLY'
       ? 'Mensual'
       : apiType === 'ANUAL'
-      ? 'Anual'
-      : 'Mensual'; // Fallback
+        ? 'Anual'
+        : 'Mensual'; // Fallback
 
   return {
     id: apiPlan.id,
-    name:
-      apiPlan.name || (type === 'Mensual' ? 'Plan Mensual' : 'Plan Anual'),
+    name: apiPlan.name || (type === 'Mensual' ? 'Plan Mensual' : 'Plan Anual'),
     type: type,
     price: apiPlan.fee || apiPlan.price || 0, // Soporte para ambos campos
     duration: type === 'Mensual' ? '/mes' : '/año',

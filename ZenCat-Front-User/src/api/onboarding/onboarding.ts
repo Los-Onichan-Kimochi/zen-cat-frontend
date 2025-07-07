@@ -1,6 +1,10 @@
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
-import { CreateOnboardingRequest, OnboardingResponse, UpdateOnboardingRequest } from '@/types/onboarding';
+import {
+  CreateOnboardingRequest,
+  OnboardingResponse,
+  UpdateOnboardingRequest,
+} from '@/types/onboarding';
 
 export const onboardingService = {
   /**
@@ -53,7 +57,7 @@ export const onboardingService = {
    */
   async updateOnboardingForUser(
     userId: string,
-    onboardingData: Partial<UpdateOnboardingRequest>
+    onboardingData: Partial<UpdateOnboardingRequest>,
   ): Promise<OnboardingResponse> {
     try {
       // Ensure we include the updated_by field
@@ -64,7 +68,7 @@ export const onboardingService = {
 
       const response = await apiClient.patch<OnboardingResponse>(
         API_ENDPOINTS.ONBOARDING.UPDATE_FOR_USER(userId),
-        dataWithUpdatedBy
+        dataWithUpdatedBy,
       );
 
       return response;
@@ -72,7 +76,5 @@ export const onboardingService = {
       console.error('Error updating onboarding for user:', error);
       throw error;
     }
-  }
-
-
+  },
 };

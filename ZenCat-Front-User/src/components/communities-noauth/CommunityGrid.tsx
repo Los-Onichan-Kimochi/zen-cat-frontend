@@ -13,9 +13,7 @@ interface CommunityGridProps {
   onCardViewMore: (id: string) => void;
 }
 
-const CommunityGrid: React.FC<CommunityGridProps> = ({
-  communities,
-}) => {
+const CommunityGrid: React.FC<CommunityGridProps> = ({ communities }) => {
   return (
     <section>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
