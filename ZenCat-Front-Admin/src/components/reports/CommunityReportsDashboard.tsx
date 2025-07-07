@@ -21,6 +21,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { ExportButtons } from '@/components/common/ExportButtons';
+import jsPDF from 'jspdf';
 
 // Paleta de colores del Admin
 const PALETTE = [
@@ -117,6 +118,87 @@ function exportToCSV(
   a.download = `reporte_comunidades_totales_${from}_a_${to}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function exportToPDF(
+  communities: any[],
+  from: string,
+  to: string,
+  totalGeneral: number,
+  totalActive: number,
+  totalExpired: number,
+  totalCancelled: number,
+  totalActiveUsers: number,
+) {
+  const doc = new jsPDF();
+  let y = 15;
+
+  // Título
+  doc.setFontSize(18);
+  doc.text('Reporte de Comunidades', 10, y);
+  y += 10;
+  doc.setFontSize(12);
+  doc.text('ZenCat - Dashboard de Comunidades', 10, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.text(`Período: ${formatDate(from)} - ${formatDate(to)}`, 10, y);
+  y += 10;
+
+  // Totales generales
+  doc.setFontSize(12);
+  doc.text(`Total membresías: ${totalGeneral}`, 10, y);
+  y += 7;
+  doc.text(`Activas: ${totalActive}   Expiradas: ${totalExpired}   Canceladas: ${totalCancelled}   Usuarios activos: ${totalActiveUsers}`, 10, y);
+  y += 10;
+
+  // Tabla de comunidades
+  doc.setFontSize(11);
+  doc.text('Comunidades:', 10, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.text('Comunidad', 10, y);
+  doc.text('Total', 50, y);
+  doc.text('%', 70, y);
+  doc.text('Activas', 85, y);
+  doc.text('Expiradas', 110, y);
+  doc.text('Canceladas', 140, y);
+  doc.text('Usuarios activos', 170, y);
+  y += 5;
+  doc.text('----------------------------------------------------------------------------------------------------', 10, y);
+  y += 3;
+
+  communities.forEach((c) => {
+    doc.text(String(c.CommunityName), 10, y);
+    doc.text(String(c.Total), 50, y);
+    doc.text(c.percent || '', 70, y);
+    doc.text(String(c.ActiveMemberships), 85, y);
+    doc.text(String(c.ExpiredMemberships), 110, y);
+    doc.text(String(c.CancelledMemberships), 140, y);
+    doc.text(String(c.ActiveUsers), 170, y);
+    y += 6;
+  });
+
+  y += 4;
+  doc.text('----------------------------------------------------------------------------------------------------', 10, y);
+  y += 8;
+
+  // Resumen destacado
+  if (communities.length > 0) {
+    const max = communities.reduce((a, b) =>
+      a.ActiveMemberships > b.ActiveMemberships ? a : b,
+    );
+    const porcentaje = totalActive
+      ? ((max.ActiveMemberships / totalActive) * 100).toFixed(1)
+      : '0';
+    doc.setFontSize(11);
+    doc.text(
+      `La comunidad con más membresías activas es ${max.CommunityName} con ${max.ActiveMemberships} activas (${porcentaje}%)`,
+      10,
+      y,
+    );
+  }
+
+  doc.save(`reporte_comunidades_${from}_a_${to}.pdf`);
 }
 
 const renderPieLabel = (props: any) => {
@@ -263,8 +345,9 @@ export default function CommunityReportsDashboard() {
   return (
     <div className="min-h-screen w-full bg-zinc-50 pb-12 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros visual igual a ReportsDashboard */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2" data-pdf-hide>
-        <div className="flex flex-wrap gap-2 items-center flex-1">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
+        {/* Filtros a la izquierda */}
+        <div className="flex flex-wrap gap-2 items-center">
           {quickRanges.map((r) => (
             <button
               key={r.label}
@@ -298,6 +381,7 @@ export default function CommunityReportsDashboard() {
             />
           </div>
         </div>
+        {/* Botones a la derecha */}
         <div className="flex gap-2">
           <ExportButtons
             onExportCSV={() => {
@@ -334,12 +418,33 @@ export default function CommunityReportsDashboard() {
                 totalActiveUsers,
               );
             }}
-            pdfElementRef={pdfElementRef}
-            pdfOptions={{
-              filename: `reporte_comunidades_${from}_a_${to}.pdf`,
-              title: 'Reporte de Comunidades',
-              subtitle: 'ZenCat - Dashboard de Comunidades',
-              dateRange: `Período: ${formatDate(from)} - ${formatDate(to)}`,
+            onExportPDF={() => {
+              if (
+                !data ||
+                !Array.isArray(data.communities) ||
+                !data.communities.length
+              )
+                return;
+              const totalGeneral = data.totalMemberships || 0;
+              const totalActive = data.summary?.totalActiveMemberships || 0;
+              const totalExpired = data.summary?.totalExpiredMemberships || 0;
+              const totalCancelled = data.summary?.totalCancelledMemberships || 0;
+              const totalActiveUsers = data.summary?.totalActiveUsers || 0;
+              exportToPDF(
+                data.communities.map((c) => ({
+                  ...c,
+                  percent: totalGeneral
+                    ? ((c.Total / totalGeneral) * 100).toFixed(1) + '%'
+                    : '0%',
+                })),
+                from,
+                to,
+                totalGeneral,
+                totalActive,
+                totalExpired,
+                totalCancelled,
+                totalActiveUsers,
+              );
             }}
             disabled={loading || !data?.communities.length}
             loading={loading}
