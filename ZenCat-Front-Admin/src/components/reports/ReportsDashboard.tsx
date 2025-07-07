@@ -366,7 +366,7 @@ export default function ReportsDashboard() {
       {/* Barra de filtros */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
         {/* Filtros a la izquierda */}
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-1 items-center">
           {quickRanges.map((r) => (
             <button
               key={r.label}
