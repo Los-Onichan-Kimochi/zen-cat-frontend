@@ -2,8 +2,15 @@ import { useState, useCallback, useMemo } from 'react';
 import { UserFilters } from '@/components/usuarios/filters';
 import { User } from '@/types/user';
 
+export interface UsersFilters {
+  search?: string;
+  phone?: string;
+  document?: string;
+  district?: string;
+}
+
 export const useUserFilters = () => {
-  const [filters, setFilters] = useState<UserFilters>({});
+  const [filters, setFilters] = useState<UsersFilters>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = useCallback(() => {
@@ -14,7 +21,7 @@ export const useUserFilters = () => {
     setIsModalOpen(false);
   }, []);
 
-  const applyFilters = useCallback((newFilters: UserFilters) => {
+  const applyFilters = useCallback((newFilters: UsersFilters) => {
     setFilters(newFilters);
   }, []);
 
@@ -37,34 +44,30 @@ export const useUserFilters = () => {
     if (!hasActiveFilters) return users;
 
     return users.filter(user => {
-      // Filtro por nombre
-      if (filters.name && !user.name.toLowerCase().includes(filters.name.toLowerCase())) {
-        return false;
+      // search on name or email
+      if (filters.search) {
+        const term = filters.search.toLowerCase();
+        if (
+          !user.name.toLowerCase().includes(term) &&
+          !user.email.toLowerCase().includes(term)
+        ) {
+          return false;
+        }
       }
 
-      // Filtro por email
-      if (filters.email && !user.email.toLowerCase().includes(filters.email.toLowerCase())) {
-        return false;
+      if (filters.phone) {
+        const phoneVal = user.onboarding?.phoneNumber || '';
+        if (!phoneVal.includes(filters.phone)) return false;
       }
 
-      // Filtro por rol
-      if (filters.rol && user.rol !== filters.rol) {
-        return false;
+      if (filters.document) {
+        const docNum = user.onboarding?.documentNumber || '';
+        if (!docNum.includes(filters.document)) return false;
       }
 
-      // Filtro por distrito
-      if (filters.district && user.district && !user.district.toLowerCase().includes(filters.district.toLowerCase())) {
-        return false;
-      }
-
-      // Filtro por ciudad
-      if (filters.city && user.city && !user.city.toLowerCase().includes(filters.city.toLowerCase())) {
-        return false;
-      }
-
-      // Filtro por teléfono
-      if (filters.phone && user.phone && !user.phone.includes(filters.phone)) {
-        return false;
+      if (filters.district) {
+        const dist = user.onboarding?.district || '';
+        if (!dist.toLowerCase().includes(filters.district.toLowerCase())) return false;
       }
 
       return true;
