@@ -162,13 +162,25 @@ export function transformMembershipsToFrontend(
       reservationLimit: membership.plan.reservation_limit,
       reservationsUsed: membership.reservations_used,
     };
-    //console.log("HOLA", communityId, transformedCommunity);
-    // Prioritize active memberships if a community is already in the map
-    if (
-      !communityMap.has(communityId) &&
-      transformedCommunity.status === 'active'
-    ) {
-      communityMap.set(communityId, transformedCommunity);
+
+    // Lógica de prioridad: Activas > Suspendidas
+    if (!communityMap.has(communityId)) {
+      // Si no existe la comunidad y es activa o suspendida, agregarla
+      if (transformedCommunity.status === 'active' || transformedCommunity.status === 'suspended') {
+        communityMap.set(communityId, transformedCommunity);
+      }
+    } else {
+      // Si ya existe la comunidad, verificar si debemos reemplazarla
+      const existingCommunity = communityMap.get(communityId)!;
+      
+      // Reemplazar solo si:
+      // 1. La existente es suspendida Y la nueva es activa (prioridad a activas)
+      // 2. Ambas son del mismo estado pero la nueva tiene mejor plan (opcional)
+      if (existingCommunity.status === 'suspended' && transformedCommunity.status === 'active') {
+        communityMap.set(communityId, transformedCommunity);
+      }
+      // Si ambas son activas, mantener la primera (o podrías implementar lógica adicional)
+      // Si ambas son suspendidas, mantener la primera (o podrías implementar lógica adicional)
     }
   });
 

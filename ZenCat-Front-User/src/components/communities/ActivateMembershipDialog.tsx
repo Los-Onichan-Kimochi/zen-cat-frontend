@@ -12,6 +12,7 @@ interface ActivateMembershipDialogProps {
   onClose: () => void;
   onActivate: () => void;
   communityName?: string;
+  isLoading?: boolean;
 }
 
 export function ActivateMembershipDialog({
@@ -19,6 +20,7 @@ export function ActivateMembershipDialog({
   onClose,
   onActivate,
   communityName = '',
+  isLoading = false,
 }: ActivateMembershipDialogProps) {
   return (
     <AlertDialog open={isOpen}>
@@ -31,7 +33,7 @@ export function ActivateMembershipDialog({
             <AlertDialogDescription className="text-sm text-black text-center mt-4 leading-relaxed">
               Si vuelve a activar su membresía el tiempo que le falta para que
               esta culmine seguirá corriendo de manera regular hasta que acabe.
-              Todas las reservas disponibles que tenía al momento de suspeder la
+              Todas las reservas disponibles que tenía al momento de suspender la
               membresía se mantienen igual.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -39,16 +41,18 @@ export function ActivateMembershipDialog({
           <div className="flex justify-center space-x-4 mt-6">
             <Button
               type="button"
-              className="bg-black text-white hover:bg-gray-800 rounded-sm px-8 py-2 w-32"
+              className="bg-black text-white hover:bg-gray-800 rounded-sm px-8 py-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onActivate}
+              disabled={isLoading}
             >
-              Activar
+              {isLoading ? 'Activando...' : 'Activar'}
             </Button>
             <Button
               type="button"
               variant="outline"
               className="bg-white text-black border border-gray-300 hover:bg-gray-100 rounded-sm px-8 py-2 w-32"
               onClick={onClose}
+              disabled={isLoading}
             >
               Volver
             </Button>

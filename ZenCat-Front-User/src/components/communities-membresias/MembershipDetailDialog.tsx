@@ -24,35 +24,7 @@ export function MembershipDetailDialog({
   onSuspendMembership,
   onCancelMembership,
 }: MembershipDetailDialogProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-
   if (!membership) return null;
-
-  const handleSuspendMembership = async () => {
-    setIsProcessing(true);
-    try {
-      // await membershipApi.suspendMembership(membership.id);
-      onSuspendMembership(membership.id);
-      console.log('Membresía suspendida:', membership.id);
-    } catch (error) {
-      console.error('Error al suspender membresía:', error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleCancelMembership = async () => {
-    setIsProcessing(true);
-    try {
-      // await membershipApi.cancelMembership(membership.id);
-      onCancelMembership(membership.id);
-      console.log('Membresía cancelada:', membership.id);
-    } catch (error) {
-      console.error('Error al cancelar membresía:', error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   const planName = membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
   const duration = membership.plan.type === 'MONTHLY' ? '1 mes' : '1 año';
@@ -139,7 +111,7 @@ export function MembershipDetailDialog({
           </div>
         </div>
 
-        {/* Botones */}
+        {/* Botón */}
         <div className="flex justify-center gap-4 mt-6">
           <Button
             variant="default"
@@ -147,26 +119,6 @@ export function MembershipDetailDialog({
             className="bg-black text-white hover:bg-gray-800 px-8"
           >
             Volver
-          </Button>
-          
-          {membership.status === MembershipState.ACTIVE && (
-            <Button
-              variant="outline"
-              onClick={handleSuspendMembership}
-              className="px-8"
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'Procesando...' : 'Suspender membresía'}
-            </Button>
-          )}
-          
-          <Button
-            variant="outline"
-            onClick={handleCancelMembership}
-            className="px-8"
-            disabled={isProcessing}
-          >
-            {isProcessing ? 'Procesando...' : 'Cancelar membresía'}
           </Button>
         </div>
       </DialogContent>

@@ -24,8 +24,8 @@ interface CommunityCardProps {
 const statusConfig = {
   active: {
     label: 'Membresía activa',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-green-800',
+    bgColor: 'bg-green-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -33,8 +33,8 @@ const statusConfig = {
   },
   suspended: {
     label: 'Membresía suspendida',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-orange-800',
+    bgColor: 'bg-orange-100',
     buttonText: 'Activar',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -42,7 +42,7 @@ const statusConfig = {
   },
   expired: {
     label: 'Membresía vencida',
-    textColor: 'text-black',
+    textColor: 'text-gray-800',
     bgColor: 'bg-gray-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',
@@ -51,8 +51,8 @@ const statusConfig = {
   },
   cancelled: {
     label: 'Membresía cancelada',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-red-800',
+    bgColor: 'bg-red-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -71,19 +71,22 @@ export function CommunityCard({
   const buttonText = isSelected ? config.selectedText : config.buttonText;
   const buttonStyle = isSelected ? config.selectedStyle : config.buttonStyle;
 
-  // Determinar el estilo del fondo de la tarjeta basado en si está seleccionado
-  const cardBgColor =
-    isSelected && community.status === 'active' ? 'bg-black' : 'bg-white';
-  const cardTextColor =
-    isSelected && community.status === 'active' ? 'text-white' : 'text-black';
-  const statusTextColor =
-    isSelected && community.status === 'active'
-      ? 'text-white'
-      : config.textColor;
-  const statusBgColor =
-    isSelected && community.status === 'active'
-      ? 'bg-gray-700'
-      : config.bgColor;
+  // Mantener colores neutros para el card, solo colorear el badge
+  const cardBgColor = isSelected && community.status === 'active' 
+    ? 'bg-black' 
+    : 'bg-white';
+    
+  const cardTextColor = isSelected && community.status === 'active' 
+    ? 'text-white' 
+    : 'text-black';
+    
+  const statusTextColor = isSelected && community.status === 'active'
+    ? 'text-white'
+    : config.textColor;
+    
+  const statusBgColor = isSelected && community.status === 'active'
+    ? 'bg-gray-700'
+    : config.bgColor;
 
   return (
     <div
@@ -111,7 +114,7 @@ export function CommunityCard({
             {community.name}
           </h3>
 
-          {/* Estado de membresía */}
+          {/* Estado de membresía - SOLO ESTE TIENE COLOR */}
           <div
             className={cn(
               'inline-block px-3 py-1 rounded-full text-xs font-medium',

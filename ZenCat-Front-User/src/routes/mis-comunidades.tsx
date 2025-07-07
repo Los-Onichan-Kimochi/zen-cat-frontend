@@ -120,6 +120,7 @@ function ComunidadesComponent() {
                 filterBy={filterBy}
                 itemsPerPage={4}
                 selectCommunity={selectCommunity}
+                onRefresh={handleRefresh}
               />
             </div>
 
