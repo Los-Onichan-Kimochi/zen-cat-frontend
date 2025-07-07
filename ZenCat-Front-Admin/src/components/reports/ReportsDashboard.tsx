@@ -172,9 +172,6 @@ function exportToPDF(
   const doc = new jsPDF();
   let y = 15;
 
-  // Colores ejecutivos para el PDF
-  const colors = ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D', '#3A1772'];
-
   // Título
   doc.setFontSize(18);
   doc.text('Reporte de Reservas por Servicio', 10, y);
@@ -190,154 +187,6 @@ function exportToPDF(
   doc.setFontSize(12);
   doc.text(`Total reservas: ${totalGeneral}`, 10, y);
   y += 10;
-
-  // Gráfico de barras
-  if (chartData.length > 0 && services.length > 0) {
-    doc.setFontSize(14);
-    doc.text('Evolución de Reservas por Servicio', 10, y);
-    y += 8;
-
-    const chartWidth = 180;
-    const chartHeight = 80;
-    const chartX = 10;
-    const chartY = y;
-    const barWidth = chartWidth / chartData.length;
-    const maxValue = Math.max(...chartData.map(row =>
-      services.reduce((sum, service) => sum + (row[service] || 0), 0)
-    ));
-
-    // Ejes
-    (doc as any).setDrawColor(100, 100, 100);
-    (doc as any).line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight); // Eje X
-    (doc as any).line(chartX, chartY, chartX, chartY + chartHeight); // Eje Y
-
-    // Dibujar barras
-    chartData.forEach((row, index) => {
-      const x = chartX + (index * barWidth) + 2;
-      let currentY = chartY + chartHeight;
-
-      services.forEach((service, serviceIndex) => {
-        const value = row[service] || 0;
-        if (value > 0) {
-          const barHeight = (value / maxValue) * chartHeight;
-          const color = colors[serviceIndex % colors.length];
-
-          // Convertir color hex a RGB
-          const r = parseInt(color.slice(1, 3), 16);
-          const g = parseInt(color.slice(3, 5), 16);
-          const b = parseInt(color.slice(5, 7), 16);
-
-          (doc as any).setFillColor(r, g, b);
-          (doc as any).rect(x, currentY - barHeight, barWidth - 4, barHeight, 'F');
-          currentY -= barHeight;
-        }
-      });
-    });
-
-    // Etiquetas del eje X (fechas)
-    doc.setFontSize(8);
-    (doc as any).setTextColor(100, 100, 100);
-    chartData.forEach((row, index) => {
-      const x = chartX + (index * barWidth) + barWidth / 2;
-      const label = formatDate(row.date);
-      doc.text(label, x, chartY + chartHeight + 5);
-    });
-
-    y += chartHeight + 20;
-
-    // Leyenda del gráfico de barras
-    doc.setFontSize(10);
-    (doc as any).setTextColor(0, 0, 0);
-    doc.text('Leyenda:', 10, y);
-    y += 6;
-
-    services.forEach((service, index) => {
-      const color = colors[index % colors.length];
-      const r = parseInt(color.slice(1, 3), 16);
-      const g = parseInt(color.slice(3, 5), 16);
-      const b = parseInt(color.slice(5, 7), 16);
-
-      (doc as any).setFillColor(r, g, b);
-      (doc as any).rect(10, y - 2, 8, 4, 'F');
-      (doc as any).setTextColor(0, 0, 0);
-      doc.text(service, 22, y);
-      y += 5;
-    });
-
-    y += 5;
-  }
-
-  // Gráfico de pastel
-  if (services.length > 0) {
-    doc.setFontSize(14);
-    doc.text('Distribución Total por Servicio', 10, y);
-    y += 8;
-
-    const pieX = 100;
-    const pieY = y;
-    const pieRadius = 30;
-
-    // Calcular totales por servicio
-    const serviceTotals = services.map(service => ({
-      name: service,
-      total: chartData.reduce((acc, row) => acc + (row[service] || 0), 0)
-    })).filter(item => item.total > 0);
-
-    if (serviceTotals.length > 0) {
-      const totalSum = serviceTotals.reduce((sum, item) => sum + item.total, 0);
-      let currentAngle = 0;
-
-      serviceTotals.forEach((item, index) => {
-        const sliceAngle = (item.total / totalSum) * 360;
-        const color = colors[index % colors.length];
-        const r = parseInt(color.slice(1, 3), 16);
-        const g = parseInt(color.slice(3, 5), 16);
-        const b = parseInt(color.slice(5, 7), 16);
-
-        (doc as any).setFillColor(r, g, b);
-        (doc as any).setDrawColor(255);
-
-        // Dibujar sector del pastel
-        const startAngle = currentAngle;
-        const endAngle = currentAngle + sliceAngle;
-
-        // Aproximación del sector con múltiples líneas
-        for (let angle = startAngle; angle <= endAngle; angle += 5) {
-          const rad = (angle * Math.PI) / 180;
-          const x1 = pieX + Math.cos(rad) * pieRadius;
-          const y1 = pieY + Math.sin(rad) * pieRadius;
-          const x2 = pieX + Math.cos(rad) * (pieRadius + 2);
-          const y2 = pieY + Math.sin(rad) * (pieRadius + 2);
-          (doc as any).line(x1, y1, x2, y2);
-        }
-
-        currentAngle += sliceAngle;
-      });
-
-      // Leyenda del pie chart
-      y += pieRadius * 2 + 10;
-      doc.setFontSize(10);
-      (doc as any).setTextColor(0, 0, 0);
-      doc.text('Distribución:', 10, y);
-      y += 6;
-
-      serviceTotals.forEach((item, index) => {
-        const percentage = ((item.total / totalSum) * 100).toFixed(1);
-        const color = colors[index % colors.length];
-        const r = parseInt(color.slice(1, 3), 16);
-        const g = parseInt(color.slice(3, 5), 16);
-        const b = parseInt(color.slice(5, 7), 16);
-
-        (doc as any).setFillColor(r, g, b);
-        (doc as any).rect(10, y - 2, 8, 4, 'F');
-        (doc as any).setTextColor(0, 0, 0);
-        doc.text(`${item.name}: ${item.total} (${percentage}%)`, 22, y);
-        y += 5;
-      });
-
-      y += 5;
-    }
-  }
 
   // Tabla de servicios
   doc.setFontSize(11);
@@ -515,17 +364,13 @@ export default function ReportsDashboard() {
   return (
     <div className="space-y-6 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros */}
-      <div
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-zinc-50 rounded-lg p-2 shadow-sm border border-zinc-200 mb-2 overflow-x-auto"
-        style={{ minWidth: 0 }}
-      >
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
         {/* Filtros a la izquierda */}
-        <div className="flex flex-row flex-wrap items-center gap-1 min-w-0 overflow-x-auto">
+        <div className="flex flex-wrap gap-1 items-center">
           {quickRanges.map((r) => (
             <button
               key={r.label}
-              className={`px-2 py-1 rounded border text-xs font-medium transition-all duration-200 bg-white text-gray-700 hover:border-blue-600 hover:bg-blue-50 active:scale-95 whitespace-nowrap ${from === r.get()[0].format('YYYY-MM-DD') && to === r.get()[1].format('YYYY-MM-DD') ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}
-              style={{ minWidth: 0 }}
+              className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200 bg-white text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:shadow-md active:scale-95 ${from === r.get()[0].format('YYYY-MM-DD') && to === r.get()[1].format('YYYY-MM-DD') ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}
               onClick={() => {
                 const [start, end] = r.get();
                 setFrom(start.format('YYYY-MM-DD'));
@@ -535,24 +380,23 @@ export default function ReportsDashboard() {
               {r.label}
             </button>
           ))}
-          {/* Inputs de fecha agrupados */}
-          <div className="flex items-center gap-1 ml-2 bg-white rounded border border-gray-200 px-2 py-1">
-            <FaCalendarAlt color="#a3a3a3" size={16} />
+          <div className="flex items-center gap-1 ml-4">
+            <FaCalendarAlt color="#a3a3a3" size={20} />
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="border-none outline-none text-xs w-28 bg-white text-black"
-              style={{ minWidth: 0 }}
+              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm font-montserrat text-sm"
             />
-            <span className="mx-1 text-gray-400">-</span>
-            <FaCalendarAlt color="#a3a3a3" size={16} />
+          </div>
+          <span className="mx-1 text-gray-400">-</span>
+          <div className="flex items-center gap-1">
+            <FaCalendarAlt color="#a3a3a3" size={20} />
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="border-none outline-none text-xs w-28 bg-white text-black"
-              style={{ minWidth: 0 }}
+              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm font-montserrat text-sm"
             />
           </div>
         </div>

@@ -355,9 +355,8 @@ export function OnboardingStep() {
     if (!formData.postal_code.trim()) {
       newErrors.postal_code = 'El código postal es requerido';
       valid = false;
-    } else if (formData.postal_code.length < 5) {
-      newErrors.postal_code =
-        'El código postal debe tener al menos 5 caracteres';
+    } else if (!formData.postal_code.match(/^\d{5}$/)) {
+      newErrors.postal_code = 'El código postal debe tener 5 dígitos.';
       valid = false;
     }
 
@@ -597,23 +596,6 @@ export function OnboardingStep() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="postal_code">Código Postal *</Label>
-                <Input
-                  id="postal_code"
-                  value={formData.postal_code}
-                  onChange={(e) =>
-                    handleInputChange('postal_code', e.target.value)
-                  }
-                  placeholder="Ingrese código postal"
-                />
-                {errors.postal_code && (
-                  <span className="text-red-500 text-sm">
-                    {errors.postal_code}
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="birth_date">Fecha de Nacimiento</Label>
                 <Input
                   id="birth_date"
@@ -651,7 +633,7 @@ export function OnboardingStep() {
               Ubicación Geográfica *
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="region">Región *</Label>
                 <Select
@@ -718,6 +700,23 @@ export function OnboardingStep() {
                 {errors.district && (
                   <span className="text-red-500 text-sm">
                     {errors.district}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal_code">Código Postal *</Label>
+                <Input
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) =>
+                    handleInputChange('postal_code', e.target.value)
+                  }
+                  placeholder="Ingrese código postal"
+                />
+                {errors.postal_code && (
+                  <span className="text-red-500 text-sm">
+                    {errors.postal_code}
                   </span>
                 )}
               </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
@@ -33,6 +34,15 @@ export function ConfirmationStep() {
   >('onboarding');
   const [hasStarted, setHasStarted] = useState(false);
   const hasStartedRef = useRef(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
+  };
 
   const handleCreateMembership = useCallback(
     async (onboardingResponse: OnboardingResponse) => {
@@ -340,7 +350,7 @@ export function ConfirmationStep() {
         <CardContent className="px-8 pb-8">
           {/* Tabla de detalles */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               {/* Columna izquierda */}
               <div className="space-y-4">
                 <div className="flex justify-between py-2 border-b border-gray-200">
@@ -358,31 +368,6 @@ export function ConfirmationStep() {
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Estado</span>
-                  <span className="text-green-600 font-semibold">
-                    {membershipResult.status}
-                  </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Cantidad de reservas</span>
-                  <span>
-                    {membershipResult.plan?.reservation_limit === 0
-                      ? 'Ilimitadas'
-                      : membershipResult.plan?.reservation_limit ||
-                        state.selectedPlan?.reservationLimit ||
-                        'Ilimitadas'}{' '}
-                    reservas
-                  </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Fecha de inicio</span>
-                  <span>{startDate}</span>
-                </div>
-              </div>
-
-              {/* Columna derecha */}
-              <div className="space-y-4">
-                <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Nombre</span>
                   <span>{user?.name || 'N/A'}</span>
                 </div>
@@ -391,20 +376,59 @@ export function ConfirmationStep() {
                   <span>{onboardingResult.document_number || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">ID de membresía</span>
-                  <span>{membershipResult.id}</span>
+                  <span className="font-medium">Estado</span>
+                  <span className="text-green-600 font-semibold">Activo</span>
+                </div>
+              </div>
+
+              {/* Columna derecha */}
+              <div className="space-y-4">
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">Fecha de inicio</span>
+                  <span>{startDate}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">Fecha de fin</span>
+                  <span>{endDate}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="font-medium">Cantidad de reservas</span>
+                  <span>
+                    {membershipResult.plan?.reservation_limit === 0
+                      ? 'Ilimitadas'
+                      : `${
+                          membershipResult.plan?.reservation_limit ||
+                          state.selectedPlan?.reservationLimit ||
+                          'Ilimitadas'
+                        } reservas`}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium">ID de membresía</span>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate max-w-[120px]">
+                      {membershipResult.id}
+                    </span>
+                    <button
+                      onClick={() => handleCopy(membershipResult.id)}
+                      className="relative"
+                    >
+                      <Copy className="h-4 w-4 text-gray-500 hover:text-gray-800 transition-colors" />
+                      {isCopied && (
+                        <span className="absolute -top-8 -left-1/2 transform -translate-x-1/4 bg-black text-white text-xs rounded px-2 py-1">
+                          Copiado
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-2">
                   <span className="font-medium text-lg">Total</span>
                   <span className="font-bold text-lg">
                     S/{' '}
                     {membershipResult.plan?.fee?.toFixed(2) ||
                       state.selectedPlan?.price.toFixed(2)}
                   </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Fecha de fin</span>
-                  <span>{endDate}</span>
                 </div>
               </div>
             </div>
