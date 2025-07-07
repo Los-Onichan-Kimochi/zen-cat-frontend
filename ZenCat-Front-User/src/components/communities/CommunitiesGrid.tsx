@@ -9,6 +9,7 @@ interface CommunitiesGridProps {
   communities: Community[];
   searchTerm: string;
   sortBy: string;
+  sortDirection?: 'asc' | 'desc';
   filterBy: string;
   itemsPerPage?: number;
   selectCommunity: (communityId: string) => void;
@@ -18,6 +19,7 @@ export function CommunitiesGrid({
   communities,
   searchTerm,
   sortBy,
+  sortDirection = 'asc',
   filterBy,
   itemsPerPage = 4,
   selectCommunity,
@@ -51,21 +53,29 @@ export function CommunitiesGrid({
 
     // Aplicar ordenamiento
     filtered.sort((a, b) => {
+      let comparison = 0;
+      
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          comparison = a.name.localeCompare(b.name);
+          break;
         case 'status':
-          return a.status.localeCompare(b.status);
+          comparison = a.status.localeCompare(b.status);
+          break;
         case 'date':
           // Ordenar por ID como proxy de fecha (asumiendo IDs cronológicos)
-          return a.id.localeCompare(b.id);
+          comparison = a.id.localeCompare(b.id);
+          break;
         default:
-          return 0;
+          comparison = 0;
       }
+      
+      // Aplicar dirección de ordenamiento
+      return sortDirection === 'desc' ? -comparison : comparison;
     });
 
     return filtered;
-  }, [communities, searchTerm, filterBy, sortBy]);
+  }, [communities, searchTerm, filterBy, sortBy, sortDirection]);
 
   // Paginación
   const totalPages = Math.ceil(filteredCommunities.length / itemsPerPage);
@@ -123,7 +133,7 @@ export function CommunitiesGrid({
   // Reset página cuando cambian los filtros
   useMemo(() => {
     setCurrentPage(0);
-  }, [searchTerm, sortBy, filterBy]);
+  }, [searchTerm, sortBy, sortDirection, filterBy]);
 
   if (filteredCommunities.length === 0) {
     const message = searchTerm
