@@ -154,10 +154,10 @@ function exportToPDF(
   doc.text(`Activas: ${totalActive}   Expiradas: ${totalExpired}   Canceladas: ${totalCancelled}   Usuarios activos: ${totalActiveUsers}`, 10, y);
   y += 10;
 
-  // Resumen de comunidades
+  // Gráfico circular de membresías activas por comunidad
   if (communities.length > 0) {
     doc.setFontSize(14);
-    doc.text('Distribución de Membresías por Comunidad', 10, y);
+    doc.text('Distribución de Membresías Activas por Comunidad', 10, y);
     y += 8;
 
     // Filtrar comunidades con membresías activas
@@ -168,16 +168,68 @@ function exportToPDF(
     if (activeCommunities.length > 0) {
       const totalActiveSum = activeCommunities.reduce((sum, c) => sum + c.ActiveMemberships, 0);
 
-      // Mostrar top 5 comunidades
-      const topCommunities = activeCommunities.slice(0, 5);
+      // Dibujar gráfico circular
+      const pieX = 100;
+      const pieY = y;
+      const pieRadius = 35;
+      const innerRadius = 20; // Para hacer un donut chart
 
+      let currentAngle = 0;
+
+      activeCommunities.forEach((community, index) => {
+        const sliceAngle = (community.ActiveMemberships / totalActiveSum) * 360;
+        const color = colors[index % colors.length];
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+
+        (doc as any).setFillColor(r, g, b);
+        (doc as any).setDrawColor(255);
+
+        // Dibujar sector del donut (sector exterior menos sector interior)
+        const startAngle = currentAngle;
+        const endAngle = currentAngle + sliceAngle;
+
+        // Aproximación del sector con múltiples líneas para el exterior
+        for (let angle = startAngle; angle <= endAngle; angle += 3) {
+          const rad = (angle * Math.PI) / 180;
+          const x1 = pieX + Math.cos(rad) * innerRadius;
+          const y1 = pieY + Math.sin(rad) * innerRadius;
+          const x2 = pieX + Math.cos(rad) * pieRadius;
+          const y2 = pieY + Math.sin(rad) * pieRadius;
+          (doc as any).line(x1, y1, x2, y2);
+        }
+
+        // Dibujar arcos del donut
+        const startRad = (startAngle * Math.PI) / 180;
+        const endRad = (endAngle * Math.PI) / 180;
+
+        // Arco exterior
+        (doc as any).arc(pieX, pieY, pieRadius, startAngle, endAngle, 'S');
+        // Arco interior
+        (doc as any).arc(pieX, pieY, innerRadius, startAngle, endAngle, 'S');
+
+        currentAngle += sliceAngle;
+      });
+
+      // Leyenda del gráfico circular
+      y += pieRadius * 2 + 15;
       doc.setFontSize(10);
-      doc.text('Top 5 Comunidades por Membresías Activas:', 10, y);
+      (doc as any).setTextColor(0, 0, 0);
+      doc.text('Distribución por Comunidad:', 10, y);
       y += 6;
 
-      topCommunities.forEach((community, index) => {
+      activeCommunities.forEach((community, index) => {
         const percentage = ((community.ActiveMemberships / totalActiveSum) * 100).toFixed(1);
-        doc.text(`${community.CommunityName}: ${community.ActiveMemberships} activas (${percentage}%)`, 10, y);
+        const color = colors[index % colors.length];
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+
+        (doc as any).setFillColor(r, g, b);
+        (doc as any).rect(10, y - 2, 8, 4, 'F');
+        (doc as any).setTextColor(0, 0, 0);
+        doc.text(`${community.CommunityName}: ${community.ActiveMemberships} activas (${percentage}%)`, 22, y);
         y += 5;
       });
 
@@ -187,7 +239,7 @@ function exportToPDF(
 
   // Tabla de comunidades
   doc.setFontSize(11);
-  doc.text('Comunidades:', 10, y);
+  doc.text('Detalle por Comunidad:', 10, y);
   y += 7;
   doc.setFontSize(10);
   doc.text('Comunidad', 10, y);
