@@ -133,6 +133,9 @@ function exportToPDF(
   const doc = new jsPDF();
   let y = 15;
 
+  // Colores ejecutivos para el PDF
+  const colors = ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D', '#3A1772', '#8B5CF6', '#06B6D4'];
+
   // Título
   doc.setFontSize(18);
   doc.text('Reporte de Comunidades', 10, y);
@@ -150,6 +153,37 @@ function exportToPDF(
   y += 7;
   doc.text(`Activas: ${totalActive}   Expiradas: ${totalExpired}   Canceladas: ${totalCancelled}   Usuarios activos: ${totalActiveUsers}`, 10, y);
   y += 10;
+
+  // Resumen de comunidades
+  if (communities.length > 0) {
+    doc.setFontSize(14);
+    doc.text('Distribución de Membresías por Comunidad', 10, y);
+    y += 8;
+
+    // Filtrar comunidades con membresías activas
+    const activeCommunities = communities
+      .filter(c => c.ActiveMemberships > 0)
+      .sort((a, b) => b.ActiveMemberships - a.ActiveMemberships);
+
+    if (activeCommunities.length > 0) {
+      const totalActiveSum = activeCommunities.reduce((sum, c) => sum + c.ActiveMemberships, 0);
+
+      // Mostrar top 5 comunidades
+      const topCommunities = activeCommunities.slice(0, 5);
+
+      doc.setFontSize(10);
+      doc.text('Top 5 Comunidades por Membresías Activas:', 10, y);
+      y += 6;
+
+      topCommunities.forEach((community, index) => {
+        const percentage = ((community.ActiveMemberships / totalActiveSum) * 100).toFixed(1);
+        doc.text(`${community.CommunityName}: ${community.ActiveMemberships} activas (${percentage}%)`, 10, y);
+        y += 5;
+      });
+
+      y += 5;
+    }
+  }
 
   // Tabla de comunidades
   doc.setFontSize(11);

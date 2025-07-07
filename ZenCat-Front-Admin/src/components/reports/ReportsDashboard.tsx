@@ -188,9 +188,35 @@ function exportToPDF(
   doc.text(`Total reservas: ${totalGeneral}`, 10, y);
   y += 10;
 
+  // Resumen de servicios con totales
+  if (services.length > 0) {
+    doc.setFontSize(14);
+    doc.text('Resumen por Servicio', 10, y);
+    y += 8;
+
+    // Calcular totales por servicio
+    const serviceTotals = services.map(service => ({
+      name: service,
+      total: chartData.reduce((acc, row) => acc + (row[service] || 0), 0)
+    })).filter(item => item.total > 0);
+
+    if (serviceTotals.length > 0) {
+      const totalSum = serviceTotals.reduce((sum, item) => sum + item.total, 0);
+
+      serviceTotals.forEach((item, index) => {
+        const percentage = ((item.total / totalSum) * 100).toFixed(1);
+        doc.setFontSize(10);
+        doc.text(`${item.name}: ${item.total} reservas (${percentage}%)`, 10, y);
+        y += 5;
+      });
+
+      y += 5;
+    }
+  }
+
   // Tabla de servicios
   doc.setFontSize(11);
-  doc.text('Servicios:', 10, y);
+  doc.text('Resumen por Servicio:', 10, y);
   y += 7;
   doc.setFontSize(10);
   doc.text('Servicio', 10, y);
