@@ -46,11 +46,23 @@ export function CreateReservationModal({
   const [name, setName] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [membershipReservationsUsed, setMembershipReservationsUsed] = useState<number | null>(null);
+  const [membershipReservationLimit, setMembershipReservationLimit] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { modal, error, closeModal } = useModalNotifications();
   const toast = useToast();
 
   const queryClient = useQueryClient();
+
+  // Función para verificar si se puede crear la reserva
+  const canCreateReservation = () => {
+    if (!selectedUserId) return false;
+    if (membershipReservationLimit === null || membershipReservationsUsed === null) {
+      // Plan ilimitado, siempre se puede crear
+      return true;
+    }
+    // Verificar que no haya excedido el límite
+    return membershipReservationsUsed < membershipReservationLimit;
+  };
 
   const createReservationMutation = useMutation({
     mutationFn: async (data: any) => reservationsApi.createReservation(data),
@@ -85,6 +97,17 @@ export function CreateReservationModal({
     if (!selectedUserId) {
       error('Validación', {
         description: 'Debe seleccionar un usuario',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar si el usuario ha excedido su límite de reservas
+    if (membershipReservationLimit !== null && 
+        membershipReservationsUsed !== null && 
+        membershipReservationsUsed >= membershipReservationLimit) {
+      toast.error('Límite de reservas excedido', {
+        description: `El usuario ha alcanzado el límite de ${membershipReservationLimit} reservas. No se puede crear más reservas.`,
       });
       setIsLoading(false);
       return;
@@ -144,6 +167,7 @@ export function CreateReservationModal({
     setName('');
     setSelectedUserId('');
     setMembershipReservationsUsed(null);
+    setMembershipReservationLimit(null);
     onClose();
   };
 
@@ -184,19 +208,24 @@ export function CreateReservationModal({
                           console.log('Membership data received:', membership);
                           
                           // Verificar si el plan tiene límite de reservas
-                          if (membership.plan?.reservation_limit === null || 
-                              membership.plan?.reservation_limit === 0) {
+                          if (!membership.plan || 
+                              membership.plan.reservation_limit === null || 
+                              membership.plan.reservation_limit === 0) {
                             // Plan ilimitado
                             console.log('Plan ilimitado, estableciendo a null');
                             setMembershipReservationsUsed(null);
+                            setMembershipReservationLimit(null);
                           } else {
                             console.log('Estableciendo reservas usadas a:', membership.reservations_used);
+                            console.log('Estableciendo límite de reservas a:', membership.plan.reservation_limit);
                             setMembershipReservationsUsed(membership.reservations_used !== undefined ? membership.reservations_used : null);
+                            setMembershipReservationLimit(membership.plan.reservation_limit || null);
                           }
                         })
                         .catch(err => {
                           console.error('Error al obtener membresía:', err);
                           setMembershipReservationsUsed(null);
+                          setMembershipReservationLimit(null);
                         })
                         .finally(() => {
                           setIsLoading(false);
@@ -229,6 +258,53 @@ export function CreateReservationModal({
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">
+                  Límite de reservas
+                </Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {selectedUserId ? 
+                    (membershipReservationLimit === null ? 
+                      "Ilimitado" : 
+                      membershipReservationLimit.toString()) 
+                    : "Seleccione un usuario"}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">
+                  Disponibles
+                </Label>
+                <div className="col-span-3 text-sm text-gray-600">
+                  {selectedUserId ? 
+                    (membershipReservationLimit === null || membershipReservationsUsed === null ? 
+                      "Ilimitado" : 
+                      Math.max(0, membershipReservationLimit - membershipReservationsUsed).toString()) 
+                    : "Seleccione un usuario"}
+                </div>
+              </div>
+              
+              {/* Mensaje de advertencia cuando se excede el límite */}
+              {selectedUserId && 
+               membershipReservationLimit !== null && 
+               membershipReservationsUsed !== null && 
+               membershipReservationsUsed >= membershipReservationLimit && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="col-span-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <div className="flex items-center text-red-700 text-sm">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-medium">Límite de reservas alcanzado</span>
+                      </div>
+                      <p className="text-red-600 text-xs mt-1">
+                        Este usuario ha utilizado todas sus reservas disponibles ({membershipReservationsUsed}/{membershipReservationLimit}). 
+                        No se pueden crear más reservas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Sesión</Label>
                 <div className="col-span-3 text-sm text-gray-600">
                   {sessionName}
@@ -244,7 +320,10 @@ export function CreateReservationModal({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                disabled={isLoading || !canCreateReservation()}
+              >
                 {isLoading ? 'Creando...' : 'Crear'}
               </Button>
             </DialogFooter>

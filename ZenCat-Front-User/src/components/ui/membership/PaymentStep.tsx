@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PaymentData } from '@/types/membership';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
+import { useAuth } from '@/context/AuthContext';
 import YapeImg from '@/assets/yape.png';
 import PlinImg from '@/assets/plin.png';
 
 export function PaymentStep() {
   const { state, setPaymentData, nextStep, prevStep } =
     useMembershipOnboarding();
+  const { user } = useAuth();
 
   // Método de pago seleccionado: 'Tarjeta', 'Yape', 'Plin'
   const [paymentMethod, setPaymentMethod] = useState<'Tarjeta' | 'Yape' | 'Plin'>('Tarjeta');
@@ -89,7 +91,7 @@ export function PaymentStep() {
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex justify-between text-sm">
                         <span>Nombre</span>
-                        <span>Carlos Chavez</span>
+                        <span>{user?.name || 'No disponible'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>DNI</span>

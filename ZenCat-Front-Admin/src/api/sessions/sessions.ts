@@ -81,6 +81,7 @@ export interface AvailabilityRequest {
   date: string;
   professionalId?: string;
   localId?: string;
+  excludeSessionId?: string;
 }
 
 export interface TimeSlot {
@@ -320,6 +321,7 @@ export const sessionsApi = {
       date: convertLimaToUTC(`${data.date}T00:00:00`),
       professional_id: data.professionalId || null,
       local_id: data.localId || null,
+      exclude_session_id: data.excludeSessionId || null,
     };
 
     const result = await apiClient.post<any>(

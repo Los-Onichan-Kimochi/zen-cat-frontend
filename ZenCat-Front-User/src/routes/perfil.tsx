@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { useUserMemberships } from '@/hooks/use-user-memberships';
+import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,6 +20,7 @@ function PerfilComponent() {
     isLoading: membershipsLoading,
     error: membershipsError,
   } = useUserMemberships();
+  const { onboardingData } = useUserOnboarding();
 
   // Mostrar solo activas por defecto
   const [showHistory, setShowHistory] = useState(false);
@@ -139,40 +141,57 @@ function PerfilComponent() {
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 Información Personal
               </h2>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nombre
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">
-                    {user?.name || 'No especificado'}
-                  </p>
+                  <p className="text-gray-600">Nombre</p>
+                  <p className="font-medium text-gray-800">{user?.name || 'No especificado'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">
-                    {user?.email || 'No especificado'}
-                  </p>
+                  <p className="text-gray-600">Email</p>
+                  <p className="font-medium text-gray-800">{user?.email || 'No especificado'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Rol
-                  </label>
-                  <p className="mt-1 text-sm text-gray-900">
-                    {roleDisplayMap[user?.role as string] ?? 'Usuario'}
-                  </p>
+                  <p className="text-gray-600">Rol</p>
+                  <p className="font-medium text-gray-800">{roleDisplayMap[user?.role as string] ?? 'Usuario'}</p>
                 </div>
               </div>
-              <div className="mt-6">
-                <Link
-                  to="/profile"
-                  className="inline-block bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition"
-                >
-                  Editar Perfil
-                </Link>
-              </div>
+
+              {/* Dirección del Onboarding si existe */}
+              {onboardingData && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Dirección</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Región</p>
+                      <p className="font-medium text-gray-800">{onboardingData.region}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Provincia</p>
+                      <p className="font-medium text-gray-800">{onboardingData.province}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Distrito</p>
+                      <p className="font-medium text-gray-800">{onboardingData.district}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Código Postal</p>
+                      <p className="font-medium text-gray-800">{onboardingData.postal_code}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-gray-600">Dirección Completa</p>
+                      <p className="font-medium text-gray-800 max-w-md truncate" title={onboardingData.address}>{onboardingData.address}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+                           <div className="mt-6 text-right">
+                 <Link
+                   to="/profile"
+                   className="inline-block bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition"
+                 >
+                   Editar Perfil
+                 </Link>
+               </div>
             </div>
           </div>
 

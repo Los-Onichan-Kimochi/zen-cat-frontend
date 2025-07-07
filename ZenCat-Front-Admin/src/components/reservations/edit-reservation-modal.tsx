@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ModalNotifications } from '@/components/custom/common/modal-notifications';
 import { useModalNotifications } from '@/hooks/use-modal-notifications';
 import { useToast } from '@/context/ToastContext';
@@ -24,7 +24,6 @@ import {
 import { Loader2 } from 'lucide-react';
 
 import { reservationsApi } from '@/api/reservations/reservations';
-import { membershipsApi } from '@/api/memberships/memberships';
 import {
   Reservation,
   UpdateReservationRequest,
@@ -48,63 +47,11 @@ export function EditReservationModal({
   const [name, setName] = useState('');
   const [reservationState, setReservationState] = useState<ReservationState>(ReservationState.CONFIRMED);
   const [isLoading, setIsLoading] = useState(false);
-  const [membershipReservationsUsed, setMembershipReservationsUsed] = useState<number | null>(null);
   
   // Hooks
   const { modal, closeModal } = useModalNotifications();
   const toast = useToast();
   const queryClient = useQueryClient();
-
-  // Obtener la información de membresía si tenemos un ID de usuario y comunidad
-  useEffect(() => {
-    if (reservation && reservation.user_id && reservation.session_id) {
-      // Primero, obtener el ID de la comunidad desde la sesión
-      const fetchMembershipData = async () => {
-        try {
-          setIsLoading(true);
-          // Este es un enfoque simplificado, deberías adaptar esta lógica a tu estructura de API
-          const sessionResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/session/${reservation.session_id}`);
-          if (!sessionResponse.ok) throw new Error("Error obteniendo sesión");
-          const sessionData = await sessionResponse.json();
-          
-          if (sessionData.community_service_id) {
-            // Ahora conseguimos el servicio de comunidad para obtener el ID de comunidad
-            const serviceResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/community-service/${sessionData.community_service_id}`);
-            if (!serviceResponse.ok) throw new Error("Error obteniendo servicio de comunidad");
-            const serviceData = await serviceResponse.json();
-            
-            if (serviceData.community_id) {
-              // Finalmente obtenemos la membresía
-              try {
-                const membership = await membershipsApi.getMembershipByUserAndCommunity(
-                  reservation.user_id,
-                  serviceData.community_id
-                );
-                console.log('Membership data for edit:', membership);
-                
-                // Determinar si es un plan ilimitado o con límite
-                if (membership.plan?.reservation_limit === null || 
-                    membership.plan?.reservation_limit === 0) {
-                  setMembershipReservationsUsed(null); // Plan ilimitado
-                } else {
-                  setMembershipReservationsUsed(membership.reservations_used);
-                }
-              } catch (membershipErr) {
-                console.warn('No se pudo obtener datos de membresía:', membershipErr);
-                setMembershipReservationsUsed(null);
-              }
-            }
-          }
-        } catch (err) {
-          console.error('Error obteniendo datos para membership_reservations_used:', err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
-      fetchMembershipData();
-    }
-  }, [reservation]);
 
   // Initialize form with reservation data when it changes (solo nombre y estado)
   useEffect(() => {
@@ -262,18 +209,7 @@ export function EditReservationModal({
               </div>
 
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Reservas usadas</Label>
-                <div className="col-span-3 text-sm text-gray-600">
-                  {isLoading ? "Cargando..." : (
-                    membershipReservationsUsed === null ? 
-                    "Ilimitado" : 
-                    membershipReservationsUsed.toString()
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Fecha y Hora</Label>
+                <Label className="text-right">Creación de la reserva</Label>
                 <div className="col-span-3 text-sm text-gray-600">
                   {reservation.reservation_time ? new Date(reservation.reservation_time).toLocaleString('es-ES') : 'No disponible'}
                 </div>

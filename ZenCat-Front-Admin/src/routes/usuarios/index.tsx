@@ -288,7 +288,25 @@ function UsuariosComponent() {
             return false;
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p>
+            El archivo debe contener las siguientes columnas (en este orden):<br />
+            <strong>Correo electrónico, Nombres, Primer apellido, Segundo apellido, Foto</strong>
+          </p>
+          <ul className="list-disc list-inside mt-1">
+          </ul>
+          <a
+            href="/plantillas/plantilla-carga-usuarios.xlsx"
+            className="text-blue-600 hover:underline"
+            download
+          >
+            Descargar plantilla de ejemplo
+          </a>
+        </div>
+
+
+      </BulkCreateDialog>
     </div>
   );
 }

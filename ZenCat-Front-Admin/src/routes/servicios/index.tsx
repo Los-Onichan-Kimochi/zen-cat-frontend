@@ -393,7 +393,25 @@ function ServiciosComponent() {
             return false;
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p>
+            El archivo debe contener las siguientes columnas (en este orden):<br />
+            <strong>Nombre, Descripción, Tipo, Foto</strong>
+          </p>
+          <ul className="list-disc list-inside">
+            <li> El campo <strong>Tipo</strong> debe ser <em>Virtual</em>, <em>Presencial</em>, 
+            <em>Sí</em>, <em>No</em> o sus equivalentes (ej. 1/0).</li>
+          </ul>
+          <a
+            href="/plantillas/plantilla-carga-servicios.xlsx"
+            className="text-blue-600 hover:underline"
+            download
+          >
+            Descargar plantilla de ejemplo
+          </a>
+        </div>
+      </BulkCreateDialog>
 
       <SuccessDialog
         open={showSuccess}

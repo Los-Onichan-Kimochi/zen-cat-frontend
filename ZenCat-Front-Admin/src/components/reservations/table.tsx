@@ -136,7 +136,7 @@ export function ReservationsTable({
     },
     {
       accessorKey: 'reservation_time',
-      header: 'Fecha de Reserva',
+      header: 'Creación de la reserva',
       cell: ({ row }) => {
         const date = new Date(row.getValue('reservation_time'));
         return (

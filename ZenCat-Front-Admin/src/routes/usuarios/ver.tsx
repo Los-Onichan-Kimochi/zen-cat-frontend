@@ -180,6 +180,7 @@ function VerUsuario() {
     region: '',
     provincia: '',
     distrito: '',
+    codigoPostal: '',
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
@@ -257,13 +258,25 @@ function VerUsuario() {
 
       // Convert geographic names from backend to IDs for the form
       const regionId = user.onboarding?.region
-        ? regiones.find((r) => r.name === user.onboarding?.region)?.id || ''
+        ? regiones.find(
+            (r) =>
+              r.name.trim().toLowerCase() ===
+              user.onboarding?.region.trim().toLowerCase(),
+          )?.id || ''
         : '';
       const provinciaId = user.onboarding?.province
-        ? provincias.find((p) => p.name === user.onboarding?.province)?.id || ''
+        ? provincias.find(
+            (p) =>
+              p.name.trim().toLowerCase() ===
+              user.onboarding?.province.trim().toLowerCase(),
+          )?.id || ''
         : '';
       const distritoId = user.onboarding?.district
-        ? distritos.find((d) => d.name === user.onboarding?.district)?.id || ''
+        ? distritos.find(
+            (d) =>
+              d.name.trim().toLowerCase() ===
+              user.onboarding?.district.trim().toLowerCase(),
+          )?.id || ''
         : '';
 
       const initialFormState = {
@@ -305,6 +318,7 @@ function VerUsuario() {
         region: '',
         provincia: '',
         distrito: '',
+        codigoPostal: '',
       });
       setIsEditing(false);
     } else {
@@ -325,6 +339,7 @@ function VerUsuario() {
       region: '',
       provincia: '',
       distrito: '',
+      codigoPostal: '',
     };
 
     if (!form.nombres.trim()) {
@@ -338,6 +353,19 @@ function VerUsuario() {
     if (!form.correo.match(/^\S+@\S+\.\S+$/)) {
       newErrors.correo = 'Ingrese un correo válido';
       valid = false;
+    } else {
+      const allUsers: any[] | undefined = queryClient.getQueryData(['usuarios']);
+      if (allUsers) {
+        const isEmailTaken = allUsers.some(
+          (u) =>
+            u.email.toLowerCase() === form.correo.toLowerCase() &&
+            u.id !== userId,
+        );
+        if (isEmailTaken) {
+          newErrors.correo = 'Este correo ya está en uso por otro usuario.';
+          valid = false;
+        }
+      }
     }
 
     if (onboardingEnabled) {
@@ -423,6 +451,11 @@ function VerUsuario() {
           newErrors.distrito = 'Distrito seleccionado no válido';
           valid = false;
         }
+      }
+
+      if (form.codigoPostal && !/^\d{5}$/.test(form.codigoPostal)) {
+        newErrors.codigoPostal = 'El código postal debe tener 5 dígitos.';
+        valid = false;
       }
     }
 
@@ -911,7 +944,7 @@ function VerUsuario() {
                   <Select
                     name="distrito"
                     value={form.distrito}
-                    onValue-change={handleDistritoChange}
+                    onValueChange={handleDistritoChange}
                     disabled={
                       !isEditing || !onboardingEnabled || !distritosFiltrados.length
                     }
@@ -950,6 +983,11 @@ function VerUsuario() {
                     placeholder="Ej. 15001"
                     disabled={!isEditing || !onboardingEnabled}
                   />
+                  {errors.codigoPostal && (
+                    <span className="text-red-500 text-sm">
+                      {errors.codigoPostal}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="calle" className="block font-medium mb-1">
@@ -986,6 +1024,7 @@ function VerUsuario() {
                         region: '',
                         provincia: '',
                         distrito: '',
+                        codigoPostal: '',
                       });
                       setIsEditing(false);
                     }

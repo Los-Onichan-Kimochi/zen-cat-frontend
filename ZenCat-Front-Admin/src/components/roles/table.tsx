@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -14,6 +14,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { User } from '@/types/user';
 import { getRoleColumns } from './columns';
+import { RoleFiltersModal } from './filters-modal';
+import { useRoleFilters } from '@/hooks/use-role-filters';
 
 interface RoleTableProps {
   data: User[];
@@ -45,10 +47,26 @@ export function RoleTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    openModal,
+    closeModal,
+    applyFilters,
+    clearFilters,
+    filterUsers,
+  } = useRoleFilters();
+
   const columns = getRoleColumns({ onRoleChange, isChangingRole });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterUsers(data);
+  }, [data, filterUsers]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -80,7 +98,7 @@ export function RoleTable({
         showFilterButton
         showExportButton
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isLoading}
         isBulkDeleting={false}
@@ -89,6 +107,15 @@ export function RoleTable({
         <DataTable table={table} columns={columns} isRefreshing={isLoading} />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <RoleFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }
