@@ -26,34 +26,6 @@ import { Route as ChangepasswordRouteRouteImport } from './routes/changepassword
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReservasIndexRouteImport } from './routes/reservas/index'
 import { Route as ReservaIndexRouteImport } from './routes/reserva/index'
-import { Route as MisComunidadesIndexRouteImport } from './routes/mis-comunidades/index'
-import { Route as ComunidadesIndexRouteImport } from './routes/comunidades/index'
-import { Route as ReservaServiciosRouteImport } from './routes/reserva/servicios'
-import { Route as ReservaLugarRouteImport } from './routes/reserva/lugar'
-import { Route as ReservaHorarioRouteImport } from './routes/reserva/horario'
-import { Route as ReservaConfirmacionRouteImport } from './routes/reserva/confirmacion'
-import { Route as OnboardingMembresiaRouteImport } from './routes/onboarding/membresia'
-import { Route as HistorialReservasCommunityIdRouteImport } from './routes/historial-reservas/$communityId'
-import { Route as HistorialMembresiasCommunityIdRouteImport } from './routes/historial-membresias/$communityId'
-import { Route as ComunidadesCommunityIdRouteRouteImport } from './routes/comunidades/$communityId/route'
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as PreciosRouteImport } from './routes/precios'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as MisComunidadesRouteImport } from './routes/mis-comunidades'
-import { Route as MembresiaRouteImport } from './routes/membresia'
-import { Route as ContactoRouteImport } from './routes/contacto'
-import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
-import { Route as SignupRouteRouteImport } from './routes/signup/route'
-import { Route as ReservaRouteRouteImport } from './routes/reserva/route'
-import { Route as ProfileRouteRouteImport } from './routes/profile/route'
-import { Route as PinRouteRouteImport } from './routes/pin/route'
-import { Route as LoginRouteRouteImport } from './routes/login/route'
-import { Route as HomeRouteRouteImport } from './routes/home/route'
-import { Route as ForgotRouteRouteImport } from './routes/forgot/route'
-import { Route as ChangepasswordRouteRouteImport } from './routes/changepassword/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ReservasIndexRouteImport } from './routes/reservas/index'
-import { Route as ReservaIndexRouteImport } from './routes/reserva/index'
 import { Route as ComunidadesIndexRouteImport } from './routes/comunidades/index'
 import { Route as ReservaServiciosRouteImport } from './routes/reserva/servicios'
 import { Route as ReservaLocationProfessionalRouteImport } from './routes/reserva/location-professional'
@@ -149,11 +121,6 @@ const ReservaIndexRoute = ReservaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReservaRouteRoute,
 } as any)
-const MisComunidadesIndexRoute = MisComunidadesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MisComunidadesRoute,
-} as any)
 const ComunidadesIndexRoute = ComunidadesIndexRouteImport.update({
   id: '/comunidades/',
   path: '/comunidades/',
@@ -164,11 +131,12 @@ const ReservaServiciosRoute = ReservaServiciosRouteImport.update({
   path: '/servicios',
   getParentRoute: () => ReservaRouteRoute,
 } as any)
-const ReservaLugarRoute = ReservaLugarRouteImport.update({
-  id: '/lugar',
-  path: '/lugar',
-  getParentRoute: () => ReservaRouteRoute,
-} as any)
+const ReservaLocationProfessionalRoute =
+  ReservaLocationProfessionalRouteImport.update({
+    id: '/location-professional',
+    path: '/location-professional',
+    getParentRoute: () => ReservaRouteRoute,
+  } as any)
 const ReservaHorarioRoute = ReservaHorarioRouteImport.update({
   id: '/horario',
   path: '/horario',
@@ -518,13 +486,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReservaIndexRouteImport
       parentRoute: typeof ReservaRouteRoute
     }
-    '/mis-comunidades/': {
-      id: '/mis-comunidades/'
-      path: '/'
-      fullPath: '/mis-comunidades/'
-      preLoaderRoute: typeof MisComunidadesIndexRouteImport
-      parentRoute: typeof MisComunidadesRoute
-    }
     '/comunidades/': {
       id: '/comunidades/'
       path: '/comunidades'
@@ -539,11 +500,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReservaServiciosRouteImport
       parentRoute: typeof ReservaRouteRoute
     }
-    '/reserva/lugar': {
-      id: '/reserva/lugar'
-      path: '/lugar'
-      fullPath: '/reserva/lugar'
-      preLoaderRoute: typeof ReservaLugarRouteImport
+    '/reserva/location-professional': {
+      id: '/reserva/location-professional'
+      path: '/location-professional'
+      fullPath: '/reserva/location-professional'
+      preLoaderRoute: typeof ReservaLocationProfessionalRouteImport
       parentRoute: typeof ReservaRouteRoute
     }
     '/reserva/horario': {
@@ -594,7 +555,7 @@ declare module '@tanstack/react-router' {
 interface ReservaRouteRouteChildren {
   ReservaConfirmacionRoute: typeof ReservaConfirmacionRoute
   ReservaHorarioRoute: typeof ReservaHorarioRoute
-  ReservaLugarRoute: typeof ReservaLugarRoute
+  ReservaLocationProfessionalRoute: typeof ReservaLocationProfessionalRoute
   ReservaServiciosRoute: typeof ReservaServiciosRoute
   ReservaIndexRoute: typeof ReservaIndexRoute
 }
@@ -602,25 +563,13 @@ interface ReservaRouteRouteChildren {
 const ReservaRouteRouteChildren: ReservaRouteRouteChildren = {
   ReservaConfirmacionRoute: ReservaConfirmacionRoute,
   ReservaHorarioRoute: ReservaHorarioRoute,
-  ReservaLugarRoute: ReservaLugarRoute,
+  ReservaLocationProfessionalRoute: ReservaLocationProfessionalRoute,
   ReservaServiciosRoute: ReservaServiciosRoute,
   ReservaIndexRoute: ReservaIndexRoute,
 }
 
 const ReservaRouteRouteWithChildren = ReservaRouteRoute._addFileChildren(
   ReservaRouteRouteChildren,
-)
-
-interface MisComunidadesRouteChildren {
-  MisComunidadesIndexRoute: typeof MisComunidadesIndexRoute
-}
-
-const MisComunidadesRouteChildren: MisComunidadesRouteChildren = {
-  MisComunidadesIndexRoute: MisComunidadesIndexRoute,
-}
-
-const MisComunidadesRouteWithChildren = MisComunidadesRoute._addFileChildren(
-  MisComunidadesRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
