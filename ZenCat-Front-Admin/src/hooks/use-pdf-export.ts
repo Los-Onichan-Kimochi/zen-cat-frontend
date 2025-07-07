@@ -16,52 +16,33 @@ export const usePdfExport = () => {
             options: PDFExportOptions = {}
         ) => {
             if (!elementRef) {
-                console.error('Element reference is required for PDF export');
+                alert('No se encontró el contenido para exportar.');
                 return;
             }
-
             try {
-                // Mostrar indicador de carga (opcional)
-                const loadingElement = document.createElement('div');
-                loadingElement.innerHTML = 'Generando PDF...';
-                loadingElement.style.cssText = `
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 20px;
-          border-radius: 8px;
-          z-index: 9999;
-        `;
-                document.body.appendChild(loadingElement);
-
-                // Ocultar elementos que no queremos en el PDF
+                // Oculta los elementos con data-pdf-hide
                 const elementsToHide = elementRef.querySelectorAll('[data-pdf-hide]');
                 const originalDisplays: string[] = [];
-
                 elementsToHide.forEach((el) => {
                     originalDisplays.push((el as HTMLElement).style.display);
                     (el as HTMLElement).style.display = 'none';
                 });
 
-                // Capturar el elemento como imagen
+                // Espera un frame para asegurar el reflow
+                await new Promise((res) => setTimeout(res, 50));
+
+                // Captura el dashboard
                 const canvas = await html2canvas(elementRef, {
-                    scale: 2, // Mejor calidad
+                    scale: 1, // Menos memoria, más compatibilidad
                     useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    width: elementRef.scrollWidth,
-                    height: elementRef.scrollHeight,
+                    backgroundColor: '#fff',
                 });
 
-                // Restaurar elementos ocultos
-                elementsToHide.forEach((el, index) => {
-                    (el as HTMLElement).style.display = originalDisplays[index];
+                // Restaura los elementos ocultos
+                elementsToHide.forEach((el, i) => {
+                    (el as HTMLElement).style.display = originalDisplays[i];
                 });
 
-                // Crear PDF
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF({
                     orientation: 'portrait',
@@ -69,77 +50,43 @@ export const usePdfExport = () => {
                     format: 'a4',
                 });
 
+                // Calcula el tamaño de la imagen en el PDF
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = pdfWidth - 20; // Margen de 10mm en cada lado
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const imgProps = {
+                    width: canvas.width,
+                    height: canvas.height,
+                };
+                const ratio = Math.min(pdfWidth / imgProps.width, (pdfHeight - 20) / imgProps.height);
+                const imgWidth = imgProps.width * ratio;
+                const imgHeight = imgProps.height * ratio;
 
-                // Agregar título y metadatos si se proporcionan
+                // Opcional: agrega título
+                let y = 10;
                 if (options.title) {
                     pdf.setFontSize(18);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text(options.title, 10, 20);
-
-                    if (options.subtitle) {
-                        pdf.setFontSize(12);
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.text(options.subtitle, 10, 30);
-                    }
-
-                    if (options.dateRange) {
-                        pdf.setFontSize(10);
-                        pdf.setFont('helvetica', 'italic');
-                        pdf.text(options.dateRange, 10, 40);
-                    }
+                    pdf.text(options.title, 10, y);
+                    y += 10;
+                }
+                if (options.subtitle) {
+                    pdf.setFontSize(12);
+                    pdf.text(options.subtitle, 10, y);
+                    y += 8;
+                }
+                if (options.dateRange) {
+                    pdf.setFontSize(10);
+                    pdf.text(options.dateRange, 10, y);
+                    y += 8;
                 }
 
-                // Calcular posición inicial de la imagen
-                let yPosition = options.title ? 50 : 10;
+                // Dibuja la imagen
+                pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
 
-                // Agregar imagen al PDF
-                if (imgHeight <= pdfHeight - yPosition) {
-                    // La imagen cabe en una página
-                    pdf.addImage(imgData, 'PNG', 10, yPosition, imgWidth, imgHeight);
-                } else {
-                    // La imagen necesita múltiples páginas
-                    let remainingHeight = imgHeight;
-                    let currentY = yPosition;
-
-                    while (remainingHeight > 0) {
-                        const pageHeight = pdfHeight - currentY;
-                        const heightToAdd = Math.min(remainingHeight, pageHeight);
-
-                        pdf.addImage(
-                            imgData,
-                            'PNG',
-                            10,
-                            currentY,
-                            imgWidth,
-                            imgHeight,
-                            '',
-                            'FAST',
-                            0,
-                            (imgHeight - remainingHeight) / imgHeight
-                        );
-
-                        remainingHeight -= pageHeight;
-
-                        if (remainingHeight > 0) {
-                            pdf.addPage();
-                            currentY = 10;
-                        }
-                    }
-                }
-
-                // Guardar PDF
-                const filename = options.filename || `reporte_${new Date().toISOString().split('T')[0]}.pdf`;
-                pdf.save(filename);
-
-                // Remover indicador de carga
-                document.body.removeChild(loadingElement);
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+                pdf.save(options.filename || 'reporte.pdf');
+            } catch (error: any) {
+                // Muestra el error real en consola y alerta
+                console.error('Error al generar PDF:', error, error?.message, error?.stack);
+                alert('Error al generar el PDF. Detalles en consola.');
             }
         },
         []
