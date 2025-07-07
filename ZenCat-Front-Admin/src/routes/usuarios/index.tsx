@@ -41,7 +41,7 @@ function UsuariosComponent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
 
-  // Query para obtener usuarios
+  // Query para obtener usuarios, awawa
   const {
     data: usersData,
     isLoading: isLoadingUsers,
