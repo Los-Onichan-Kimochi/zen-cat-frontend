@@ -1,11 +1,6 @@
 import { SelectableCard } from '@/components/ui/selectable-card';
 import { TablePagination } from '@/components/common/TablePagination';
-
-type Service = {
-  title: string;
-  description: string;
-  imageUrl: string;
-};
+import { Service } from '@/types/service';
 
 type Props = {
   services: Service[];
@@ -30,13 +25,13 @@ export function ServiceCarousel({
       {/* Grid de servicios mejorado */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
         {services.map((service) => (
-          <div key={service.title} className="h-full">
+          <div key={service.name} className="h-full">
             <SelectableCard
-              title={service.title}
+              title={service.name}
               description={service.description}
-              imageUrl={service.imageUrl}
-              selected={selected === service.title}
-              onClick={() => onSelect(service.title)}
+              imageUrl={service.image_url}
+              selected={selected === service.name}
+              onClick={() => onSelect(service.name)}
             />
           </div>
         ))}

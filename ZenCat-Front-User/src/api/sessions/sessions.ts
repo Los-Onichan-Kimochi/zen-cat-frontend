@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
+import { SessionFilters } from '@/types/session';
 
 export interface Session {
   id: string;
@@ -55,10 +56,26 @@ export interface ConflictResult {
 
 export const sessionsApi = {
   // Get all sessions
-  getSessions: async (): Promise<Session[]> => {
-    const data = await apiClient.get<{ sessions: Session[] }>(
-      API_ENDPOINTS.SESSIONS.BASE,
-    );
+  getSessions: async (filters?: SessionFilters): Promise<Session[]> => {
+    const searchParams = new URLSearchParams();
+
+    if (filters?.professionalIds?.length) {
+      searchParams.append('professionalIds', filters.professionalIds.join(','));
+    }
+    if (filters?.localIds?.length) {
+      searchParams.append('localIds', filters.localIds.join(','));
+    }
+    if (filters?.states?.length) {
+      searchParams.append('states', filters.states.join(','));
+    }
+    if (filters?.communityServiceIds?.length) {
+      searchParams.append('communityServiceIds', filters.communityServiceIds.join(','));
+    }
+    
+    const queryString = searchParams.toString();
+    const endpoint = `${API_ENDPOINTS.SESSIONS.BASE}${queryString ? `?${queryString}` : ''}`;
+
+    const data = await apiClient.get<any>(endpoint);
     if (data && Array.isArray(data.sessions)) {
       return data.sessions;
     } else if (Array.isArray(data)) {

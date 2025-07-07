@@ -1,10 +1,10 @@
 import {
   ServiceLocal,
   CreateServiceLocalRequest,
-  BulkCreateServiceLocalPayload,
-  BulkDeleteServiceLocalPayload,
-} from '@/types/service-local';
+} from '@/types/service_local';
 import { apiClient } from '@/lib/api-client';
+import { Local } from '@/types/local';
+import { API_ENDPOINTS } from '@/config/api';
 
 export interface ServiceLocalsResponse {
   service_locals: ServiceLocal[];
@@ -87,5 +87,14 @@ export const serviceLocalsApi = {
   // Get services available at a specific local
   getServicesForLocal: async (localId: string): Promise<ServiceLocal[]> => {
     return serviceLocalsApi.getServiceLocals(undefined, [localId]);
+  },
+
+  getLocalsByServiceId: async (serviceId: string): Promise<Local[]> => {
+    const response = await apiClient.get<{ locals: Local[] }>(
+      API_ENDPOINTS.SERVICE_LOCALS.BY_SERVICE_ID(serviceId),
+    );
+
+    const locals = Array.isArray(response.locals) ? response.locals : [];
+    return locals;
   },
 };

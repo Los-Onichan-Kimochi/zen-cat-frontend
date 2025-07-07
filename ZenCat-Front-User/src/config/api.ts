@@ -31,6 +31,18 @@ export const API_ENDPOINTS = {
       `/community-service/${communityId}/`,
   },
 
+  // Service Local endpoints
+  SERVICE_LOCALS: {
+    BASE: '/service-local/',
+    BY_SERVICE_ID: (serviceId: string) => `/service-local/${serviceId}/`,
+  },
+
+  // Service Professional endpoints
+  SERVICE_PROFESSIONALS: {
+    BASE: '/service-professional/',
+    BY_SERVICE_ID: (serviceId: string) => `/service-professional/${serviceId}/`,
+  },
+
   // User endpoints
   USERS: {
     BASE: '/user/',

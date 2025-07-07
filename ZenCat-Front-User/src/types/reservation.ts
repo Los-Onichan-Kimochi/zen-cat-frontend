@@ -9,7 +9,7 @@ export interface Reservation {
   user_id: string;
   session_id: string;
   session: Session;
-  membership_id: string;
+  membership_id?: string; // Opcional según el backend
   // Extended fields for display (might come from joins)
   user_name?: string;
   user_email?: string;
@@ -33,6 +33,7 @@ export interface CreateReservationRequest {
   state: ReservationState;
   user_id: string;
   session_id: string;
+  membership_id?: string; // Opcional según el backend
 }
 
 export interface UpdateReservationRequest {
@@ -41,6 +42,7 @@ export interface UpdateReservationRequest {
   state?: ReservationState;
   user_id?: string;
   session_id?: string;
+  membership_id?: string;
 }
 
 export interface BulkCreateReservationPayload {

@@ -1,47 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
-
-export interface Professional {
-  id: string;
-  name: string;
-  first_last_name: string;
-  second_last_name?: string;
-  specialty: string;
-  email: string;
-  phone_number: string;
-  type: string;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at?: string;
-  updated_by: string;
-}
-
-export interface ProfessionalsResponse {
-  professionals: Professional[];
-}
-
-export interface CreateProfessionalRequest {
-  name: string;
-  first_last_name: string;
-  second_last_name?: string;
-  specialty: string;
-  email: string;
-  phone_number: string;
-  type: string;
-  image_url?: string;
-}
-
-export interface UpdateProfessionalRequest {
-  name?: string;
-  first_last_name?: string;
-  second_last_name?: string;
-  specialty?: string;
-  email?: string;
-  phone_number?: string;
-  type?: string;
-  image_url?: string;
-}
+import { Professional, CreateProfessionalRequest, UpdateProfessionalRequest } from '@/types/professional';
 
 export const professionalsApi = {
   // Get all professionals with optional filters
