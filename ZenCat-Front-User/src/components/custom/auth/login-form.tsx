@@ -106,14 +106,18 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-  try {
+    try {
       const credential = credentialResponse.credential;
       if (!credential) {
-        throw new Error("Token de Google no recibido");
+        throw new Error('Token de Google no recibido');
       }
-      console.log('Payload GoogleLogin:', { token: credentialResponse.credential });
+      console.log('Payload GoogleLogin:', {
+        token: credentialResponse.credential,
+      });
       // Llamar al backend para login/registro con Google
-      const response = await authService.googleLogin({ token: credentialResponse.credential });
+      const response = await authService.googleLogin({
+        token: credentialResponse.credential,
+      });
 
       const user = {
         id: response.user.id,
@@ -125,9 +129,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       };
 
       login(user); // desde tu AuthContext
-      navigate({ to: "/" });
+      navigate({ to: '/' });
     } catch (error) {
-      console.error("Error en login con Google:", error);
+      console.error('Error en login con Google:', error);
     }
   };
 

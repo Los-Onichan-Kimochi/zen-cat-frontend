@@ -68,10 +68,11 @@ const CommunityReservasLayout = () => {
   const [filterByDate, setFilterByDate] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
   const [filterByPlace, setFilterByPlace] = useState('');
-  
+
   // Estados para el dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!communityId) {
@@ -85,62 +86,85 @@ const CommunityReservasLayout = () => {
       setErrorReservations(null);
       try {
         const userId = user?.id;
-        
+
         if (!userId) {
           throw new Error('No se pudo obtener el ID del usuario');
         }
 
         // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
-        const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
-        const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
+        const response =
+          await reservationsApi.getReservationsByCommunityAndUser(
+            communityId as string,
+            userId,
+          );
+        const communityServices =
+          await communityServicesApi.getCommunityServices([
+            communityId as string,
+          ]);
         // Enriquecer las reservas con información de profesor y lugar
         const reservationsWithDetails = await Promise.all(
           response.map(async (reservation: Reservation) => {
             const session = reservation.session;
-            
-            let professionalName = "";
-            let placeName = "";
-            
-            const communityService = communityServices.find((service) => service.id === reservation.session.community_service_id);
-            const service = await servicesApi.getServiceById(communityService?.service_id as string);
-            
+
+            let professionalName = '';
+            let placeName = '';
+
+            const communityService = communityServices.find(
+              (service) =>
+                service.id === reservation.session.community_service_id,
+            );
+            const service = await servicesApi.getServiceById(
+              communityService?.service_id as string,
+            );
+
             // Obtener información del profesor si es necesario
-            if (session && session.professional_id && !reservation.professional) {
+            if (
+              session &&
+              session.professional_id &&
+              !reservation.professional
+            ) {
               try {
-                const professionalData = await professionalsApi.getProfessional(session.professional_id);
+                const professionalData = await professionalsApi.getProfessional(
+                  session.professional_id,
+                );
                 professionalName = professionalData.name;
               } catch (error) {
-                console.warn(`No se pudo obtener información del profesor: ${error}`);
-                professionalName = session.title || `Profesor ID: ${session.professional_id}`;
+                console.warn(
+                  `No se pudo obtener información del profesor: ${error}`,
+                );
+                professionalName =
+                  session.title || `Profesor ID: ${session.professional_id}`;
               }
             } else if (reservation.professional) {
               // Si ya tenemos el nombre del profesor en la reserva, usarlo directamente
               professionalName = reservation.professional;
             }
-            
+
             // Obtener información del local si es necesario
             if (session && session.local_id && !reservation.place) {
               try {
                 const localData = await localsApi.getLocal(session.local_id);
                 placeName = localData.local_name;
               } catch (error) {
-                console.warn(`No se pudo obtener información del local: ${error}`);
+                console.warn(
+                  `No se pudo obtener información del local: ${error}`,
+                );
                 placeName = `Local ID: ${session.local_id}`;
               }
             } else if (reservation.place) {
               placeName = reservation.place;
             }
-            
+
             // Devolver la reserva con la información adicional
             return {
               ...reservation,
               professional: professionalName || reservation.professional,
               place: placeName || reservation.place,
-              service_name: service?.name || 'Servicio desconocido'
+              service_name: service?.name || 'Servicio desconocido',
             };
-          })
+          }),
         );
-        
+
         setAllReservations(reservationsWithDetails);
       } catch (err) {
         console.error('Error al cargar reservas:', err);
@@ -163,11 +187,17 @@ const CommunityReservasLayout = () => {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       currentReservations = currentReservations.filter(
         (res) =>
-          (res.service_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          (res.session.title?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          (res.service_name?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
+          (res.session.title?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
+          (res.professional?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
           (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          translateReservationState(res.state).includes(lowerCaseSearchTerm)
+          translateReservationState(res.state).includes(lowerCaseSearchTerm),
       );
     }
 
@@ -246,14 +276,18 @@ const CommunityReservasLayout = () => {
     setSelectedReservation(null);
   };
 
-  const handleCancelReservation = async (reservationOrId: Reservation | string) => {
+  const handleCancelReservation = async (
+    reservationOrId: Reservation | string,
+  ) => {
     try {
       // Determinar si recibimos una reserva completa o solo el ID
       let reservation: Reservation;
-      
+
       if (typeof reservationOrId === 'string') {
         // Si recibimos un ID, buscar la reserva en el estado local
-        const foundReservation = allReservations.find(r => r.id === reservationOrId);
+        const foundReservation = allReservations.find(
+          (r) => r.id === reservationOrId,
+        );
         if (!foundReservation) {
           console.error('Reserva no encontrada');
           return;
@@ -273,37 +307,41 @@ const CommunityReservasLayout = () => {
       await reservationsApi.updateReservation(reservation.id, {
         state: ReservationState.CANCELLED,
       });
-      
+
       // 2. Si hay membresía asociada, actualizar las reservas usadas
       if (reservation.membership_id) {
         console.log('Actualizando membresía:', reservation.membership_id);
-        
-        const membership = await membershipsApi.getMembershipById(reservation.membership_id);
-        
+
+        const membership = await membershipsApi.getMembershipById(
+          reservation.membership_id,
+        );
+
         // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
-        if (membership.plan.reservation_limit !== null && 
-            typeof membership.reservations_used === 'number' && 
-            membership.reservations_used > 0) {
-          
+        if (
+          membership.plan.reservation_limit !== null &&
+          typeof membership.reservations_used === 'number' &&
+          membership.reservations_used > 0
+        ) {
           await membershipsApi.updateMembership(membership.id, {
             reservations_used: membership.reservations_used - 1,
           });
-          
+
           console.log('Reservas usadas actualizadas:', {
             membresiaId: membership.id,
             reservasAnteriores: membership.reservations_used,
-            reservasNuevas: membership.reservations_used - 1
+            reservasNuevas: membership.reservations_used - 1,
           });
         }
       }
-      
+
       // 3. Actualizar el estado local cambiando el estado de la reserva
-      setAllReservations(prev => prev.map(r => 
-        r.id === reservation.id 
-          ? { ...r, state: ReservationState.CANCELLED }
-          : r
-      ));
-      
+      setAllReservations((prev) =>
+        prev.map((r) =>
+          r.id === reservation.id
+            ? { ...r, state: ReservationState.CANCELLED }
+            : r,
+        ),
+      );
     } catch (error) {
       console.error('Error al cancelar reserva:', error);
       alert('Error al cancelar la reserva. Por favor, inténtalo de nuevo.');
@@ -355,9 +393,13 @@ const CommunityReservasLayout = () => {
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                {filterByDate === '' ? 'Filtrar por fecha' : 
-                 filterByDate === 'today' ? 'Hoy' : 
-                 filterByDate === 'week' ? 'Última semana' : 'Filtrar por fecha'}
+                {filterByDate === ''
+                  ? 'Filtrar por fecha'
+                  : filterByDate === 'today'
+                    ? 'Hoy'
+                    : filterByDate === 'week'
+                      ? 'Última semana'
+                      : 'Filtrar por fecha'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -379,11 +421,17 @@ const CommunityReservasLayout = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                {filterByStatus === '' ? 'Filtrar por estado' : 
-                 filterByStatus === 'DONE' ? 'Finalizada' : 
-                 filterByStatus === 'CANCELLED' ? 'Cancelada' : 
-                 filterByStatus === 'CONFIRMED' ? 'Confirmada' : 
-                 filterByStatus === 'ANULLED' ? 'Anulada' : 'Filtrar por estado'}
+                {filterByStatus === ''
+                  ? 'Filtrar por estado'
+                  : filterByStatus === 'DONE'
+                    ? 'Finalizada'
+                    : filterByStatus === 'CANCELLED'
+                      ? 'Cancelada'
+                      : filterByStatus === 'CONFIRMED'
+                        ? 'Confirmada'
+                        : filterByStatus === 'ANULLED'
+                          ? 'Anulada'
+                          : 'Filtrar por estado'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

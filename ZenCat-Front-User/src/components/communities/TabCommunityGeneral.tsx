@@ -16,19 +16,26 @@ interface TabCommunityGeneralProps {
   onRefresh?: () => void;
 }
 
-export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGeneralProps) {
+export function TabCommunityGeneral({
+  community,
+  onRefresh,
+}: TabCommunityGeneralProps) {
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isProcessingReservation, setIsProcessingReservation] = useState(false);
   const [isProcessingMembership, setIsProcessingMembership] = useState(false);
   const navigate = useNavigate();
-  const { error: showErrorToast, success: showSuccessToast, ToastContainer } = useToast();
+  const {
+    error: showErrorToast,
+    success: showSuccessToast,
+    ToastContainer,
+  } = useToast();
 
   if (!community) {
     return <div>No hay información disponible</div>;
   }
-  console.log("Community:", community);
-  
+  console.log('Community:', community);
+
   const handleNewReservation = useCallback(() => {
     // Evitar múltiples clics rápidos
     if (isProcessingReservation) {
@@ -36,9 +43,10 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
     }
 
     // Calcular reservas disponibles
-    const reservasDisponibles = community.reservationsUsed === null 
-      ? null // Sin límite
-      : (community.reservationLimit || 0) - (community.reservationsUsed || 0);
+    const reservasDisponibles =
+      community.reservationsUsed === null
+        ? null // Sin límite
+        : (community.reservationLimit || 0) - (community.reservationsUsed || 0);
 
     // Verificar si hay reservas disponibles
     if (reservasDisponibles !== null && reservasDisponibles <= 0) {
@@ -90,13 +98,13 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
 
     try {
       setIsProcessingMembership(true);
-      await membershipsApi.updateMembership(community.membershipId, { 
-        status: MembershipState.SUSPENDED 
+      await membershipsApi.updateMembership(community.membershipId, {
+        status: MembershipState.SUSPENDED,
       });
-      
+
       showSuccessToast('Membresía suspendida exitosamente');
       setShowSuspendDialog(false);
-      
+
       // Refrescar los datos después de suspender
       if (onRefresh) {
         onRefresh();
@@ -116,13 +124,13 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
 
     try {
       setIsProcessingMembership(true);
-      await membershipsApi.updateMembership(community.membershipId, { 
-        status: MembershipState.CANCELLED 
+      await membershipsApi.updateMembership(community.membershipId, {
+        status: MembershipState.CANCELLED,
       });
-      
+
       showSuccessToast('Membresía cancelada exitosamente');
       setShowCancelDialog(false);
-      
+
       // Refrescar los datos después de cancelar
       if (onRefresh) {
         onRefresh();
@@ -180,7 +188,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
             >
               Ver reservas
             </Button>
-            <Button 
+            <Button
               className="w-full text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
               onClick={handleViewMemberships}
             >
@@ -217,20 +225,18 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas disponibles:</p>
                 <p className="font-medium">
-                  {community.reservationsUsed === null 
-                    ? 'Sin límite' 
-                    : `${(community.reservationLimit || 0) - (community.reservationsUsed || 0)}`
-                  }
+                  {community.reservationsUsed === null
+                    ? 'Sin límite'
+                    : `${(community.reservationLimit || 0) - (community.reservationsUsed || 0)}`}
                 </p>
               </div>
 
               <div className="flex justify-between">
                 <p className="text-gray-600">Reservas usadas:</p>
                 <p className="font-medium">
-                  {community.reservationsUsed === null 
-                    ? 'Sin límite' 
-                    : community.reservationsUsed || 0
-                  }
+                  {community.reservationsUsed === null
+                    ? 'Sin límite'
+                    : community.reservationsUsed || 0}
                 </p>
               </div>
 
@@ -278,7 +284,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
         onCancel={handleCancelMembership}
         communityName={community.name}
       />
-      
+
       {/* Toast Container */}
       <ToastContainer />
     </>

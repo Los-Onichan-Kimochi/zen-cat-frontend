@@ -165,10 +165,15 @@ function LocationStepComponent() {
   }, [allLocations, searchTerm, districtFilter, sortBy]);
 
   // Paginación
-  const totalPages = Math.ceil(filteredAndSortedLocations.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    filteredAndSortedLocations.length / itemsPerPage,
+  );
   const startIndex = currentPage * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentLocations = filteredAndSortedLocations.slice(startIndex, endIndex);
+  const currentLocations = filteredAndSortedLocations.slice(
+    startIndex,
+    endIndex,
+  );
 
   // Reset página cuando cambian los filtros
   useEffect(() => {
@@ -324,8 +329,8 @@ function LocationStepComponent() {
                         <tr
                           key={location.id}
                           className={`hover:bg-gray-50 cursor-pointer transition-colors ${
-                            selectedLocationId === location.id 
-                              ? 'bg-blue-50 border-l-4 border-l-blue-500' 
+                            selectedLocationId === location.id
+                              ? 'bg-blue-50 border-l-4 border-l-blue-500'
                               : ''
                           }`}
                           onClick={() => handleLocationSelect(location)}
@@ -381,8 +386,7 @@ function LocationStepComponent() {
                 <p className="text-gray-500 text-lg font-medium">
                   {searchTerm || districtFilter
                     ? 'No se encontraron ubicaciones que coincidan con tu búsqueda'
-                    : 'No hay ubicaciones disponibles'
-                  }
+                    : 'No hay ubicaciones disponibles'}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
                   Intenta ajustar tus filtros de búsqueda
@@ -410,8 +414,8 @@ function LocationStepComponent() {
           <ArrowLeft className="w-4 h-4" />
           Anterior
         </Button>
-        <Button 
-          onClick={handleContinue} 
+        <Button
+          onClick={handleContinue}
           disabled={!selectedLocationId}
           className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
         >

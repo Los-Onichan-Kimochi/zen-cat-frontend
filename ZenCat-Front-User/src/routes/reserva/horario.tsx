@@ -96,16 +96,29 @@ function ScheduleStepComponent() {
     queryKey: ['locals'],
     queryFn: () => localsApi.getLocals(),
   });
-  
+
   // Obtener el community service único basado en community_id y service_id
-  const { data: communityServiceData = [], isLoading: isLoadingCommunityService, error: errorCommunityService } = useQuery<CommunityService[], Error>({
-    queryKey: ['communityService', reservationData.communityId, reservationData.service?.id],
-    queryFn: () => communityServicesApi.getCommunityServices([reservationData.communityId!], [reservationData.service?.id!]),
+  const {
+    data: communityServiceData = [],
+    isLoading: isLoadingCommunityService,
+    error: errorCommunityService,
+  } = useQuery<CommunityService[], Error>({
+    queryKey: [
+      'communityService',
+      reservationData.communityId,
+      reservationData.service?.id,
+    ],
+    queryFn: () =>
+      communityServicesApi.getCommunityServices(
+        [reservationData.communityId!],
+        [reservationData.service?.id!],
+      ),
     enabled: !!reservationData.communityId && !!reservationData.service?.id,
   });
 
   // Obtener el community_service_id único
-  const communityServiceId = communityServiceData.length > 0 ? communityServiceData[0].id : null;
+  const communityServiceId =
+    communityServiceData.length > 0 ? communityServiceData[0].id : null;
 
   // Fetch sessions basado en el community_service_id único
   const {
@@ -119,20 +132,21 @@ function ScheduleStepComponent() {
   });
 
   // Fetch user reservations para identificar sesiones donde ya tiene reservas
-  const { data: userReservations = [], isLoading: isLoadingReservations } = useQuery<Reservation[], Error>({
-    queryKey: ['user-reservations', reservationData.communityId, user?.id],
-    queryFn: () => {
-      if (!reservationData.communityId || !user?.id) {
-        throw new Error('Missing required parameters');
-      }
-      return reservationsApi.getReservationsByCommunityAndUser(
-        reservationData.communityId,
-        user.id
-      );
-    },
-    enabled: !!reservationData.communityId && !!user?.id,
-  });
-  
+  const { data: userReservations = [], isLoading: isLoadingReservations } =
+    useQuery<Reservation[], Error>({
+      queryKey: ['user-reservations', reservationData.communityId, user?.id],
+      queryFn: () => {
+        if (!reservationData.communityId || !user?.id) {
+          throw new Error('Missing required parameters');
+        }
+        return reservationsApi.getReservationsByCommunityAndUser(
+          reservationData.communityId,
+          user.id,
+        );
+      },
+      enabled: !!reservationData.communityId && !!user?.id,
+    });
+
   const isLoading =
     isLoadingServiceProfessionals ||
     isLoadingProfessionals ||
@@ -142,7 +156,7 @@ function ScheduleStepComponent() {
     isLoadingReservations;
 
   // Filter sessions by community_service_id, location and service-professional associations
-  console.log("Filtrar");
+  console.log('Filtrar');
   const filteredSessions = sessionsData.filter((session: Session) => {
     // Filtrar por community_service_id si está disponible
     if (communityServiceId && session.community_service_id) {
@@ -167,20 +181,20 @@ function ScheduleStepComponent() {
     return true;
   });
 
-  console.log("Sessions filtradas: ", filteredSessions);
+  console.log('Sessions filtradas: ', filteredSessions);
 
   // Crear un Set de session_ids donde el usuario ya tiene reservas
   const userReservedSessionIds = new Set(
     userReservations
-      .filter(reservation => reservation.state === 'CONFIRMED') // Solo reservas confirmadas
-      .map(reservation => reservation.session_id)
+      .filter((reservation) => reservation.state === 'CONFIRMED') // Solo reservas confirmadas
+      .map((reservation) => reservation.session_id),
   );
 
   // Generar fechas disponibles (próximos 7 días)
   const getAvailableDates = () => {
     const dates = [];
     const today = new Date();
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -192,7 +206,7 @@ function ScheduleStepComponent() {
         fullDate: `${date.getDate()}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`,
       });
     }
-    
+
     return dates;
   };
 
@@ -201,7 +215,7 @@ function ScheduleStepComponent() {
   // Verificar si una fecha está entre las disponibles (próximos 7 días)
   const isDateAvailable = (day: number, month: number) => {
     return availableDates.some(
-      (date) => date.day === day && date.month === month
+      (date) => date.day === day && date.month === month,
     );
   };
 
@@ -211,30 +225,48 @@ function ScheduleStepComponent() {
     currentMonth.getMonth() + 1,
     0,
   ).getDate();
-  
+
   const firstDayOfMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth(),
     1,
   ).getDay();
-  
+
   const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Ajustar para que lunes sea 0
 
   // Convertir las sesiones al formato requerido por TimeSlotCalendar
   const convertedOccupiedSlots = filteredSessions.map((session: Session) => {
-    const professional = professionalsData.find(p => p.id === session.professional_id);
-    const local = localsData.find(l => l.id === session.local_id);
+    const professional = professionalsData.find(
+      (p) => p.id === session.professional_id,
+    );
+    const local = localsData.find((l) => l.id === session.local_id);
     const sessionDate = new Date(session.date);
     const dateLabel = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
-    
+
+    // Convertir las horas UTC a hora local
+    const startTimeUTC = new Date(session.start_time);
+    const endTimeUTC = new Date(session.end_time);
+
+    // Formatear las horas en formato local (HH:MM)
+    const startTimeLocal = startTimeUTC.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const endTimeLocal = endTimeUTC.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
     // Determinar el estado de la sesión
     const isUserReserved = userReservedSessionIds.has(session.id);
     const isFullyBooked = session.registered_count >= session.capacity;
-    
+
     return {
       date: dateLabel,
-      start: session.start_time.split('T')[1].substring(0, 5),
-      end: session.end_time.split('T')[1].substring(0, 5),
+      start: startTimeLocal,
+      end: endTimeLocal,
       title: session.title,
       type: 'professional' as const,
       sessionId: session.id,
@@ -242,11 +274,13 @@ function ScheduleStepComponent() {
       isFullyBooked,
       sessionInfo: {
         title: session.title,
-        professional: professional ? `${professional.name} ${professional.first_last_name}` : 'No asignado',
+        professional: professional
+          ? `${professional.name} ${professional.first_last_name}`
+          : 'No asignado',
         location: local ? local.local_name : 'No especificado',
         capacity: session.capacity,
-        registered: session.registered_count
-      }
+        registered: session.registered_count,
+      },
     };
   });
 
@@ -260,22 +294,32 @@ function ScheduleStepComponent() {
     setSelectedSessionId(null);
   };
 
-  const handleTimeRangeSelect = (range: { start: string; end: string }, date: string) => {
+  const handleTimeRangeSelect = (
+    range: { start: string; end: string },
+    date: string,
+  ) => {
     setSelectedTime(range.start);
     setSelectedDate(date);
-    
+
     // Buscar la sesión que coincide con este horario y fecha
     const matchingSession = filteredSessions.find((session: Session) => {
       const sessionDate = new Date(session.date);
       const sessionDateStr = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
-      const sessionTime = session.start_time.split('T')[1].substring(0, 5);
-      
-      return sessionDateStr === date && sessionTime === range.start;
+
+      // Convertir la hora UTC a hora local para la comparación
+      const startTimeUTC = new Date(session.start_time);
+      const sessionTimeLocal = startTimeUTC.toLocaleTimeString('es-PE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+
+      return sessionDateStr === date && sessionTimeLocal === range.start;
     });
-    
+
     if (matchingSession) {
       setSelectedSessionId(matchingSession.id);
-      
+
       updateReservation({
         date: date,
         time: range.start,
@@ -336,12 +380,13 @@ function ScheduleStepComponent() {
       const isAvailable = isDateAvailable(day, currentMonth.getMonth() + 1);
       const dateStr = `${day}/${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
       const isSelected = selectedDate === dateStr;
-      
+
       // Verificar si es hoy
       const today = new Date();
-      const isToday = day === today.getDate() && 
-                     currentMonth.getMonth() === today.getMonth() &&
-                     currentMonth.getFullYear() === today.getFullYear();
+      const isToday =
+        day === today.getDate() &&
+        currentMonth.getMonth() === today.getMonth() &&
+        currentMonth.getFullYear() === today.getFullYear();
 
       days.push(
         <button
@@ -357,7 +402,7 @@ function ScheduleStepComponent() {
           `}
         >
           {day}
-        </button>
+        </button>,
       );
     }
 
@@ -379,13 +424,14 @@ function ScheduleStepComponent() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 mb-4">
-          Error al cargar los horarios: {error?.message || errorCommunityService?.message}
+          Error al cargar los horarios:{' '}
+          {error?.message || errorCommunityService?.message}
         </p>
         <Button onClick={() => window.location.reload()}>Reintentar</Button>
       </div>
     );
   }
-  
+
   return (
     <div>
       {/* Mensaje informativo sobre filtros aplicados */}
@@ -426,7 +472,8 @@ function ScheduleStepComponent() {
           <div className="mb-4 w-full text-center">
             <h3 className="text-2xl font-bold mb-2">Fechas disponibles</h3>
             <p className="text-xs text-gray-600">
-              Puedes hacer reservas hasta con<br />7 días de anticipación
+              Puedes hacer reservas hasta con
+              <br />7 días de anticipación
             </p>
           </div>
 
@@ -470,7 +517,9 @@ function ScheduleStepComponent() {
         {/* Tabla de horarios con altura igual al calendario */}
         <div className="col-span-2 h-[450px]">
           <TimeSlotCalendar
-            selectedRange={selectedTime ? { start: selectedTime, end: '' } : undefined}
+            selectedRange={
+              selectedTime ? { start: selectedTime, end: '' } : undefined
+            }
             onRangeSelect={handleTimeRangeSelect}
             occupiedSlots={convertedOccupiedSlots}
             startHour={8}

@@ -37,7 +37,7 @@ function ServiceStepComponent() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/reserva/servicios' });
   const { reservationData, updateReservation } = useReservation();
-  
+
   // Estados para búsqueda, ordenamiento y paginación
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
@@ -139,9 +139,10 @@ function ServiceStepComponent() {
 
     // Aplicar filtro de búsqueda
     if (searchTerm) {
-      filtered = filtered.filter((service) =>
-        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (service) =>
+          service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          service.description.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -227,7 +228,8 @@ function ServiceStepComponent() {
                 ¡Busca el servicio que más te guste!
               </h1>
               <p className="text-gray-600 text-lg">
-                Explora nuestra variedad de servicios y encuentra el perfecto para ti
+                Explora nuestra variedad de servicios y encuentra el perfecto
+                para ti
               </p>
             </div>
 

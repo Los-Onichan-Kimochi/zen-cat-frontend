@@ -50,13 +50,16 @@ function OnboardingMembresiaComponent() {
     useState<APICommunity | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
-  const [onHoldMembership, setOnHoldMembership] = useState<Membership | null>(null);
+  const [onHoldMembership, setOnHoldMembership] = useState<Membership | null>(
+    null,
+  );
   const [reactivating, setReactivating] = useState(false);
 
   useEffect(() => {
     if (!membershipsLoading && communityId) {
       const activeMembership = memberships.find(
-        (m) => m.community.id === communityId && m.status === MembershipState.ACTIVE,
+        (m) =>
+          m.community.id === communityId && m.status === MembershipState.ACTIVE,
       );
 
       if (activeMembership) {
@@ -64,7 +67,9 @@ function OnboardingMembresiaComponent() {
         setOnHoldMembership(null);
       } else {
         const hold = memberships.find(
-          (m) => m.community.id === communityId && m.status === MembershipState.SUSPENDED,
+          (m) =>
+            m.community.id === communityId &&
+            m.status === MembershipState.SUSPENDED,
         );
         if (hold) {
           setOnHoldMembership(hold);
@@ -83,7 +88,8 @@ function OnboardingMembresiaComponent() {
       communities &&
       communities.length > 0 &&
       !isInitialized &&
-      isMember === false && !onHoldMembership // Only initialize if not a member nor on hold
+      isMember === false &&
+      !onHoldMembership // Only initialize if not a member nor on hold
     ) {
       let targetCommunity: APICommunity | undefined;
 
@@ -229,8 +235,8 @@ function OnboardingMembresiaComponent() {
               {membershipsLoading
                 ? 'Verificando membresía...'
                 : communitiesLoading
-                ? 'Cargando comunidades...'
-                : 'Cargando planes de la comunidad...'}
+                  ? 'Cargando comunidades...'
+                  : 'Cargando planes de la comunidad...'}
             </p>
           </div>
         </div>

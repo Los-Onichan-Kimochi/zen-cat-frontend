@@ -12,7 +12,7 @@ export const userOnboardingApi = {
     try {
       console.log('📋 Fetching onboarding data for user:', userId);
       const data = await apiClient.get<OnboardingResponse>(
-        API_ENDPOINTS.ONBOARDING.GET_BY_USER(userId)
+        API_ENDPOINTS.ONBOARDING.GET_BY_USER(userId),
       );
       console.log('✅ Got onboarding data:', data);
       return data;
@@ -21,4 +21,4 @@ export const userOnboardingApi = {
       throw error;
     }
   },
-}; 
+};

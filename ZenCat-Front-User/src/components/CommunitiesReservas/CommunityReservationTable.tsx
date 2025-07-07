@@ -57,7 +57,6 @@ const getStateLabel = (state: ReservationState) => {
   }
 };
 
-
 export function ReservationsTable({ data, onView }: ReservationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -68,14 +67,18 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
       accessorKey: 'service_name',
       header: 'Servicio',
       cell: ({ row }) => (
-        <div className="text-sm text-center font-medium">{row.original.service_name || 'N/A'}</div>
+        <div className="text-sm text-center font-medium">
+          {row.original.service_name || 'N/A'}
+        </div>
       ),
     },
     {
       accessorKey: 'session.title',
       header: 'Título de la sesión',
       cell: ({ row }) => (
-        <div className="text-sm text-center">{row.original.session?.title || 'N/A'}</div>
+        <div className="text-sm text-center">
+          {row.original.session?.title || 'N/A'}
+        </div>
       ),
     },
     {
@@ -103,7 +106,17 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
               <Clock className="h-3 w-3 text-gray-500" />
-              {format(startTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
+              {startTime.toLocaleTimeString('es-PE', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              })}{' '}
+              -{' '}
+              {endTime.toLocaleTimeString('es-PE', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              })}
             </div>
           </div>
         );
@@ -149,7 +162,9 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
         const state = row.original.state as ReservationState;
         return (
           <div className="flex justify-center">
-            <Badge className={getStateColor(state)}>{getStateLabel(state)}</Badge>
+            <Badge className={getStateColor(state)}>
+              {getStateLabel(state)}
+            </Badge>
           </div>
         );
       },

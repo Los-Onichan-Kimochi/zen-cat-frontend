@@ -72,32 +72,36 @@ export const authService = {
     return apiClient.isAuthenticated();
   },
 
-googleLogin: async ({ token }: { token: string }): Promise<LoginResponse> => {
-  const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  });
+  googleLogin: async ({ token }: { token: string }): Promise<LoginResponse> => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      },
+    );
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
-  }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || `HTTP error! status: ${response.status}`,
+      );
+    }
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (data.tokens?.access_token && data.tokens?.refresh_token) {
-    apiClient.setTokens({
-      access_token: data.tokens.access_token,
-      refresh_token: data.tokens.refresh_token,
-      token_type: data.tokens.token_type || 'Bearer',
-      expires_in: data.tokens.expires_in,
-    });
-  }
+    if (data.tokens?.access_token && data.tokens?.refresh_token) {
+      apiClient.setTokens({
+        access_token: data.tokens.access_token,
+        refresh_token: data.tokens.refresh_token,
+        token_type: data.tokens.token_type || 'Bearer',
+        expires_in: data.tokens.expires_in,
+      });
+    }
 
-  return data;
-}
-  
+    return data;
+  },
 };
