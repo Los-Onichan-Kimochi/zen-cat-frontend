@@ -55,10 +55,21 @@ export default function CommunityPage() {
 
   if (loading) return <p className="text-center mt-10">Cargando comunidad...</p>;
   if (!community) return <p className="text-center mt-10 text-red-500">Comunidad no encontrada</p>;
+  
+  const handleGoBack = () => {
+    navigate({ to: `/comunidades` });
+  };
 
   return (
-    <div className="min-h-screen pt-6 pb-12 px-4 max-w-6xl mx-auto">
-      <Button>Retroceder</Button>
+<div className="min-h-screen pt-6 pb-12 px-4">
+  <div className="ml-4 mb-4">
+    <Button
+      onClick={handleGoBack}
+      className="text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+    >
+      &lt; Retroceder
+    </Button>
+  </div>
 
       <section className="text-center mb-8">
         <h2 className="uppercase text-sm font-medium text-gray-500">Comunidad</h2>
