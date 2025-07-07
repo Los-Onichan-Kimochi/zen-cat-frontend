@@ -11,6 +11,7 @@ import { Reservation, ReservationState } from '@/types/reservation';
 import { format, differenceInHours } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { localsApi } from '@/api/locals/locals';
+import { Globe, MapPin, ExternalLink } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,6 +101,9 @@ export function ReservationDetailDialog({
 
   if (!reservation) return null;
 
+  // Determinar si es virtual o presencial
+  const isVirtual = reservation.service_is_virtual || false;
+
   // Combinar correctamente la fecha de la sesión con la hora de inicio
   const sessionDate = new Date(reservation.session.date);
   const sessionStartTime = new Date(reservation.session.start_time);
@@ -117,6 +121,7 @@ export function ReservationDetailDialog({
   const now = new Date();
   const hoursUntilReservation = differenceInHours(sessionDateTime, now);
   const canCancel = hoursUntilReservation >= 24;
+  const hasSessionPassed = sessionDateTime < now; // Verificar si la sesión ya pasó
 
   const handleCancelReservation = () => {
     if (canCancel) {
@@ -128,6 +133,12 @@ export function ReservationDetailDialog({
     onCancelReservation(reservation);
     setShowCancelDialog(false);
     onClose();
+  };
+
+  const handleOpenSessionLink = () => {
+    if (reservation.session.session_link) {
+      window.open(reservation.session.session_link, '_blank');
+    }
   };
 
   return (
@@ -159,18 +170,74 @@ export function ReservationDetailDialog({
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Lugar</span>
-                <span className="font-medium text-right">
-                  {reservation.place || 'N/A'}
+                <span className="text-gray-600">Tipo</span>
+                <span className="font-medium text-right flex items-center gap-1">
+                  {isVirtual ? (
+                    <>
+                      <Globe className="h-4 w-4 text-blue-500" />
+                      <span className="text-blue-600">Virtual</span>
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="h-4 w-4 text-green-500" />
+                      <span className="text-green-600">Presencial</span>
+                    </>
+                  )}
                 </span>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Dirección</span>
-                <span className="font-medium text-right">
-                  {loading ? 'Cargando...' : (localData?.street_name + ' ' + localData?.building_number || 'N/A')}
-                </span>
-              </div>
+              {/* Mostrar información según el tipo */}
+              {isVirtual ? (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Enlace de sesión</span>
+                  {reservation.session.session_link ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleOpenSessionLink}
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Abrir enlace
+                    </Button>
+                  ) : (
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="flex items-center gap-1 text-gray-400 cursor-not-allowed"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Sin enlace
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Aún no hay link para esta sesión</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Lugar</span>
+                    <span className="font-medium text-right">
+                      {reservation.place || 'N/A'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Dirección</span>
+                    <span className="font-medium text-right">
+                      {loading ? 'Cargando...' : (localData?.street_name + ' ' + localData?.building_number || 'N/A')}
+                    </span>
+                  </div>
+                </>
+              )}
               
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Profesional</span>
@@ -196,12 +263,15 @@ export function ReservationDetailDialog({
                 </span>
               </div>
               
-              <div className="flex justify-between">
-                <span className="text-gray-600">Distrito</span>
-                <span className="font-medium text-right">
-                  {loading ? 'Cargando...' : (localData?.district || 'N/A')}
-                </span>
-              </div>
+              {/* Solo mostrar distrito si es presencial */}
+              {!isVirtual && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Distrito</span>
+                  <span className="font-medium text-right">
+                    {loading ? 'Cargando...' : (localData?.district || 'N/A')}
+                  </span>
+                </div>
+              )}
               
               <div className="flex justify-between">
                 <span className="text-gray-600">Estado</span>
@@ -223,7 +293,7 @@ export function ReservationDetailDialog({
             >
               Volver
             </Button>
-            {reservation.state === ReservationState.CONFIRMED && (
+            {reservation.state === ReservationState.CONFIRMED && !hasSessionPassed && (
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>

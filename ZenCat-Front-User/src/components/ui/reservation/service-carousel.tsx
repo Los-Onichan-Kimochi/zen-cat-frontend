@@ -32,6 +32,7 @@ export function ServiceCarousel({
               imageUrl={service.image_url}
               selected={selected === service.name}
               onClick={() => onSelect(service.name)}
+              is_virtual={service.is_virtual}
             />
           </div>
         ))}

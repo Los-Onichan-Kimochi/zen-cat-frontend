@@ -256,6 +256,7 @@ function ScheduleStepComponent() {
           registeredCount: matchingSession.registered_count,
           professionalId: matchingSession.professional_id,
           localId: matchingSession.local_id,
+          sessionLink: matchingSession.session_link,
         },
         userId: user?.id,
       });

@@ -18,6 +18,7 @@ export interface Reservation {
   place?: string;
   professional?: string;
   service_name?: string;
+  service_is_virtual?: boolean; // Información de si el servicio es virtual
 }
 
 export enum ReservationState {

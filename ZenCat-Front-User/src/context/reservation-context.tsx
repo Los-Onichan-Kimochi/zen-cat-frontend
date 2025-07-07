@@ -48,6 +48,7 @@ export interface ReservationSession {
   registeredCount: number;
   professionalId: string;
   localId?: string;
+  sessionLink?: string;
 }
 
 export interface ReservationData {

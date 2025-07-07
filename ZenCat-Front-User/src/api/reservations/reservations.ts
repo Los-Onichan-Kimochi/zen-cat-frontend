@@ -50,6 +50,7 @@ export const reservationsApi = {
   createReservation: async (
     request: CreateReservationRequest,
   ): Promise<Reservation> => {
+    console.log('Request: ', request);
     return apiClient.post<Reservation>(
       API_ENDPOINTS.RESERVATIONS.BASE,
       request,
