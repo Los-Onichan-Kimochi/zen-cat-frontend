@@ -129,8 +129,9 @@ export function UsersTable({
         open={isModalOpen}
         onClose={closeModal}
         filters={filters}
-        onApplyFilters={applyFilters}
+        onApplyFilters={closeModal}
         onClearFilters={clearFilters}
+        onFiltersChange={applyFilters}
       />
     </div>
   );

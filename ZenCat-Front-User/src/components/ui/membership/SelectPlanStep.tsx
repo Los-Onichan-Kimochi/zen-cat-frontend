@@ -94,20 +94,20 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
       <div className="flex justify-center mb-8">
         <div className="bg-gray-100 rounded-lg p-1 flex">
           <button
-            className={`px-8 py-2 rounded-md font-medium transition-all ${
+            className={`w-32 px-8 py-2 rounded-md font-medium transition-all duration-300 ${
               activeTab === 'Mensual'
                 ? 'bg-white text-black shadow-sm'
-                : 'text-gray-600 hover:text-black'
+                : 'text-gray-500 hover:text-black hover:bg-gray-200/50'
             }`}
             onClick={() => setActiveTab('Mensual')}
           >
             Mensual
           </button>
           <button
-            className={`px-8 py-2 rounded-md font-medium transition-all ${
+            className={`w-32 px-8 py-2 rounded-md font-medium transition-all duration-300 ${
               activeTab === 'Anual'
                 ? 'bg-white text-black shadow-sm'
-                : 'text-gray-600 hover:text-black'
+                : 'text-gray-500 hover:text-black hover:bg-gray-200/50'
             }`}
             onClick={() => setActiveTab('Anual')}
           >
@@ -149,8 +149,8 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
                 key={plan.id}
                 className={`cursor-pointer transition-all duration-300 transform border-2 ${
                   state.selectedPlan?.id === plan.id
-                    ? 'bg-black text-white border-black scale-105'
-                    : 'bg-white border-gray-200 hover:border-gray-300'
+                    ? 'bg-black text-white border-black scale-105 shadow-lg'
+                    : 'bg-white border-gray-200 hover:border-gray-400 hover:shadow-md'
                 }`}
                 onClick={() => handlePlanSelect(plan)}
               >

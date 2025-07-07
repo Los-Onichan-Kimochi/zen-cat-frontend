@@ -24,6 +24,8 @@ interface UsersTableProps {
   resetSelection?: number;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  onOpenFilters?: () => void;
+  hasActiveFilters?: boolean;
 }
 
 export function UsersTable({
@@ -36,6 +38,8 @@ export function UsersTable({
   resetSelection = 0,
   onRefresh,
   isRefreshing = false,
+  onOpenFilters,
+  hasActiveFilters = false,
 }: UsersTableProps) {
   const {
     sorting,
@@ -94,12 +98,13 @@ export function UsersTable({
         showExportButton
         showBulkDeleteButton={!!onBulkDelete}
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={onOpenFilters}
         onBulkDelete={onBulkDelete}
         onRefreshClick={onRefresh}
         isBulkDeleting={isBulkDeleting}
         isRefreshing={isRefreshing}
         isBulkDeleteEnabled={true}
+        hasActiveFilters={hasActiveFilters}
       />
       <div className="flex-1 overflow-hidden rounded-md border bg-white">
         <DataTable
