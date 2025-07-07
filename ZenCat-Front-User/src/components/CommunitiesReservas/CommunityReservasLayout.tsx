@@ -67,7 +67,7 @@ const CommunityReservasLayout = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByDate, setFilterByDate] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
-  const [filterByPlace, setFilterByPlace] = useState('');
+  const [filterByType, setFilterByType] = useState('');
 
   // Estados para el dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -97,32 +97,30 @@ const CommunityReservasLayout = () => {
             communityId as string,
             userId,
           );
-        const communityServices =
-          await communityServicesApi.getCommunityServices([
-            communityId as string,
-          ]);
+        console.log("Response", response);
+        console.log("CommunityId", communityId);
+        console.log("UserId", userId);
+        
+        // Obtener los community services y los services de la comunidad
+        const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
+        const services = await communityServicesApi.getServicesByCommunityId(communityId as string);
+        console.log("Community Services", communityServices);
+        console.log("Services", services);
+        
         // Enriquecer las reservas con información de profesor y lugar
         const reservationsWithDetails = await Promise.all(
           response.map(async (reservation: Reservation) => {
             const session = reservation.session;
 
-            let professionalName = '';
-            let placeName = '';
-
-            const communityService = communityServices.find(
-              (service) =>
-                service.id === reservation.session.community_service_id,
-            );
-            const service = await servicesApi.getServiceById(
-              communityService?.service_id as string,
-            );
-
+            let professionalName = "";
+            let placeName = "";
+            
+            // Buscar el community service y luego el service correspondiente
+            const communityService = communityServices.find((cs) => cs.id === session.community_service_id);
+            const service = services.find((s) => s.id === communityService?.service_id);
+            
             // Obtener información del profesor si es necesario
-            if (
-              session &&
-              session.professional_id &&
-              !reservation.professional
-            ) {
+            if (session && session.professional_id && !reservation.professional) {
               try {
                 const professionalData = await professionalsApi.getProfessional(
                   session.professional_id,
@@ -161,8 +159,9 @@ const CommunityReservasLayout = () => {
               professional: professionalName || reservation.professional,
               place: placeName || reservation.place,
               service_name: service?.name || 'Servicio desconocido',
+              service_is_virtual: service?.is_virtual || false // Agregar la información de si es virtual
             };
-          }),
+          })
         );
 
         setAllReservations(reservationsWithDetails);
@@ -186,31 +185,42 @@ const CommunityReservasLayout = () => {
     if (searchTerm) {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       currentReservations = currentReservations.filter(
-        (res) =>
-          (res.service_name?.toLowerCase() || '').includes(
-            lowerCaseSearchTerm,
-          ) ||
-          (res.session.title?.toLowerCase() || '').includes(
-            lowerCaseSearchTerm,
-          ) ||
-          (res.professional?.toLowerCase() || '').includes(
-            lowerCaseSearchTerm,
-          ) ||
-          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-          translateReservationState(res.state).includes(lowerCaseSearchTerm),
+        (res) => {
+          const isVirtual = res.service_is_virtual || false;
+          const typeText = isVirtual ? 'virtual' : 'presencial';
+          return (
+            (res.service_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+            (res.session.title?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+            (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+            typeText.includes(lowerCaseSearchTerm) ||
+            translateReservationState(res.state).includes(lowerCaseSearchTerm)
+          );
+        }
       );
     }
 
     if (filterByDate) {
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+      
       currentReservations = currentReservations.filter((res) => {
-        const reservationDate = new Date(res.reservation_time);
+        const sessionDate = new Date(res.session.date);
+        sessionDate.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+        
         if (filterByDate === 'today') {
-          return reservationDate.toDateString() === today.toDateString();
+          return sessionDate.getTime() === today.getTime();
         } else if (filterByDate === 'week') {
           const sevenDaysAgo = new Date(today);
           sevenDaysAgo.setDate(today.getDate() - 7);
-          return reservationDate >= sevenDaysAgo && reservationDate <= today;
+          return sessionDate >= sevenDaysAgo && sessionDate <= today;
+        } else if (filterByDate === 'month') {
+          const thirtyDaysAgo = new Date(today);
+          thirtyDaysAgo.setDate(today.getDate() - 30);
+          return sessionDate >= thirtyDaysAgo && sessionDate <= today;
+        } else if (filterByDate === 'future') {
+          return sessionDate > today;
+        } else if (filterByDate === 'past') {
+          return sessionDate < today;
         }
         return true;
       });
@@ -251,10 +261,16 @@ const CommunityReservasLayout = () => {
       });
     }
 
-    if (filterByPlace) {
-      currentReservations = currentReservations.filter((res) =>
-        res.place?.toLowerCase().includes(filterByPlace.toLowerCase()),
-      );
+    if (filterByType) {
+      currentReservations = currentReservations.filter((res) => {
+        const isVirtual = res.service_is_virtual || false;
+        if (filterByType === 'virtual') {
+          return isVirtual;
+        } else if (filterByType === 'presencial') {
+          return !isVirtual;
+        }
+        return true;
+      });
     }
 
     return currentReservations;
@@ -263,7 +279,7 @@ const CommunityReservasLayout = () => {
     searchTerm,
     filterByDate,
     filterByStatus,
-    filterByPlace,
+    filterByType,
   ]);
 
   const handleViewReservation = (reservation: Reservation) => {
@@ -393,13 +409,12 @@ const CommunityReservasLayout = () => {
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                {filterByDate === ''
-                  ? 'Filtrar por fecha'
-                  : filterByDate === 'today'
-                    ? 'Hoy'
-                    : filterByDate === 'week'
-                      ? 'Última semana'
-                      : 'Filtrar por fecha'}
+                {filterByDate === '' ? 'Filtrar por fecha' : 
+                 filterByDate === 'today' ? 'Hoy' : 
+                 filterByDate === 'week' ? 'Última semana' : 
+                 filterByDate === 'month' ? 'Último mes' : 
+                 filterByDate === 'future' ? 'Próximas' : 
+                 filterByDate === 'past' ? 'Pasadas' : 'Filtrar por fecha'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -413,7 +428,15 @@ const CommunityReservasLayout = () => {
               <DropdownMenuItem onClick={() => setFilterByDate('week')}>
                 Última semana
               </DropdownMenuItem>
-              {/* Aquí puedes añadir más opciones de fecha o un DatePicker */}
+              <DropdownMenuItem onClick={() => setFilterByDate('month')}>
+                Último mes
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterByDate('future')}>
+                Próximas
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterByDate('past')}>
+                Pasadas
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -454,48 +477,25 @@ const CommunityReservasLayout = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Filtro por lugar */}
+          {/* Filtro por tipo */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                {filterByPlace === '' ? 'Filtrar por lugar' : filterByPlace}
+                {filterByType === '' ? 'Filtrar por tipo' : 
+                 filterByType === 'virtual' ? 'Virtual' : 
+                 filterByType === 'presencial' ? 'Presencial' : 'Filtrar por tipo'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setFilterByPlace('')}>
+              <DropdownMenuItem onClick={() => setFilterByType('')}>
                 Todos
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByPlace('pabellón a')}>
-                Pabellón A
+              <DropdownMenuItem onClick={() => setFilterByType('virtual')}>
+                Virtual
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setFilterByPlace('gimnasio principal')}
-              >
-                Gimnasio Principal
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByPlace('pabellón b')}>
-                Pabellón B
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setFilterByPlace('salón de usos múltiples')}
-              >
-                Salón de Usos Múltiples
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setFilterByPlace('área recreativa')}
-              >
-                Área Recreativa
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setFilterByPlace('edificio central')}
-              >
-                Edificio Central
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setFilterByPlace('zona deportiva')}
-              >
-                Zona Deportiva
+              <DropdownMenuItem onClick={() => setFilterByType('presencial')}>
+                Presencial
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

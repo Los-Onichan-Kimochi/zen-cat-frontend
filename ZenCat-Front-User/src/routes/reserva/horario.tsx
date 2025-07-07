@@ -333,6 +333,7 @@ function ScheduleStepComponent() {
           registeredCount: matchingSession.registered_count,
           professionalId: matchingSession.professional_id,
           localId: matchingSession.local_id,
+          sessionLink: matchingSession.session_link,
         },
         userId: user?.id,
       });
@@ -350,7 +351,7 @@ function ScheduleStepComponent() {
 
   const handleBack = () => {
     navigate({
-      to: '/reserva/lugar',
+      to: '/reserva/location-professional',
       search: { servicio: search.servicio },
     });
   };
@@ -453,7 +454,7 @@ function ScheduleStepComponent() {
               <p>
                 • Ubicación:{' '}
                 <span className="font-medium">
-                  {reservationData.location.name}
+                  {reservationData.location.pavilion}
                 </span>{' '}
                 - {reservationData.location.district}
               </p>
