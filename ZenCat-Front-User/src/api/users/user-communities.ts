@@ -67,7 +67,7 @@ export interface UserWithMemberships {
 
 export const userCommunitiesService = {
   /**
-   * Get user by ID with memberships
+   * Get user by ID with memberships (admin only)
    */
   async getUserById(userId: string): Promise<UserWithMemberships> {
     const response = await apiClient.get<UserWithMemberships>(
@@ -203,18 +203,19 @@ export function useUserCommunities(userId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) {
-      setLoading(false);
-      setError('No se proporcionó ID de usuario');
-      return;
-    }
-
+    // Always use getCurrentUser for regular users
+    // Only use getUserById if specifically needed for admin functionality
     const fetchUserData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const userData = await userCommunitiesService.getUserById(userId);
+        console.log('🔄 Fetching user communities data...');
+        
+        // Always use /me/ endpoint for user's own data
+        const userData = await userCommunitiesService.getCurrentUser();
+        
+        console.log('✅ User data fetched successfully:', userData);
 
         setUser(userData);
         setMemberships(userData.memberships || []);
@@ -223,7 +224,10 @@ export function useUserCommunities(userId?: string) {
           userData.memberships || [],
         );
         setCommunities(transformedCommunities);
+        
+        console.log('✅ Communities transformed:', transformedCommunities);
       } catch (err) {
+        console.error('❌ Error fetching user communities:', err);
         setError(
           `Error del API: ${err instanceof Error ? err.message : 'Error desconocido'}`,
         );
@@ -234,27 +238,27 @@ export function useUserCommunities(userId?: string) {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId]); // Keep userId in dependency array for potential future use
 
   const refreshUserData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      let userData: UserWithMemberships;
-
-      if (userId) {
-        userData = await userCommunitiesService.getUserById(userId);
-      } else {
-        userData = await userCommunitiesService.getCurrentUser();
-      }
+      console.log('🔄 Refreshing user data...');
+      
+      // Always use getCurrentUser for refresh
+      const userData = await userCommunitiesService.getCurrentUser();
 
       setUser(userData);
       setMemberships(userData.memberships || []);
       setCommunities(
         transformMembershipsToFrontend(userData.memberships || []),
       );
+      
+      console.log('✅ User data refreshed successfully');
     } catch (err) {
+      console.error('❌ Error refreshing user data:', err);
       setError(
         err instanceof Error
           ? err.message
