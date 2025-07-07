@@ -12,7 +12,9 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Local } from '@/types/local';
 import { getLocalColumns } from './local-columns';
-import { useEffect } from 'react';
+import { LocalFiltersModal } from './filters-modal';
+import { useLocalFilters } from '@/hooks/use-local-filters';
+import { useEffect, useMemo } from 'react';
 
 interface LocalsTableProps {
   data: Local[];
@@ -52,10 +54,27 @@ export function LocalsTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    activeFiltersCount,
+    applyFilters,
+    clearFilters,
+    openModal,
+    closeModal,
+    filterLocals,
+  } = useLocalFilters();
+
   const columns = getLocalColumns({ onEdit, onDelete, onView });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterLocals(data);
+  }, [data, filterLocals]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -92,7 +111,7 @@ export function LocalsTable({
         showFilterButton
         showExportButton
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => {}}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
         exportFileName="locales"
@@ -101,7 +120,7 @@ export function LocalsTable({
         onBulkDelete={
           onBulkDelete
             ? (ids: string[]) => {
-                const localsToDelete = data.filter((local) =>
+                const localsToDelete = filteredData.filter((local) =>
                   ids.includes(local.id),
                 );
                 onBulkDelete(localsToDelete);
@@ -118,6 +137,15 @@ export function LocalsTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <LocalFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }

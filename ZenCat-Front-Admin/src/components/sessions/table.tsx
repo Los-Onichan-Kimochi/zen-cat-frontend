@@ -1,4 +1,5 @@
 'use client';
+import React, { useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,6 +14,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Session } from '@/types/session';
 import { getSessionColumns } from './columns';
+import { SessionFiltersModal } from './filters-modal';
+import { useSessionFilters } from '@/hooks/use-session-filters';
 
 interface SessionsTableProps {
   data: Session[];
@@ -51,6 +54,17 @@ export function SessionsTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    openModal,
+    closeModal,
+    applyFilters,
+    clearFilters,
+    filterSessions,
+  } = useSessionFilters();
+
   const columns = getSessionColumns({
     onEdit,
     onDelete,
@@ -63,8 +77,13 @@ export function SessionsTable({
     },
   });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterSessions(data);
+  }, [data, filterSessions]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -100,7 +119,7 @@ export function SessionsTable({
         showFilterButton
         showExportButton
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => {}}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
         exportFileName="sesiones"
@@ -126,6 +145,15 @@ export function SessionsTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <SessionFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }

@@ -13,6 +13,9 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
+import { CommunityFilters } from './filters';
+import { CommunityFiltersModal } from './filters-modal';
+import { useCommunityFilters } from '@/hooks/use-community-filters';
 import { useEffect } from 'react';
 
 interface CommunityTableProps {
@@ -51,10 +54,23 @@ export function CommunityTable({
     setPagination,
   } = useDataTable();
 
+  // Hook de filtros de comunidades
+  const {
+    filters,
+    filteredData,
+    hasActiveFilters,
+    isFiltersModalOpen,
+    updateFilters,
+    clearFilters,
+    openFiltersModal,
+    closeFiltersModal,
+    applyFilters,
+  } = useCommunityFilters(data);
+
   const columns = getCommunityColumns({ onDelete, onEdit });
 
   const table = useReactTable({
-    data,
+    data: filteredData, // Usar datos filtrados en lugar de datos originales
     columns,
     state: {
       sorting,
@@ -85,22 +101,34 @@ export function CommunityTable({
 
   return (
     <div className="h-full flex flex-col">
-      <DataTableToolbar
-        table={table}
-        onBulkDelete={onBulkDelete}
-        isBulkDeleting={isBulkDeleting}
-        showBulkDeleteButton
-        showExportButton
-        showRefreshButton={!!onRefresh}
-        filterPlaceholder="Buscar comunidad..."
-        exportFileName="comunidades"
-        showFilterButton
-        onFilterClick={() => {}}
-        onRefreshClick={onRefresh}
-        isRefreshing={isRefreshing}
-        showSortButton
-      />
-      <div className="flex-1 min-h-0">
+      <div className="space-y-3">
+        {/* Filtros */}
+        <CommunityFilters
+          filters={filters}
+          onOpenFilters={openFiltersModal}
+          onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+
+        {/* Toolbar */}
+        <DataTableToolbar
+          table={table}
+          onBulkDelete={onBulkDelete}
+          isBulkDeleting={isBulkDeleting}
+          showBulkDeleteButton
+          showExportButton
+          showRefreshButton={!!onRefresh}
+          filterPlaceholder="Buscar comunidad..."
+          exportFileName="comunidades"
+          showFilterButton
+          onFilterClick={openFiltersModal}
+          onRefreshClick={onRefresh}
+          isRefreshing={isRefreshing}
+          showSortButton
+        />
+      </div>
+
+      <div className="flex-1 min-h-0 mt-4">
         <DataTable
           table={table}
           columns={columns}
@@ -108,6 +136,16 @@ export function CommunityTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <CommunityFiltersModal
+        isOpen={isFiltersModalOpen}
+        onClose={closeFiltersModal}
+        filters={filters}
+        onFiltersChange={updateFilters}
+        onClearFilters={clearFilters}
+        onApplyFilters={applyFilters}
+      />
     </div>
   );
 }

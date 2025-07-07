@@ -13,7 +13,9 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { DataTable } from '@/components/common/data-table/data-table';
 import { DataTableToolbar } from '@/components/common/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
-import { useEffect } from 'react';
+import { MembershipPlanFiltersModal } from './filters-modal';
+import { useMembershipPlanFilters } from '@/hooks/use-membership-plan-filters';
+import { useEffect, useMemo } from 'react';
 
 interface MembershipPlanTableProps {
   data: MembershipPlan[];
@@ -51,10 +53,27 @@ export function MembershipPlanTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    activeFiltersCount,
+    applyFilters,
+    clearFilters,
+    openModal,
+    closeModal,
+    filterMembershipPlans,
+  } = useMembershipPlanFilters();
+
   const columns = getMembershipPlanColumns({ onDelete, onView });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterMembershipPlans(data);
+  }, [data, filterMembershipPlans]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -95,7 +114,7 @@ export function MembershipPlanTable({
         filterPlaceholder="Buscar plan de membresía..."
         exportFileName="planes de membresía"
         showFilterButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
         showSortButton
@@ -108,6 +127,15 @@ export function MembershipPlanTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <MembershipPlanFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }
