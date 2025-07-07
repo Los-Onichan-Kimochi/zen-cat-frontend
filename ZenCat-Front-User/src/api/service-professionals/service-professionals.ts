@@ -1,23 +1,10 @@
+import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
-
-export interface ServiceProfessional {
-  id: string;
-  service_id: string;
-  professional_id: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at?: string;
-  updated_by: string;
-}
-
-export interface CreateServiceProfessionalRequest {
-  service_id: string;
-  professional_id: string;
-}
-
-export interface ServiceProfessionalsResponse {
-  service_professionals: ServiceProfessional[];
-}
+import { Professional } from '@/types/professional';
+import {
+  ServiceProfessional,
+  CreateServiceProfessionalRequest,
+} from '@/types/service_professional';
 
 export const serviceProfessionalsApi = {
   // Get all service-professional associations with optional filters
@@ -28,12 +15,11 @@ export const serviceProfessionalsApi = {
     const params = new URLSearchParams();
 
     if (serviceIds && serviceIds.length > 0) {
-      params.append('service_ids', serviceIds.join(','));
+      params.append('serviceId', serviceIds.join(','));
     }
     if (professionalIds && professionalIds.length > 0) {
-      params.append('professional_ids', professionalIds.join(','));
+      params.append('professionalId', professionalIds.join(','));
     }
-
     const endpoint = `/service-professional/?${params}`;
     const data = await apiClient.get<{
       service_professionals: ServiceProfessional[];
@@ -93,5 +79,14 @@ export const serviceProfessionalsApi = {
     return serviceProfessionalsApi.getServiceProfessionals(undefined, [
       professionalId,
     ]);
+  },
+
+  getProfessionalsByServiceId: async (serviceId: string): Promise<Professional[]> => {
+    const response = await apiClient.get<{ professionals: Professional[] }>(
+      API_ENDPOINTS.SERVICE_PROFESSIONALS.BY_SERVICE_ID(serviceId),
+    );
+
+    const professionals = Array.isArray(response.professionals) ? response.professionals : [];
+    return professionals;
   },
 };

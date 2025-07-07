@@ -23,15 +23,9 @@ export const Route = createFileRoute(ReservaServiciosRoute)({
   validateSearch: z.object({
     servicio: z.string().optional(), // Permite pasar un query param `servicio`
     communityId: z.string().optional(), // Permite pasar el ID de la comunidad
+    membershipId: z.string().optional(), // Permite pasar el ID de la membresía
   }),
 });
-
-interface ServiceInfo {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-}
 
 function ServiceStepComponent() {
   const navigate = useNavigate();
@@ -48,16 +42,24 @@ function ServiceStepComponent() {
 
   // Usar el communityId del search param si está disponible, sino usar el del contexto
   const communityId = search.communityId || reservationData.communityId;
+  const membershipId = search.membershipId || reservationData.membershipId;
 
-  // Actualizar el contexto con el communityId si viene del search param
+  // Actualizar el contexto con el communityId y membershipId si vienen del search param
   useEffect(() => {
-    if (
-      search.communityId &&
-      search.communityId !== reservationData.communityId
-    ) {
-      updateReservation({ communityId: search.communityId });
+    const updates: Partial<any> = {};
+    
+    if (search.communityId && search.communityId !== reservationData.communityId) {
+      updates.communityId = search.communityId;
     }
-  }, [search.communityId, reservationData.communityId, updateReservation]);
+    
+    if (search.membershipId && search.membershipId !== reservationData.membershipId) {
+      updates.membershipId = search.membershipId;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateReservation(updates);
+    }
+  }, [search.communityId, search.membershipId, reservationData.communityId, reservationData.membershipId, updateReservation]);
 
   // Si no hay communityId, mostrar mensaje de error
   if (!communityId) {
@@ -112,7 +114,7 @@ function ServiceStepComponent() {
   });
 
   // Filtrar servicios que pertenecen a la comunidad usando useMemo para optimizar
-  const allServices: ServiceInfo[] = useMemo(() => {
+  const allServices: Service[] = useMemo(() => {
     if (!servicesData.length || !communityServicesData.length) return [];
 
     const filtered = servicesData
@@ -123,12 +125,13 @@ function ServiceStepComponent() {
         if (!match) return null;
         return {
           id: service.id,
-          title: service.name,
+          name: service.name,
           description: service.description,
-          imageUrl: service.image_url,
+          image_url: service.image_url,
+          is_virtual: service.is_virtual,
         };
       })
-      .filter((s): s is ServiceInfo => s !== null);
+      .filter((s): s is Service => s !== null);
 
     return filtered;
   }, [servicesData, communityServicesData, communityId]);
@@ -140,7 +143,7 @@ function ServiceStepComponent() {
     // Aplicar filtro de búsqueda
     if (searchTerm) {
       filtered = filtered.filter((service) =>
-        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -150,9 +153,9 @@ function ServiceStepComponent() {
       filtered.sort((a, b) => {
         switch (sortBy) {
           case 'a-z':
-            return a.title.localeCompare(b.title);
+            return a.name.localeCompare(b.name);
           case 'z-a':
-            return b.title.localeCompare(a.title);
+            return b.name.localeCompare(a.name);
           default:
             return 0;
         }
@@ -176,14 +179,15 @@ function ServiceStepComponent() {
   // Actualizar el contexto cuando se selecciona un servicio
   useEffect(() => {
     if (selected && allServices.length > 0) {
-      const selectedService = allServices.find((s) => s.title === selected);
+      const selectedService = allServices.find((s) => s.name === selected);
       if (selectedService) {
         updateReservation({
           service: {
             id: selectedService.id,
-            name: selectedService.title,
+            name: selectedService.name,
             description: selectedService.description,
-            image_url: selectedService.imageUrl,
+            image_url: selectedService.image_url,
+            is_virtual: selectedService.is_virtual,
           },
         });
       }
@@ -210,8 +214,13 @@ function ServiceStepComponent() {
   const handleContinue = () => {
     if (selected && reservationData.service) {
       navigate({
-        to: '/reserva/lugar',
-        search: { servicio: selected },
+        to: '/reserva/location-professional',
+        search: { 
+          servicio: selected,
+          communityId: communityId,
+          membershipId: membershipId,
+          serviceId: reservationData.service.id,
+        },
       });
     }
   };
@@ -267,9 +276,11 @@ function ServiceStepComponent() {
             {/* ServiceCarousel con paginación integrada */}
             <ServiceCarousel
               services={currentServices.map((s) => ({
-                title: s.title,
+                id: s.id,
+                name: s.name,
                 description: s.description,
-                imageUrl: s.imageUrl,
+                image_url: s.image_url,
+                is_virtual: s.is_virtual,
               }))}
               selected={selected}
               onSelect={handleSelect}

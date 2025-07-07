@@ -6,6 +6,7 @@ import { SearchInput } from '@/components/communities/SearchInput';
 import { FilterControls } from '@/components/communities/FilterControls';
 import { useNavigate } from '@tanstack/react-router';
 import { TablePagination } from '@/components/common/TablePagination';
+import { useReservationAlert } from '@/components/ui/ReservationAlert';
 
 interface TabCommunityServicesProps {
   community: Community | null;
@@ -21,6 +22,7 @@ export function TabCommunityServices({
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage] = useState(3);
   const navigate = useNavigate();
+  const { error: showErrorAlert, AlertComponent } = useReservationAlert();
   const safeServices = Array.isArray(services) ? services : [];
 
   // Filtrar servicios por búsqueda
@@ -56,17 +58,32 @@ export function TabCommunityServices({
   };
 
   const handleServiceReservation = (communityId: string, serviceId: string) => {
+    if (!community) return;
+
+    // 🔍 VALIDACIÓN DE RESERVAS DISPONIBLES (igual que en TabCommunityGeneral)
+    const reservasDisponibles = community.reservationsUsed === null 
+      ? null // Sin límite
+      : (community.reservationLimit || 0) - (community.reservationsUsed || 0);
+
+    // Verificar si hay reservas disponibles
+    if (reservasDisponibles !== null && reservasDisponibles <= 0) {
+      showErrorAlert('No tienes reservas disponibles en tu plan actual');
+      return;
+    }
+
     // Encontrar el servicio seleccionado
     const selectedService = safeServices.find(
       (service) => service.id === serviceId,
     );
 
     if (selectedService) {
-      // Navegar directamente al paso 2 (selección de lugar) pasando tanto el communityId como el servicio
+      // Navegar directamente al paso 2 (selección de lugar) pasando communityId, membershipId y servicio
+      // El contexto de reservación se actualizará automáticamente en la ruta destino
       navigate({
-        to: '/reserva/lugar',
+        to: '/reserva/location-professional',
         search: {
           communityId: communityId,
+          membershipId: community.membershipId,
           servicio: selectedService.name,
           serviceId: selectedService.id,
         },
@@ -87,55 +104,60 @@ export function TabCommunityServices({
   }
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-sm py-6">
-      <div className="text-center mb-4">
-        <h1 className="text-2xl font-black">
-          ¡Busca el servicio que más te guste!
-        </h1>
-      </div>
+    <>
+      <div className="bg-white border border-gray-300 rounded-lg shadow-sm py-6">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-black">
+            ¡Busca el servicio que más te guste!
+          </h1>
+        </div>
 
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-        <SearchInput
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Buscar servicio..."
-          className="w-full sm:w-80"
-        />
-        <FilterControls
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          showFilter={false}
-        />
-      </div>
-
-      {/* Resultados */}
-      <div className="text-center text-sm text-gray-600 mb-2">
-        Resultados: {filteredServices.length} servicios
-      </div>
-
-      {/* Mostrar servicios */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8">
-        {currentServices.map((service) => (
-          <CommunityServiceCard
-            key={service.id}
-            community={community!}
-            service={service}
-            onAction={(communityId, action) => {
-              if (action === 'reserve') {
-                handleServiceReservation(communityId, service.id);
-              }
-            }}
+        {/* Filtros */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar servicio..."
+            className="w-full sm:w-80"
           />
-        ))}
-      </div>
+          <FilterControls
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            showFilter={false}
+          />
+        </div>
 
-      {/* Paginación */}
-      <TablePagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-    </div>
+        {/* Resultados */}
+        <div className="text-center text-sm text-gray-600 mb-2">
+          Resultados: {filteredServices.length} servicios
+        </div>
+
+        {/* Mostrar servicios */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8">
+          {currentServices.map((service) => (
+            <CommunityServiceCard
+              key={service.id}
+              community={community!}
+              service={service}
+              onAction={(communityId, action) => {
+                if (action === 'reserve') {
+                  handleServiceReservation(communityId, service.id);
+                }
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Paginación */}
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+      
+      {/* Componente de Alerta personalizado */}
+      <AlertComponent />
+    </>
   );
 }

@@ -18,7 +18,6 @@ import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
-import { membershipsApi } from '@/api/memberships/memberships';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -269,35 +268,14 @@ const CommunityReservasLayout = () => {
         return;
       }
 
-      // 1. Cancelar la reserva
+      // Cancelar la reserva - el backend maneja automáticamente:
+      // - Decrementar registered_count de la sesión
+      // - Decrementar reservations_used de la membresía (si aplica)
       await reservationsApi.updateReservation(reservation.id, {
         state: ReservationState.CANCELLED,
       });
       
-      // 2. Si hay membresía asociada, actualizar las reservas usadas
-      if (reservation.membership_id) {
-        console.log('Actualizando membresía:', reservation.membership_id);
-        
-        const membership = await membershipsApi.getMembershipById(reservation.membership_id);
-        
-        // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
-        if (membership.plan.reservation_limit !== null && 
-            typeof membership.reservations_used === 'number' && 
-            membership.reservations_used > 0) {
-          
-          await membershipsApi.updateMembership(membership.id, {
-            reservations_used: membership.reservations_used - 1,
-          });
-          
-          console.log('Reservas usadas actualizadas:', {
-            membresiaId: membership.id,
-            reservasAnteriores: membership.reservations_used,
-            reservasNuevas: membership.reservations_used - 1
-          });
-        }
-      }
-      
-      // 3. Actualizar el estado local cambiando el estado de la reserva
+      // Actualizar el estado local cambiando el estado de la reserva
       setAllReservations(prev => prev.map(r => 
         r.id === reservation.id 
           ? { ...r, state: ReservationState.CANCELLED }

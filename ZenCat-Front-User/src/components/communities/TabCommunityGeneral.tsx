@@ -6,8 +6,8 @@ import { es } from 'date-fns/locale';
 import { SuspendMembershipDialog } from './SuspendMembershipDialog';
 import { CancelMembershipDialog } from './CancelMembershipDialog';
 import { useNavigate } from '@tanstack/react-router';
-import { useToast } from '@/components/ui/Toast';
-import { MembershipState, UpdateMembershipRequest } from '@/types/membership';
+import { useReservationAlert } from '@/components/ui/ReservationAlert';
+import { MembershipState } from '@/types/membership';
 import { membershipsApi } from '@/api/memberships/memberships';
 
 interface TabCommunityGeneralProps {
@@ -22,7 +22,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
   const [isProcessingReservation, setIsProcessingReservation] = useState(false);
   const [isProcessingMembership, setIsProcessingMembership] = useState(false);
   const navigate = useNavigate();
-  const { error: showErrorToast, success: showSuccessToast, ToastContainer } = useToast();
+  const { error: showErrorAlert, success: showSuccessAlert, AlertComponent } = useReservationAlert();
 
   if (!community) {
     return <div>No hay información disponible</div>;
@@ -42,24 +42,25 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
 
     // Verificar si hay reservas disponibles
     if (reservasDisponibles !== null && reservasDisponibles <= 0) {
-      showErrorToast('No tienes reservas disponibles');
+      showErrorAlert('No tienes reservas disponibles en tu plan actual');
       return;
     }
 
     // Bloquear temporalmente para evitar múltiples navegaciones
     setIsProcessingReservation(true);
 
-    // Navegar a la página de servicios pasando el communityId como search param
+    // Navegar a la página de servicios pasando tanto el communityId como el membershipId como search params
     navigate({
       to: '/reserva/servicios',
       search: {
         communityId: community.id,
+        membershipId: community.membershipId, // Pasamos el membershipId como search param
       },
     });
 
     // Resetear el estado después de navegar
     setTimeout(() => setIsProcessingReservation(false), 500);
-  }, [isProcessingReservation, community, navigate, showErrorToast]);
+  }, [isProcessingReservation, community, navigate, showErrorAlert]);
 
   const handleViewReservations = () => {
     // Navegar a la página de reservas pasando el communityId como search param
@@ -94,7 +95,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
         status: MembershipState.SUSPENDED 
       });
       
-      showSuccessToast('Membresía suspendida exitosamente');
+      showSuccessAlert('Membresía suspendida exitosamente');
       setShowSuspendDialog(false);
       
       // Refrescar los datos después de suspender
@@ -103,7 +104,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
       }
     } catch (error) {
       console.error('Error suspendiendo membresía:', error);
-      showErrorToast('Error al suspender la membresía');
+      showErrorAlert('Error al suspender la membresía');
     } finally {
       setIsProcessingMembership(false);
     }
@@ -120,7 +121,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
         status: MembershipState.CANCELLED 
       });
       
-      showSuccessToast('Membresía cancelada exitosamente');
+      showSuccessAlert('Membresía cancelada exitosamente');
       setShowCancelDialog(false);
       
       // Refrescar los datos después de cancelar
@@ -129,7 +130,7 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
       }
     } catch (error) {
       console.error('Error cancelando membresía:', error);
-      showErrorToast('Error al cancelar la membresía');
+      showErrorAlert('Error al cancelar la membresía');
     } finally {
       setIsProcessingMembership(false);
     }
@@ -279,8 +280,8 @@ export function TabCommunityGeneral({ community, onRefresh }: TabCommunityGenera
         communityName={community.name}
       />
       
-      {/* Toast Container */}
-      <ToastContainer />
+      {/* Componente de Alerta personalizado - igual que en TabCommunityServices */}
+      <AlertComponent />
     </>
   );
 }

@@ -59,30 +59,15 @@ function ScheduleStepComponent() {
   const search = useSearch({ from: '/reserva/horario' });
   const { reservationData, updateReservation } = useReservation();
   const { user } = useAuth();
+  
+  // Determinar si el servicio es virtual
+  const isVirtualService = reservationData.service?.is_virtual || false;
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
   );
   const [currentMonth, setCurrentMonth] = useState(() => new Date()); // Usar la fecha actual
-
-  // Fetch service-professional associations if a service is selected
-  const {
-    data: serviceProfessionals = [],
-    isLoading: isLoadingServiceProfessionals,
-  } = useQuery({
-    queryKey: ['service-professionals', reservationData.service?.id],
-    queryFn: () =>
-      serviceProfessionalsApi.getProfessionalsForService(
-        reservationData.service!.id,
-      ),
-    enabled: !!reservationData.service?.id,
-  });
-
-  // Extract professional IDs from service-professional associations
-  const availableProfessionalIds = serviceProfessionals.map(
-    (sp) => sp.professional_id,
-  );
 
   // Fetch all professionals
   const { data: professionalsData = [], isLoading: isLoadingProfessionals } =
@@ -107,14 +92,21 @@ function ScheduleStepComponent() {
   // Obtener el community_service_id único
   const communityServiceId = communityServiceData.length > 0 ? communityServiceData[0].id : null;
 
-  // Fetch sessions basado en el community_service_id único
+
+  // Obtener sesiones del mes con filtros apropiados
+  const filters = {
+    professionalIds: reservationData.professional?.id ? [reservationData.professional?.id] : undefined,
+    localIds: reservationData.location?.id ? [reservationData.location?.id] : undefined,
+    communityServiceIds: communityServiceId ? [communityServiceId] : undefined,
+  };
+
   const {
     data: sessionsData = [],
     isLoading: isLoadingSessions,
     error,
   } = useQuery<Session[], Error>({
     queryKey: ['sessions', communityServiceId],
-    queryFn: () => sessionsApi.getSessions(),
+    queryFn: () => sessionsApi.getSessions(filters),
     enabled: !!communityServiceId,
   });
 
@@ -134,40 +126,14 @@ function ScheduleStepComponent() {
   });
   
   const isLoading =
-    isLoadingServiceProfessionals ||
     isLoadingProfessionals ||
     isLoadingLocals ||
     isLoadingSessions ||
     isLoadingCommunityService ||
     isLoadingReservations;
 
-  // Filter sessions by community_service_id, location and service-professional associations
-  console.log("Filtrar");
-  const filteredSessions = sessionsData.filter((session: Session) => {
-    // Filtrar por community_service_id si está disponible
-    if (communityServiceId && session.community_service_id) {
-      if (session.community_service_id !== communityServiceId) {
-        return false;
-      }
-    }
-
-    // Filter by location if selected
-    if (reservationData.location?.id && session.local_id) {
-      if (session.local_id !== reservationData.location.id) {
-        return false;
-      }
-    }
-
-    // Filter by service-professional associations if service is selected
-    if (reservationData.service?.id && session.professional_id) {
-      if (!availableProfessionalIds.includes(session.professional_id)) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  console.log("Sessions filtradas: ", filteredSessions);
+  // Las sesiones ya vienen filtradas por communityServiceId desde la API
+  const filteredSessions = sessionsData;
 
   // Crear un Set de session_ids donde el usuario ya tiene reservas
   const userReservedSessionIds = new Set(
@@ -243,7 +209,7 @@ function ScheduleStepComponent() {
       sessionInfo: {
         title: session.title,
         professional: professional ? `${professional.name} ${professional.first_last_name}` : 'No asignado',
-        location: local ? local.local_name : 'No especificado',
+        location: isVirtualService ? 'Virtual' : (local ? local.local_name : 'No especificado'),
         capacity: session.capacity,
         registered: session.registered_count
       }
@@ -306,7 +272,7 @@ function ScheduleStepComponent() {
 
   const handleBack = () => {
     navigate({
-      to: '/reserva/lugar',
+      to: '/reserva/location-professional',
       search: { servicio: search.servicio },
     });
   };
@@ -389,7 +355,7 @@ function ScheduleStepComponent() {
   return (
     <div>
       {/* Mensaje informativo sobre filtros aplicados */}
-      {(reservationData.service || reservationData.location) && (
+      {(reservationData.service || reservationData.location || reservationData.professional) && (
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
           <h4 className="font-semibold text-blue-800 mb-2">
             Filtros aplicados:
@@ -400,10 +366,20 @@ function ScheduleStepComponent() {
                 • Servicio:{' '}
                 <span className="font-medium">
                   {reservationData.service.name}
+                  {isVirtualService ? ' (Virtual)' : ' (Presencial)'}
                 </span>
               </p>
             )}
-            {reservationData.location && (
+            {isVirtualService && reservationData.professional && (
+              <p>
+                • Profesional:{' '}
+                <span className="font-medium">
+                  {reservationData.professional.name} {reservationData.professional.first_last_name}
+                  {reservationData.professional.second_last_name && ` ${reservationData.professional.second_last_name}`}
+                </span>
+              </p>
+            )}
+            {!isVirtualService && reservationData.location && (
               <p>
                 • Ubicación:{' '}
                 <span className="font-medium">
