@@ -91,6 +91,9 @@ const CommunityReservasLayout = () => {
 
         // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
         const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
+        console.log("Response", response);
+        console.log("CommunityId", communityId);
+        console.log("UserId", userId);
         const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
         // Enriquecer las reservas con información de profesor y lugar
         const reservationsWithDetails = await Promise.all(

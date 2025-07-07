@@ -99,7 +99,7 @@ function ScheduleStepComponent() {
     localIds: reservationData.location?.id ? [reservationData.location?.id] : undefined,
     communityServiceIds: communityServiceId ? [communityServiceId] : undefined,
   };
-
+  console.log("Filters", filters);
   const {
     data: sessionsData = [],
     isLoading: isLoadingSessions,
@@ -109,6 +109,7 @@ function ScheduleStepComponent() {
     queryFn: () => sessionsApi.getSessions(filters),
     enabled: !!communityServiceId,
   });
+  console.log("SessionsData", sessionsData);
 
   // Fetch user reservations para identificar sesiones donde ya tiene reservas
   const { data: userReservations = [], isLoading: isLoadingReservations } = useQuery<Reservation[], Error>({

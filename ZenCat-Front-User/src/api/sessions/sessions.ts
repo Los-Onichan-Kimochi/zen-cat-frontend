@@ -56,7 +56,6 @@ export interface ConflictResult {
 
 export const sessionsApi = {
   // Get all sessions
-
   getSessions: async (filters?: SessionFilters): Promise<Session[]> => {
     const searchParams = new URLSearchParams();
 
@@ -69,7 +68,10 @@ export const sessionsApi = {
     if (filters?.states?.length) {
       searchParams.append('states', filters.states.join(','));
     }
-
+    if (filters?.communityServiceIds?.length) {
+      searchParams.append('communityServiceIds', filters.communityServiceIds.join(','));
+    }
+    
     const queryString = searchParams.toString();
     const endpoint = `${API_ENDPOINTS.SESSIONS.BASE}${queryString ? `?${queryString}` : ''}`;
 
