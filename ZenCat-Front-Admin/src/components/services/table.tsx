@@ -1,4 +1,5 @@
 'use client';
+import React, { useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,6 +13,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Service } from '@/types/service';
 import { getServiceColumns } from './columns';
+import { ServiceFiltersModal } from './filters-modal';
+import { useServiceFilters } from '@/hooks/use-service-filters';
 
 interface ServicesTableProps {
   data: Service[];
@@ -47,10 +50,26 @@ export function ServicesTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    openModal,
+    closeModal,
+    applyFilters,
+    clearFilters,
+    filterServices,
+  } = useServiceFilters();
+
   const columns = getServiceColumns({ onDelete, onView });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterServices(data);
+  }, [data, filterServices]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -82,7 +101,7 @@ export function ServicesTable({
         showFilterButton
         showExportButton
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => {}}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
         exportFileName="servicios"
@@ -108,6 +127,15 @@ export function ServicesTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <ServiceFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }

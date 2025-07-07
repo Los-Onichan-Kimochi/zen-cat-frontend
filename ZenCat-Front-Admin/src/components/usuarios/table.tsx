@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -14,6 +14,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { User } from '@/types/user';
 import { getUsersColumns } from './columns';
+import { UserFiltersModal } from './filters-modal';
+import { useUserFilters } from '@/hooks/use-user-filters';
 
 interface UsersTableProps {
   data: User[];
@@ -53,10 +55,26 @@ export function UsersTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    openModal,
+    closeModal,
+    applyFilters,
+    clearFilters,
+    filterUsers,
+  } = useUserFilters();
+
   const columns = getUsersColumns({ onView, onDelete, onViewMemberships });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterUsers(data);
+  }, [data, filterUsers]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -96,7 +114,7 @@ export function UsersTable({
         filterPlaceholder="Buscar usuarios..."
         exportFileName="usuarios"
         showFilterButton
-        onFilterClick={() => console.log('Filtrar')}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isLoading}
         showSortButton
@@ -105,6 +123,15 @@ export function UsersTable({
         <DataTable table={table} columns={columns} isRefreshing={isLoading} />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <UserFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }
