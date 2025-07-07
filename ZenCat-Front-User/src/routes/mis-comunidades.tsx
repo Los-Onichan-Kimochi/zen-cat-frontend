@@ -20,6 +20,7 @@ export const Route = createFileRoute('/mis-comunidades')({
 function ComunidadesComponent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
     null,
@@ -106,8 +107,10 @@ function ComunidadesComponent() {
                 />
                 <FilterControls
                   sortBy={sortBy}
+                  sortDirection={sortDirection}
                   filterBy={filterBy}
                   onSortChange={setSortBy}
+                  onSortDirectionChange={setSortDirection}
                   onFilterChange={setFilterBy}
                 />
               </div>
@@ -119,6 +122,7 @@ function ComunidadesComponent() {
                 communities={communities}
                 searchTerm={searchTerm}
                 sortBy={sortBy}
+                sortDirection={sortDirection}
                 filterBy={filterBy}
                 itemsPerPage={4}
                 selectCommunity={selectCommunity}

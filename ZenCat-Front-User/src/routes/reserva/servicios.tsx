@@ -27,19 +27,11 @@ export const Route = createFileRoute(ReservaServiciosRoute)({
   }),
 });
 
-interface ServiceInfo {
-  id: string;
-  name: string;
-  description: string;
-  image_url: string;
-  is_virtual: boolean;
-}
-
 function ServiceStepComponent() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/reserva/servicios' });
   const { reservationData, updateReservation } = useReservation();
-
+  
   // Estados para búsqueda, ordenamiento y paginación
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
@@ -122,7 +114,7 @@ function ServiceStepComponent() {
   });
 
   // Filtrar servicios que pertenecen a la comunidad usando useMemo para optimizar
-  const allServices: ServiceInfo[] = useMemo(() => {
+  const allServices: Service[] = useMemo(() => {
     if (!servicesData.length || !communityServicesData.length) return [];
 
     const filtered = servicesData
@@ -139,7 +131,7 @@ function ServiceStepComponent() {
           is_virtual: service.is_virtual,
         };
       })
-      .filter((s): s is ServiceInfo => s !== null);
+      .filter((s): s is Service => s !== null);
 
     return filtered;
   }, [servicesData, communityServicesData, communityId]);
@@ -150,10 +142,9 @@ function ServiceStepComponent() {
 
     // Aplicar filtro de búsqueda
     if (searchTerm) {
-      filtered = filtered.filter(
-        (service) =>
-          service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          service.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      filtered = filtered.filter((service) =>
+        service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -205,17 +196,22 @@ function ServiceStepComponent() {
 
   if (isLoadingCommunityServices || isLoadingServices || !communityId) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin w-12 h-12" />
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="animate-spin w-12 h-12 mx-auto mb-4" />
+          <p className="text-gray-600">Cargando servicios disponibles...</p>
+        </div>
       </div>
     );
   }
 
   if (errorCommunityServices || errorServices) {
     return (
-      <div>
-        Error cargando los servicios. {errorCommunityServices?.message}
-        {errorServices?.message}
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">
+          Error al cargar los servicios: {errorCommunityServices?.message || errorServices?.message}
+        </p>
+        <Button onClick={() => window.location.reload()}>Reintentar</Button>
       </div>
     );
   }
@@ -245,8 +241,7 @@ function ServiceStepComponent() {
                 ¡Busca el servicio que más te guste!
               </h1>
               <p className="text-gray-600 text-lg">
-                Explora nuestra variedad de servicios y encuentra el perfecto
-                para ti
+                Explora nuestra variedad de servicios y encuentra el perfecto para ti
               </p>
             </div>
 
