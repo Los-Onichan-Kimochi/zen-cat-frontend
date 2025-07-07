@@ -80,10 +80,21 @@ export const userCommunitiesService = {
    * Get current user profile with memberships
    */
   async getCurrentUser(): Promise<UserWithMemberships> {
-    const response = await apiClient.get<UserWithMemberships>(
+    // First get the user basic info
+    const userResponse = await apiClient.get<UserWithMemberships>(
       API_ENDPOINTS.AUTH.ME,
     );
-    return response;
+    
+    // Then get the user's memberships separately
+    const membershipsResponse = await apiClient.get<{memberships: Membership[]}>(
+      API_ENDPOINTS.MEMBERSHIPS.BY_USER(userResponse.id),
+    );
+    
+    // Combine the data
+    return {
+      ...userResponse,
+      memberships: membershipsResponse.memberships || []
+    };
   },
 
   /**
