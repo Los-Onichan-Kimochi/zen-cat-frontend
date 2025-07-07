@@ -6,6 +6,44 @@ import { ErrorModal } from '@/components/custom/common/error-modal';
 import { useNavigate } from '@tanstack/react-router';
 import { API_CONFIG } from '@/config/api';
 
+const mapErrorCodeToTitle = (code: string): string => {
+  switch (code) {
+    case 'USER_ERROR_001':
+      return 'Correo inválido';
+    case 'USER_ERROR_002':
+      return 'No se pudo crear el usuario';
+    case 'USER_ERROR_003':
+      return 'No se pudo actualizar el usuario';
+    case 'USER_ERROR_004':
+      return 'ID de usuario inválido';
+    case 'USER_ERROR_005':
+      return 'No se pudo eliminar el usuario';
+    case 'USER_ERROR_006':
+      return 'Correo ya registrado';
+    case 'USER_ERROR_007':
+      return 'No se pudo actualizar la contraseña';
+    case 'USER_ERROR_008':
+      return 'Contraseña demasiado corta, minimo 6 caracteres';
+
+    case 'REQUEST_ERROR_001':
+      return 'Solicitud incompleta';
+    case 'REQUEST_ERROR_004':
+      return 'Formato incorrecto en los datos';
+
+    case 'AUTHENTICATION_ERROR_001':
+      return 'No autorizado';
+    case 'AUTHENTICATION_ERROR_003':
+      return 'Token de acceso inválido';
+
+    case 'FORGOT_PASSWORD_ERROR_001':
+      return 'Correo no asociado a ninguna cuenta';
+    case 'FORGOT_PASSWORD_ERROR_003':
+      return 'PIN inválido o expirado';
+
+    default:
+      return `Error inesperado (${code})`;
+  }
+};
 export function SignupForm() {
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -15,7 +53,7 @@ export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isModalOpen2, setIsModalOpen2] = useState(false); //modal para registro exitoso
+  const [modalTitle, setModalTitle] = useState(''); // 🆕
 
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,11 +69,20 @@ export function SignupForm() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setModalTitle('Correo electrónico inválido');
+      setError('Por favor ingresa un correo con formato válido (ej: nombre@dominio.com).');
+      setIsModalOpen(true);
+      setLoading(false);
+      return;
+    }
+
     // Separar apellidos
     const lastNameParts = lastName.trim().split(/\s+/);
     const firstLastName = lastNameParts[0];
     const secondLastName =
-      lastNameParts.length > 1 ? lastNameParts.slice(1).join(' ') : null;
+    lastNameParts.length > 1 ? lastNameParts.slice(1).join(' ') : null;
 
     try {
       const response = await fetch(API_CONFIG.BASE_URL + '/register/', {
@@ -55,18 +102,25 @@ export function SignupForm() {
         }),
       });
 
-      if (!response.ok) {
-        const errBody = await response.json();
-        throw new Error(errBody?.message || 'Error al crear usuario');
-      }
+      const responseBody= await response.json()
 
-      const user = await response.json();
-      //setIsModalOpen2(true); // mostrar modal de éxito si lo deseas
+      if (!response.ok) {
+        responseBody.status = response.status;
+        throw responseBody;
+      }
       navigate({ to: '/login' });
     } catch (err: any) {
-      const errorMessage =
-        err.message || 'Error desconocido al intentar registrarte.';
-      setError(errorMessage);
+    let errBody = err;
+
+    if (err instanceof Error) {
+      errBody = { code: '', message: err.message };
+    }
+      setModalTitle(
+        errBody.Code ? mapErrorCodeToTitle(errBody.Code) : 'Error al registrarse'
+      );
+      setError(
+        errBody.Message || err.Message || 'Ha ocurrido un error al crear la cuenta'
+      );
       setIsModalOpen(true);
     } finally {
       setLoading(false);
@@ -118,7 +172,7 @@ export function SignupForm() {
                 Correo electrónico
               </label>
               <Input
-                type="email"
+                type="text"
                 placeholder="Ingrese su correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -162,12 +216,12 @@ export function SignupForm() {
         </CardContent>
       </Card>
 
-      <ErrorModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Error al intentar iniciar sesión"
-        description={error || 'Ha ocurrido un error.'}
-      />
+    <ErrorModal
+      isOpen={isModalOpen}
+      onClose={handleCloseModal}
+      title={modalTitle || 'Error al intentar registrarse'}
+      description={error || 'Ha ocurrido un error.'}
+    />
     </>
   );
 }

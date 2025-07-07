@@ -24,6 +24,10 @@ export default function CommunityPage() {
     });
   };
 
+  const handleGoBack = () => {
+    navigate({ to: `/comunidades` });
+  };
+
   useEffect(() => {
     const fetchCommunityAndServices = async () => {
       try {
@@ -64,8 +68,15 @@ export default function CommunityPage() {
     );
 
   return (
-    <div className="min-h-screen pt-6 pb-12 px-4 max-w-6xl mx-auto">
-      <Button>Retroceder</Button>
+<div className="min-h-screen pt-6 pb-12 px-4">
+  <div className="ml-4 mb-4">
+    <Button
+      onClick={handleGoBack}
+      className="text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white"
+    >
+      &lt; Retroceder
+    </Button>
+  </div>
 
       <section className="text-center mb-8">
         <h2 className="uppercase text-sm font-medium text-gray-500">
