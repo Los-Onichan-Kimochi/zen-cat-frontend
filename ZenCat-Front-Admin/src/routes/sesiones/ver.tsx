@@ -63,6 +63,9 @@ function SessionDetailComponent() {
   // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
 
+  // State for capacity validation error
+  const [capacityError, setCapacityError] = useState<string>('');
+
   // Form state for editing
   const [formData, setFormData] = useState({
     title: '',
@@ -334,6 +337,20 @@ function SessionDetailComponent() {
       console.log('-----------------------------------');
     }
   }, [isEditing, formData.date, formData.professional_id, formData.local_id, formData.is_virtual, availability, id]);
+
+  // Capacity validation useEffect - similar to agregar.tsx
+  useEffect(() => {
+    if (isEditing && formData.capacity > 0 && formData.local_id && !formData.is_virtual) {
+      const selectedLocal = availableLocals.find(local => local?.id === formData.local_id);
+      if (selectedLocal && formData.capacity > selectedLocal.capacity) {
+        setCapacityError(`La capacidad no puede exceder la capacidad del local (${selectedLocal.capacity})`);
+      } else {
+        setCapacityError('');
+      }
+    } else {
+      setCapacityError('');
+    }
+  }, [isEditing, formData.capacity, formData.local_id, formData.is_virtual, availableLocals]);
 
   // Debug logging - similar to agregar.tsx
   useEffect(() => {
@@ -782,6 +799,11 @@ function SessionDetailComponent() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-gray-50' : ''}
                         />
+                        {isEditing && capacityError && (
+                          <p className="text-red-600 text-sm mt-1">
+                            {capacityError}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1351,7 +1373,7 @@ function SessionDetailComponent() {
                 <Button
                   onClick={handleSubmit}
                   className="bg-green-600 text-white hover:bg-green-700 flex items-center w-1/2"
-                  disabled={updateSessionMutation.isPending || hasConflict}
+                  disabled={updateSessionMutation.isPending || hasConflict || !!capacityError}
                   type="button"
                 >
                   {updateSessionMutation.isPending ? (

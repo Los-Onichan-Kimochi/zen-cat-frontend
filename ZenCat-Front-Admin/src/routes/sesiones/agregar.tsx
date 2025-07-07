@@ -280,6 +280,21 @@ function AddSessionComponent() {
     // No es necesario realizar acciones adicionales aquí, solo mantener las dependencias
   }, [communities, services, professionals, serviceLocals, locals, selectedService, watchedValues.is_virtual, watchedValues.community_service_id]);
 
+  // Validar capacidad del local cuando cambie
+  React.useEffect(() => {
+    if (!watchedValues.is_virtual && watchedValues.local_id && watchedValues.capacity && locals) {
+      const selectedLocal = locals.find((local) => local.id === watchedValues.local_id);
+      if (selectedLocal && watchedValues.capacity > selectedLocal.capacity) {
+        form.setError('capacity', {
+          type: 'manual',
+          message: `La capacidad no puede exceder ${selectedLocal.capacity} (capacidad del local)`,
+        });
+      } else {
+        form.clearErrors('capacity');
+      }
+    }
+  }, [watchedValues.local_id, watchedValues.capacity, watchedValues.is_virtual, locals, form]);
+
   // Verificar conflictos
   const conflictCheck = {
     date: watchedValues.date ? format(watchedValues.date, 'yyyy-MM-dd') : '',
@@ -958,7 +973,7 @@ function AddSessionComponent() {
                     </Button>
                     <Button
                       type="submit"
-                      disabled={isCreating || hasConflict}
+                      disabled={isCreating || hasConflict || form.formState.errors.capacity}
                       className="bg-black text-white hover:bg-gray-800"
                     >
                       {isCreating ? (

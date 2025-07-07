@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useToast } from '@/context/ToastContext';
 import { ArrowLeft, Plus } from 'lucide-react';
+import { format } from 'date-fns';
 
 import { reservationsApi } from '@/api/reservations/reservations';
 import { sessionsApi } from '@/api/sessions/sessions';
@@ -275,7 +276,7 @@ function SessionReservationsComponent() {
               <div className="text-sm text-gray-600">Fecha y Hora</div>
               <div className="font-medium">
                 {new Date(session.date).toLocaleDateString('es-ES')} -{' '}
-                {session.start_time}
+                {format(new Date(session.start_time), 'HH:mm')} - {format(new Date(session.end_time), 'HH:mm')}
               </div>
             </div>
             <div>
