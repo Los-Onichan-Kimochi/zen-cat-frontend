@@ -24,6 +24,10 @@ export default function CommunityPage() {
     });
   };
 
+  const handleGoBack = () => {
+    navigate({ to: `/comunidades` });
+  };
+
   useEffect(() => {
     const fetchCommunityAndServices = async () => {
       try {
