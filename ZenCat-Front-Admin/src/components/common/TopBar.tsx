@@ -67,7 +67,7 @@ export function TopBar({ user }: TopBarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate({ to: '/perfil' })}
+              onClick={() => navigate({ to: '/profile' })}
               className="cursor-pointer"
             >
               <UserIcon className="mr-2 h-4 w-4" />

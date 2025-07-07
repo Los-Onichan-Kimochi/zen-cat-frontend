@@ -32,13 +32,18 @@ function PerfilComponent() {
   }, [memberships]);
 
   const toggleSuspend = async (m: Membership) => {
-    const newStatus = m.status === MembershipState.ACTIVE ? MembershipState.SUSPENDED : MembershipState.ACTIVE;
+    const newStatus =
+      m.status === MembershipState.ACTIVE
+        ? MembershipState.SUSPENDED
+        : MembershipState.ACTIVE;
     setUpdatingIds((prev) => new Set(prev).add(m.id));
     try {
       await membershipsApi.updateMembership(m.id, { status: newStatus });
       // Actualizar localmente
       setMembershipList((prev) =>
-        prev.map((item) => (item.id === m.id ? { ...item, status: newStatus } : item)),
+        prev.map((item) =>
+          item.id === m.id ? { ...item, status: newStatus } : item,
+        ),
       );
     } catch (err) {
       console.error('Error actualizando membresía', err);
@@ -66,7 +71,9 @@ function PerfilComponent() {
         const pb = statusPriority[b.status] ?? 5;
         if (pa !== pb) return pa - pb;
         // si misma prioridad ordenar por fecha inicio descendente
-        return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+        return (
+          new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+        );
       })
     : membershipList.filter((m) => m.status === MembershipState.ACTIVE);
 
@@ -95,11 +102,14 @@ function PerfilComponent() {
   ).length;
 
   // "Miembro desde" is the earliest start_date of the memberships
-  const earliestStartDate = membershipList.reduce<Date | null>((earliest, m) => {
-    const current = new Date(m.start_date);
-    if (!earliest || current < earliest) return current;
-    return earliest;
-  }, null);
+  const earliestStartDate = membershipList.reduce<Date | null>(
+    (earliest, m) => {
+      const current = new Date(m.start_date);
+      if (!earliest || current < earliest) return current;
+      return earliest;
+    },
+    null,
+  );
 
   const memberSinceLabel = earliestStartDate
     ? format(earliestStartDate, "dd 'de' MMMM 'del' yyyy", { locale: es })
@@ -184,7 +194,9 @@ function PerfilComponent() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Reservas totales</span>
-                <span className="text-lg font-semibold">{totalReservations}</span>
+                <span className="text-lg font-semibold">
+                  {totalReservations}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
@@ -196,7 +208,9 @@ function PerfilComponent() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Miembro desde</span>
-                <span className="text-sm font-semibold">{memberSinceLabel}</span>
+                <span className="text-sm font-semibold">
+                  {memberSinceLabel}
+                </span>
               </div>
             </div>
           </div>
@@ -265,9 +279,7 @@ function PerfilComponent() {
 
                     const statusText =
                       statusMap[membership.status] ||
-                      membership.status
-                        .charAt(0)
-                        .toUpperCase() +
+                      membership.status.charAt(0).toUpperCase() +
                         membership.status.slice(1).toLowerCase();
 
                     const formatDate = (dateStr: string) =>
@@ -277,7 +289,9 @@ function PerfilComponent() {
 
                     const planLabel =
                       (membership.plan.type &&
-                        planTypeMap[membership.plan.type as 'MONTHLY' | 'ANNUAL']) ||
+                        planTypeMap[
+                          membership.plan.type as 'MONTHLY' | 'ANNUAL'
+                        ]) ||
                       (membership.plan as any).name ||
                       'Plan';
 
@@ -345,8 +359,8 @@ function PerfilComponent() {
                             {updatingIds.has(membership.id)
                               ? 'Procesando...'
                               : membership.status === MembershipState.ACTIVE
-                              ? 'Suspender'
-                              : 'Reactivar'}
+                                ? 'Suspender'
+                                : 'Reactivar'}
                           </button>
                         ) : null}
                       </div>

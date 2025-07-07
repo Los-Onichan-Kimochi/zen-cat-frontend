@@ -13,7 +13,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { communitiesApi } from '@/api/communities/communities';
-import { CreateReservationRequest, ReservationState } from '@/types/reservation';
+import {
+  CreateReservationRequest,
+  ReservationState,
+} from '@/types/reservation';
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
   component: ConfirmationStepComponent,
   validateSearch: z.object({

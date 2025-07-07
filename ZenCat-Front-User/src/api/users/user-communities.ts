@@ -84,16 +84,16 @@ export const userCommunitiesService = {
     const userResponse = await apiClient.get<UserWithMemberships>(
       API_ENDPOINTS.AUTH.ME,
     );
-    
+
     // Then get the user's memberships separately
-    const membershipsResponse = await apiClient.get<{memberships: Membership[]}>(
-      API_ENDPOINTS.MEMBERSHIPS.BY_USER(userResponse.id),
-    );
-    
+    const membershipsResponse = await apiClient.get<{
+      memberships: Membership[];
+    }>(API_ENDPOINTS.MEMBERSHIPS.BY_USER(userResponse.id));
+
     // Combine the data
     return {
       ...userResponse,
-      memberships: membershipsResponse.memberships || []
+      memberships: membershipsResponse.memberships || [],
     };
   },
 
@@ -102,7 +102,7 @@ export const userCommunitiesService = {
    */
   async updateUser(
     userId: string,
-    userData: Partial<UpdateUserRequest>
+    userData: Partial<UpdateUserRequest>,
   ): Promise<User> {
     try {
       // Ensure we include the updated_by field
@@ -113,7 +113,7 @@ export const userCommunitiesService = {
 
       const response = await apiClient.patch<User>(
         API_ENDPOINTS.USERS.BY_ID(userId),
-        dataWithUpdatedBy
+        dataWithUpdatedBy,
       );
 
       return response;
@@ -121,8 +121,7 @@ export const userCommunitiesService = {
       console.error('Error updating user:', error);
       throw error;
     }
-  }
-  
+  },
 };
 
 // ========================
@@ -222,10 +221,10 @@ export function useUserCommunities(userId?: string) {
         setError(null);
 
         console.log('🔄 Fetching user communities data...');
-        
+
         // Always use /me/ endpoint for user's own data
         const userData = await userCommunitiesService.getCurrentUser();
-        
+
         console.log('✅ User data fetched successfully:', userData);
 
         setUser(userData);
@@ -235,7 +234,7 @@ export function useUserCommunities(userId?: string) {
           userData.memberships || [],
         );
         setCommunities(transformedCommunities);
-        
+
         console.log('✅ Communities transformed:', transformedCommunities);
       } catch (err) {
         console.error('❌ Error fetching user communities:', err);
@@ -257,7 +256,7 @@ export function useUserCommunities(userId?: string) {
       setError(null);
 
       console.log('🔄 Refreshing user data...');
-      
+
       // Always use getCurrentUser for refresh
       const userData = await userCommunitiesService.getCurrentUser();
 
@@ -266,7 +265,7 @@ export function useUserCommunities(userId?: string) {
       setCommunities(
         transformMembershipsToFrontend(userData.memberships || []),
       );
-      
+
       console.log('✅ User data refreshed successfully');
     } catch (err) {
       console.error('❌ Error refreshing user data:', err);

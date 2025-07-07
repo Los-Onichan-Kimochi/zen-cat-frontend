@@ -103,7 +103,7 @@ export function ReservationDetailDialog({
   // Combinar correctamente la fecha de la sesión con la hora de inicio
   const sessionDate = new Date(reservation.session.date);
   const sessionStartTime = new Date(reservation.session.start_time);
-  
+
   // Crear la fecha y hora completa de inicio de la sesión
   const sessionDateTime = new Date(
     sessionDate.getFullYear(),
@@ -111,9 +111,9 @@ export function ReservationDetailDialog({
     sessionDate.getDate(),
     sessionStartTime.getHours(),
     sessionStartTime.getMinutes(),
-    sessionStartTime.getSeconds()
+    sessionStartTime.getSeconds(),
   );
-  
+
   const now = new Date();
   const hoursUntilReservation = differenceInHours(sessionDateTime, now);
   const canCancel = hoursUntilReservation >= 24;
@@ -148,30 +148,36 @@ export function ReservationDetailDialog({
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Comunidad</span>
-                <span className="font-medium text-right">{communityName || 'N/A'}</span>
+                <span className="font-medium text-right">
+                  {communityName || 'N/A'}
+                </span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Fecha</span>
                 <span className="font-medium text-right">
                   {format(sessionDate, 'dd/MM/yyyy', { locale: es })}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Lugar</span>
                 <span className="font-medium text-right">
                   {reservation.place || 'N/A'}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Dirección</span>
                 <span className="font-medium text-right">
-                  {loading ? 'Cargando...' : (localData?.street_name + ' ' + localData?.building_number || 'N/A')}
+                  {loading
+                    ? 'Cargando...'
+                    : localData?.street_name +
+                        ' ' +
+                        localData?.building_number || 'N/A'}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Profesional</span>
                 <span className="font-medium text-right">
@@ -188,21 +194,28 @@ export function ReservationDetailDialog({
                   {reservation.service_name || 'N/A'}
                 </span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Horario</span>
                 <span className="font-medium text-right">
-                  {format(reservation.session.start_time, 'HH:mm', { locale: es })} h - {format(reservation.session.end_time, 'HH:mm', { locale: es })} h
+                  {format(reservation.session.start_time, 'HH:mm', {
+                    locale: es,
+                  })}{' '}
+                  h -{' '}
+                  {format(reservation.session.end_time, 'HH:mm', {
+                    locale: es,
+                  })}{' '}
+                  h
                 </span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Distrito</span>
                 <span className="font-medium text-right">
-                  {loading ? 'Cargando...' : (localData?.district || 'N/A')}
+                  {loading ? 'Cargando...' : localData?.district || 'N/A'}
                 </span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Estado</span>
                 <div className="text-right">
@@ -240,7 +253,10 @@ export function ReservationDetailDialog({
                   </TooltipTrigger>
                   {!canCancel && (
                     <TooltipContent>
-                      <p>Falta menos de 24 horas para la reserva. No se puede cancelar.</p>
+                      <p>
+                        Falta menos de 24 horas para la reserva. No se puede
+                        cancelar.
+                      </p>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -253,7 +269,9 @@ export function ReservationDetailDialog({
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro que deseas cancelar esta reserva?</AlertDialogTitle>
+            <AlertDialogTitle>
+              ¿Estás seguro que deseas cancelar esta reserva?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer.
             </AlertDialogDescription>
@@ -268,4 +286,4 @@ export function ReservationDetailDialog({
       </AlertDialog>
     </>
   );
-} 
+}

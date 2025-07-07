@@ -61,7 +61,7 @@ export const membershipsApi = {
   async getMembershipsByUserId(userId: string): Promise<Membership[]> {
     try {
       const data = await apiClient.get<{ memberships: Membership[] }>(
-        API_ENDPOINTS.MEMBERSHIPS.BY_USER(userId)
+        API_ENDPOINTS.MEMBERSHIPS.BY_USER(userId),
       );
       return data.memberships || [];
     } catch (error) {

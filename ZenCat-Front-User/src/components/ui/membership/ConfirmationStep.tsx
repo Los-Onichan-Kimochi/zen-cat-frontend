@@ -7,23 +7,30 @@ import { useAuth } from '@/context/AuthContext';
 import { onboardingService } from '@/api/onboarding';
 import { membershipsApi } from '@/api/memberships/memberships';
 import { OnboardingResponse } from '@/types/onboarding';
-import { Membership, CreateMembershipRequest, MembershipState } from '@/types/membership';
+import {
+  Membership,
+  CreateMembershipRequest,
+  MembershipState,
+} from '@/types/membership';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 
 export function ConfirmationStep() {
   const { state, resetOnboarding } = useMembershipOnboarding();
   const { user } = useAuth();
-  const {
-    onboardingData: existingOnboarding,
-    isLoading: isLoadingOnboarding,
-  } = useUserOnboarding();
+  const { onboardingData: existingOnboarding, isLoading: isLoadingOnboarding } =
+    useUserOnboarding();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [onboardingResult, setOnboardingResult] = useState<OnboardingResponse | null>(null);
-  const [membershipResult, setMembershipResult] = useState<Membership | null>(null);
-  const [currentProcess, setCurrentProcess] = useState<'onboarding' | 'membership' | 'completed'>('onboarding');
+  const [onboardingResult, setOnboardingResult] =
+    useState<OnboardingResponse | null>(null);
+  const [membershipResult, setMembershipResult] = useState<Membership | null>(
+    null,
+  );
+  const [currentProcess, setCurrentProcess] = useState<
+    'onboarding' | 'membership' | 'completed'
+  >('onboarding');
   const [hasStarted, setHasStarted] = useState(false);
   const hasStartedRef = useRef(false);
 
@@ -38,7 +45,6 @@ export function ConfirmationStep() {
       }
 
       try {
-
         // Validar que los IDs sean válidos
         if (!state.community.id || state.community.id.trim() === '') {
           throw new Error('ID de comunidad inválido');
@@ -111,17 +117,15 @@ export function ConfirmationStep() {
           );
         }
 
-        const membershipResponse =
-          await membershipsApi.createMembershipForUser(
-            user.id,
-            membershipRequest,
-          );
+        const membershipResponse = await membershipsApi.createMembershipForUser(
+          user.id,
+          membershipRequest,
+        );
 
         setMembershipResult(membershipResponse);
         setCurrentProcess('completed');
         setIsLoading(false);
       } catch (err: any) {
-
         // Proporcionar mensaje de error más específico
         let errorMessage = 'Ocurrió un error desconocido';
 
@@ -143,7 +147,8 @@ export function ConfirmationStep() {
           errorMessage =
             'Los datos enviados no tienen el formato correcto. Es posible que falten campos requeridos o que los IDs no sean válidos.';
         } else if (err.message?.includes('HTTP error! status: 500')) {
-          errorMessage = 'Error interno del servidor. Por favor, inténtelo más tarde.';
+          errorMessage =
+            'Error interno del servidor. Por favor, inténtelo más tarde.';
         } else if (err.message) {
           errorMessage = err.message;
         }
@@ -259,15 +264,14 @@ export function ConfirmationStep() {
     resetOnboarding();
     navigate({ to: '/mis-comunidades' });
   };
-  
-  const handleDownloadReceipt = () => {
-  };
-  
+
+  const handleDownloadReceipt = () => {};
+
   if (isLoading) {
     const processMessages = {
       onboarding: 'Registrando tus datos personales...',
       membership: 'Creando tu membresía...',
-      completed: 'Finalizando...'
+      completed: 'Finalizando...',
     };
 
     return (
@@ -283,23 +287,23 @@ export function ConfirmationStep() {
     return (
       <div className="w-full max-w-lg mx-auto text-center py-12">
         <Card className="border-red-500 border-2">
-            <CardHeader>
-                <CardTitle className="text-red-600">¡Hubo un problema!</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-gray-700 mb-4">{error}</p>
-                <Button 
-                  onClick={() => {
-                    setHasStarted(false);
-                    hasStartedRef.current = false;
-                    setError(null);
-                    handleSubmitOnboarding();
-                  }} 
-                  className="bg-black text-white"
-                >
-                  Reintentar
-                </Button>
-            </CardContent>
+          <CardHeader>
+            <CardTitle className="text-red-600">¡Hubo un problema!</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 mb-4">{error}</p>
+            <Button
+              onClick={() => {
+                setHasStarted(false);
+                hasStartedRef.current = false;
+                setError(null);
+                handleSubmitOnboarding();
+              }}
+              className="bg-black text-white"
+            >
+              Reintentar
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -308,14 +312,18 @@ export function ConfirmationStep() {
   if (!onboardingResult || !membershipResult) {
     // Esto no debería pasar si no hay error, pero es un buen fallback.
     return (
-        <div className="w-full max-w-lg mx-auto text-center py-12">
-            <p>No se pudo mostrar la confirmación. Por favor, recarga la página.</p>
-        </div>
+      <div className="w-full max-w-lg mx-auto text-center py-12">
+        <p>No se pudo mostrar la confirmación. Por favor, recarga la página.</p>
+      </div>
     );
   }
-  
-  const startDate = membershipResult.start_date ? new Date(membershipResult.start_date).toLocaleDateString('es-PE') : 'N/A';
-  const endDate = membershipResult.end_date ? new Date(membershipResult.end_date).toLocaleDateString('es-PE') : 'N/A';
+
+  const startDate = membershipResult.start_date
+    ? new Date(membershipResult.start_date).toLocaleDateString('es-PE')
+    : 'N/A';
+  const endDate = membershipResult.end_date
+    ? new Date(membershipResult.end_date).toLocaleDateString('es-PE')
+    : 'N/A';
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -337,7 +345,11 @@ export function ConfirmationStep() {
               <div className="space-y-4">
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Comunidad</span>
-                  <span>{membershipResult.community?.name || state.community?.name || "N/A"}</span>
+                  <span>
+                    {membershipResult.community?.name ||
+                      state.community?.name ||
+                      'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Plan</span>
@@ -347,12 +359,18 @@ export function ConfirmationStep() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Estado</span>
-                  <span className="text-green-600 font-semibold">{membershipResult.status}</span>
+                  <span className="text-green-600 font-semibold">
+                    {membershipResult.status}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">Cantidad de reservas</span>
                   <span>
-                    {membershipResult.plan?.reservation_limit === 0 ? 'Ilimitadas' : membershipResult.plan?.reservation_limit || state.selectedPlan?.reservationLimit || 'Ilimitadas'}{' '}
+                    {membershipResult.plan?.reservation_limit === 0
+                      ? 'Ilimitadas'
+                      : membershipResult.plan?.reservation_limit ||
+                        state.selectedPlan?.reservationLimit ||
+                        'Ilimitadas'}{' '}
                     reservas
                   </span>
                 </div>
@@ -370,9 +388,7 @@ export function ConfirmationStep() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">DNI</span>
-                  <span>
-                    {onboardingResult.document_number || 'N/A'}
-                  </span>
+                  <span>{onboardingResult.document_number || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium">ID de membresía</span>
@@ -381,7 +397,9 @@ export function ConfirmationStep() {
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="font-medium text-lg">Total</span>
                   <span className="font-bold text-lg">
-                    S/ {membershipResult.plan?.fee?.toFixed(2) || state.selectedPlan?.price.toFixed(2)}
+                    S/{' '}
+                    {membershipResult.plan?.fee?.toFixed(2) ||
+                      state.selectedPlan?.price.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
@@ -395,7 +413,11 @@ export function ConfirmationStep() {
           {/* Mensaje de bienvenida */}
           <div className="text-center mb-8">
             <p className="text-lg font-semibold text-black mb-2">
-              ¡Bienvenido a {membershipResult.community?.name || state.community?.name || "la comunidad"}!
+              ¡Bienvenido a{' '}
+              {membershipResult.community?.name ||
+                state.community?.name ||
+                'la comunidad'}
+              !
             </p>
             <p className="text-gray-600">
               Ya puedes empezar a disfrutar de todos los beneficios de tu

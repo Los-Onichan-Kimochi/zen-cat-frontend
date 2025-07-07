@@ -58,7 +58,7 @@ export function SelectPlanStep({ plans }: SelectPlanStepProps) {
       nextStep();
     }
   };
-  
+
   if (processedPlans.length === 0) {
     return (
       <div className="w-full max-w-4xl mx-auto">

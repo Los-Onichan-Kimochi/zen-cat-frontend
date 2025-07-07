@@ -13,7 +13,9 @@ export function PaymentStep() {
     useMembershipOnboarding();
 
   // Método de pago seleccionado: 'Tarjeta', 'Yape', 'Plin'
-  const [paymentMethod, setPaymentMethod] = useState<'Tarjeta' | 'Yape' | 'Plin'>('Tarjeta');
+  const [paymentMethod, setPaymentMethod] = useState<
+    'Tarjeta' | 'Yape' | 'Plin'
+  >('Tarjeta');
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -147,13 +149,17 @@ export function PaymentStep() {
                   <Input
                     placeholder="Número de tarjeta"
                     value={formData.cardNumber}
-                    onChange={(e) => handleInputChange('cardNumber', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('cardNumber', e.target.value)
+                    }
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="MM/AA"
                       value={formData.expiryDate}
-                      onChange={(e) => handleInputChange('expiryDate', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange('expiryDate', e.target.value)
+                      }
                     />
                     <Input
                       placeholder="CVV"
@@ -164,7 +170,9 @@ export function PaymentStep() {
                   <Input
                     placeholder="Nombre del titular"
                     value={formData.cardholderName}
-                    onChange={(e) => handleInputChange('cardholderName', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('cardholderName', e.target.value)
+                    }
                   />
                 </div>
               )}
@@ -179,7 +187,8 @@ export function PaymentStep() {
                     />
                   </div>
                   <p className="text-gray-600">
-                    Escanee el código QR con {paymentMethod} y confirme su envío.
+                    Escanee el código QR con {paymentMethod} y confirme su
+                    envío.
                   </p>
                 </div>
               )}

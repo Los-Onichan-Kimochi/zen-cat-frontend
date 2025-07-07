@@ -5,7 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectItem } from '@/components/ui/select';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
-import { CreateOnboardingRequest, DocumentType, Gender } from '@/types/onboarding';
+import {
+  CreateOnboardingRequest,
+  DocumentType,
+  Gender,
+} from '@/types/onboarding';
 import { useAuth } from '@/context/AuthContext';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
@@ -27,7 +31,7 @@ interface OnboardingFormData {
   district: string;
   province: string;
   region: string;
-  
+
   // Optional fields
   birth_date: string;
   gender: Gender | '';
@@ -46,9 +50,14 @@ interface FormErrors {
 }
 
 export function OnboardingStep() {
-  const { state, setOnboardingData, nextStep, prevStep } = useMembershipOnboarding();
+  const { state, setOnboardingData, nextStep, prevStep } =
+    useMembershipOnboarding();
   const { user } = useAuth();
-  const { onboardingData, isLoading: onboardingLoading, error: onboardingError } = useUserOnboarding();
+  const {
+    onboardingData,
+    isLoading: onboardingLoading,
+    error: onboardingError,
+  } = useUserOnboarding();
 
   // Estado inicial del formulario
   const initialFormData: OnboardingFormData = {
@@ -102,7 +111,9 @@ export function OnboardingStep() {
       let regionId = onboardingData.region || '';
       if (!regiones.find((r) => r.id === regionId)) {
         const regionByName = regiones.find(
-          (r) => r.name.toLowerCase() === (onboardingData.region || '').toLowerCase(),
+          (r) =>
+            r.name.toLowerCase() ===
+            (onboardingData.region || '').toLowerCase(),
         );
         regionId = regionByName?.id || '';
       }
@@ -112,7 +123,8 @@ export function OnboardingStep() {
       if (!provincias.find((p) => p.id === provinceId)) {
         const provinceByName = provincias.find(
           (p) =>
-            p.name.toLowerCase() === (onboardingData.province || '').toLowerCase() &&
+            p.name.toLowerCase() ===
+              (onboardingData.province || '').toLowerCase() &&
             p.department_id === regionId,
         );
         provinceId = provinceByName?.id || '';
@@ -123,7 +135,8 @@ export function OnboardingStep() {
       if (!distritos.find((d) => d.id === districtId)) {
         const districtByName = distritos.find(
           (d) =>
-            d.name.toLowerCase() === (onboardingData.district || '').toLowerCase() &&
+            d.name.toLowerCase() ===
+              (onboardingData.district || '').toLowerCase() &&
             d.department_id === regionId &&
             d.province_id === provinceId,
         );
@@ -135,7 +148,9 @@ export function OnboardingStep() {
         ? onboardingData.birth_date.split('T')[0]
         : '';
 
-      const normalizedDocumentType = (onboardingData.document_type || '').toUpperCase();
+      const normalizedDocumentType = (
+        onboardingData.document_type || ''
+      ).toUpperCase();
       const normalizedGender = (onboardingData.gender || '').toUpperCase();
 
       setFormData({
@@ -159,27 +174,56 @@ export function OnboardingStep() {
       <div className="w-full max-w-4xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Datos ya registrados</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              Datos ya registrados
+            </CardTitle>
             <p className="text-center text-gray-600 text-sm">
-              Ya contamos con tu información de identificación, verifica que sea correcta y continúa
+              Ya contamos con tu información de identificación, verifica que sea
+              correcta y continúa
             </p>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <p><strong>Tipo de Documento:</strong> {onboardingData.document_type}</p>
-              <p><strong>Número de Documento:</strong> {onboardingData.document_number}</p>
-              <p><strong>Teléfono:</strong> {onboardingData.phone_number}</p>
-              <p><strong>Código Postal:</strong> {onboardingData.postal_code}</p>
-              <p><strong>Fecha de Nacimiento:</strong> {onboardingData.birth_date?.split('T')[0]}</p>
-              <p><strong>Género:</strong> {onboardingData.gender}</p>
-              <p><strong>Región:</strong> {onboardingData.region}</p>
-              <p><strong>Provincia:</strong> {onboardingData.province}</p>
-              <p><strong>Distrito:</strong> {onboardingData.district}</p>
-              <p className="md:col-span-2"><strong>Dirección:</strong> {onboardingData.address}</p>
+              <p>
+                <strong>Tipo de Documento:</strong>{' '}
+                {onboardingData.document_type}
+              </p>
+              <p>
+                <strong>Número de Documento:</strong>{' '}
+                {onboardingData.document_number}
+              </p>
+              <p>
+                <strong>Teléfono:</strong> {onboardingData.phone_number}
+              </p>
+              <p>
+                <strong>Código Postal:</strong> {onboardingData.postal_code}
+              </p>
+              <p>
+                <strong>Fecha de Nacimiento:</strong>{' '}
+                {onboardingData.birth_date?.split('T')[0]}
+              </p>
+              <p>
+                <strong>Género:</strong> {onboardingData.gender}
+              </p>
+              <p>
+                <strong>Región:</strong> {onboardingData.region}
+              </p>
+              <p>
+                <strong>Provincia:</strong> {onboardingData.province}
+              </p>
+              <p>
+                <strong>Distrito:</strong> {onboardingData.district}
+              </p>
+              <p className="md:col-span-2">
+                <strong>Dirección:</strong> {onboardingData.address}
+              </p>
             </div>
 
             <div className="flex justify-end pt-6">
-              <Button onClick={nextStep} className="px-8 bg-black text-white hover:bg-gray-800">
+              <Button
+                onClick={nextStep}
+                className="px-8 bg-black text-white hover:bg-gray-800"
+              >
                 Continuar
               </Button>
             </div>
@@ -211,11 +255,16 @@ export function OnboardingStep() {
       <div className="w-full max-w-4xl mx-auto">
         <Card className="border-red-500 border-2">
           <CardHeader>
-            <CardTitle className="text-red-600">Error al cargar los datos</CardTitle>
+            <CardTitle className="text-red-600">
+              Error al cargar los datos
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-700 mb-4">{onboardingError}</p>
-            <Button onClick={() => window.location.reload()} className="bg-black text-white">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-black text-white"
+            >
               Reintentar
             </Button>
           </CardContent>
@@ -225,15 +274,21 @@ export function OnboardingStep() {
   }
 
   // Cálculos para los dropdowns de ubigeo
-  const selectedRegion = regiones.find(region => region.id === formData.region);
-  const selectedProvincia = provincias.find(prov => prov.id === formData.province);
+  const selectedRegion = regiones.find(
+    (region) => region.id === formData.region,
+  );
+  const selectedProvincia = provincias.find(
+    (prov) => prov.id === formData.province,
+  );
 
   const provinciasFiltradas = provincias.filter(
-    prov => prov.department_id === selectedRegion?.id
+    (prov) => prov.department_id === selectedRegion?.id,
   );
 
   const distritosFiltrados = distritos.filter(
-    dist => dist.department_id === selectedRegion?.id && dist.province_id === selectedProvincia?.id
+    (dist) =>
+      dist.department_id === selectedRegion?.id &&
+      dist.province_id === selectedProvincia?.id,
   );
 
   // Validaciones robustas
@@ -263,14 +318,25 @@ export function OnboardingStep() {
       valid = false;
     } else {
       // Validar formato según tipo
-      if (formData.document_type === 'DNI' && !formData.document_number.match(/^\d{8}$/)) {
+      if (
+        formData.document_type === 'DNI' &&
+        !formData.document_number.match(/^\d{8}$/)
+      ) {
         newErrors.document_number = 'El DNI debe tener 8 dígitos';
         valid = false;
-      } else if (formData.document_type === 'FOREIGNER_CARD' && !formData.document_number.match(/^\d{9}$/)) {
-        newErrors.document_number = 'El Carnet de Extranjería debe tener 9 dígitos';
+      } else if (
+        formData.document_type === 'FOREIGNER_CARD' &&
+        !formData.document_number.match(/^\d{9}$/)
+      ) {
+        newErrors.document_number =
+          'El Carnet de Extranjería debe tener 9 dígitos';
         valid = false;
-      } else if (formData.document_type === 'PASSPORT' && !formData.document_number.match(/^[A-Za-z0-9]{6,12}$/)) {
-        newErrors.document_number = 'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
+      } else if (
+        formData.document_type === 'PASSPORT' &&
+        !formData.document_number.match(/^[A-Za-z0-9]{6,12}$/)
+      ) {
+        newErrors.document_number =
+          'El Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos';
         valid = false;
       }
     }
@@ -280,7 +346,8 @@ export function OnboardingStep() {
       newErrors.phone_number = 'El número de teléfono es requerido';
       valid = false;
     } else if (!formData.phone_number.match(/^\d{9,15}$/)) {
-      newErrors.phone_number = 'Ingrese un número de teléfono válido (9-15 dígitos)';
+      newErrors.phone_number =
+        'Ingrese un número de teléfono válido (9-15 dígitos)';
       valid = false;
     }
 
@@ -289,7 +356,8 @@ export function OnboardingStep() {
       newErrors.postal_code = 'El código postal es requerido';
       valid = false;
     } else if (formData.postal_code.length < 5) {
-      newErrors.postal_code = 'El código postal debe tener al menos 5 caracteres';
+      newErrors.postal_code =
+        'El código postal debe tener al menos 5 caracteres';
       valid = false;
     }
 
@@ -305,7 +373,7 @@ export function OnboardingStep() {
       valid = false;
     } else {
       // Verify the region ID exists
-      const regionExists = regiones.find(r => r.id === formData.region);
+      const regionExists = regiones.find((r) => r.id === formData.region);
       if (!regionExists) {
         newErrors.region = 'Región seleccionada no válida';
         valid = false;
@@ -318,7 +386,10 @@ export function OnboardingStep() {
       valid = false;
     } else {
       // Verify the province ID exists and belongs to the selected region
-      const provinceExists = provincias.find(p => p.id === formData.province && p.department_id === formData.region);
+      const provinceExists = provincias.find(
+        (p) =>
+          p.id === formData.province && p.department_id === formData.region,
+      );
       if (!provinceExists) {
         newErrors.province = 'Provincia seleccionada no válida';
         valid = false;
@@ -331,7 +402,12 @@ export function OnboardingStep() {
       valid = false;
     } else {
       // Verify the district ID exists and belongs to the selected province and region
-      const districtExists = distritos.find(d => d.id === formData.district && d.department_id === formData.region && d.province_id === formData.province);
+      const districtExists = distritos.find(
+        (d) =>
+          d.id === formData.district &&
+          d.department_id === formData.region &&
+          d.province_id === formData.province,
+      );
       if (!districtExists) {
         newErrors.district = 'Distrito seleccionado no válido';
         valid = false;
@@ -360,9 +436,12 @@ export function OnboardingStep() {
     return valid;
   };
 
-  const handleInputChange = (field: keyof OnboardingFormData, value: string) => {
+  const handleInputChange = (
+    field: keyof OnboardingFormData,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
@@ -410,9 +489,12 @@ export function OnboardingStep() {
     if (!validate()) return;
 
     // Find the actual names from the IDs for the API
-    const selectedRegionName = regiones.find(r => r.id === formData.region)?.name || '';
-    const selectedProvinceName = provincias.find(p => p.id === formData.province)?.name || '';
-    const selectedDistrictName = distritos.find(d => d.id === formData.district)?.name || '';
+    const selectedRegionName =
+      regiones.find((r) => r.id === formData.region)?.name || '';
+    const selectedProvinceName =
+      provincias.find((p) => p.id === formData.province)?.name || '';
+    const selectedDistrictName =
+      distritos.find((d) => d.id === formData.district)?.name || '';
 
     // Convert to the correct format for the API
     const onboardingRequest: CreateOnboardingRequest = {
@@ -426,10 +508,13 @@ export function OnboardingStep() {
       district: selectedDistrictName,
       province: selectedProvinceName,
       region: selectedRegionName,
-      
+
       // Optional fields (only include if they have values)
-      ...(formData.birth_date && { birth_date: new Date(formData.birth_date).toISOString() }),
-      ...(formData.gender && formData.gender.length > 0 && { gender: formData.gender as Gender }),
+      ...(formData.birth_date && {
+        birth_date: new Date(formData.birth_date).toISOString(),
+      }),
+      ...(formData.gender &&
+        formData.gender.length > 0 && { gender: formData.gender as Gender }),
     };
 
     setOnboardingData(onboardingRequest);
@@ -453,21 +538,27 @@ export function OnboardingStep() {
             <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
               Información de Identificación
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="document_type">Tipo de Documento *</Label>
                 <Select
                   value={formData.document_type}
-                  onValueChange={(value) => handleInputChange('document_type', value)}
+                  onValueChange={(value) =>
+                    handleInputChange('document_type', value)
+                  }
                   placeholder="Seleccione un tipo de documento"
                 >
                   <SelectItem value="DNI">DNI</SelectItem>
-                  <SelectItem value="FOREIGNER_CARD">Carnet de Extranjería</SelectItem>
+                  <SelectItem value="FOREIGNER_CARD">
+                    Carnet de Extranjería
+                  </SelectItem>
                   <SelectItem value="PASSPORT">Pasaporte</SelectItem>
                 </Select>
                 {errors.document_type && (
-                  <span className="text-red-500 text-sm">{errors.document_type}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.document_type}
+                  </span>
                 )}
               </div>
 
@@ -476,11 +567,15 @@ export function OnboardingStep() {
                 <Input
                   id="document_number"
                   value={formData.document_number}
-                  onChange={(e) => handleInputChange('document_number', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('document_number', e.target.value)
+                  }
                   placeholder="Ingrese número de documento"
                 />
                 {errors.document_number && (
-                  <span className="text-red-500 text-sm">{errors.document_number}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.document_number}
+                  </span>
                 )}
               </div>
 
@@ -489,11 +584,15 @@ export function OnboardingStep() {
                 <Input
                   id="phone_number"
                   value={formData.phone_number}
-                  onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('phone_number', e.target.value)
+                  }
                   placeholder="Ej: 987654321"
                 />
                 {errors.phone_number && (
-                  <span className="text-red-500 text-sm">{errors.phone_number}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.phone_number}
+                  </span>
                 )}
               </div>
 
@@ -502,11 +601,15 @@ export function OnboardingStep() {
                 <Input
                   id="postal_code"
                   value={formData.postal_code}
-                  onChange={(e) => handleInputChange('postal_code', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('postal_code', e.target.value)
+                  }
                   placeholder="Ingrese código postal"
                 />
                 {errors.postal_code && (
-                  <span className="text-red-500 text-sm">{errors.postal_code}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.postal_code}
+                  </span>
                 )}
               </div>
 
@@ -516,10 +619,14 @@ export function OnboardingStep() {
                   id="birth_date"
                   type="date"
                   value={formData.birth_date}
-                  onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('birth_date', e.target.value)
+                  }
                 />
                 {errors.birth_date && (
-                  <span className="text-red-500 text-sm">{errors.birth_date}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.birth_date}
+                  </span>
                 )}
               </div>
 
@@ -543,7 +650,7 @@ export function OnboardingStep() {
             <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
               Ubicación Geográfica *
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="region">Región *</Label>
@@ -583,7 +690,9 @@ export function OnboardingStep() {
                   </div>
                 )}
                 {errors.province && (
-                  <span className="text-red-500 text-sm">{errors.province}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.province}
+                  </span>
                 )}
               </div>
 
@@ -607,7 +716,9 @@ export function OnboardingStep() {
                   </div>
                 )}
                 {errors.district && (
-                  <span className="text-red-500 text-sm">{errors.district}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.district}
+                  </span>
                 )}
               </div>
             </div>
