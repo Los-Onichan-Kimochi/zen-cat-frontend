@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   BarChart,
   Bar,
@@ -18,7 +18,8 @@ import {
   ServiceReportResponse,
 } from '@/api/reportes/serviceReports';
 import dayjs from 'dayjs';
-import { FaCalendarAlt, FaDownload } from 'react-icons/fa';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { ExportButtons } from '@/components/common/ExportButtons';
 
 const groupByOptions = [
   { value: 'day', label: 'Día' },
@@ -170,6 +171,9 @@ export default function ReportsDashboard() {
   const [rangeWarning, setRangeWarning] = useState<string | null>(null);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
+  // Ref para el elemento que se exportará como PDF
+  const pdfElementRef = useRef<HTMLDivElement>(null);
+
   // Calcular días de diferencia
   function getDaysDiff() {
     if (!from || !to) return 0;
@@ -282,9 +286,9 @@ export default function ReportsDashboard() {
   }
 
   return (
-    <div className="space-y-6 font-montserrat">
+    <div className="space-y-6 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
+      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2" data-pdf-hide>
         <div className="flex flex-wrap gap-2 items-center flex-1">
           {quickRanges.map((r) => (
             <button
@@ -319,21 +323,28 @@ export default function ReportsDashboard() {
             />
           </div>
         </div>
-        <button
-          className="ml-auto px-6 py-2 bg-zinc-900 text-white rounded-lg shadow-md hover:bg-zinc-700 transition font-semibold h-12 text-base flex items-center justify-center gap-2"
-          onClick={() =>
-            exportToCSV(
-              chartData,
-              data?.services.map((s) => s.ServiceType) || [],
-              from,
-              to,
-              data?.totalReservations || 0,
-            )
-          }
-          disabled={loading || !chartData.length}
-        >
-          <FaDownload size={20} /> Exportar CSV
-        </button>
+        <div className="flex gap-2">
+          <ExportButtons
+            onExportCSV={() =>
+              exportToCSV(
+                chartData,
+                data?.services.map((s) => s.ServiceType) || [],
+                from,
+                to,
+                data?.totalReservations || 0,
+              )
+            }
+            pdfElementRef={pdfElementRef}
+            pdfOptions={{
+              filename: `reporte_reservas_${from}_a_${to}.pdf`,
+              title: 'Reporte de Reservas por Servicio',
+              subtitle: 'ZenCat - Dashboard de Reportes',
+              dateRange: `Período: ${formatDate(from)} - ${formatDate(to)}`,
+            }}
+            disabled={loading || !chartData.length}
+            loading={loading}
+          />
+        </div>
       </div>
       {rangeWarning && (
         <div className="text-xs text-orange-600 font-semibold mb-2">
