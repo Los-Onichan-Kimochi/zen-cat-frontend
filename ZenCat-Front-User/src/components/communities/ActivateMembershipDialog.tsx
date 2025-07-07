@@ -12,6 +12,7 @@ interface ActivateMembershipDialogProps {
   onClose: () => void;
   onActivate: () => void;
   communityName?: string;
+  isProcessing?: boolean;
 }
 
 export function ActivateMembershipDialog({
@@ -19,6 +20,7 @@ export function ActivateMembershipDialog({
   onClose,
   onActivate,
   communityName = '',
+  isProcessing = false,
 }: ActivateMembershipDialogProps) {
   return (
     <AlertDialog open={isOpen}>
@@ -39,16 +41,18 @@ export function ActivateMembershipDialog({
           <div className="flex justify-center space-x-4 mt-6">
             <Button
               type="button"
-              className="bg-black text-white hover:bg-gray-800 rounded-sm px-8 py-2 w-32"
+              className="bg-black text-white hover:bg-gray-800 rounded-sm px-8 py-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onActivate}
+              disabled={isProcessing}
             >
-              Activar
+              {isProcessing ? 'Procesando...' : 'Activar'}
             </Button>
             <Button
               type="button"
               variant="outline"
-              className="bg-white text-black border border-gray-300 hover:bg-gray-100 rounded-sm px-8 py-2 w-32"
+              className="bg-white text-black border border-gray-300 hover:bg-gray-100 rounded-sm px-8 py-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onClose}
+              disabled={isProcessing}
             >
               Volver
             </Button>

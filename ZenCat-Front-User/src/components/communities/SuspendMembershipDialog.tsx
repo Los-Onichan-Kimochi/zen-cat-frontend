@@ -30,7 +30,7 @@ export function SuspendMembershipDialog({
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-black text-center mt-4 leading-relaxed">
               Si suspende su membresía el tiempo que le falta para que esta
-              culmine se conge- lará junto a sus reservas disponibles hasta que
+              culmine se congelará junto a sus reservas disponibles hasta que
               decida volver a activar su membresía otra vez
             </AlertDialogDescription>
           </AlertDialogHeader>

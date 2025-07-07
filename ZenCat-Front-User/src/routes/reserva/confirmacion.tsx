@@ -63,9 +63,33 @@ function ConfirmationStepComponent() {
       setReservationCreated(true);
       setCreatedReservationId(data.id);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating reservation:', error);
-      showErrorAlert('Error al crear la reserva. Por favor, inténtalo de nuevo.');
+      console.log('Error message:', error.message);
+      console.log('Error status:', error.status);
+      console.log('Full error object:', error);
+      
+      // Manejo específico de errores basado en el código de respuesta
+      if (error.message?.includes('409') || error.status === 409) {
+        // Error de conflicto - ya existe una reserva en ese horario
+        console.log('Mostrando alerta de conflicto 409');
+        showErrorAlert('Ya tienes una reserva programada para este horario. Por favor, selecciona un horario diferente o cancela tu reserva existente.');
+      } else if (error.message?.includes('400') || error.status === 400) {
+        // Error de datos inválidos
+        showErrorAlert('No tienes reservas disponibles en tu plan actual');
+      } else if (error.message?.includes('401') || error.status === 401) {
+        // Error de autenticación
+        showErrorAlert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      } else if (error.message?.includes('403') || error.status === 403) {
+        // Error de autorización
+        showErrorAlert('No tienes permisos para realizar esta reserva. Verifica tu membresía.');
+      } else if (error.message?.includes('500') || error.status === 500) {
+        // Error del servidor
+        showErrorAlert('Ocurrió un error en el servidor. Por favor, intenta nuevamente en unos minutos.');
+      } else {
+        // Error genérico
+        showErrorAlert('No se pudo crear la reserva. Por favor, verifica tu conexión e intenta nuevamente.');
+      }
     },
   });
 
@@ -456,6 +480,9 @@ function ConfirmationStepComponent() {
           </Button>
         </div>
       </div>
+      
+      {/* Componente de Alerta */}
+      <AlertComponent />
     </div>
   );
 }

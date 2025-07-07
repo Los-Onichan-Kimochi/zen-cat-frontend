@@ -29,15 +29,12 @@ export function FilterControls({
 }: FilterControlsProps) {
   const sortOptions = [
     { value: 'name', label: 'Nombre' },
-    { value: 'status', label: 'Estado' },
   ];
 
   const filterOptions = [
     { value: 'all', label: 'Todas' },
     { value: 'active', label: 'Activas' },
     { value: 'suspended', label: 'Suspendidas' },
-    { value: 'expired', label: 'Vencidas' },
-    { value: 'cancelled', label: 'Canceladas' },
   ];
 
   const currentSortLabel = sortOptions.find(option => option.value === sortBy)?.label || 'Nombre';

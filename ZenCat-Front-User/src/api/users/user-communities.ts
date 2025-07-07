@@ -146,6 +146,7 @@ function mapMembershipStatus(
 
 /**
  * Transform API membership data to frontend format
+ * Shows both active and suspended memberships, prioritizing active ones
  */
 export function transformMembershipsToFrontend(
   memberships: Membership[],
@@ -172,13 +173,19 @@ export function transformMembershipsToFrontend(
       reservationLimit: membership.plan.reservation_limit,
       reservationsUsed: membership.reservations_used,
     };
-    //console.log("HOLA", communityId, transformedCommunity);
-    // Prioritize active memberships if a community is already in the map
-    if (
-      !communityMap.has(communityId) &&
-      transformedCommunity.status === 'active'
-    ) {
-      communityMap.set(communityId, transformedCommunity);
+
+    // Include active and suspended memberships only
+    if (transformedCommunity.status === 'active' || transformedCommunity.status === 'suspended') {
+      const existingCommunity = communityMap.get(communityId);
+      
+      if (!existingCommunity) {
+        // No existing community, add this one
+        communityMap.set(communityId, transformedCommunity);
+      } else if (transformedCommunity.status === 'active' && existingCommunity.status === 'suspended') {
+        // Replace suspended with active (prioritize active)
+        communityMap.set(communityId, transformedCommunity);
+      }
+      // If existing is active and current is suspended, keep the active one (do nothing)
     }
   });
 

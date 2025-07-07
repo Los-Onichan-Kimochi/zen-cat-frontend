@@ -24,8 +24,8 @@ interface CommunityCardProps {
 const statusConfig = {
   active: {
     label: 'Membresía activa',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-green-800',
+    bgColor: 'bg-green-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -33,8 +33,8 @@ const statusConfig = {
   },
   suspended: {
     label: 'Membresía suspendida',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-yellow-800',
+    bgColor: 'bg-yellow-100',
     buttonText: 'Activar',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -42,8 +42,8 @@ const statusConfig = {
   },
   expired: {
     label: 'Membresía vencida',
-    textColor: 'text-black',
-    bgColor: 'bg-gray-100',
+    textColor: 'text-red-800',
+    bgColor: 'bg-red-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',
     buttonStyle: 'bg-black text-white hover:bg-gray-800',
@@ -51,7 +51,7 @@ const statusConfig = {
   },
   cancelled: {
     label: 'Membresía cancelada',
-    textColor: 'text-black',
+    textColor: 'text-gray-800',
     bgColor: 'bg-gray-100',
     buttonText: 'Ver más',
     selectedText: 'Seleccionado',

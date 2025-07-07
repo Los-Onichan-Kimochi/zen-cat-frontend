@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Service } from '@/types/service';
 import { Community } from './CommunityCard';
 
@@ -19,6 +20,20 @@ export function CommunityServiceCard({
       <div className="space-y-3">
         {/* Nombre del servicio */}
         <h3 className="text-xl font-bold text-center">{service.name}</h3>
+        
+        {/* Indicador de tipo de servicio */}
+        <div className="flex justify-center">
+          <Badge 
+            variant={service.is_virtual ? "default" : "secondary"}
+            className={service.is_virtual 
+              ? "bg-blue-100 text-blue-800 hover:bg-blue-200" 
+              : "bg-green-100 text-green-800 hover:bg-green-200"
+            }
+          >
+            {service.is_virtual ? "Virtual" : "Presencial"}
+          </Badge>
+        </div>
+        
         {/* Descripción del servicio */}
         <p className="text-sm text-gray-700 text-justify">
           {service.description}
