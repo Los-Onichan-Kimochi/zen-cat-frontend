@@ -20,6 +20,18 @@ export interface ReservationLocation {
   reference?: string;
 }
 
+export interface ReservationProfessional {
+  id: string;
+  name: string;
+  first_last_name: string;
+  second_last_name?: string;
+  specialty: string;
+  email: string;
+  phone_number: string;
+  type: string;
+  image_url: string;
+}
+
 export interface ReservationTimeSlot {
   date: string;
   time: string;
@@ -44,14 +56,17 @@ export interface ReservationData {
     name: string;
     description: string;
     image_url: string;
+    is_virtual: boolean;
   };
   location?: ReservationLocation;
+  professional?: ReservationProfessional;
   session?: ReservationSession;
   date?: string;
   time?: string;
   instructor?: string;
   communityId?: string;
   userId?: string; // ID del usuario actual
+  membershipId?: string; // ID de la membresía asociada
 }
 
 interface ReservationContextType {

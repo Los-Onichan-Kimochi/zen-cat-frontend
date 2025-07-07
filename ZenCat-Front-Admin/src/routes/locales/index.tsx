@@ -319,7 +319,30 @@ function LocalesComponent() {
             console.error('Detalle del error:', error);
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p>
+            El archivo debe contener las siguientes columnas (en este orden):<br />
+            <strong>
+              Nombre del Local, Nombre de la Calle, Número de Edificio, Distrito, Provincia, Región, 
+              Referencia, Capacidad, URL de Imagen
+            </strong>
+          </p>
+          <ul className="list-disc list-inside">
+            <li>Todos los campos son obligatorios.</li>
+            <li>La capacidad debe ser un número válido.</li>
+          </ul>
+          <a
+            href="/plantillas/plantilla-carga-locales.xlsx"
+            className="text-blue-600 hover:underline"
+            download
+          >
+            Descargar plantilla de ejemplo
+          </a>
+        </div>
+
+
+      </BulkCreateDialog>
 
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}

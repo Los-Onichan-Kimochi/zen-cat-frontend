@@ -189,7 +189,24 @@ function ComunidadesComponent() {
             return false;
           }
         }}
-      />
+      >
+        <div className="px-1 pt-1 text-sm text-muted-foreground space-y-1">
+          <p>
+            El archivo debe contener las siguientes columnas (en este orden):<br />
+            <strong>Nombre, Propósito, Logo</strong>
+          </p>
+          <p className="text-red-600">
+            El nombre de la comunidad debe ser único. No se permiten duplicados.
+          </p>
+          <a
+            href="/plantillas/plantilla-carga-comunidades.xlsx"
+            className="text-blue-600 hover:underline"
+            download
+          >
+            Descargar plantilla de ejemplo
+          </a>
+        </div>
+      </BulkCreateDialog>
 
       <ConfirmDeleteSingleDialog
         isOpen={isDeleteModalOpen}

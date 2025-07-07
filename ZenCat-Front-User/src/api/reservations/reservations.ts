@@ -92,7 +92,7 @@ export const reservationsApi = {
     
     const endpoint = `${API_ENDPOINTS.RESERVATIONS.BASE}${communityId}/${userId}/`;
     const data = await apiClient.get<{ reservations: Reservation[] }>(endpoint);
-    console.log('Data: ', data);
+    
     if (data && typeof data === 'object' && 'reservations' in data) {
       return data.reservations;
     }

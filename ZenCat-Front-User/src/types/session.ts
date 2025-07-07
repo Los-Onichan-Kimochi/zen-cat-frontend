@@ -56,4 +56,5 @@ export type SessionFilters = {
   professionalIds?: string[];
   localIds?: string[];
   states?: SessionState[];
+  communityServiceIds?: string[];
 };

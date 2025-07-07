@@ -12,20 +12,20 @@ import { useAuth } from '@/context/AuthContext';
 
 const steps = [
   'Seleccionar servicio',
-  'Seleccionar lugar',
+  'Seleccionar Lugar o Profesional',
   'Seleccionar horario',
   'Confirmar reserva',
 ];
 
 export const ReservaBaseRoute = '/reserva';
 export const ReservaServiciosRoute = '/reserva/servicios';
-export const ReservaLugarRoute = '/reserva/lugar';
+export const ReservaLocationProfessionalRoute = '/reserva/location-professional';
 export const ReservaHorarioRoute = '/reserva/horario';
 export const ReservaConfirmacionRoute = '/reserva/confirmacion';
 
 const stepRoutes = [
   ReservaServiciosRoute,
-  ReservaLugarRoute,
+  ReservaLocationProfessionalRoute,
   ReservaHorarioRoute,
   ReservaConfirmacionRoute,
 ];

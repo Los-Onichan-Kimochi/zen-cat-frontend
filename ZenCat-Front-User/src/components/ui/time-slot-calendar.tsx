@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
@@ -234,7 +234,9 @@ export function TimeSlotCalendar({
                               <div className="space-y-1 text-xs">
                                 <p><span className="font-medium">Horario:</span> {session.start} - {session.end}</p>
                                 <p><span className="font-medium">Profesional:</span> {session.sessionInfo.professional}</p>
-                                <p><span className="font-medium">Lugar:</span> {session.sessionInfo.location}</p>
+                                {session.sessionInfo.location !== 'Virtual' && (
+                                  <p><span className="font-medium">Lugar:</span> {session.sessionInfo.location}</p>
+                                )}
                                 <p><span className="font-medium">Disponibilidad:</span> {session.sessionInfo.capacity - session.sessionInfo.registered}/{session.sessionInfo.capacity}</p>
                                 <p className={cn("font-medium", {
                                   "text-red-600": session.isUserReserved === true,
