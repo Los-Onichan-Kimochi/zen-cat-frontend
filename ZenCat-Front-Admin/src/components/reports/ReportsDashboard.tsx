@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { ExportButtons } from '@/components/common/ExportButtons';
 import { PDFTestButton } from '@/components/common/PDFTestButton';
+import jsPDF from 'jspdf';
 
 const groupByOptions = [
   { value: 'day', label: 'Día' },
@@ -161,6 +162,80 @@ const renderPieLabel = ({
   );
 };
 
+function exportToPDF(
+  chartData: any[],
+  services: string[],
+  from: string,
+  to: string,
+  totalGeneral: number,
+) {
+  const doc = new jsPDF();
+  let y = 15;
+
+  // Título
+  doc.setFontSize(18);
+  doc.text('Reporte de Reservas por Servicio', 10, y);
+  y += 10;
+  doc.setFontSize(12);
+  doc.text('ZenCat - Dashboard de Reportes', 10, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.text(`Período: ${formatDate(from)} - ${formatDate(to)}`, 10, y);
+  y += 10;
+
+  // Totales generales
+  doc.setFontSize(12);
+  doc.text(`Total reservas: ${totalGeneral}`, 10, y);
+  y += 10;
+
+  // Tabla de servicios
+  doc.setFontSize(11);
+  doc.text('Servicios:', 10, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.text('Servicio', 10, y);
+  doc.text('Cantidad', 60, y);
+  doc.text('% del total', 100, y);
+  y += 5;
+  doc.text('-----------------------------------------------', 10, y);
+  y += 3;
+
+  services.forEach((service) => {
+    const total = chartData.reduce((acc, row) => acc + (row[service] ?? 0), 0);
+    const porcentaje = totalGeneral ? ((total / totalGeneral) * 100).toFixed(1) : '0';
+    doc.text(service, 10, y);
+    doc.text(String(total), 60, y);
+    doc.text(`${porcentaje}%`, 100, y);
+    y += 6;
+  });
+
+  y += 4;
+  doc.text('-----------------------------------------------', 10, y);
+  y += 8;
+
+  // Resumen destacado
+  if (services.length > 0) {
+    let maxService = services[0];
+    let maxTotal = chartData.reduce((acc, row) => acc + (row[maxService] ?? 0), 0);
+    services.forEach((service) => {
+      const total = chartData.reduce((acc, row) => acc + (row[service] ?? 0), 0);
+      if (total > maxTotal) {
+        maxService = service;
+        maxTotal = total;
+      }
+    });
+    const porcentaje = totalGeneral ? ((maxTotal / totalGeneral) * 100).toFixed(1) : '0';
+    doc.setFontSize(11);
+    doc.text(
+      `El servicio más reservado es ${maxService} con ${maxTotal} reservas (${porcentaje}%)`,
+      10,
+      y,
+    );
+  }
+
+  doc.save(`reporte_reservas_${from}_a_${to}.pdf`);
+}
+
 export default function ReportsDashboard() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -289,8 +364,9 @@ export default function ReportsDashboard() {
   return (
     <div className="space-y-6 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2" data-pdf-hide>
-        <div className="flex flex-wrap gap-2 items-center flex-1">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
+        {/* Filtros a la izquierda */}
+        <div className="flex flex-wrap gap-2 items-center">
           {quickRanges.map((r) => (
             <button
               key={r.label}
@@ -324,6 +400,7 @@ export default function ReportsDashboard() {
             />
           </div>
         </div>
+        {/* Botones a la derecha */}
         <div className="flex gap-2">
           <ExportButtons
             onExportCSV={() =>
@@ -335,19 +412,17 @@ export default function ReportsDashboard() {
                 data?.totalReservations || 0,
               )
             }
-            pdfElementRef={pdfElementRef}
-            pdfOptions={{
-              filename: `reporte_reservas_${from}_a_${to}.pdf`,
-              title: 'Reporte de Reservas por Servicio',
-              subtitle: 'ZenCat - Dashboard de Reportes',
-              dateRange: `Período: ${formatDate(from)} - ${formatDate(to)}`,
-            }}
+            onExportPDF={() =>
+              exportToPDF(
+                chartData,
+                data?.services.map((s) => s.ServiceType) || [],
+                from,
+                to,
+                data?.totalReservations || 0,
+              )
+            }
             disabled={loading || !chartData.length}
             loading={loading}
-          />
-          <PDFTestButton
-            elementRef={pdfElementRef}
-            disabled={loading || !chartData.length}
           />
         </div>
       </div>
