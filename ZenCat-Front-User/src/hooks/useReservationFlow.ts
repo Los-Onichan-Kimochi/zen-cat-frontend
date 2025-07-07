@@ -19,7 +19,7 @@ export const useReservationFlow = () => {
       return;
     }
     navigate({
-      to: '/reserva/lugar',
+      to: '/reserva/location-professional',
       search: servicio ? { servicio } : undefined,
     });
   };

@@ -7,7 +7,7 @@ import { ReservaConfirmacionRoute } from '@/layouts/reservation-layout';
 import { z } from 'zod';
 import { useReservation } from '@/context/reservation-context';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, Clock, User, MapPin, Monitor, Users, Home, Video, MapPinIcon, CalendarDays, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
