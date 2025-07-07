@@ -14,6 +14,7 @@ export interface User {
   name?: string;
   email?: string;
   imageUrl?: string;
+  image_url?: string; // Backend field
   role?: string;
   rol?: string; // Backend uses 'rol' field
   isAuthenticated?: boolean;
@@ -120,6 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAdministrator = () => {
     return user?.rol === 'ADMINISTRATOR' || user?.role === 'ADMINISTRATOR';
   };
+
   const hasRole = (role: string) => {
     return user?.rol === role || user?.role === role;
   };
@@ -145,6 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated,
     isLoading,
     userEmail: user?.email,
+    userRole: user?.rol || user?.role,
   });
 
   return (

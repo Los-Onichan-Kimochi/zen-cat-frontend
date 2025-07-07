@@ -7,14 +7,16 @@ import { ReservaConfirmacionRoute } from '@/layouts/reservation-layout';
 import { z } from 'zod';
 import { useReservation } from '@/context/reservation-context';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, Calendar, Clock, User, MapPin, Monitor, Users, Home, Video, MapPinIcon, CalendarDays, Timer } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
 import { professionalsApi } from '@/api/professionals/professionals';
 import { communitiesApi } from '@/api/communities/communities';
-import { CreateReservationRequest, ReservationState } from '@/types/reservation';
-
+import {
+  CreateReservationRequest,
+  ReservationState,
+} from '@/types/reservation';
 export const Route = createFileRoute(ReservaConfirmacionRoute)({
   component: ConfirmationStepComponent,
   validateSearch: z.object({
@@ -27,11 +29,10 @@ function ConfirmationStepComponent() {
   const search = useSearch({ from: '/reserva/confirmacion' });
   const { reservationData, resetReservation } = useReservation();
   const [reservationCreated, setReservationCreated] = useState(false);
-  const [createdReservationId, setCreatedReservationId] = useState<string | null>(null);
-  
-  // Determinar si el servicio es virtual
-  const isVirtualService = reservationData.service?.is_virtual || false;
-
+  const [createdReservationId, setCreatedReservationId] = useState<
+    string | null
+  >(null);
+  console.log(reservationData);
   // Fetch professional data if session exists
   const { data: professionalData } = useQuery({
     queryKey: ['professional', reservationData.session?.professionalId],
@@ -63,7 +64,6 @@ function ConfirmationStepComponent() {
   });
 
   const handleConfirm = async () => {
-    // Validaciones más estrictas
     if (!reservationData.session || !reservationData.userId) {
       alert('Faltan datos para crear la reserva');
       return;
@@ -75,8 +75,6 @@ function ConfirmationStepComponent() {
       state: ReservationState.CONFIRMED,
       user_id: reservationData.userId,
       session_id: reservationData.session.id,
-      // Solo incluir membershipId si está presente
-      ...(reservationData.membershipId && { membership_id: reservationData.membershipId }),
     };
 
     createReservationMutation.mutate(reservationRequest);
@@ -91,15 +89,25 @@ function ConfirmationStepComponent() {
 
   const handleGoToCommunities = () => {
     resetReservation();
-    navigate({ to: '/mis-comunidades' });
+    navigate({ to: '/comunidades' });
   };
 
   const formatDate = (dateStr?: string) => {
     if (reservationData.session?.date) {
       const sessionDate = new Date(reservationData.session.date);
       const months = [
-        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+        'enero',
+        'febrero',
+        'marzo',
+        'abril',
+        'mayo',
+        'junio',
+        'julio',
+        'agosto',
+        'septiembre',
+        'octubre',
+        'noviembre',
+        'diciembre',
       ];
       return `${sessionDate.getDate()} de ${months[sessionDate.getMonth()]} del ${sessionDate.getFullYear()}`;
     }
@@ -107,17 +115,32 @@ function ConfirmationStepComponent() {
     if (!dateStr) return '';
     const [day, month] = dateStr.split('/');
     const months = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     return `${day} de ${months[parseInt(month) - 1]} del 2025`;
+  };
+
+  const formatTime = (time: string) => {
+    if (!time) return '';
+    return `${time} h - 08:00 h`;
   };
 
   const formatSessionTime = () => {
     if (!reservationData.session) return '';
     const startTime = new Date(reservationData.session.startTime);
     const endTime = new Date(reservationData.session.endTime);
-    return `${startTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    return `${startTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h - ${endTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h`;
   };
 
   if (!reservationData.service) {
@@ -136,11 +159,11 @@ function ConfirmationStepComponent() {
   if (reservationCreated) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-8 rounded-xl shadow-lg">
+        <div className="border p-8 rounded-md bg-green-50">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-10 h-10 text-white"
+                className="w-8 h-8 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -148,26 +171,29 @@ function ConfirmationStepComponent() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold mb-3 text-green-800">
+            <h2 className="text-2xl font-bold mb-2 text-green-800">
               ¡Reserva Confirmada!
             </h2>
-            <p className="text-green-700 text-lg">
+            <p className="text-green-700">
               Tu reserva se ha creado exitosamente
             </p>
+            {createdReservationId && (
+              <p className="text-sm text-green-600 mt-2">
+                ID de reserva: {createdReservationId}
+              </p>
+            )}
           </div>
 
           <div className="text-center">
-            <Button 
-              onClick={handleGoToCommunities} 
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <Button onClick={handleGoToCommunities} className="mr-4">
               Ir a mis comunidades
             </Button>
+            <Button variant="outline">Descargar comprobante</Button>
           </div>
         </div>
       </div>
@@ -176,212 +202,128 @@ function ConfirmationStepComponent() {
 
   return (
     <div>
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-          {/* Header */}
-          <div className="bg-gray-900 text-white p-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2">Confirmar Reserva</h2>
-              <p className="text-gray-300 text-lg">
-                Revisa los detalles de tu reserva antes de confirmar
-              </p>
-            </div>
+      <div className="max-w-2xl mx-auto">
+        <div className="border p-8 rounded-md bg-white">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Reserva realizada</h2>
+            <p className="text-gray-600">
+              Tu reserva se ha registrado correctamente
+            </p>
           </div>
 
-          {/* Content */}
-          <div className="p-8">
-            <div className="space-y-8">
-              {/* Información principal */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-100 rounded-lg">
-                    <div className="w-10 h-10 bg-sky-300 rounded-full flex items-center justify-center shadow-sm">
-                      <Users className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-sky-600 font-medium">Comunidad</div>
-                      <div className="font-semibold text-gray-900">
-                        {communityData?.name || 'ZenCat Wellness Community'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-100 rounded-lg">
-                    <div className="w-10 h-10 bg-sky-300 rounded-full flex items-center justify-center shadow-sm">
-                      {isVirtualService ? (
-                        <Video className="w-5 h-5 text-white" />
-                      ) : (
-                        <Home className="w-5 h-5 text-white" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-sm text-sky-600 font-medium">Servicio</div>
-                      <div className="font-semibold text-gray-900">
-                        {reservationData.service.name}
-                      </div>
-                      <div className="text-sm text-sky-600 font-medium">
-                        {isVirtualService ? 'Virtual' : 'Presencial'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-100 rounded-lg">
-                    <div className="w-10 h-10 bg-sky-300 rounded-full flex items-center justify-center shadow-sm">
-                      <CalendarDays className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-sky-600 font-medium">Fecha</div>
-                      <div className="font-semibold text-gray-900">{formatDate()}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-100 rounded-lg">
-                    <div className="w-10 h-10 bg-sky-300 rounded-full flex items-center justify-center shadow-sm">
-                      <Timer className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-sky-600 font-medium">Horario</div>
-                      <div className="font-semibold text-gray-900">
-                        {formatSessionTime()}
-                      </div>
-                    </div>
-                  </div>
+          <div className="space-y-6">
+            {/* Información de la comunidad y servicio */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Comunidad</div>
+                <div className="font-semibold">
+                  {communityData?.name || 'ZenCat Wellness Community'}
                 </div>
               </div>
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Servicio</div>
+                <div className="font-semibold">
+                  {reservationData.service.name}
+                </div>
+              </div>
+            </div>
 
-              {/* Información específica por modalidad */}
-              {isVirtualService ? (
-                                 // Información para servicios virtuales
-                 <div className="border-t pt-6">
-                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                     <div className="w-6 h-6 bg-emerald-300 rounded-full flex items-center justify-center">
-                       <Video className="w-4 h-4 text-white" />
-                     </div>
-                     Información del Servicio Virtual
-                   </h3>
-                   <div className="space-y-4">
-                     {reservationData.professional && (
-                       <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
-                         <div className="w-10 h-10 bg-emerald-300 rounded-full flex items-center justify-center shadow-sm">
-                           <User className="w-5 h-5 text-white" />
-                         </div>
-                         <div>
-                           <div className="text-sm text-emerald-600 font-medium">Profesional</div>
-                           <div className="font-semibold text-gray-900">
-                             {reservationData.professional.name} {reservationData.professional.first_last_name}
-                             {reservationData.professional.second_last_name && ` ${reservationData.professional.second_last_name}`}
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                     
-                     {/* Enlace de la sesión virtual */}
-                     {reservationData.session && (
-                       <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
-                         <div className="flex items-start gap-3">
-                           <div className="w-10 h-10 bg-emerald-300 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-                             <Monitor className="w-5 h-5 text-white" />
-                           </div>
-                           <div className="flex-1 min-w-0">
-                             <div className="text-sm font-medium text-gray-900 mb-2">Enlace de acceso a la sesión</div>
-                             <div className="font-mono text-sm bg-white px-3 py-2 rounded border border-gray-200 text-emerald-600 break-all mb-2">
-                               https://meet.zencat.com/session/{reservationData.session.id}
-                             </div>
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                   </div>
-                 </div>
-              ) : (
-                // Información para servicios presenciales
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <div className="w-6 h-6 bg-emerald-300 rounded-full flex items-center justify-center">
-                      <MapPinIcon className="w-4 h-4 text-white" />
-                    </div>
-                    Información del Lugar
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
-                      <div className="w-10 h-10 bg-emerald-300 rounded-full flex items-center justify-center shadow-sm">
-                        <MapPin className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-emerald-600 font-medium">Lugar</div>
-                        <div className="font-semibold text-gray-900">
-                          {reservationData.location?.name || 'Pabellón A'}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {reservationData.location?.district || 'San Miguel'}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
-                      <div className="w-10 h-10 bg-emerald-300 rounded-full flex items-center justify-center shadow-sm">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-emerald-600 font-medium">Instructor</div>
-                        <div className="font-semibold text-gray-900">
-                          {professionalData
-                            ? `${professionalData.name} ${professionalData.first_last_name}`
-                            : 'Instructor asignado'}
-                        </div>
-                      </div>
+            <hr className="border-gray-200" />
+
+            {/* Información de lugar y fecha */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Lugar</div>
+                <div className="font-semibold">
+                  {reservationData.location?.pavilion || 'Pabellón A'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Fecha</div>
+                <div className="font-semibold">{formatDate()}</div>
+              </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* Información de dirección y horario */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Dirección</div>
+                <div className="font-semibold">
+                  {reservationData.location?.address || 'Av. Universitaria 100'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Hora</div>
+                <div className="font-semibold">
+                  {reservationData.session
+                    ? formatSessionTime()
+                    : formatTime(reservationData.time || '')}
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* Información de capacidad y sesión */}
+            {reservationData.session && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Capacidad</div>
+                    <div className="font-semibold">
+                      {reservationData.session.capacity} personas
                     </div>
                   </div>
-                  {reservationData.location?.address && (
-                    <div className="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
-                      <div className="text-sm text-emerald-600 mb-1 font-medium">Dirección completa</div>
-                      <div className="font-medium text-gray-900">{reservationData.location.address}</div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">
+                      Reservas actuales
                     </div>
-                  )}
+                    <div className="font-semibold">
+                      {reservationData.session.registeredCount + 1} /{' '}
+                      {reservationData.session.capacity}
+                    </div>
+                  </div>
                 </div>
-              )}
 
-                             {/* Información de la sesión */}
-               {reservationData.session && (
-                 <div className="border-t pt-6">
-                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                     <div className="w-6 h-6 bg-slate-300 rounded-full flex items-center justify-center">
-                       <Calendar className="w-4 h-4 text-white" />
-                     </div>
-                     Detalles de la Sesión
-                   </h3>
-                   <div className="bg-slate-50 border border-slate-100 p-6 rounded-xl shadow-sm">
-                     <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 bg-slate-300 rounded-full flex items-center justify-center shadow-sm">
-                         <Clock className="w-6 h-6 text-white" />
-                       </div>
-                       <div className="flex-1">
-                         <div className="font-bold text-gray-900 text-xl mb-1">
-                           {reservationData.session.title}
-                         </div>
-                         <div className="flex items-center gap-4 text-sm text-slate-600">
-                           <span className="flex items-center gap-1">
-                             <Users className="w-4 h-4" />
-                             Capacidad: {reservationData.session.capacity} personas
-                           </span>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               )}
+                <hr className="border-gray-200" />
+              </>
+            )}
 
-                             {/* Mensaje informativo */}
-               <div className="bg-sky-50 border border-sky-100 p-4 rounded-lg">
-                 <p className="text-sky-600 text-center font-medium">
-                   {isVirtualService ? (
-                     "Asegúrate de tener una conexión estable a internet y únete unos minutos antes"
-                   ) : (
-                     "No olvides llegar puntual a tu reserva"
-                   )}
-                 </p>
-               </div>
+            {/* Información del salón y distrito */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Salón</div>
+                <div className="font-semibold">
+                  {reservationData.session?.title || 'A201'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Distrito</div>
+                <div className="font-semibold">
+                  {reservationData.location?.district || 'San Miguel'}
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* Información del profesor */}
+            <div>
+              <div className="text-sm text-gray-600 mb-1">Profesor</div>
+              <div className="font-semibold">
+                {professionalData
+                  ? `${professionalData.name} ${professionalData.first_last_name}`
+                  : 'Instructor asignado'}
+              </div>
+            </div>
+
+            {/* Mensaje adicional */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-700 text-center">
+                No olvides llegar puntual a tu reserva
+              </p>
             </div>
           </div>
         </div>
@@ -391,27 +333,30 @@ function ConfirmationStepComponent() {
           <Button
             variant="outline"
             onClick={handleBack}
-            className="flex items-center gap-2 px-6 py-3"
+            className="flex items-center gap-2"
             disabled={createReservationMutation.isPending}
           >
             <ArrowLeft className="w-4 h-4" />
             Anterior
           </Button>
 
-          <Button
-            onClick={handleConfirm}
-            disabled={createReservationMutation.isPending}
-            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            {createReservationMutation.isPending ? (
-              <>
-                <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                Confirmando...
-              </>
-            ) : (
-              'Confirmar reserva'
-            )}
-          </Button>
+          <div className="flex gap-4">
+            <Button variant="outline">Descargar ticket</Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={createReservationMutation.isPending}
+              className="min-w-[140px]"
+            >
+              {createReservationMutation.isPending ? (
+                <>
+                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                  Confirmando...
+                </>
+              ) : (
+                'Confirmar reserva'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

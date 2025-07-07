@@ -1,6 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
 
 export interface TimeSlotCalendarProps {
   selectedRange?: { start: string; end: string };
@@ -72,79 +76,93 @@ export function TimeSlotCalendar({
   }, []);
 
   // Calcular posición y altura de un bloque de sesión
-  const getSessionPosition = useCallback((start: string, end: string) => {
-    const startMinutes = timeToMinutes(start);
-    const endMinutes = timeToMinutes(end);
-    const startHourMinutes = startHour * 60;
-    
-    // Cada hora ocupa 60px
-    const pixelsPerMinute = 60 / 60; // 1px por minuto
-    const top = (startMinutes - startHourMinutes) * pixelsPerMinute;
-    const height = (endMinutes - startMinutes) * pixelsPerMinute;
-    
-    return { top, height };
-  }, [startHour, timeToMinutes]);
+  const getSessionPosition = useCallback(
+    (start: string, end: string) => {
+      const startMinutes = timeToMinutes(start);
+      const endMinutes = timeToMinutes(end);
+      const startHourMinutes = startHour * 60;
+
+      // Cada hora ocupa 60px
+      const pixelsPerMinute = 60 / 60; // 1px por minuto
+      const top = (startMinutes - startHourMinutes) * pixelsPerMinute;
+      const height = (endMinutes - startMinutes) * pixelsPerMinute;
+
+      return { top, height };
+    },
+    [startHour, timeToMinutes],
+  );
 
   // Obtener sesiones para una fecha específica
-  const getSessionsForDate = useCallback((dateLabel: string) => {
-    return occupiedSlots.filter(slot => slot.date === dateLabel);
-  }, [occupiedSlots]);
+  const getSessionsForDate = useCallback(
+    (dateLabel: string) => {
+      return occupiedSlots.filter((slot) => slot.date === dateLabel);
+    },
+    [occupiedSlots],
+  );
 
   // Manejar selección de sesión
-  const handleSessionSelect = useCallback((date: string, session: any) => {
-    if (disabled) return;
-    
-    // No permitir seleccionar sesiones donde el usuario ya tiene reserva
-    if (session.isUserReserved) {
-      return;
-    }
-    
-    // No permitir seleccionar sesiones llenas
-    if (session.isFullyBooked) {
-      return;
-    }
-    
-    onRangeSelect({ start: session.start, end: session.end }, date);
-  }, [disabled, onRangeSelect]);
+  const handleSessionSelect = useCallback(
+    (date: string, session: any) => {
+      if (disabled) return;
+
+      // No permitir seleccionar sesiones donde el usuario ya tiene reserva
+      if (session.isUserReserved) {
+        return;
+      }
+
+      // No permitir seleccionar sesiones llenas
+      if (session.isFullyBooked) {
+        return;
+      }
+
+      onRangeSelect({ start: session.start, end: session.end }, date);
+    },
+    [disabled, onRangeSelect],
+  );
 
   // Determinar el estilo de la sesión basado en su estado
   const getSessionStyle = useCallback((session: any, isSelected: boolean) => {
     if (session.isUserReserved === true) {
-      return "bg-red-100 border-red-300 text-red-800 cursor-not-allowed";
+      return 'bg-red-100 border-red-300 text-red-800 cursor-not-allowed';
     }
-    
+
     if (session.isFullyBooked === true) {
-      return "bg-gray-200 border-gray-300 text-gray-600 cursor-not-allowed";
+      return 'bg-gray-200 border-gray-300 text-gray-600 cursor-not-allowed';
     }
-    
+
     if (isSelected) {
-      return "bg-black text-white border-black";
+      return 'bg-black text-white border-black';
     }
-    
-    return "bg-green-100 border-green-300 text-green-800 hover:bg-green-200 cursor-pointer";
+
+    return 'bg-green-100 border-green-300 text-green-800 hover:bg-green-200 cursor-pointer';
   }, []);
 
   // Obtener el texto de estado para el hover
   const getStatusText = useCallback((session: any) => {
     if (session.isUserReserved === true) {
-      return "Ya tienes una reserva en este horario";
+      return 'Ya tienes una reserva en este horario';
     }
-    
+
     if (session.isFullyBooked === true) {
-      return "Sesión llena";
+      return 'Sesión llena';
     }
-    
-    return "Disponible para reservar";
+
+    return 'Disponible para reservar';
   }, []);
 
   const totalHours = endHour - startHour + 1;
   const gridHeight = totalHours * 60; // 60px por hora
 
   return (
-    <div className="border rounded-lg bg-white shadow-sm h-full flex flex-col" style={{ minHeight: '400px' }}>
+    <div
+      className="border rounded-lg bg-white shadow-sm h-full flex flex-col"
+      style={{ minHeight: '400px' }}
+    >
       {/* Header */}
       <div className="p-4 border-b bg-gray-50 flex-shrink-0">
-        <h3 className="text-lg font-medium text-gray-900">Horarios disponibles</h3>
+        <h3 className="text-lg font-medium text-gray-900">
+          Horarios disponibles
+        </h3>
         {selectedRange && selectedDate && (
           <div className="mt-2 text-sm font-medium text-green-600">
             Seleccionado: {selectedDate} a las {selectedRange.start}
@@ -153,7 +171,10 @@ export function TimeSlotCalendar({
       </div>
 
       {/* Contenedor principal con scroll */}
-      <div className="flex-1 overflow-auto relative" style={{ scrollBehavior: 'smooth', willChange: 'scroll-position' }}>
+      <div
+        className="flex-1 overflow-auto relative"
+        style={{ scrollBehavior: 'smooth', willChange: 'scroll-position' }}
+      >
         <div className="flex min-w-full" style={{ minHeight: '100%' }}>
           {/* Columna de horas */}
           <div className="w-20 flex-shrink-0 border-r bg-gray-50 relative z-20">
@@ -161,7 +182,7 @@ export function TimeSlotCalendar({
             <div className="h-16 border-b flex items-center justify-center text-xs font-medium text-gray-600 bg-gray-50 sticky top-0 z-30">
               Hora
             </div>
-            
+
             {/* Horas */}
             <div className="relative" style={{ height: gridHeight }}>
               {hours.map((hour, idx) => (
@@ -170,7 +191,9 @@ export function TimeSlotCalendar({
                   className="absolute w-full border-b border-gray-200 flex items-start justify-center pt-1"
                   style={{ top: idx * 60, height: 60 }}
                 >
-                  <span className="text-xs font-medium text-gray-700">{hour}</span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {hour}
+                  </span>
                 </div>
               ))}
             </div>
@@ -179,15 +202,25 @@ export function TimeSlotCalendar({
           {/* Columnas de días */}
           <div className="flex-1 flex">
             {dates.map((date, dateIdx) => (
-              <div key={dateIdx} className="flex-1 border-r border-gray-200 last:border-r-0 relative">
+              <div
+                key={dateIdx}
+                className="flex-1 border-r border-gray-200 last:border-r-0 relative"
+              >
                 {/* Header del día - STICKY */}
                 <div className="h-16 border-b bg-gray-50 flex flex-col items-center justify-center sticky top-0 z-20">
-                  <div className="text-xs font-medium text-gray-600">{date.weekday}</div>
-                  <div className="text-sm font-bold text-gray-900">{date.day}/{date.month}</div>
+                  <div className="text-xs font-medium text-gray-600">
+                    {date.weekday}
+                  </div>
+                  <div className="text-sm font-bold text-gray-900">
+                    {date.day}/{date.month}
+                  </div>
                 </div>
 
                 {/* Grid de horas con sesiones - CON OVERFLOW HIDDEN */}
-                <div className="relative overflow-hidden" style={{ height: gridHeight }}>
+                <div
+                  className="relative overflow-hidden"
+                  style={{ height: gridHeight }}
+                >
                   {/* Líneas de fondo para cada hora */}
                   {hours.map((_, idx) => (
                     <div
@@ -199,11 +232,16 @@ export function TimeSlotCalendar({
 
                   {/* Sesiones para este día */}
                   {getSessionsForDate(date.label).map((session, sessionIdx) => {
-                    const { top, height } = getSessionPosition(session.start, session.end);
-                    const isSelected = !!(selectedRange && 
-                                      selectedDate === date.label && 
-                                      selectedRange.start === session.start);
-                    
+                    const { top, height } = getSessionPosition(
+                      session.start,
+                      session.end,
+                    );
+                    const isSelected = !!(
+                      selectedRange &&
+                      selectedDate === date.label &&
+                      selectedRange.start === session.start
+                    );
+
                     const sessionStyle = getSessionStyle(session, isSelected);
                     const statusText = getStatusText(session);
 
@@ -212,50 +250,89 @@ export function TimeSlotCalendar({
                         <HoverCardTrigger asChild>
                           <div
                             className={cn(
-                              "absolute left-1 right-1 rounded border text-xs font-medium p-1 flex items-center justify-center overflow-hidden transition-colors",
-                              sessionStyle
+                              'absolute left-1 right-1 rounded border text-xs font-medium p-1 flex items-center justify-center overflow-hidden transition-colors',
+                              sessionStyle,
                             )}
-                            style={{ 
-                              top, 
+                            style={{
+                              top,
                               height: Math.max(height, 20),
-                              maxHeight: gridHeight - top // Evita que escape del área
+                              maxHeight: gridHeight - top, // Evita que escape del área
                             }}
-                            onClick={() => handleSessionSelect(date.label, session)}
+                            onClick={() =>
+                              handleSessionSelect(date.label, session)
+                            }
                           >
                             <span className="truncate">
-                              {session.sessionInfo?.title || session.title || 'Sesión'}
+                              {session.sessionInfo?.title ||
+                                session.title ||
+                                'Sesión'}
                             </span>
                           </div>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-64 p-3 text-sm">
                           {session.sessionInfo ? (
                             <div className="space-y-2">
-                              <h4 className="font-medium">{session.sessionInfo.title}</h4>
+                              <h4 className="font-medium">
+                                {session.sessionInfo.title}
+                              </h4>
                               <div className="space-y-1 text-xs">
-                                <p><span className="font-medium">Horario:</span> {session.start} - {session.end}</p>
-                                <p><span className="font-medium">Profesional:</span> {session.sessionInfo.professional}</p>
-                                {session.sessionInfo.location !== 'Virtual' && (
-                                  <p><span className="font-medium">Lugar:</span> {session.sessionInfo.location}</p>
-                                )}
-                                <p><span className="font-medium">Disponibilidad:</span> {session.sessionInfo.capacity - session.sessionInfo.registered}/{session.sessionInfo.capacity}</p>
-                                <p className={cn("font-medium", {
-                                  "text-red-600": session.isUserReserved === true,
-                                  "text-gray-600": session.isFullyBooked === true,
-                                  "text-green-600": session.isUserReserved !== true && session.isFullyBooked !== true
-                                })}>
-                                  <span className="font-medium">Estado:</span> {statusText}
+                                <p>
+                                  <span className="font-medium">Horario:</span>{' '}
+                                  {session.start} - {session.end}
+                                </p>
+                                <p>
+                                  <span className="font-medium">
+                                    Profesional:
+                                  </span>{' '}
+                                  {session.sessionInfo.professional}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Lugar:</span>{' '}
+                                  {session.sessionInfo.location}
+                                </p>
+                                <p>
+                                  <span className="font-medium">
+                                    Disponibilidad:
+                                  </span>{' '}
+                                  {session.sessionInfo.capacity -
+                                    session.sessionInfo.registered}
+                                  /{session.sessionInfo.capacity}
+                                </p>
+                                <p
+                                  className={cn('font-medium', {
+                                    'text-red-600':
+                                      session.isUserReserved === true,
+                                    'text-gray-600':
+                                      session.isFullyBooked === true,
+                                    'text-green-600':
+                                      session.isUserReserved !== true &&
+                                      session.isFullyBooked !== true,
+                                  })}
+                                >
+                                  <span className="font-medium">Estado:</span>{' '}
+                                  {statusText}
                                 </p>
                               </div>
                             </div>
                           ) : (
                             <div>
-                              <p className="font-medium">{session.title || 'Sesión'}</p>
-                              <p className="text-xs text-gray-500 mt-1">Horario: {session.start} - {session.end}</p>
-                              <p className={cn("text-xs mt-1", {
-                                "text-red-600": session.isUserReserved === true,
-                                "text-gray-600": session.isFullyBooked === true,
-                                "text-green-600": session.isUserReserved !== true && session.isFullyBooked !== true
-                              })}>
+                              <p className="font-medium">
+                                {session.title || 'Sesión'}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Horario: {session.start} - {session.end}
+                              </p>
+                              <p
+                                className={cn('text-xs mt-1', {
+                                  'text-red-600':
+                                    session.isUserReserved === true,
+                                  'text-gray-600':
+                                    session.isFullyBooked === true,
+                                  'text-green-600':
+                                    session.isUserReserved !== true &&
+                                    session.isFullyBooked !== true,
+                                })}
+                              >
                                 {statusText}
                               </p>
                             </div>

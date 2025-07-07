@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as ProfileImport } from './routes/profile'
 import { Route as LoginImport } from './routes/login'
 import { Route as NotFoundPageImport } from './routes/NotFoundPage'
 import { Route as RolesPermisosRouteImport } from './routes/roles-permisos/route'
@@ -50,6 +51,12 @@ import { Route as AdminConfiguracionImport } from './routes/admin/configuracion'
 import { Route as SesionesReservasSessionIdImport } from './routes/sesiones/reservas/$sessionId'
 
 // Create/Update Routes
+
+const ProfileRoute = ProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const LoginRoute = LoginImport.update({
   id: '/login',
@@ -330,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileImport
+      parentRoute: typeof rootRoute
+    }
     '/admin/configuracion': {
       id: '/admin/configuracion'
       path: '/admin/configuracion'
@@ -553,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/admin/configuracion': typeof AdminConfiguracionRoute
   '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
@@ -593,6 +608,7 @@ export interface FileRoutesByTo {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/admin/configuracion': typeof AdminConfiguracionRoute
   '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
@@ -634,6 +650,7 @@ export interface FileRoutesById {
   '/roles-permisos': typeof RolesPermisosRouteRoute
   '/NotFoundPage': typeof NotFoundPageRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/admin/configuracion': typeof AdminConfiguracionRoute
   '/comunidades/agregar-comunidad': typeof ComunidadesAgregarComunidadRoute
   '/comunidades/agregar-planes-membresía': typeof ComunidadesAgregarPlanesMembresaRoute
@@ -676,6 +693,7 @@ export interface FileRouteTypes {
     | '/roles-permisos'
     | '/NotFoundPage'
     | '/login'
+    | '/profile'
     | '/admin/configuracion'
     | '/comunidades/agregar-comunidad'
     | '/comunidades/agregar-planes-membresía'
@@ -715,6 +733,7 @@ export interface FileRouteTypes {
     | '/roles-permisos'
     | '/NotFoundPage'
     | '/login'
+    | '/profile'
     | '/admin/configuracion'
     | '/comunidades/agregar-comunidad'
     | '/comunidades/agregar-planes-membresía'
@@ -754,6 +773,7 @@ export interface FileRouteTypes {
     | '/roles-permisos'
     | '/NotFoundPage'
     | '/login'
+    | '/profile'
     | '/admin/configuracion'
     | '/comunidades/agregar-comunidad'
     | '/comunidades/agregar-planes-membresía'
@@ -795,6 +815,7 @@ export interface RootRouteChildren {
   RolesPermisosRouteRoute: typeof RolesPermisosRouteRoute
   NotFoundPageRoute: typeof NotFoundPageRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   AdminConfiguracionRoute: typeof AdminConfiguracionRoute
   ComunidadesAgregarComunidadRoute: typeof ComunidadesAgregarComunidadRoute
   ComunidadesAgregarPlanesMembresaRoute: typeof ComunidadesAgregarPlanesMembresaRoute
@@ -835,6 +856,7 @@ const rootRouteChildren: RootRouteChildren = {
   RolesPermisosRouteRoute: RolesPermisosRouteRoute,
   NotFoundPageRoute: NotFoundPageRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   AdminConfiguracionRoute: AdminConfiguracionRoute,
   ComunidadesAgregarComunidadRoute: ComunidadesAgregarComunidadRoute,
   ComunidadesAgregarPlanesMembresaRoute: ComunidadesAgregarPlanesMembresaRoute,
@@ -884,6 +906,7 @@ export const routeTree = rootRoute
         "/roles-permisos",
         "/NotFoundPage",
         "/login",
+        "/profile",
         "/admin/configuracion",
         "/comunidades/agregar-comunidad",
         "/comunidades/agregar-planes-membresía",
@@ -936,6 +959,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/profile": {
+      "filePath": "profile.tsx"
     },
     "/admin/configuracion": {
       "filePath": "admin/configuracion.tsx"

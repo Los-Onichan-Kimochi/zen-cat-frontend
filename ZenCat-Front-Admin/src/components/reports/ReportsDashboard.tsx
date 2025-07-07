@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   BarChart,
   Bar,
@@ -18,7 +18,10 @@ import {
   ServiceReportResponse,
 } from '@/api/reportes/serviceReports';
 import dayjs from 'dayjs';
-import { FaCalendarAlt, FaDownload } from 'react-icons/fa';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { ExportButtons } from '@/components/common/ExportButtons';
+import { PDFTestButton } from '@/components/common/PDFTestButton';
+import jsPDF from 'jspdf';
 
 const groupByOptions = [
   { value: 'day', label: 'Día' },
@@ -159,6 +162,80 @@ const renderPieLabel = ({
   );
 };
 
+function exportToPDF(
+  chartData: any[],
+  services: string[],
+  from: string,
+  to: string,
+  totalGeneral: number,
+) {
+  const doc = new jsPDF();
+  let y = 15;
+
+  // Título
+  doc.setFontSize(18);
+  doc.text('Reporte de Reservas por Servicio', 10, y);
+  y += 10;
+  doc.setFontSize(12);
+  doc.text('ZenCat - Dashboard de Reportes', 10, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.text(`Período: ${formatDate(from)} - ${formatDate(to)}`, 10, y);
+  y += 10;
+
+  // Totales generales
+  doc.setFontSize(12);
+  doc.text(`Total reservas: ${totalGeneral}`, 10, y);
+  y += 10;
+
+  // Tabla de servicios
+  doc.setFontSize(11);
+  doc.text('Resumen por Servicio:', 10, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.text('Servicio', 10, y);
+  doc.text('Cantidad', 60, y);
+  doc.text('% del total', 100, y);
+  y += 5;
+  doc.text('-----------------------------------------------', 10, y);
+  y += 3;
+
+  services.forEach((service) => {
+    const total = chartData.reduce((acc, row) => acc + (row[service] ?? 0), 0);
+    const porcentaje = totalGeneral ? ((total / totalGeneral) * 100).toFixed(1) : '0';
+    doc.text(service, 10, y);
+    doc.text(String(total), 60, y);
+    doc.text(`${porcentaje}%`, 100, y);
+    y += 6;
+  });
+
+  y += 4;
+  doc.text('-----------------------------------------------', 10, y);
+  y += 8;
+
+  // Resumen destacado
+  if (services.length > 0) {
+    let maxService = services[0];
+    let maxTotal = chartData.reduce((acc, row) => acc + (row[maxService] ?? 0), 0);
+    services.forEach((service) => {
+      const total = chartData.reduce((acc, row) => acc + (row[service] ?? 0), 0);
+      if (total > maxTotal) {
+        maxService = service;
+        maxTotal = total;
+      }
+    });
+    const porcentaje = totalGeneral ? ((maxTotal / totalGeneral) * 100).toFixed(1) : '0';
+    doc.setFontSize(11);
+    doc.text(
+      `El servicio más reservado es ${maxService} con ${maxTotal} reservas (${porcentaje}%)`,
+      10,
+      y,
+    );
+  }
+
+  doc.save(`reporte_reservas_${from}_a_${to}.pdf`);
+}
+
 export default function ReportsDashboard() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -169,6 +246,9 @@ export default function ReportsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [rangeWarning, setRangeWarning] = useState<string | null>(null);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+  // Ref para el elemento que se exportará como PDF
+  const pdfElementRef = useRef<HTMLDivElement>(null);
 
   // Calcular días de diferencia
   function getDaysDiff() {
@@ -282,10 +362,11 @@ export default function ReportsDashboard() {
   }
 
   return (
-    <div className="space-y-6 font-montserrat">
+    <div className="space-y-6 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
-        <div className="flex flex-wrap gap-2 items-center flex-1">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
+        {/* Filtros a la izquierda */}
+        <div className="flex flex-wrap gap-2 items-center">
           {quickRanges.map((r) => (
             <button
               key={r.label}
@@ -305,7 +386,7 @@ export default function ReportsDashboard() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm font-montserrat text-sm"
             />
           </div>
           <span className="mx-1 text-gray-400">-</span>
@@ -315,25 +396,35 @@ export default function ReportsDashboard() {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-black focus:outline-none focus:border-blue-500 transition w-36 shadow-sm font-montserrat text-sm"
             />
           </div>
         </div>
-        <button
-          className="ml-auto px-6 py-2 bg-zinc-900 text-white rounded-lg shadow-md hover:bg-zinc-700 transition font-semibold h-12 text-base flex items-center justify-center gap-2"
-          onClick={() =>
-            exportToCSV(
-              chartData,
-              data?.services.map((s) => s.ServiceType) || [],
-              from,
-              to,
-              data?.totalReservations || 0,
-            )
-          }
-          disabled={loading || !chartData.length}
-        >
-          <FaDownload size={20} /> Exportar CSV
-        </button>
+        {/* Botones a la derecha */}
+        <div className="flex gap-1 min-w-fit">
+          <ExportButtons
+            onExportCSV={() =>
+              exportToCSV(
+                chartData,
+                data?.services.map((s) => s.ServiceType) || [],
+                from,
+                to,
+                data?.totalReservations || 0,
+              )
+            }
+            onExportPDF={() =>
+              exportToPDF(
+                chartData,
+                data?.services.map((s) => s.ServiceType) || [],
+                from,
+                to,
+                data?.totalReservations || 0,
+              )
+            }
+            disabled={loading || !chartData.length}
+            loading={loading}
+          />
+        </div>
       </div>
       {rangeWarning && (
         <div className="text-xs text-orange-600 font-semibold mb-2">

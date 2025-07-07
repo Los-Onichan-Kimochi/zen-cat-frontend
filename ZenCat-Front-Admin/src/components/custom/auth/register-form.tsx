@@ -156,6 +156,7 @@ export function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
         permissions:
           response.user.rol === 'ADMINISTRATOR' ? ['admin'] : ['user'],
         avatar: response.user.image_url || '',
+        image_url: response.user.image_url || '', // Also store as image_url for compatibility
         address: '',
         district: '',
         phone: '',

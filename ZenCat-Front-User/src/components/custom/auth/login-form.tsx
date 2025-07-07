@@ -64,7 +64,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email.split('@')[0],
-        imageUrl: response.user.image_url,
+        imageUrl: response.user.image_url || '',
+        image_url: response.user.image_url || '', // Backend field
         role: response.user.rol || 'user',
         isAuthenticated: true,
       };
@@ -106,28 +107,33 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-  try {
+    try {
       const credential = credentialResponse.credential;
       if (!credential) {
-        throw new Error("Token de Google no recibido");
+        throw new Error('Token de Google no recibido');
       }
-      console.log('Payload GoogleLogin:', { token: credentialResponse.credential });
+      console.log('Payload GoogleLogin:', {
+        token: credentialResponse.credential,
+      });
       // Llamar al backend para login/registro con Google
-      const response = await authService.googleLogin({ token: credentialResponse.credential });
+      const response = await authService.googleLogin({
+        token: credentialResponse.credential,
+      });
 
       const user = {
         id: response.user.id,
         name: response.user.name,
         email: response.user.email,
-        imageUrl: response.user.image_url,
+        imageUrl: response.user.image_url || '',
+        image_url: response.user.image_url || '', // Backend field
         role: response.user.rol,
         isAuthenticated: true,
       };
 
       login(user); // desde tu AuthContext
-      navigate({ to: "/" });
+      navigate({ to: '/' });
     } catch (error) {
-      console.error("Error en login con Google:", error);
+      console.error('Error en login con Google:', error);
     }
   };
 

@@ -58,19 +58,6 @@ export const TopBar = () => {
         >
           Contacto
         </Link>
-
-        {/* Enlaces adicionales para usuarios autenticados */}
-        {user && (
-          <>
-            <Link
-              to="/reservas"
-              className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out flex items-center"
-            >
-              <CalendarIcon className="mr-1 h-4 w-4" />
-              Mis Reservas
-            </Link>
-          </>
-        )}
       </div>
 
       {/* Acciones (login / signup) o info usuario */}
@@ -81,9 +68,9 @@ export const TopBar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-800 transition focus:outline-none">
-                  {user.imageUrl ? (
+                  {user.image_url || user.imageUrl ? (
                     <img
-                      src={user.imageUrl}
+                      src={user.image_url || user.imageUrl}
                       alt="Avatar"
                       className="h-8 w-8 rounded-full object-cover"
                     />
@@ -97,7 +84,7 @@ export const TopBar = () => {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
                   <Link
-                    to="/perfil"
+                    to="/profile"
                     className="flex items-center cursor-pointer"
                   >
                     <PersonIcon className="mr-2 h-4 w-4" />
@@ -145,9 +132,9 @@ export const TopBar = () => {
                   className="sm:hidden p-2 rounded-full hover:bg-gray-800 transition focus:outline-none"
                   aria-label="Opciones de usuario"
                 >
-                  {user.imageUrl ? (
+                  {user.image_url || user.imageUrl ? (
                     <img
-                      src={user.imageUrl}
+                      src={user.image_url || user.imageUrl}
                       alt="Avatar"
                       className="h-8 w-8 rounded-full object-cover"
                     />

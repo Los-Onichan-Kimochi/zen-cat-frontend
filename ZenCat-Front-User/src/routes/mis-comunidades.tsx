@@ -30,7 +30,9 @@ function ComunidadesComponent() {
   const { user } = useAuth();
 
   // Fetch user communities usando el ID del usuario autenticado
-  const { communities, loading, error, refreshUserData } = useUserCommunities(user?.id);
+  const { communities, loading, error, refreshUserData } = useUserCommunities(
+    user?.id,
+  );
 
   // Si hay error al cargar las comunidades
   if (error) {
@@ -76,7 +78,7 @@ function ComunidadesComponent() {
   // Función para refrescar datos después de cambios en membresía
   const handleRefresh = async () => {
     await refreshUserData();
-    
+
     // Deseleccionar la comunidad para que los tabs desaparezcan
     setSelectedCommunity(null);
     setServices([]);

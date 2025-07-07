@@ -4,7 +4,6 @@ import { API_ENDPOINTS } from '@/config/api';
 import { Service } from '@/types/service';
 
 export const communityServicesApi = {
-
   // Get all community services with optional filters
   getCommunityServices: async (
     communityIds?: string[],
@@ -19,12 +18,12 @@ export const communityServicesApi = {
     if (communityIds && communityIds.length > 0) {
       params.append('communityId', communityIds.join(','));
     }
-    
+
     const endpoint = `/community-service/?${params}`;
     const data = await apiClient.get<{
       community_services: CommunityService[];
     }>(endpoint);
-    
+
     if (data && typeof data === 'object' && 'community_services' in data) {
       return data.community_services;
     }

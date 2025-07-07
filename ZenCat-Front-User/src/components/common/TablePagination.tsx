@@ -60,8 +60,8 @@ export function TablePagination({
                 }}
                 isActive={currentPage === index}
                 className={`w-10 h-10 flex items-center justify-center ${
-                  currentPage === index 
-                    ? 'bg-black text-white hover:bg-gray-800' 
+                  currentPage === index
+                    ? 'bg-black text-white hover:bg-gray-800'
                     : 'hover:bg-gray-100'
                 }`}
               >
@@ -86,4 +86,4 @@ export function TablePagination({
       </Pagination>
     </div>
   );
-} 
+}

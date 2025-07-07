@@ -50,6 +50,7 @@ export const reservationsApi = {
   createReservation: async (
     request: CreateReservationRequest,
   ): Promise<Reservation> => {
+    console.log('Request: ', request);
     return apiClient.post<Reservation>(
       API_ENDPOINTS.RESERVATIONS.BASE,
       request,
@@ -89,7 +90,6 @@ export const reservationsApi = {
     communityId: string,
     userId: string,
   ): Promise<Reservation[]> => {
-    
     const endpoint = `${API_ENDPOINTS.RESERVATIONS.BASE}${communityId}/${userId}/`;
     const data = await apiClient.get<{ reservations: Reservation[] }>(endpoint);
     

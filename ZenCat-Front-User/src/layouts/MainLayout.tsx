@@ -12,6 +12,7 @@ const publicPages = [
   '/signup',
   '/forgot',
   '/pin',
+  '/changepassword',
 ];
 
 const MainLayout: React.FC = () => {

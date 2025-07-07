@@ -7,6 +7,7 @@ export interface User {
   isAuthenticated: boolean;
   permissions?: string[];
   image_url?: string;
+  avatar?: string; // For compatibility with TopBar and other components
   address?: string;
   district?: string;
   city?: string;

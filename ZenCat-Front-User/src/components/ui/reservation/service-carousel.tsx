@@ -12,13 +12,13 @@ type Props = {
   onPageChange: (page: number) => void;
 };
 
-export function ServiceCarousel({ 
-  services, 
-  onSelect, 
+export function ServiceCarousel({
+  services,
+  onSelect,
   selected,
   currentPage,
   totalPages,
-  onPageChange 
+  onPageChange,
 }: Props) {
   return (
     <div className="w-full space-y-4">
@@ -32,6 +32,7 @@ export function ServiceCarousel({
               imageUrl={service.image_url}
               selected={selected === service.name}
               onClick={() => onSelect(service.name)}
+              is_virtual={service.is_virtual}
             />
           </div>
         ))}
