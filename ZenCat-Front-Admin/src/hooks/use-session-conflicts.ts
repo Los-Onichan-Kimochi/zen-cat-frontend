@@ -103,9 +103,10 @@ export function useDayAvailability(
   date: string,
   professionalId?: string,
   localId?: string,
+  excludeSessionId?: string,
 ) {
   const { data, isLoading } = useQuery<AvailabilityResult>({
-    queryKey: ['day-availability', date, professionalId, localId],
+    queryKey: ['day-availability', date, professionalId, localId, excludeSessionId],
     queryFn: () => {
       if (!date || (!professionalId && !localId)) {
         return Promise.resolve({ isAvailable: true, busySlots: [] });
@@ -115,6 +116,7 @@ export function useDayAvailability(
         date,
         professionalId,
         localId,
+        excludeSessionId,
       };
 
       return sessionsApi.getAvailability(request);
