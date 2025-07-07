@@ -24,6 +24,7 @@ import { ModalNotifications } from '@/components/custom/common/modal-notificatio
 import { useModalNotifications } from '@/hooks/use-modal-notifications';
 import { useToast } from '@/context/ToastContext';
 import { UsersTable } from '@/components/usuarios/table';
+import { UsersFiltersModal, UsersFilters } from '@/components/usuarios/filters-modal';
 
 export const Route = createFileRoute('/usuarios/')({
   component: UsuariosComponent,
@@ -40,6 +41,9 @@ function UsuariosComponent() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [resetSelectionTrigger, setResetSelectionTrigger] = useState(0);
+
+  const [filtersState, setFiltersState] = useState<UsersFilters>({});
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
 
   // Query para obtener usuarios
   const {
@@ -172,6 +176,60 @@ function UsuariosComponent() {
     return result;
   };
 
+  const filteredUsersData = useMemo(() => {
+    if (!usersData) return [];
+    return usersData.filter((user) => {
+      const matchesSearch = filtersState.search
+        ? user.name.toLowerCase().includes(filtersState.search.toLowerCase()) ||
+          user.email.toLowerCase().includes(filtersState.search.toLowerCase())
+        : true;
+      const phone = user.onboarding?.phoneNumber || '';
+      const matchesPhone = filtersState.phone
+        ? phone.toLowerCase().includes(filtersState.phone.toLowerCase())
+        : true;
+      const documentNum = user.onboarding?.documentNumber || '';
+      const matchesDoc = filtersState.document
+        ? documentNum.toLowerCase().includes(filtersState.document.toLowerCase())
+        : true;
+      const district = user.onboarding?.district || '';
+      const matchesDistrict = filtersState.district
+        ? district.toLowerCase().includes(filtersState.district.toLowerCase())
+        : true;
+
+      return (
+        matchesSearch &&
+        matchesPhone &&
+        matchesDoc &&
+        matchesDistrict
+      );
+    });
+  }, [usersData, filtersState]);
+
+  const hasActiveFilters = useMemo(() => {
+    return Boolean(
+      (filtersState.search && filtersState.search.trim()) ||
+        (filtersState.phone && filtersState.phone.trim()) ||
+        (filtersState.document && filtersState.document.trim()) ||
+        (filtersState.district && filtersState.district.trim())
+    );
+  }, [filtersState]);
+
+  const handleFiltersChange = (newFilters: UsersFilters) => {
+    setFiltersState(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFiltersState({});
+  };
+
+  const handleApplyFilters = () => {
+    setIsFiltersModalOpen(false);
+  };
+
+  const handleOpenFiltersModal = () => {
+    setIsFiltersModalOpen(true);
+  };
+
   if (usersError) return <p>Error cargando usuarios: {usersError.message}</p>;
 
   return (
@@ -211,7 +269,7 @@ function UsuariosComponent() {
           </div>
         ) : (
           <UsersTable
-            data={usersData || []}
+            data={filteredUsersData}
             isLoading={isFetchingUsers}
             onView={handleView}
             onViewMemberships={handleViewMemberships}
@@ -220,6 +278,8 @@ function UsuariosComponent() {
             isBulkDeleting={isBulkDeleting}
             onRefresh={handleRefresh}
             resetRowSelectionTrigger={resetSelectionTrigger}
+            onOpenFilters={handleOpenFiltersModal}
+            hasActiveFilters={hasActiveFilters}
           />
         )}
       </div>
@@ -288,6 +348,14 @@ function UsuariosComponent() {
             return false;
           }
         }}
+      />
+      <UsersFiltersModal
+        isOpen={isFiltersModalOpen}
+        onClose={() => setIsFiltersModalOpen(false)}
+        filters={filtersState}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={handleClearFilters}
+        onApplyFilters={handleApplyFilters}
       />
     </div>
   );

@@ -38,6 +38,9 @@ export const getColumnLabel = (columnKey: string): string => {
     username: 'Usuario',
     role: 'Rol',
     status: 'Estado',
+    onboarding_phoneNumber: 'Celular',
+    onboarding_documentNumber: 'Documento',
+    onboarding_district: 'Distrito',
 
     // Audit columns
     user: 'Usuario',

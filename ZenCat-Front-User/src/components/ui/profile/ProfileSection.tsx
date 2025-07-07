@@ -85,7 +85,12 @@ const ProfileSection: React.FC = () => {
             setPostal(onboarding.postal_code || '');
             setDocument(onboarding.document_number || '');
             setDocumentType(onboarding.document_type || 'DNI');
-            setBirthDay(onboarding.birth_date || '2001-11-18');
+            if (onboarding.birth_date) {
+                const isoDate = onboarding.birth_date.split('T')[0];
+                setBirthDay(isoDate);
+            } else {
+                setBirthDay('');
+            }
             setRegion(onboarding.region || '');
 
             // Update current form values
@@ -243,9 +248,8 @@ const ProfileSection: React.FC = () => {
         <section className=" pb-16">
             {/* 1. Encabezado */}
             <div className="max-w-4xl mx-auto px-6 text-center mb-8">
-                <p className="text-2xl font-black text-gray-900 mb-2">Mi perfil</p>
-                <h2 className="text-6xl font-black text-gray-900 mb-4">
-                    Bienvenido, {name}
+                <h2 className="text-6xl font-black text-gray-900 mb-4 gapy-20">
+                    Hola, {name}
                 </h2>
 
                 <div className="flex items-center justify-center bg-blue-100 rounded-full w-54 h-54 mb-2 mx-auto">

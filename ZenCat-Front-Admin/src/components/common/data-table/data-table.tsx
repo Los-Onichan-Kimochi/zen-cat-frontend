@@ -79,7 +79,7 @@ export function DataTable<TData>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`border-b border-gray-200 hover:bg-gray-50/50 ${
+                  className={`border-b border-gray-300 hover:bg-gray-50/50 ${
                     index % 2 === 0 ? 'bg-white' : 'bg-gray-50/25'
                   }`}
                 >

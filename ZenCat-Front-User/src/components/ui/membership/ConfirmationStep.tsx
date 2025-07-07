@@ -10,6 +10,18 @@ import { OnboardingResponse } from '@/types/onboarding';
 import { Membership, CreateMembershipRequest, MembershipState } from '@/types/membership';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 
+const ClipboardIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 8.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v8.25A2.25 2.25 0 0 0 6 16.5h2.25m8.25-8.25H18a2.25 2.25 0 0 1 2.25 2.25v8.25A2.25 2.25 0 0 1 18 21h-7.5a2.25 2.25 0 0 1-2.25-2.25v-1.5m8.25-8.25h-6a2.25 2.25 0 0 0-2.25 2.25v6" />
+  </svg>
+);
+
+const CheckIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+  </svg>
+);
+
 export function ConfirmationStep() {
   const { state, resetOnboarding } = useMembershipOnboarding();
   const { user } = useAuth();
@@ -20,12 +32,22 @@ export function ConfirmationStep() {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isCopied, setIsCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [onboardingResult, setOnboardingResult] = useState<OnboardingResponse | null>(null);
   const [membershipResult, setMembershipResult] = useState<Membership | null>(null);
   const [currentProcess, setCurrentProcess] = useState<'onboarding' | 'membership' | 'completed'>('onboarding');
   const [hasStarted, setHasStarted] = useState(false);
   const hasStartedRef = useRef(false);
+
+  const handleCopy = (text: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      });
+    }
+  };
 
   const handleCreateMembership = useCallback(
     async (onboardingResponse: OnboardingResponse) => {
@@ -331,69 +353,84 @@ export function ConfirmationStep() {
 
         <CardContent className="px-8 pb-8">
           {/* Tabla de detalles */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Columna izquierda */}
-              <div className="space-y-4">
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Comunidad</span>
-                  <span>{membershipResult.community?.name || state.community?.name || "N/A"}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Plan</span>
-                  <span>
-                    {state.selectedPlan?.name} - {state.selectedPlan?.type}
+          <div className="border-t border-gray-200 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+              {/* --- Fila 1 --- */}
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Comunidad</span>
+                <span className="font-semibold text-gray-800">{membershipResult.community?.name || state.community?.name || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Nombre</span>
+                <span className="font-semibold text-gray-800">{user?.name || 'N/A'}</span>
+              </div>
+              
+              {/* --- Fila 2 --- */}
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Plan</span>
+                <span className="font-semibold text-gray-800">
+                  {state.selectedPlan?.name} - {state.selectedPlan?.type}
+                </span>
+              </div>
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">DNI</span>
+                <span className="font-semibold text-gray-800">
+                  {onboardingResult.document_number || 'N/A'}
+                </span>
+              </div>
+
+              {/* --- Fila 3 --- */}
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Estado</span>
+                <span className="font-bold text-green-600">{membershipResult.status === 'ACTIVE' ? 'Activa' : membershipResult.status}</span>
+              </div>
+              <div className="flex justify-between py-3 border-b items-center">
+                <span className="text-gray-600">ID de membresía</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="font-semibold text-gray-800 truncate max-w-32"
+                    title={membershipResult.id}
+                  >
+                    {membershipResult.id}
                   </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Estado</span>
-                  <span className="text-green-600 font-semibold">{membershipResult.status}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Cantidad de reservas</span>
-                  <span>
-                    {membershipResult.plan?.reservation_limit === 0 ? 'Ilimitadas' : membershipResult.plan?.reservation_limit || state.selectedPlan?.reservationLimit || 'Ilimitadas'}{' '}
-                    reservas
-                  </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Fecha de inicio</span>
-                  <span>{startDate}</span>
+                  <button onClick={() => handleCopy(membershipResult.id)} className="flex-shrink-0">
+                    {isCopied ? (
+                      <CheckIcon className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <ClipboardIcon className="h-4 w-4 text-gray-500 hover:text-gray-800 cursor-pointer" />
+                    )}
+                  </button>
                 </div>
               </div>
 
-              {/* Columna derecha */}
-              <div className="space-y-4">
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Nombre</span>
-                  <span>{user?.name || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">DNI</span>
-                  <span>
-                    {onboardingResult.document_number || 'N/A'}
-                  </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">ID de membresía</span>
-                  <span>{membershipResult.id}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium text-lg">Total</span>
-                  <span className="font-bold text-lg">
-                    S/ {membershipResult.plan?.fee?.toFixed(2) || state.selectedPlan?.price.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="font-medium">Fecha de fin</span>
-                  <span>{endDate}</span>
-                </div>
+              {/* --- Fila 4 --- */}
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Cantidad de reservas</span>
+                <span className="font-semibold text-gray-800">
+                  {membershipResult.plan?.reservation_limit === 0 ? 'Ilimitadas' : `${membershipResult.plan?.reservation_limit || state.selectedPlan?.reservationLimit || 'Ilimitadas'} reservas`}
+                </span>
+              </div>
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Total</span>
+                <span className="font-bold text-gray-800">
+                  S/ {membershipResult.plan?.fee?.toFixed(2) || state.selectedPlan?.price.toFixed(2)}
+                </span>
+              </div>
+
+              {/* --- Fila 5 --- */}
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Fecha de inicio</span>
+                <span className="font-semibold text-gray-800">{startDate}</span>
+              </div>
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">Fecha de fin</span>
+                <span className="font-semibold text-gray-800">{endDate}</span>
               </div>
             </div>
           </div>
 
           {/* Mensaje de bienvenida */}
-          <div className="text-center mb-8">
+          <div className="text-center mt-8 mb-8">
             <p className="text-lg font-semibold text-black mb-2">
               ¡Bienvenido a {membershipResult.community?.name || state.community?.name || "la comunidad"}!
             </p>

@@ -94,6 +94,7 @@ function AgregarUsuario() {
     region: '',
     provincia: '',
     distrito: '',
+    codigoPostal: '',
   });
 
   const [onboardingEnabled, setOnboardingEnabled] = useState(true);
@@ -158,6 +159,7 @@ function AgregarUsuario() {
       region: '',
       provincia: '',
       distrito: '',
+      codigoPostal: '',
     };
 
     // Validar nombres
@@ -176,6 +178,17 @@ function AgregarUsuario() {
     if (!form.correo.match(/^\S+@\S+\.\S+$/)) {
       newErrors.correo = 'Ingrese un correo válido';
       valid = false;
+    } else {
+      const allUsers: any[] | undefined = queryClient.getQueryData(['usuarios']);
+      if (allUsers) {
+        const isEmailTaken = allUsers.some(
+          (u) => u.email.toLowerCase() === form.correo.toLowerCase(),
+        );
+        if (isEmailTaken) {
+          newErrors.correo = 'Este correo ya está en uso por otro usuario.';
+          valid = false;
+        }
+      }
     }
 
     // Solo validar onboarding fields si el onboarding está habilitado
@@ -241,6 +254,11 @@ function AgregarUsuario() {
 
       if (form.provincia && !form.distrito) {
         newErrors.distrito = 'Seleccione un distrito';
+        valid = false;
+      }
+
+      if (form.codigoPostal && !/^\d{5}$/.test(form.codigoPostal)) {
+        newErrors.codigoPostal = 'El código postal debe tener 5 dígitos.';
         valid = false;
       }
 
@@ -688,7 +706,13 @@ function AgregarUsuario() {
                     value={form.codigoPostal}
                     onChange={handleChange}
                     placeholder="Ingrese el código postal"
+                    disabled={!onboardingEnabled}
                   />
+                  {errors.codigoPostal && (
+                    <span className="text-red-500 text-sm">
+                      {errors.codigoPostal}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="calle" className="block font-medium mb-1">
