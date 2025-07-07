@@ -31,17 +31,15 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validar campos vacíos
-    if (!email.trim() || !password.trim()) {
-      setError('El email y contraseña son obligatorios');
-      setIsModalOpen(true);
-      return;
-    }
-
     setLoading(true);
     setError(null);
-    setIsModalOpen(false);
+
+    if (!email.trim() || !password.trim()) {
+      setError('Por favor, completa todos los campos');
+      setIsModalOpen(true);
+      setLoading(false);
+      return;
+    }
 
     try {
       console.log('LoginForm: Attempting login with authService:', { email });
@@ -65,7 +63,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         email: response.user.email,
         name: response.user.name || response.user.email.split('@')[0],
         imageUrl: response.user.image_url,
-        role: response.user.rol || 'user',
+        rol: response.user.rol || 'CLIENT', // Campo principal del backend
+        role: response.user.rol || 'CLIENT', // Campo para compatibilidad
         isAuthenticated: true,
       };
 
@@ -120,7 +119,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         name: response.user.name,
         email: response.user.email,
         imageUrl: response.user.image_url,
-        role: response.user.rol,
+        rol: response.user.rol || 'CLIENT', // Campo principal del backend
+        role: response.user.rol || 'CLIENT', // Campo para compatibilidad
         isAuthenticated: true,
       };
 
@@ -129,6 +129,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     } catch (error) {
       console.error("Error en login con Google:", error);
     }
+  };
+
+  const handleGoogleError = () => {
+    console.error("Error en login con Google");
   };
 
   return (
@@ -193,7 +197,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
           <div className="relative flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={() => {}}
+              onError={handleGoogleError}
               theme="outline"
               size="large"
               width="2000"

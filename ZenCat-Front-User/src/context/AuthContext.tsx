@@ -30,62 +30,54 @@ interface AuthContextType {
   hasRole: (role: string) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Checking authentication status...');
-    try {
-      const savedUser = localStorage.getItem('user');
-      const hasAccessToken = !!Cookies.get('access_token');
+    console.log('AuthProvider: Initializing...');
+    
+    // Check if user data exists in localStorage
+    const storedUser = localStorage.getItem('user');
+    const hasAccessToken = !!Cookies.get('access_token');
 
-      if (savedUser && hasAccessToken) {
-        const userData = JSON.parse(savedUser);
-        // Verificar que no sea administrador
-        if (
-          userData.rol === 'ADMINISTRATOR' ||
-          userData.role === 'ADMINISTRATOR'
-        ) {
-          console.log('AuthProvider: Administrator detected, clearing session');
-          localStorage.removeItem('user');
-          Cookies.remove('access_token');
-          Cookies.remove('refresh_token');
-          setUser(null);
-        } else {
-          console.log(
-            'AuthProvider: Found saved user with valid tokens:',
-            userData,
-          );
-          setUser(userData);
+    console.log('AuthProvider: Stored user exists:', !!storedUser);
+    console.log('AuthProvider: Access token exists:', hasAccessToken);
+
+    if (storedUser && hasAccessToken) {
+      try {
+        const userData = JSON.parse(storedUser);
+        console.log('AuthProvider: Restoring user from localStorage:', userData);
+        
+        // Asegurar que el usuario tenga rol CLIENT si no tiene rol definido
+        if (!userData.rol && !userData.role) {
+          userData.rol = 'CLIENT';
+          userData.role = 'CLIENT';
         }
-      } else if (savedUser && !hasAccessToken) {
-        console.log(
-          'AuthProvider: Found saved user but no access token, clearing localStorage',
-        );
+        
+        setUser(userData);
+      } catch (error) {
+        console.error('AuthProvider: Error parsing stored user:', error);
         localStorage.removeItem('user');
-        setUser(null);
-      } else {
-        console.log('AuthProvider: No saved user found');
-        setUser(null);
       }
-    } catch (error) {
-      console.error('AuthProvider: Error parsing saved user:', error);
+    } else if (storedUser && !hasAccessToken) {
+      // User data exists but no token, clear stored data
+      console.log('AuthProvider: Clearing stale user data (no token)');
       localStorage.removeItem('user');
-      setUser(null);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }, []);
 
   const login = (userData: User) => {
     console.log('AuthProvider: Login called with:', userData);
+    
     // Verificar que no sea administrador antes de hacer login
     if (userData.rol === 'ADMINISTRATOR' || userData.role === 'ADMINISTRATOR') {
       console.error('AuthProvider: Administrator cannot login to client app');
@@ -93,7 +85,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         'Los administradores no pueden acceder a la aplicación de clientes',
       );
     }
-    const userWithAuth = { ...userData, isAuthenticated: true };
+    
+    // Asegurar que el usuario tenga rol CLIENT si no tiene rol definido
+    const userWithAuth = { 
+      ...userData, 
+      isAuthenticated: true,
+      rol: userData.rol || 'CLIENT',
+      role: userData.role || userData.rol || 'CLIENT'
+    };
+    
+    console.log('AuthProvider: Setting user with role:', userWithAuth.rol);
     setUser(userWithAuth);
     localStorage.setItem('user', JSON.stringify(userWithAuth));
   };
@@ -114,12 +115,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const isClient = () => {
-    return user?.rol === 'CLIENT' || user?.role === 'CLIENT';
+    const hasClientRole = user?.rol === 'CLIENT' || user?.role === 'CLIENT';
+    console.log('AuthProvider: isClient check:', { 
+      userRol: user?.rol, 
+      userRole: user?.role, 
+      hasClientRole 
+    });
+    return hasClientRole;
   };
 
   const isAdministrator = () => {
     return user?.rol === 'ADMINISTRATOR' || user?.role === 'ADMINISTRATOR';
   };
+  
   const hasRole = (role: string) => {
     return user?.rol === role || user?.role === role;
   };
@@ -145,6 +153,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated,
     isLoading,
     userEmail: user?.email,
+    userRol: user?.rol,
+    userRole: user?.role,
+    isClientResult: isClient(),
   });
 
   return (
@@ -152,8 +163,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-export function useAuth(): AuthContextType {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 }
