@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Cog, User as UserIcon, LogOut } from 'lucide-react';
+import { Cog, User as UserIcon, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -88,11 +88,16 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
             </span>
           </div>
           <div className="flex items-center gap-2 transition-opacity duration-300 ">
-            <Cog className="h-5 w-5" />
-            <Globe className="h-5 w-5" />
+            <button
+              onClick={() => navigate({ to: '/admin/configuracion' })}
+              className="hover:bg-zinc-800 p-1 rounded transition-colors cursor-pointer"
+              title="Configuración"
+            >
+              <Cog className="h-5 w-5" />
+            </button>
             <button
               onClick={() => logout()}
-              className="hover:bg-zinc-800 p-1 rounded transition-colors"
+              className="hover:bg-zinc-800 p-1 rounded transition-colors cursor-pointer"
               title="Cerrar Sesión"
             >
               <LogOut className="h-5 w-5" />

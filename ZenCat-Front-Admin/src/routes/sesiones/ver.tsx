@@ -42,6 +42,8 @@ import {
 } from '@/components/ui/select';
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/context/ToastContext';
+import { SimpleTimePickerModal } from '@/components/sessions/simple-time-picker-modal';
+import { useDayAvailability, useSessionConflicts } from '@/hooks/use-session-conflicts';
 
 const sessionSearchSchema = z.object({
   id: z.string(),
@@ -60,6 +62,9 @@ function SessionDetailComponent() {
 
   // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
+
+  // State for capacity validation error
+  const [capacityError, setCapacityError] = useState<string>('');
 
   // Form state for editing
   const [formData, setFormData] = useState({
@@ -281,21 +286,71 @@ function SessionDetailComponent() {
     (service) => service.id === formData.service_id,
   );
 
-  // Esta parte del código se ha eliminado porque ya manejamos el community_service_id
-  // directamente en el useEffect que procesa communityService, evitando así 
-  // múltiples actualizaciones de estado que pueden causar problemas de sincronización
-  
-  // En ver.tsx nunca se permite cambiar el servicio ni la comunidad
-  // así que no necesitamos la lógica para gestionar cambios en esos campos
-  // El tipo de sesión (virtual/presencial) está determinado por el servicio
-  // y no se puede cambiar en la pantalla de ver.
-  // La propiedad is_virtual se establece al cargar los datos iniciales
-  // y se mantiene constante durante la edición
-
   // Check if session is virtual - use formData when in edit mode
   const isVirtual = isEditing
     ? formData.is_virtual
     : session && !session.local_id;
+
+  // Obtener disponibilidad del día para el selector de horario cuando está editando
+  const availability = useDayAvailability(
+    isEditing && formData.date ? formData.date : '',
+    isEditing && formData.professional_id ? formData.professional_id : '',
+    isEditing && !formData.is_virtual && formData.local_id ? formData.local_id : undefined,
+    isEditing ? id : undefined, // Excluir la sesión actual de los conflictos
+  );
+
+  // Verificar conflictos cuando se está editando
+  const conflictCheck = {
+    date: isEditing && formData.date ? formData.date : '',
+    startTime: isEditing && formData.start_time ? formData.start_time : '',
+    endTime: isEditing && formData.end_time ? formData.end_time : '',
+    professionalId: isEditing && formData.professional_id ? formData.professional_id : '',
+    localId: isEditing && !formData.is_virtual && formData.local_id ? formData.local_id : undefined,
+    excludeSessionId: isEditing ? id : undefined,
+  };
+
+  const {
+    hasConflict,
+    conflicts,
+    isLoading: isCheckingConflicts,
+  } = useSessionConflicts(conflictCheck);
+
+  // Debug para availability
+  useEffect(() => {
+    if (isEditing && formData.date && formData.professional_id) {
+      console.log('------- AVAILABILITY DEBUG -------');
+      console.log('Date:', formData.date);
+      console.log('Professional ID:', formData.professional_id);
+      console.log('Local ID:', formData.local_id);
+      console.log('Is Virtual:', formData.is_virtual);
+      console.log('Excluding Session ID:', id);
+      console.log('Availability:', availability);
+      console.log('Busy Slots:', availability.busySlots);
+      availability.busySlots.forEach((slot, index) => {
+        console.log(`Slot ${index + 1}:`, {
+          start: slot.start,
+          end: slot.end,
+          title: slot.title,
+          type: slot.type
+        });
+      });
+      console.log('-----------------------------------');
+    }
+  }, [isEditing, formData.date, formData.professional_id, formData.local_id, formData.is_virtual, availability, id]);
+
+  // Capacity validation useEffect - similar to agregar.tsx
+  useEffect(() => {
+    if (isEditing && formData.capacity > 0 && formData.local_id && !formData.is_virtual) {
+      const selectedLocal = availableLocals.find(local => local?.id === formData.local_id);
+      if (selectedLocal && formData.capacity > selectedLocal.capacity) {
+        setCapacityError(`La capacidad no puede exceder la capacidad del local (${selectedLocal.capacity})`);
+      } else {
+        setCapacityError('');
+      }
+    } else {
+      setCapacityError('');
+    }
+  }, [isEditing, formData.capacity, formData.local_id, formData.is_virtual, availableLocals]);
 
   // Debug logging - similar to agregar.tsx
   useEffect(() => {
@@ -434,6 +489,15 @@ function SessionDetailComponent() {
     }
   };
 
+  // Handle time range selection from SimpleTimePickerModal
+  const handleTimeRangeSelect = (range: { start: string; end: string }) => {
+    setFormData({
+      ...formData,
+      start_time: range.start,
+      end_time: range.end,
+    });
+  };
+
   // Validate form data
   const validateForm = (): boolean => {
     if (!formData.title.trim()) {
@@ -540,6 +604,15 @@ function SessionDetailComponent() {
     if (!validateForm()) {
       return;
     }
+
+    // Verificar si hay conflictos de horario
+    if (hasConflict) {
+      toast.error('Conflicto de Horario', {
+        description:
+          'Existen conflictos de horario que deben resolverse primero.',
+      });
+      return;
+    }
     
     // Add a second confirmation when changing to CANCELLED state
     if (formData.state === SessionState.CANCELLED && session?.state !== SessionState.CANCELLED) {
@@ -605,13 +678,6 @@ function SessionDetailComponent() {
         start_time: `${startTimeStr}:00`,
         end_time: `${endTimeStr}:00`,
       };
-
-      console.log('Form data before submission:', formData);
-      console.log('Prepared update payload:', updatedSession);
-      console.log(
-        'Community Service ID in payload:',
-        updatedSession.community_service_id,
-      );
 
       updateSessionMutation.mutate(updatedSession);
     } catch (error) {
@@ -733,6 +799,11 @@ function SessionDetailComponent() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-gray-50' : ''}
                         />
+                        {isEditing && capacityError && (
+                          <p className="text-red-600 text-sm mt-1">
+                            {capacityError}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -885,36 +956,145 @@ function SessionDetailComponent() {
                       </span>
                       Horario de la Sesión
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="start_time">Hora de inicio</Label>
-                        <Input
-                          id="start_time"
-                          name="start_time"
-                          type="time"
-                          value={
-                            isEditing ? formData.start_time : formattedStartTime
-                          }
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
-                        />
-                      </div>
+                    <div className="space-y-4">
+                      {isEditing ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <SimpleTimePickerModal
+                              selectedRange={
+                                formData.start_time && formData.end_time
+                                  ? {
+                                      start: formData.start_time,
+                                      end: formData.end_time,
+                                    }
+                                  : undefined
+                              }
+                              onRangeSelect={handleTimeRangeSelect}
+                              occupiedSlots={availability.busySlots}
+                              disabled={
+                                !formData.date ||
+                                !formData.professional_id ||
+                                (!formData.is_virtual && !formData.local_id)
+                              }
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="start_time">Hora de inicio</Label>
+                              <Input
+                                id="start_time"
+                                name="start_time"
+                                type="time"
+                                value={formData.start_time}
+                                onChange={handleInputChange}
+                                className="bg-gray-50"
+                                readOnly
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="end_time">Hora de fin</Label>
+                              <Input
+                                id="end_time"
+                                name="end_time"
+                                type="time"
+                                value={formData.end_time}
+                                onChange={handleInputChange}
+                                className="bg-gray-50"
+                                readOnly
+                              />
+                            </div>
+                          </div>
+                          {/* Leyenda de colores para conflictos */}
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-sm font-medium text-gray-700 mb-2">Leyenda de conflictos:</p>
+                            <div className="flex flex-wrap gap-4 text-xs">
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                                <span className="text-gray-600">Profesional ocupado</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                <span className="text-gray-600">Local ocupado</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                                <span className="text-gray-600">Horario seleccionado</span>
+                              </div>
+                            </div>
+                          </div>
 
-                      <div>
-                        <Label htmlFor="end_time">Hora de fin</Label>
-                        <Input
-                          id="end_time"
-                          name="end_time"
-                          type="time"
-                          value={
-                            isEditing ? formData.end_time : formattedEndTime
-                          }
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
-                        />
-                      </div>
+                          {/* Alertas de conflictos */}
+                          {hasConflict && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                              <div className="flex items-center text-red-700 font-medium mb-2">
+                                <AlertTriangle className="mr-2 h-4 w-4" />
+                                Conflictos de Horario Detectados
+                              </div>
+                              <div className="space-y-2">
+                                {conflicts.professional.length > 0 && (
+                                  <div>
+                                    <p className="text-sm font-medium text-red-700">
+                                      Conflicto de profesional:
+                                    </p>
+                                    {conflicts.professional.map((session) => (
+                                      <div
+                                        key={session.id}
+                                        className="text-sm text-red-600 bg-red-100 p-2 rounded mt-1"
+                                      >
+                                        {session.title} -{' '}
+                                        {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                                        {format(new Date(session.end_time), 'HH:mm')}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {conflicts.local.length > 0 && (
+                                  <div>
+                                    <p className="text-sm font-medium text-red-700">
+                                      Conflicto de local:
+                                    </p>
+                                    {conflicts.local.map((session) => (
+                                      <div
+                                        key={session.id}
+                                        className="text-sm text-red-600 bg-red-100 p-2 rounded mt-1"
+                                      >
+                                        {session.title} -{' '}
+                                        {format(new Date(session.start_time), 'HH:mm')} a{' '}
+                                        {format(new Date(session.end_time), 'HH:mm')}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="start_time">Hora de inicio</Label>
+                            <Input
+                              id="start_time"
+                              name="start_time"
+                              type="time"
+                              value={formattedStartTime}
+                              disabled
+                              className="bg-gray-50"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="end_time">Hora de fin</Label>
+                            <Input
+                              id="end_time"
+                              name="end_time"
+                              type="time"
+                              value={formattedEndTime}
+                              disabled
+                              className="bg-gray-50"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1193,7 +1373,7 @@ function SessionDetailComponent() {
                 <Button
                   onClick={handleSubmit}
                   className="bg-green-600 text-white hover:bg-green-700 flex items-center w-1/2"
-                  disabled={updateSessionMutation.isPending}
+                  disabled={updateSessionMutation.isPending || hasConflict || !!capacityError}
                   type="button"
                 >
                   {updateSessionMutation.isPending ? (

@@ -18,26 +18,26 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
-import { UserFilters } from './filters';
+import { ServiceFilters } from './filters';
 
-interface UserFiltersModalProps {
+interface ServiceFiltersModalProps {
   open: boolean;
   onClose: () => void;
-  filters: UserFilters;
-  onApplyFilters: (filters: UserFilters) => void;
+  filters: ServiceFilters;
+  onApplyFilters: (filters: ServiceFilters) => void;
   onClearFilters: () => void;
 }
 
-export const UserFiltersModal = React.memo(function UserFiltersModal({
+export const ServiceFiltersModal = React.memo(function ServiceFiltersModal({
   open,
   onClose,
   filters,
   onApplyFilters,
   onClearFilters,
-}: UserFiltersModalProps) {
-  const [localFilters, setLocalFilters] = useState<UserFilters>(filters);
+}: ServiceFiltersModalProps) {
+  const [localFilters, setLocalFilters] = useState<ServiceFilters>(filters);
 
-  const handleInputChange = useCallback((key: keyof UserFilters, value: string) => {
+  const handleInputChange = useCallback((key: keyof ServiceFilters, value: string | boolean) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
       
@@ -77,7 +77,7 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
   const removeFilter = useCallback((key: string) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
-      delete newFilters[key as keyof UserFilters];
+      delete newFilters[key as keyof ServiceFilters];
       return newFilters;
     });
   }, []);
@@ -90,7 +90,7 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Filter size={20} />
-            Filtros de Usuarios
+            Filtros de Servicios
             {activeFiltersCount > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {activeFiltersCount} activo{activeFiltersCount !== 1 ? 's' : ''}
@@ -102,87 +102,44 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
         <div className="space-y-4">
           {/* Nombre */}
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre</Label>
+            <Label htmlFor="name">Nombre del Servicio</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Buscar por nombre..."
+              placeholder="Buscar por nombre del servicio..."
               value={localFilters.name || ''}
               onChange={(e) => handleInputChange('name', e.target.value)}
               className="w-full"
             />
           </div>
 
-          {/* Email */}
+          {/* Descripción */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="description">Descripción</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="Buscar por email..."
-              value={localFilters.email || ''}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Teléfono */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
+              id="description"
               type="text"
-              placeholder="Buscar por teléfono..."
-              value={localFilters.phone || ''}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              placeholder="Buscar por descripción..."
+              value={localFilters.description || ''}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               className="w-full"
             />
           </div>
 
-          {/* Distrito */}
+          {/* Tipo de servicio */}
           <div className="space-y-2">
-            <Label htmlFor="district">Distrito</Label>
-            <Input
-              id="district"
-              type="text"
-              placeholder="Buscar por distrito..."
-              value={localFilters.district || ''}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Ciudad */}
-          <div className="space-y-2">
-            <Label htmlFor="city">Ciudad</Label>
-            <Input
-              id="city"
-              type="text"
-              placeholder="Buscar por ciudad..."
-              value={localFilters.city || ''}
-              onChange={(e) => handleInputChange('city', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Rol */}
-          <div className="space-y-2">
-            <Label htmlFor="rol">Rol</Label>
+            <Label htmlFor="is_virtual">Tipo de Servicio</Label>
             <Select 
-              value={localFilters.rol || 'all'} 
-              onValueChange={(value) => handleInputChange('rol', value === 'all' ? undefined : value)}
+              value={localFilters.is_virtual === undefined ? 'all' : localFilters.is_virtual.toString()} 
+              onValueChange={(value) => handleInputChange('is_virtual', value === 'all' ? undefined : value === 'true')}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar rol..." />
+                <SelectValue placeholder="Seleccionar tipo..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los roles</SelectItem>
-                <SelectItem value="ADMINISTRATOR">Administrador</SelectItem>
-                <SelectItem value="CLIENT">Cliente</SelectItem>
-                <SelectItem value="GUEST">Invitado</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="user">Usuario</SelectItem>
-                <SelectItem value="guest">Guest</SelectItem>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value="false">Presencial</SelectItem>
+                <SelectItem value="true">Virtual</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -203,11 +160,8 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
                   .map(([key, value]) => (
                     <Badge key={key} variant="secondary" className="text-xs">
                       {key === 'name' && `Nombre: ${value}`}
-                      {key === 'email' && `Email: ${value}`}
-                      {key === 'phone' && `Teléfono: ${value}`}
-                      {key === 'district' && `Distrito: ${value}`}
-                      {key === 'city' && `Ciudad: ${value}`}
-                      {key === 'rol' && `Rol: ${value}`}
+                      {key === 'description' && `Descripción: ${value}`}
+                      {key === 'is_virtual' && `Tipo: ${value ? 'Virtual' : 'Presencial'}`}
                       <button
                         onClick={() => removeFilter(key)}
                         className="ml-1 text-gray-500 hover:text-gray-700 cursor-pointer"

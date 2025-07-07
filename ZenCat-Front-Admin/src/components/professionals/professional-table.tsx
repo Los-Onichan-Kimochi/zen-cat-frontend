@@ -1,4 +1,5 @@
 'use client';
+import React, { useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,6 +13,8 @@ import { DataTableToolbar } from '@/components/common/data-table/data-table-tool
 import { DataTablePagination } from '@/components/common/data-table/data-table-pagination';
 import { Professional } from '@/types/professional';
 import { getProfessionalColumns } from './professional-columns';
+import { ProfessionalFiltersModal } from './filters-modal';
+import { useProfessionalFilters } from '@/hooks/use-professional-filters';
 
 interface ProfessionalsTableProps {
   data: Professional[];
@@ -49,10 +52,26 @@ export function ProfessionalsTable({
     setPagination,
   } = useDataTable();
 
+  const {
+    filters,
+    isModalOpen,
+    hasActiveFilters,
+    openModal,
+    closeModal,
+    applyFilters,
+    clearFilters,
+    filterProfessionals,
+  } = useProfessionalFilters();
+
   const columns = getProfessionalColumns({ onEdit, onDelete, onView });
 
+  // Aplicar filtros a los datos
+  const filteredData = useMemo(() => {
+    return filterProfessionals(data);
+  }, [data, filterProfessionals]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -84,7 +103,7 @@ export function ProfessionalsTable({
         showFilterButton
         showExportButton
         showRefreshButton={!!onRefresh}
-        onFilterClick={() => {}}
+        onFilterClick={openModal}
         onRefreshClick={onRefresh}
         isRefreshing={isRefreshing}
         exportFileName="profesionales"
@@ -110,6 +129,15 @@ export function ProfessionalsTable({
         />
       </div>
       <DataTablePagination table={table} />
+
+      {/* Modal de filtros */}
+      <ProfessionalFiltersModal
+        open={isModalOpen}
+        onClose={closeModal}
+        filters={filters}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
     </div>
   );
 }

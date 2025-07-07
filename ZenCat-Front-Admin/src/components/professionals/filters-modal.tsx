@@ -18,26 +18,27 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
-import { UserFilters } from './filters';
+import { ProfessionalFilters } from './filters';
+import { ProfessionalSpecialty, ProfessionalType } from '@/types/professional';
 
-interface UserFiltersModalProps {
+interface ProfessionalFiltersModalProps {
   open: boolean;
   onClose: () => void;
-  filters: UserFilters;
-  onApplyFilters: (filters: UserFilters) => void;
+  filters: ProfessionalFilters;
+  onApplyFilters: (filters: ProfessionalFilters) => void;
   onClearFilters: () => void;
 }
 
-export const UserFiltersModal = React.memo(function UserFiltersModal({
+export const ProfessionalFiltersModal = React.memo(function ProfessionalFiltersModal({
   open,
   onClose,
   filters,
   onApplyFilters,
   onClearFilters,
-}: UserFiltersModalProps) {
-  const [localFilters, setLocalFilters] = useState<UserFilters>(filters);
+}: ProfessionalFiltersModalProps) {
+  const [localFilters, setLocalFilters] = useState<ProfessionalFilters>(filters);
 
-  const handleInputChange = useCallback((key: keyof UserFilters, value: string) => {
+  const handleInputChange = useCallback((key: keyof ProfessionalFilters, value: string | ProfessionalSpecialty | ProfessionalType) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
       
@@ -77,7 +78,7 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
   const removeFilter = useCallback((key: string) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
-      delete newFilters[key as keyof UserFilters];
+      delete newFilters[key as keyof ProfessionalFilters];
       return newFilters;
     });
   }, []);
@@ -90,7 +91,7 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Filter size={20} />
-            Filtros de Usuarios
+            Filtros de Profesionales
             {activeFiltersCount > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {activeFiltersCount} activo{activeFiltersCount !== 1 ? 's' : ''}
@@ -128,61 +129,51 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
 
           {/* Teléfono */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono</Label>
+            <Label htmlFor="phone_number">Teléfono</Label>
             <Input
-              id="phone"
+              id="phone_number"
               type="text"
               placeholder="Buscar por teléfono..."
-              value={localFilters.phone || ''}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              value={localFilters.phone_number || ''}
+              onChange={(e) => handleInputChange('phone_number', e.target.value)}
               className="w-full"
             />
           </div>
 
-          {/* Distrito */}
+          {/* Especialidad */}
           <div className="space-y-2">
-            <Label htmlFor="district">Distrito</Label>
-            <Input
-              id="district"
-              type="text"
-              placeholder="Buscar por distrito..."
-              value={localFilters.district || ''}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Ciudad */}
-          <div className="space-y-2">
-            <Label htmlFor="city">Ciudad</Label>
-            <Input
-              id="city"
-              type="text"
-              placeholder="Buscar por ciudad..."
-              value={localFilters.city || ''}
-              onChange={(e) => handleInputChange('city', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Rol */}
-          <div className="space-y-2">
-            <Label htmlFor="rol">Rol</Label>
+            <Label htmlFor="specialty">Especialidad</Label>
             <Select 
-              value={localFilters.rol || 'all'} 
-              onValueChange={(value) => handleInputChange('rol', value === 'all' ? undefined : value)}
+              value={localFilters.specialty || 'all'} 
+              onValueChange={(value) => handleInputChange('specialty', value === 'all' ? undefined : value as ProfessionalSpecialty)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar rol..." />
+                <SelectValue placeholder="Seleccionar especialidad..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los roles</SelectItem>
-                <SelectItem value="ADMINISTRATOR">Administrador</SelectItem>
-                <SelectItem value="CLIENT">Cliente</SelectItem>
-                <SelectItem value="GUEST">Invitado</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="user">Usuario</SelectItem>
-                <SelectItem value="guest">Guest</SelectItem>
+                <SelectItem value="all">Todas las especialidades</SelectItem>
+                <SelectItem value={ProfessionalSpecialty.YOGA_TEACHER}>Profesor de Yoga</SelectItem>
+                <SelectItem value={ProfessionalSpecialty.GYM_TEACHER}>Profesor de Gimnasio</SelectItem>
+                <SelectItem value={ProfessionalSpecialty.DOCTOR}>Médico</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tipo */}
+          <div className="space-y-2">
+            <Label htmlFor="type">Tipo</Label>
+            <Select 
+              value={localFilters.type || 'all'} 
+              onValueChange={(value) => handleInputChange('type', value === 'all' ? undefined : value as ProfessionalType)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar tipo..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value={ProfessionalType.MEDIC}>Médico</SelectItem>
+                <SelectItem value={ProfessionalType.GYM_TRAINER}>Entrenador de Gimnasio</SelectItem>
+                <SelectItem value={ProfessionalType.YOGA_TRAINER}>Entrenador de Yoga</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -204,10 +195,9 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
                     <Badge key={key} variant="secondary" className="text-xs">
                       {key === 'name' && `Nombre: ${value}`}
                       {key === 'email' && `Email: ${value}`}
-                      {key === 'phone' && `Teléfono: ${value}`}
-                      {key === 'district' && `Distrito: ${value}`}
-                      {key === 'city' && `Ciudad: ${value}`}
-                      {key === 'rol' && `Rol: ${value}`}
+                      {key === 'phone_number' && `Teléfono: ${value}`}
+                      {key === 'specialty' && `Especialidad: ${value}`}
+                      {key === 'type' && `Tipo: ${value}`}
                       <button
                         onClick={() => removeFilter(key)}
                         className="ml-1 text-gray-500 hover:text-gray-700 cursor-pointer"

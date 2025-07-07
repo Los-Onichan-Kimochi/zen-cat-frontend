@@ -18,26 +18,26 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
-import { UserFilters } from './filters';
+import { RoleFilters } from './filters';
 
-interface UserFiltersModalProps {
+interface RoleFiltersModalProps {
   open: boolean;
   onClose: () => void;
-  filters: UserFilters;
-  onApplyFilters: (filters: UserFilters) => void;
+  filters: RoleFilters;
+  onApplyFilters: (filters: RoleFilters) => void;
   onClearFilters: () => void;
 }
 
-export const UserFiltersModal = React.memo(function UserFiltersModal({
+export const RoleFiltersModal = React.memo(function RoleFiltersModal({
   open,
   onClose,
   filters,
   onApplyFilters,
   onClearFilters,
-}: UserFiltersModalProps) {
-  const [localFilters, setLocalFilters] = useState<UserFilters>(filters);
+}: RoleFiltersModalProps) {
+  const [localFilters, setLocalFilters] = useState<RoleFilters>(filters);
 
-  const handleInputChange = useCallback((key: keyof UserFilters, value: string) => {
+  const handleInputChange = useCallback((key: keyof RoleFilters, value: string) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
       
@@ -77,7 +77,7 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
   const removeFilter = useCallback((key: string) => {
     setLocalFilters(prev => {
       const newFilters = { ...prev };
-      delete newFilters[key as keyof UserFilters];
+      delete newFilters[key as keyof RoleFilters];
       return newFilters;
     });
   }, []);
@@ -126,45 +126,6 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
             />
           </div>
 
-          {/* Teléfono */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              type="text"
-              placeholder="Buscar por teléfono..."
-              value={localFilters.phone || ''}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Distrito */}
-          <div className="space-y-2">
-            <Label htmlFor="district">Distrito</Label>
-            <Input
-              id="district"
-              type="text"
-              placeholder="Buscar por distrito..."
-              value={localFilters.district || ''}
-              onChange={(e) => handleInputChange('district', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          {/* Ciudad */}
-          <div className="space-y-2">
-            <Label htmlFor="city">Ciudad</Label>
-            <Input
-              id="city"
-              type="text"
-              placeholder="Buscar por ciudad..."
-              value={localFilters.city || ''}
-              onChange={(e) => handleInputChange('city', e.target.value)}
-              className="w-full"
-            />
-          </div>
-
           {/* Rol */}
           <div className="space-y-2">
             <Label htmlFor="rol">Rol</Label>
@@ -204,9 +165,6 @@ export const UserFiltersModal = React.memo(function UserFiltersModal({
                     <Badge key={key} variant="secondary" className="text-xs">
                       {key === 'name' && `Nombre: ${value}`}
                       {key === 'email' && `Email: ${value}`}
-                      {key === 'phone' && `Teléfono: ${value}`}
-                      {key === 'district' && `Distrito: ${value}`}
-                      {key === 'city' && `Ciudad: ${value}`}
                       {key === 'rol' && `Rol: ${value}`}
                       <button
                         onClick={() => removeFilter(key)}
