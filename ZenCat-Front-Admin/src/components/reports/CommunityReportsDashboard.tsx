@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   PieChart,
   Pie,
@@ -13,7 +13,6 @@ import {
 import dayjs from 'dayjs';
 import {
   FaCalendarAlt,
-  FaDownload,
   FaUsers,
   FaUserCheck,
   FaUserTimes,
@@ -21,6 +20,7 @@ import {
   FaCalendarTimes,
   FaTimes,
 } from 'react-icons/fa';
+import { ExportButtons } from '@/components/common/ExportButtons';
 
 // Paleta de colores del Admin
 const PALETTE = [
@@ -187,6 +187,9 @@ export default function CommunityReportsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
+  // Ref para el elemento que se exportará como PDF
+  const pdfElementRef = useRef<HTMLDivElement>(null);
+
   // Calcular días de diferencia
   function getDaysDiff() {
     if (!from || !to) return 0;
@@ -242,10 +245,10 @@ export default function CommunityReportsDashboard() {
         }),
         prevFrom && prevTo
           ? communityReportsApi.getCommunityReport({
-              from: prevFrom,
-              to: prevTo,
-              groupBy: 'day', // Usar 'day' como valor fijo
-            })
+            from: prevFrom,
+            to: prevTo,
+            groupBy: 'day', // Usar 'day' como valor fijo
+          })
           : Promise.resolve(null),
       ]);
       setData(current);
@@ -258,9 +261,9 @@ export default function CommunityReportsDashboard() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-zinc-50 pb-12 font-montserrat">
+    <div className="min-h-screen w-full bg-zinc-50 pb-12 font-montserrat" ref={pdfElementRef}>
       {/* Barra de filtros visual igual a ReportsDashboard */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2">
+      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-zinc-50 rounded-lg p-4 shadow-sm border border-zinc-200 mb-2" data-pdf-hide>
         <div className="flex flex-wrap gap-2 items-center flex-1">
           {quickRanges.map((r) => (
             <button
@@ -295,46 +298,53 @@ export default function CommunityReportsDashboard() {
             />
           </div>
         </div>
-        <button
-          className="ml-auto px-6 py-2 bg-zinc-900 text-white rounded-lg shadow-md hover:bg-zinc-700 transition font-semibold h-12 text-base flex items-center justify-center gap-2 font-montserrat"
-          onClick={() => {
-            if (
-              !data ||
-              !Array.isArray(data.communities) ||
-              !data.communities.length
-            )
-              return;
-            const totalGeneral = data.totalMemberships || 0;
-            const totalActive = data.summary?.totalActiveMemberships || 0;
-            const totalExpired = data.summary?.totalExpiredMemberships || 0;
-            const totalCancelled = data.summary?.totalCancelledMemberships || 0;
-            const totalActiveUsers = data.summary?.totalActiveUsers || 0;
-            const rows = data.communities.map((c) => ({
-              name: c.CommunityName,
-              total: c.Total,
-              percent: totalGeneral
-                ? ((c.Total / totalGeneral) * 100).toFixed(1) + '%'
-                : '0%',
-              active: c.ActiveMemberships,
-              expired: c.ExpiredMemberships,
-              cancelled: c.CancelledMemberships,
-              activeUsers: c.ActiveUsers,
-            }));
-            exportToCSV(
-              rows,
-              from,
-              to,
-              totalGeneral,
-              totalActive,
-              totalExpired,
-              totalCancelled,
-              totalActiveUsers,
-            );
-          }}
-          disabled={loading || !data?.communities.length}
-        >
-          <FaDownload size={20} /> Exportar CSV
-        </button>
+        <div className="flex gap-2">
+          <ExportButtons
+            onExportCSV={() => {
+              if (
+                !data ||
+                !Array.isArray(data.communities) ||
+                !data.communities.length
+              )
+                return;
+              const totalGeneral = data.totalMemberships || 0;
+              const totalActive = data.summary?.totalActiveMemberships || 0;
+              const totalExpired = data.summary?.totalExpiredMemberships || 0;
+              const totalCancelled = data.summary?.totalCancelledMemberships || 0;
+              const totalActiveUsers = data.summary?.totalActiveUsers || 0;
+              const rows = data.communities.map((c) => ({
+                name: c.CommunityName,
+                total: c.Total,
+                percent: totalGeneral
+                  ? ((c.Total / totalGeneral) * 100).toFixed(1) + '%'
+                  : '0%',
+                active: c.ActiveMemberships,
+                expired: c.ExpiredMemberships,
+                cancelled: c.CancelledMemberships,
+                activeUsers: c.ActiveUsers,
+              }));
+              exportToCSV(
+                rows,
+                from,
+                to,
+                totalGeneral,
+                totalActive,
+                totalExpired,
+                totalCancelled,
+                totalActiveUsers,
+              );
+            }}
+            pdfElementRef={pdfElementRef}
+            pdfOptions={{
+              filename: `reporte_comunidades_${from}_a_${to}.pdf`,
+              title: 'Reporte de Comunidades',
+              subtitle: 'ZenCat - Dashboard de Comunidades',
+              dateRange: `Período: ${formatDate(from)} - ${formatDate(to)}`,
+            }}
+            disabled={loading || !data?.communities.length}
+            loading={loading}
+          />
+        </div>
       </div>
 
       {!loading &&
@@ -436,10 +446,10 @@ export default function CommunityReportsDashboard() {
                       ...c,
                       _percent: data.summary?.totalActiveMemberships
                         ? (
-                            (c.ActiveMemberships /
-                              data.summary.totalActiveMemberships) *
-                            100
-                          ).toFixed(1) + '%'
+                          (c.ActiveMemberships /
+                            data.summary.totalActiveMemberships) *
+                          100
+                        ).toFixed(1) + '%'
                         : '0%',
                     }))}
                     dataKey="ActiveMemberships"
@@ -478,8 +488,8 @@ export default function CommunityReportsDashboard() {
                 const percentDiff =
                   prevC && prevC.ActiveMemberships > 0
                     ? ((c.ActiveMemberships - prevC.ActiveMemberships) /
-                        prevC.ActiveMemberships) *
-                      100
+                      prevC.ActiveMemberships) *
+                    100
                     : null;
                 return (
                   <div
@@ -507,10 +517,10 @@ export default function CommunityReportsDashboard() {
                       >
                         {data.summary?.totalActiveMemberships
                           ? (
-                              (c.ActiveMemberships /
-                                data.summary.totalActiveMemberships) *
-                              100
-                            ).toFixed(1)
+                            (c.ActiveMemberships /
+                              data.summary.totalActiveMemberships) *
+                            100
+                          ).toFixed(1)
                           : '0'}
                         %
                       </span>
@@ -572,10 +582,10 @@ export default function CommunityReportsDashboard() {
                 );
                 const porcentaje = data.summary?.totalActiveMemberships
                   ? (
-                      (max.ActiveMemberships /
-                        data.summary.totalActiveMemberships) *
-                      100
-                    ).toFixed(1)
+                    (max.ActiveMemberships /
+                      data.summary.totalActiveMemberships) *
+                    100
+                  ).toFixed(1)
                   : '0';
                 // Buscar comunidad líder en prevData
                 const prevC = prevData?.communities?.find(
@@ -587,8 +597,8 @@ export default function CommunityReportsDashboard() {
                 const percentDiff =
                   prevC && prevC.ActiveMemberships > 0
                     ? ((max.ActiveMemberships - prevC.ActiveMemberships) /
-                        prevC.ActiveMemberships) *
-                      100
+                      prevC.ActiveMemberships) *
+                    100
                     : null;
                 return (
                   <span>
@@ -598,7 +608,7 @@ export default function CommunityReportsDashboard() {
                       style={{
                         color:
                           PALETTE[
-                            data.communities.indexOf(max) % PALETTE.length
+                          data.communities.indexOf(max) % PALETTE.length
                           ],
                       }}
                     >
