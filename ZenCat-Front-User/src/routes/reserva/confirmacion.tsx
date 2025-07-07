@@ -137,7 +137,7 @@ function ConfirmationStepComponent() {
     if (!reservationData.session) return '';
     const startTime = new Date(reservationData.session.startTime);
     const endTime = new Date(reservationData.session.endTime);
-    return `${startTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} h - ${endTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} h`;
+    return `${startTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h - ${endTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h`;
   };
 
   if (!reservationData.service) {

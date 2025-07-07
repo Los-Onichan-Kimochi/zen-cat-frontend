@@ -227,14 +227,30 @@ function ScheduleStepComponent() {
     const sessionDate = new Date(session.date);
     const dateLabel = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
     
+    // Convertir las horas UTC a hora local
+    const startTimeUTC = new Date(session.start_time);
+    const endTimeUTC = new Date(session.end_time);
+    
+    // Formatear las horas en formato local (HH:MM)
+    const startTimeLocal = startTimeUTC.toLocaleTimeString('es-PE', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+    const endTimeLocal = endTimeUTC.toLocaleTimeString('es-PE', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+    
     // Determinar el estado de la sesión
     const isUserReserved = userReservedSessionIds.has(session.id);
     const isFullyBooked = session.registered_count >= session.capacity;
     
     return {
       date: dateLabel,
-      start: session.start_time.split('T')[1].substring(0, 5),
-      end: session.end_time.split('T')[1].substring(0, 5),
+      start: startTimeLocal,
+      end: endTimeLocal,
       title: session.title,
       type: 'professional' as const,
       sessionId: session.id,
@@ -268,9 +284,16 @@ function ScheduleStepComponent() {
     const matchingSession = filteredSessions.find((session: Session) => {
       const sessionDate = new Date(session.date);
       const sessionDateStr = `${sessionDate.getDate()}/${String(sessionDate.getMonth() + 1).padStart(2, '0')}`;
-      const sessionTime = session.start_time.split('T')[1].substring(0, 5);
       
-      return sessionDateStr === date && sessionTime === range.start;
+      // Convertir la hora UTC a hora local para la comparación
+      const startTimeUTC = new Date(session.start_time);
+      const sessionTimeLocal = startTimeUTC.toLocaleTimeString('es-PE', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+      
+      return sessionDateStr === date && sessionTimeLocal === range.start;
     });
     
     if (matchingSession) {

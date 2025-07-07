@@ -103,7 +103,7 @@ export function ReservationsTable({ data, onView }: ReservationsTableProps) {
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
               <Clock className="h-3 w-3 text-gray-500" />
-              {format(startTime, 'HH:mm', { locale: es })} - {format(endTime, 'HH:mm', { locale: es })}
+              {startTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} - {endTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })}
             </div>
           </div>
         );
