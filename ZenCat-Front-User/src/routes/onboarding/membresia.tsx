@@ -6,14 +6,14 @@ import { useCommunities } from '@/hooks/use-communities';
 import { useCommunityPlans } from '@/hooks/use-community-plans';
 import { useEffect, useState, useMemo } from 'react';
 import {
-  MembershipPlan,
   Community as MembershipCommunity,
+  MembershipState,
 } from '@/types/membership';
 import { Community as APICommunity } from '@/types/community';
 import { useUserMemberships } from '@/hooks/use-user-memberships';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 import { Membership } from '@/types/membership';
 
 export const Route = createFileRoute('/onboarding/membresia')({
@@ -56,7 +56,7 @@ function OnboardingMembresiaComponent() {
   useEffect(() => {
     if (!membershipsLoading && communityId) {
       const activeMembership = memberships.find(
-        (m) => m.community.id === communityId && m.status === 'ACTIVE',
+        (m) => m.community.id === communityId && m.status === MembershipState.ACTIVE,
       );
 
       if (activeMembership) {
@@ -64,7 +64,7 @@ function OnboardingMembresiaComponent() {
         setOnHoldMembership(null);
       } else {
         const hold = memberships.find(
-          (m) => m.community.id === communityId && (m.status as any) === 'ON_HOLD',
+          (m) => m.community.id === communityId && m.status === MembershipState.SUSPENDED,
         );
         if (hold) {
           setOnHoldMembership(hold);
@@ -169,8 +169,8 @@ function OnboardingMembresiaComponent() {
     const handleReactivate = async () => {
       setReactivating(true);
       try {
-        await membershipService.updateMembership(onHoldMembership.id, {
-          status: 'ACTIVE',
+        await membershipsApi.updateMembership(onHoldMembership.id, {
+          status: MembershipState.ACTIVE,
         });
         navigate({ to: '/mis-comunidades' });
       } catch (err) {

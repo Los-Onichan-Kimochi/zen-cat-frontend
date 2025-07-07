@@ -18,7 +18,7 @@ import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -278,14 +278,14 @@ const CommunityReservasLayout = () => {
       if (reservation.membership_id) {
         console.log('Actualizando membresía:', reservation.membership_id);
         
-        const membership = await membershipService.getMembershipById(reservation.membership_id);
+        const membership = await membershipsApi.getMembershipById(reservation.membership_id);
         
         // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
         if (membership.plan.reservation_limit !== null && 
             typeof membership.reservations_used === 'number' && 
             membership.reservations_used > 0) {
           
-          await membershipService.updateMembership(membership.id, {
+          await membershipsApi.updateMembership(membership.id, {
             reservations_used: membership.reservations_used - 1,
           });
           

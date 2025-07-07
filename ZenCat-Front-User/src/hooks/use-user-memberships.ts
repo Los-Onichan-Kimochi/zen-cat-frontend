@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Membership } from '@/types/membership';
-import { membershipService } from '@/api/membership/membership';
+import { membershipsApi } from '@/api/memberships/memberships';
 
 interface UseUserMembershipsState {
   memberships: Membership[];
@@ -24,7 +24,7 @@ export function useUserMemberships() {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const data = await membershipService.getMembershipsByUserId(user.id);
+        const data = await membershipsApi.getMembershipsByUserId(user.id);
         setState((prev) => ({
           ...prev,
           memberships: data,

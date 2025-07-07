@@ -1,3 +1,5 @@
+import { MembershipState } from "./membership";
+
 export interface UserOnboarding {
   id: string;
   document_type: 'DNI' | 'FOREIGNER_CARD' | 'PASSPORT';
@@ -31,7 +33,7 @@ export interface Membership {
   description: string;
   start_date: string;
   end_date: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
+  status: MembershipState;
   community: Community;
   plan: MembershipPlan;
 }
