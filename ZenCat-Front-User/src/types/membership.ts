@@ -53,7 +53,7 @@ export interface Membership {
   end_date: string;
   status: MembershipState;
   reservations_used?: number | null;
-  
+
   community: {
     id: string;
     name: string;

@@ -15,12 +15,12 @@ const Card: React.FC<CardProps> = ({ title, imageUrl, to, communityId }) => {
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    
+
     if (isAuthenticated) {
       // Usuario autenticado → ir a onboarding/membresía con la comunidad seleccionada
-      navigate({ 
+      navigate({
         to: '/onboarding/membresia',
-        search: communityId ? { communityId } : undefined
+        search: communityId ? { communityId } : undefined,
       });
     } else {
       // Usuario no autenticado → ir a login
@@ -47,7 +47,9 @@ const Card: React.FC<CardProps> = ({ title, imageUrl, to, communityId }) => {
           {title}
         </h3>
         <span className="inline-block bg-black bg-opacity-60 text-white text-sm px-3 py-1 rounded-md transition-bg duration-300 group-hover:bg-opacity-80">
-          {isAuthenticated ? 'Elegir membresía' : 'Iniciar para ver actividades'}
+          {isAuthenticated
+            ? 'Elegir membresía'
+            : 'Iniciar para ver actividades'}
         </span>
       </div>
     </a>

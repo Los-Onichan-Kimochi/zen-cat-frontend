@@ -8,7 +8,12 @@ interface ToastProps {
   onClose: () => void;
 }
 
-export function Toast({ message, type = 'info', duration = 4000, onClose }: ToastProps) {
+export function Toast({
+  message,
+  type = 'info',
+  duration = 4000,
+  onClose,
+}: ToastProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -25,8 +30,9 @@ export function Toast({ message, type = 'info', duration = 4000, onClose }: Toas
   }, [duration, onClose]);
 
   const getToastStyles = () => {
-    const baseStyles = "fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg border max-w-sm z-50 transition-all duration-300 transform";
-    
+    const baseStyles =
+      'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg border max-w-sm z-50 transition-all duration-300 transform';
+
     if (!isVisible) {
       return `${baseStyles} translate-x-full opacity-0`;
     }
@@ -72,51 +78,55 @@ export function Toast({ message, type = 'info', duration = 4000, onClose }: Toas
         </button>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
 // Hook para usar el toast
 export function useToast() {
-  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastProps['type'] }>>([]);
+  const [toasts, setToasts] = useState<
+    Array<{ id: string; message: string; type: ToastProps['type'] }>
+  >([]);
   const MAX_TOASTS = 3; // Máximo 3 toasts simultáneos
   const lastToastTime = useRef<number>(0);
   const DEBOUNCE_TIME = 1000; // 1 segundo de debounce
 
   const showToast = (message: string, type: ToastProps['type'] = 'info') => {
     const now = Date.now();
-    
+
     // Debounce: evitar toasts muy frecuentes
     if (now - lastToastTime.current < DEBOUNCE_TIME) {
       return;
     }
-    
+
     lastToastTime.current = now;
 
-    setToasts(prev => {
+    setToasts((prev) => {
       // Verificar si ya existe un toast con el mismo mensaje y tipo
-      const existingToast = prev.find(toast => toast.message === message && toast.type === type);
+      const existingToast = prev.find(
+        (toast) => toast.message === message && toast.type === type,
+      );
       if (existingToast) {
         // Si ya existe, no agregar uno nuevo
         return prev;
       }
-      
+
       // Si no existe, agregar el nuevo toast
       const id = now.toString();
       const newToasts = [...prev, { id, message, type }];
-      
+
       // Limitar el número máximo de toasts
       if (newToasts.length > MAX_TOASTS) {
         // Remover los toasts más antiguos si excedemos el límite
         return newToasts.slice(-MAX_TOASTS);
       }
-      
+
       return newToasts;
     });
   };
 
   const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   const clearAllToasts = () => {
@@ -125,7 +135,7 @@ export function useToast() {
 
   const ToastContainer = () => (
     <>
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <Toast
           key={toast.id}
           message={toast.message}
@@ -145,4 +155,4 @@ export function useToast() {
     warning: (message: string) => showToast(message, 'warning'),
     info: (message: string) => showToast(message, 'info'),
   };
-} 
+}

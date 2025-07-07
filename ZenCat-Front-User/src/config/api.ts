@@ -16,15 +16,16 @@ export const API_ENDPOINTS = {
     GOOGLE_LOGIN: '/login/google/',
   },
 
-  // Community endpoints
+  // Community endpoints (now public)
   COMMUNITIES: {
     BASE: '/community/',
     BULK_CREATE: '/community/bulk-create/',
     BULK_DELETE: '/community/bulk-delete/',
     BY_ID: (id: string) => `/community/${id}/`,
+    BY_ID_WITH_IMAGE: (id: string) => `/community/${id}/image/`,
   },
 
-  // Community Services endpoints
+  // Community Services endpoints (now public)
   COMMUNITY_SERVICES: {
     BASE: '/community-service/',
     BY_COMMUNITY_ID: (communityId: string) =>
@@ -51,28 +52,28 @@ export const API_ENDPOINTS = {
     ONBOARDING: (userId: string) => `/user/${userId}/onboarding/`,
   },
 
-  // Professional endpoints
+  // Professional endpoints (now public)
   PROFESSIONALS: {
     BASE: '/professional/',
     BY_ID: (id: string) => `/professional/${id}/`,
     BULK_DELETE: '/professional/bulk-delete/',
   },
 
-  // Session endpoints
+  // Session endpoints (now public)
   SESSIONS: {
     BASE: '/session/',
     BY_ID: (id: string) => `/session/${id}/`,
     BULK_DELETE: '/session/bulk-delete/',
   },
 
-  // Service endpoints
+  // Service endpoints (now public)
   SERVICES: {
     BASE: '/service/',
     BY_ID: (id: string) => `/service/${id}/`,
     BULK_DELETE: '/service/bulk-delete/',
   },
 
-  // Local endpoints
+  // Local endpoints (now public)
   LOCALS: {
     BASE: '/local/',
     BY_ID: (id: string) => `/local/${id}/`,
@@ -80,7 +81,7 @@ export const API_ENDPOINTS = {
     BULK_DELETE: '/local/bulk-delete/',
   },
 
-  // Plan endpoints
+  // Plan endpoints (now public)
   PLANS: {
     BASE: '/plan/',
     BY_ID: (id: string) => `/plan/${id}/`,
@@ -94,6 +95,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/reservation/${id}/`,
     BULK_DELETE: '/reservation/bulk-delete/',
   },
+
   // Contact endpoint
   CONTACT: {
     SEND: '/contact',
@@ -106,7 +108,7 @@ export const API_ENDPOINTS = {
     UPDATE_FOR_USER: (userId: string) => `/onboarding/user/${userId}/`,
   },
 
-  // Community Plans endpoints
+  // Community Plans endpoints (now public)
   COMMUNITY_PLANS: {
     BASE: '/community-plan/',
     BY_COMMUNITY_ID: (communityId: string) =>

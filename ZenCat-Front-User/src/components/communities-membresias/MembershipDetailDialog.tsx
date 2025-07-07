@@ -29,12 +29,13 @@ export function MembershipDetailDialog({
   const planName = membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
   const duration = membership.plan.type === 'MONTHLY' ? '1 mes' : '1 año';
   const statusText = mapMembershipStateToSpanish(membership.status);
-  
+
   // Manejar el límite de reservas
   const reservationLimit = membership.plan.reservation_limit;
-  const reservationLimitText = reservationLimit === null || reservationLimit === 0 
-    ? 'Sin límite' 
-    : `${reservationLimit} reservas`;
+  const reservationLimitText =
+    reservationLimit === null || reservationLimit === 0
+      ? 'Sin límite'
+      : `${reservationLimit} reservas`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -53,60 +54,55 @@ export function MembershipDetailDialog({
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Comunidad</span>
-              <span className="font-medium text-right">{membership.community.name}</span>
+              <span className="font-medium text-right">
+                {membership.community.name}
+              </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Fecha de inicio</span>
               <span className="font-medium text-right">
                 {new Date(membership.start_date).toLocaleDateString('es-ES')}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Duración</span>
-              <span className="font-medium text-right">
-                {duration}
-              </span>
+              <span className="font-medium text-right">{duration}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-gray-600">Monto</span>
               <span className="font-medium text-right">
                 S/. {membership.plan.fee.toFixed(2)}
               </span>
             </div>
-            
           </div>
 
           {/* Segunda columna */}
           <div className="space-y-4">
             <div className="flex justify-between">
               <span className="text-gray-600">Plan</span>
-              <span className="font-medium text-right">
-                {planName}
-              </span>
+              <span className="font-medium text-right">{planName}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-gray-600">Fecha de fin</span>
               <span className="font-medium text-right">
                 {new Date(membership.end_date).toLocaleDateString('es-ES')}
               </span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-gray-600">Cantidad de reservas</span>
               <span className="font-medium text-right">
                 {reservationLimitText}
               </span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-gray-600">Estado</span>
-              <span className="font-medium text-right">
-                {statusText}
-              </span>
+              <span className="font-medium text-right">{statusText}</span>
             </div>
           </div>
         </div>
@@ -124,4 +120,4 @@ export function MembershipDetailDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

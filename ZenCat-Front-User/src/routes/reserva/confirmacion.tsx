@@ -7,7 +7,7 @@ import { ReservaConfirmacionRoute } from '@/layouts/reservation-layout';
 import { z } from 'zod';
 import { useReservation } from '@/context/reservation-context';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, Calendar, Clock, User, MapPin, Monitor, Users, Home, Video, MapPinIcon, CalendarDays, Timer } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { reservationsApi } from '@/api/reservations/reservations';
@@ -85,7 +85,6 @@ function ConfirmationStepComponent() {
   });
 
   const handleConfirm = async () => {
-    // Validaciones más estrictas
     if (!reservationData.session || !reservationData.userId) {
       showErrorAlert('Faltan datos necesarios para crear la reserva. Por favor, intenta nuevamente.');
       return;
@@ -97,8 +96,6 @@ function ConfirmationStepComponent() {
       state: ReservationState.CONFIRMED,
       user_id: reservationData.userId,
       session_id: reservationData.session.id,
-      // Solo incluir membershipId si está presente
-      ...(reservationData.membershipId && { membership_id: reservationData.membershipId }),
     };
 
     createReservationMutation.mutate(reservationRequest);
@@ -113,15 +110,25 @@ function ConfirmationStepComponent() {
 
   const handleGoToCommunities = () => {
     resetReservation();
-    navigate({ to: '/mis-comunidades' });
+    navigate({ to: '/comunidades' });
   };
 
   const formatDate = (dateStr?: string) => {
     if (reservationData.session?.date) {
       const sessionDate = new Date(reservationData.session.date);
       const months = [
-        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+        'enero',
+        'febrero',
+        'marzo',
+        'abril',
+        'mayo',
+        'junio',
+        'julio',
+        'agosto',
+        'septiembre',
+        'octubre',
+        'noviembre',
+        'diciembre',
       ];
       return `${sessionDate.getDate()} de ${months[sessionDate.getMonth()]} del ${sessionDate.getFullYear()}`;
     }
@@ -129,17 +136,32 @@ function ConfirmationStepComponent() {
     if (!dateStr) return '';
     const [day, month] = dateStr.split('/');
     const months = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     return `${day} de ${months[parseInt(month) - 1]} del 2025`;
+  };
+
+  const formatTime = (time: string) => {
+    if (!time) return '';
+    return `${time} h - 08:00 h`;
   };
 
   const formatSessionTime = () => {
     if (!reservationData.session) return '';
     const startTime = new Date(reservationData.session.startTime);
     const endTime = new Date(reservationData.session.endTime);
-    return `${startTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    return `${startTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h - ${endTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false })} h`;
   };
 
   if (!reservationData.service) {
@@ -158,11 +180,11 @@ function ConfirmationStepComponent() {
   if (reservationCreated) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-8 rounded-xl shadow-lg">
+        <div className="border p-8 rounded-md bg-green-50">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-10 h-10 text-white"
+                className="w-8 h-8 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -170,26 +192,29 @@ function ConfirmationStepComponent() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold mb-3 text-green-800">
+            <h2 className="text-2xl font-bold mb-2 text-green-800">
               ¡Reserva Confirmada!
             </h2>
-            <p className="text-green-700 text-lg">
+            <p className="text-green-700">
               Tu reserva se ha creado exitosamente
             </p>
+            {createdReservationId && (
+              <p className="text-sm text-green-600 mt-2">
+                ID de reserva: {createdReservationId}
+              </p>
+            )}
           </div>
 
           <div className="text-center">
-            <Button 
-              onClick={handleGoToCommunities} 
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <Button onClick={handleGoToCommunities} className="mr-4">
               Ir a mis comunidades
             </Button>
+            <Button variant="outline">Descargar comprobante</Button>
           </div>
         </div>
       </div>

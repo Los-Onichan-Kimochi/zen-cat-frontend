@@ -122,7 +122,7 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      
+
       // Log detailed error information for debugging
       console.error('🚫 API Error Response:', {
         status: response.status,
@@ -131,9 +131,9 @@ class ApiClient {
         method: options.method || 'GET',
         headers: headers,
         requestBody: options.body,
-        errorResponse: error
+        errorResponse: error,
       });
-      
+
       throw new Error(
         error.message || `HTTP error! status: ${response.status}`,
       );

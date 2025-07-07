@@ -32,11 +32,11 @@ export const CardGrid: React.FC = () => {
     <section className="max-w-7xl mx-auto px-6 py-12">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map(({ title, imageUrl, to, communityId }) => (
-          <Card 
-            key={title} 
-            title={title} 
-            imageUrl={imageUrl} 
-            to={to} 
+          <Card
+            key={title}
+            title={title}
+            imageUrl={imageUrl}
+            to={to}
             communityId={communityId}
           />
         ))}

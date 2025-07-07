@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader } from '../card';
 
 interface CardDirectionProps {
   isOnGray?: boolean;
-  currentRegion: string;  // New prop
-  setCRegion: (value: string) => void;  // New prop
+  currentRegion: string; // New prop
+  setCRegion: (value: string) => void; // New prop
   currentProvince: string;
   setCProvince: (value: string) => void;
   currentDistrict: string;
@@ -19,8 +19,8 @@ interface CardDirectionProps {
 
 const CardDirection: React.FC<CardDirectionProps> = ({
   isOnGray = true,
-  currentRegion,  // New prop
-  setCRegion,  // New prop
+  currentRegion, // New prop
+  setCRegion, // New prop
   currentProvince,
   setCProvince,
   currentDistrict,
@@ -28,7 +28,7 @@ const CardDirection: React.FC<CardDirectionProps> = ({
   currentAddress,
   setCAddress,
   currentPostal,
-  setCPostal
+  setCPostal,
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,20 +45,27 @@ const CardDirection: React.FC<CardDirectionProps> = ({
         </p>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
-        <form id="personal_form" onSubmit={handleSubmit} className="w-full max-w-2xl space-y-4">
-
-
+        <form
+          id="personal_form"
+          onSubmit={handleSubmit}
+          className="w-full max-w-2xl space-y-4"
+        >
           {/* First row split into two columns (3/4 + 1/4) */}
           <div className="flex gap-4">
-
             {/* Province - takes 3/4 width */}
             <div className="flex-1" style={{ flex: 3 }}>
-              <label className="block text-gray-700 text-sm mb-1">Provincia</label>
+              <label className="block text-gray-700 text-sm mb-1">
+                Provincia
+              </label>
               <Input
                 value={currentProvince}
                 onChange={(e) => setCProvince(e.target.value)}
                 disabled={isOnGray}
-                className={isOnGray ? "disabled:opaProvince-100 disabled:cursor-default bg-gray-50" : ""}
+                className={
+                  isOnGray
+                    ? 'disabled:opaProvince-100 disabled:cursor-default bg-gray-50'
+                    : ''
+                }
                 required
               />
             </div>
@@ -70,7 +77,11 @@ const CardDirection: React.FC<CardDirectionProps> = ({
                 value={currentPostal}
                 onChange={(e) => setCPostal(e.target.value)}
                 disabled={isOnGray}
-                className={isOnGray ? "disabled:opaProvince-100 disabled:cursor-default bg-gray-50" : ""}
+                className={
+                  isOnGray
+                    ? 'disabled:opaProvince-100 disabled:cursor-default bg-gray-50'
+                    : ''
+                }
                 required
               />
             </div>
@@ -82,7 +93,11 @@ const CardDirection: React.FC<CardDirectionProps> = ({
               value={currentRegion}
               onChange={(e) => setCRegion(e.target.value)}
               disabled={isOnGray}
-              className={isOnGray ? "disabled:opaProvince-100 disabled:cursor-default bg-gray-50" : ""}
+              className={
+                isOnGray
+                  ? 'disabled:opaProvince-100 disabled:cursor-default bg-gray-50'
+                  : ''
+              }
               required
             />
           </div>
@@ -93,19 +108,29 @@ const CardDirection: React.FC<CardDirectionProps> = ({
               value={currentDistrict}
               onChange={(e) => setCDistrict(e.target.value)}
               disabled={isOnGray}
-              className={isOnGray ? "disabled:opaProvince-100 disabled:cursor-default bg-gray-50" : ""}
+              className={
+                isOnGray
+                  ? 'disabled:opaProvince-100 disabled:cursor-default bg-gray-50'
+                  : ''
+              }
               required
             />
           </div>
 
           {/* Address Row - full width */}
           <div>
-            <label className="block text-gray-700 text-sm mb-1">Dirección</label>
+            <label className="block text-gray-700 text-sm mb-1">
+              Dirección
+            </label>
             <Input
               value={currentAddress}
               onChange={(e) => setCAddress(e.target.value)}
               disabled={isOnGray}
-              className={isOnGray ? "disabled:opaProvince-100 disabled:cursor-default bg-gray-50" : ""}
+              className={
+                isOnGray
+                  ? 'disabled:opaProvince-100 disabled:cursor-default bg-gray-50'
+                  : ''
+              }
               required
             />
           </div>

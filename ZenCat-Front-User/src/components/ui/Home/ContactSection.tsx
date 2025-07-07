@@ -28,11 +28,11 @@ export default function ContactSection() {
     const formData = new FormData(form);
 
     const data = {
-        name: formData.get('name')?.toString() || '',
-        email: formData.get('email')?.toString() || '',
-        phone: formData.get('phone')?.toString() || '',
-        subject: formData.get('subject')?.toString() || '',
-        message: formData.get('message')?.toString() || '',
+      name: formData.get('name')?.toString() || '',
+      email: formData.get('email')?.toString() || '',
+      phone: formData.get('phone')?.toString() || '',
+      subject: formData.get('subject')?.toString() || '',
+      message: formData.get('message')?.toString() || '',
     };
 
     try {
@@ -41,8 +41,7 @@ export default function ContactSection() {
       form.reset();
       setTimeout(() => setEstadoEnvio('idle'), 5000);
     } catch (error: any) {
-      const msg =
-        error?.message || 'Ocurrió un error al enviar el mensaje.';
+      const msg = error?.message || 'Ocurrió un error al enviar el mensaje.';
       setErrorMensaje(msg);
       setEstadoEnvio('error');
     }

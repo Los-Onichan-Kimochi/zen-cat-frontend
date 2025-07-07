@@ -118,13 +118,13 @@ function CommunitiesPage() {
         />
 
         {totalPages > 1 && ( // Only show pagination if there's more than one page
-          (<Pagination
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-          />)
+          />
         )}
       </main>
     </div>
-  )
+  );
 }

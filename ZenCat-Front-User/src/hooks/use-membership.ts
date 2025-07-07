@@ -124,8 +124,7 @@ export function useMembership() {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const response =
-          await membershipsApi.getMembershipById(membershipId);
+        const response = await membershipsApi.getMembershipById(membershipId);
 
         setState((prev) => ({
           ...prev,

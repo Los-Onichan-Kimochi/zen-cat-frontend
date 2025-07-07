@@ -90,7 +90,6 @@ export const reservationsApi = {
     communityId: string,
     userId: string,
   ): Promise<Reservation[]> => {
-    
     const endpoint = `${API_ENDPOINTS.RESERVATIONS.BASE}${communityId}/${userId}/`;
     const data = await apiClient.get<{ reservations: Reservation[] }>(endpoint);
     
