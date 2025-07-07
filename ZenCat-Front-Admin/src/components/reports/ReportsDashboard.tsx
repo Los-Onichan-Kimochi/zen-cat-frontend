@@ -20,6 +20,7 @@ import {
 import dayjs from 'dayjs';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { ExportButtons } from '@/components/common/ExportButtons';
+import { PDFTestButton } from '@/components/common/PDFTestButton';
 
 const groupByOptions = [
   { value: 'day', label: 'Día' },
@@ -343,6 +344,10 @@ export default function ReportsDashboard() {
             }}
             disabled={loading || !chartData.length}
             loading={loading}
+          />
+          <PDFTestButton
+            elementRef={pdfElementRef}
+            disabled={loading || !chartData.length}
           />
         </div>
       </div>
