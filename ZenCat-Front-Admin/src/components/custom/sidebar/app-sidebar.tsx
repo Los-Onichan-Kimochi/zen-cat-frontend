@@ -73,9 +73,9 @@ export function AppSidebar({ className, user, ...props }: AppSidebarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 min-w-10 items-center justify-center rounded-lg border-2 border-white">
-              {user.avatar ? (
+              {user.avatar || user.image_url ? (
                 <img
-                  src={user.avatar}
+                  src={user.avatar || user.image_url}
                   alt={user.name}
                   className="h-full w-full rounded-lg"
                 />
