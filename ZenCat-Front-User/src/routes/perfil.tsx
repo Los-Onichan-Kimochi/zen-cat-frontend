@@ -131,9 +131,9 @@ function PerfilComponent() {
               </h2>
               <div className="flex flex-col items-center">
                 <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden mb-4">
-                  {user?.imageUrl ? (
+                  {user?.image_url || user?.imageUrl ? (
                     <img
-                      src={user.imageUrl}
+                      src={user.image_url || user.imageUrl}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />

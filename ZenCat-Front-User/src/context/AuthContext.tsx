@@ -14,6 +14,7 @@ export interface User {
   name?: string;
   email?: string;
   imageUrl?: string;
+  image_url?: string; // Backend field
   role?: string;
   rol?: string; // Backend uses 'rol' field
   isAuthenticated?: boolean;

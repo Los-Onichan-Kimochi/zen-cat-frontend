@@ -64,7 +64,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name || response.user.email.split('@')[0],
-        imageUrl: response.user.image_url,
+        imageUrl: response.user.image_url || '',
+        image_url: response.user.image_url || '', // Backend field
         role: response.user.rol || 'user',
         isAuthenticated: true,
       };
@@ -123,7 +124,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
         id: response.user.id,
         name: response.user.name,
         email: response.user.email,
-        imageUrl: response.user.image_url,
+        imageUrl: response.user.image_url || '',
+        image_url: response.user.image_url || '', // Backend field
         role: response.user.rol,
         isAuthenticated: true,
       };
