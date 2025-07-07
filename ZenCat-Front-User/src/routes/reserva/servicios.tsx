@@ -273,6 +273,29 @@ function ServiceStepComponent() {
               </p>
             </div>
 
+            {/* Leyenda de tipos de servicio */}
+            <div className="flex justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-xs font-medium">Virtual</span>
+                </div>
+                <span className="text-gray-600">Sesión online</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-xs font-medium">Presencial</span>
+                </div>
+                <span className="text-gray-600">Sesión en persona</span>
+              </div>
+            </div>
+
             {/* ServiceCarousel con paginación integrada */}
             <ServiceCarousel
               services={currentServices.map((s) => ({
