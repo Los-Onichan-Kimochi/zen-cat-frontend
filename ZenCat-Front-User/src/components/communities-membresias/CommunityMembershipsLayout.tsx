@@ -230,12 +230,6 @@ const CommunityMembershipsLayout = () => {
               <DropdownMenuItem onClick={() => setFilterByStatus('Suspendida')}>
                 Suspendida
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('Expirada')}>
-                Expirada
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByStatus('Cancelada')}>
-                Cancelada
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

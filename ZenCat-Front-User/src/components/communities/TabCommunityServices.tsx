@@ -19,6 +19,7 @@ export function TabCommunityServices({
 }: TabCommunityServicesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage] = useState(3);
   const navigate = useNavigate();
@@ -36,16 +37,21 @@ export function TabCommunityServices({
 
     // Ordenar servicios
     filteredBySearch.sort((a, b) => {
+      let comparison = 0;
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          comparison = a.name.localeCompare(b.name);
+          break;
         default:
-          return 0;
+          comparison = 0;
       }
+      
+      // Aplicar dirección de ordenamiento
+      return sortDirection === 'desc' ? -comparison : comparison;
     });
 
     return filteredBySearch;
-  }, [services, searchTerm, sortBy]);
+  }, [services, searchTerm, sortBy, sortDirection]);
 
   // Paginación
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
@@ -122,7 +128,9 @@ export function TabCommunityServices({
           />
           <FilterControls
             sortBy={sortBy}
+            sortDirection={sortDirection}
             onSortChange={setSortBy}
+            onSortDirectionChange={setSortDirection}
             showFilter={false}
           />
         </div>

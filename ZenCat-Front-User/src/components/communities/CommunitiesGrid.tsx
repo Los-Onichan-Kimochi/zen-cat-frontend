@@ -4,6 +4,9 @@ import { CommunityPlaceholder } from './CommunityPlaceholder';
 import { NavigationArrows } from './NavigationArrows';
 import { useNavigate } from '@tanstack/react-router';
 import { ActivateMembershipDialog } from './ActivateMembershipDialog';
+import { membershipsApi } from '@/api/memberships/memberships';
+import { MembershipState } from '@/types/membership';
+import { useReservationAlert } from '@/components/ui/ReservationAlert';
 
 interface CommunitiesGridProps {
   communities: Community[];
@@ -13,6 +16,7 @@ interface CommunitiesGridProps {
   filterBy: string;
   itemsPerPage?: number;
   selectCommunity: (communityId: string) => void;
+  onRefresh?: () => void;
 }
 
 export function CommunitiesGrid({
@@ -23,6 +27,7 @@ export function CommunitiesGrid({
   filterBy,
   itemsPerPage = 4,
   selectCommunity,
+  onRefresh,
 }: CommunitiesGridProps) {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
@@ -32,6 +37,9 @@ export function CommunitiesGrid({
   const [showActivateDialog, setShowActivateDialog] = useState(false);
   const [communityToActivate, setCommunityToActivate] =
     useState<Community | null>(null);
+  const [isProcessingActivation, setIsProcessingActivation] = useState(false);
+  
+  const { success, error, AlertComponent } = useReservationAlert();
 
   // Filtrar y buscar comunidades
   const filteredCommunities = useMemo(() => {
@@ -121,13 +129,30 @@ export function CommunitiesGrid({
     }
   };
 
-  const handleActivateMembership = () => {
-    // Aquí iría la lógica para activar la membresía en la BD
-    console.log(
-      `Activando membresía para comunidad: ${communityToActivate?.id}`,
-    );
-    // Cerrar el diálogo
-    setShowActivateDialog(false);
+  const handleActivateMembership = async () => {
+    if (!communityToActivate?.membershipId || isProcessingActivation) {
+      return;
+    }
+
+    try {
+      setIsProcessingActivation(true);
+      await membershipsApi.updateMembership(communityToActivate.membershipId, {
+        status: MembershipState.ACTIVE,
+      });
+      
+      success('Membresía activada exitosamente');
+      setShowActivateDialog(false);
+      
+      // Refrescar los datos después de activar
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (err) {
+      console.error('Error activando membresía:', err);
+      error('Error al activar la membresía');
+    } finally {
+      setIsProcessingActivation(false);
+    }
   };
 
   // Reset página cuando cambian los filtros
@@ -198,7 +223,11 @@ export function CommunitiesGrid({
         onClose={() => setShowActivateDialog(false)}
         onActivate={handleActivateMembership}
         communityName={communityToActivate?.name}
+        isProcessing={isProcessingActivation}
       />
+      
+      {/* Componente de alertas */}
+      <AlertComponent />
     </div>
   );
 }
