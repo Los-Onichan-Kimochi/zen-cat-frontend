@@ -21,11 +21,11 @@ export function useUserOnboarding() {
     const fetchOnboardingData = async () => {
       if (!user?.id) return;
 
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
         const data = await userOnboardingApi.getUserOnboarding(user.id);
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           onboardingData: data,
           isLoading: false,
@@ -37,9 +37,9 @@ export function useUserOnboarding() {
 
         if (errorMsg.includes('status: 404')) {
           // No hay datos de onboarding, dejar onboardingData en null y sin error
-          setState(prev => ({ ...prev, isLoading: false, error: null }));
+          setState((prev) => ({ ...prev, isLoading: false, error: null }));
         } else {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             error: errorMsg,
             isLoading: false,
@@ -52,4 +52,4 @@ export function useUserOnboarding() {
   }, [user?.id]);
 
   return state;
-} 
+}

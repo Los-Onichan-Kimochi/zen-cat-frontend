@@ -33,8 +33,7 @@ export function useUserMemberships() {
       } catch (error) {
         setState((prev) => ({
           ...prev,
-          error:
-            error instanceof Error ? error.message : 'Error desconocido',
+          error: error instanceof Error ? error.message : 'Error desconocido',
           isLoading: false,
         }));
       }
@@ -44,4 +43,4 @@ export function useUserMemberships() {
   }, [user?.id]);
 
   return state;
-} 
+}

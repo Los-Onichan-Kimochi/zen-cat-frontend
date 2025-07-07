@@ -258,14 +258,7 @@ function SesionesComponent() {
                 descColor="text-blue-600"
                 isLoading={isFetchingSessions}
               />
-              <HomeCard
-                icon={<Activity className="w-8 h-8 text-green-600" />}
-                iconBgColor="bg-green-100"
-                title="En curso"
-                description={counts[SessionState.ONGOING]}
-                descColor="text-green-600"
-                isLoading={isFetchingSessions}
-              />
+              
               <HomeCard
                 icon={<Clock className="w-8 h-8 text-gray-600" />}
                 iconBgColor="bg-gray-100"

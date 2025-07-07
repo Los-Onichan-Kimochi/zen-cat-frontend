@@ -17,7 +17,10 @@ import { Membership, MembershipState } from '@/types/membership';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TablePagination } from '@/components/common/TablePagination';
-import { mapMembershipStateToSpanish, getStatusColor } from '@/utils/membership-utils';
+import {
+  mapMembershipStateToSpanish,
+  getStatusColor,
+} from '@/utils/membership-utils';
 
 import { CommunityMembershipsDataTable } from './CommunityMembershipsDataTable';
 
@@ -91,7 +94,9 @@ export function MembershipsTable({ data, onView }: MembershipsTableProps) {
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
               <CreditCard className="h-3 w-3 text-gray-500" />
-              <span className="font-semibold text-green-700">S/. {amount.toFixed(2)}</span>
+              <span className="font-semibold text-green-700">
+                S/. {amount.toFixed(2)}
+              </span>
             </div>
           </div>
         );
@@ -103,13 +108,13 @@ export function MembershipsTable({ data, onView }: MembershipsTableProps) {
       cell: ({ row }) => {
         const used = row.original.reservations_used || 0;
         const limit = row.original.plan.reservation_limit;
-        
+
         // Si limit es null o 0, significa sin límite
         const hasLimit = limit !== null && limit > 0;
         const limitText = hasLimit ? limit.toString() : 'Sin límite';
         const percentage = hasLimit ? (used / limit) * 100 : 0;
         const isNearLimit = hasLimit && percentage > 80;
-        
+
         return (
           <div className="text-sm text-center">
             <div className="flex items-center justify-center gap-1">
@@ -117,7 +122,9 @@ export function MembershipsTable({ data, onView }: MembershipsTableProps) {
               <span className="font-medium">{used}</span>
               <span className="text-gray-500">/ {limitText}</span>
               {hasLimit && (
-                <span className={`ml-1 text-xs ${isNearLimit ? 'text-orange-600' : 'text-gray-400'}`}>
+                <span
+                  className={`ml-1 text-xs ${isNearLimit ? 'text-orange-600' : 'text-gray-400'}`}
+                >
                   ({Math.round(percentage)}%)
                 </span>
               )}
@@ -135,9 +142,7 @@ export function MembershipsTable({ data, onView }: MembershipsTableProps) {
         const statusText = getStateLabel(status);
         return (
           <div className="flex justify-center">
-            <Badge className={getStatusColor(status)}>
-              {statusText}
-            </Badge>
+            <Badge className={getStatusColor(status)}>{statusText}</Badge>
           </div>
         );
       },
@@ -201,4 +206,4 @@ export function MembershipsTable({ data, onView }: MembershipsTableProps) {
       />
     </div>
   );
-} 
+}

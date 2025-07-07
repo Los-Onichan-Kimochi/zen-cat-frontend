@@ -58,19 +58,6 @@ export const TopBar = () => {
         >
           Contacto
         </Link>
-
-        {/* Enlaces adicionales para usuarios autenticados */}
-        {user && (
-          <>
-            <Link
-              to="/reservas"
-              className="hover:opacity-80 hover:font-black transition-all duration-300 ease-in-out flex items-center"
-            >
-              <CalendarIcon className="mr-1 h-4 w-4" />
-              Mis Reservas
-            </Link>
-          </>
-        )}
       </div>
 
       {/* Acciones (login / signup) o info usuario */}

@@ -45,10 +45,11 @@ const CommunityMembershipsLayout = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
   const [filterByPlan, setFilterByPlan] = useState('');
-  
+
   // Estados para el dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedMembership, setSelectedMembership] = useState<Membership | null>(null);
+  const [selectedMembership, setSelectedMembership] =
+    useState<Membership | null>(null);
 
   useEffect(() => {
     if (!communityId || !user?.id) {
@@ -61,17 +62,15 @@ const CommunityMembershipsLayout = () => {
       setLoadingMemberships(true);
       setErrorMemberships(null);
       try {
- 
         // Obtener las membresías del usuario
         const response = await membershipsApi.getMembershipsByUser(user.id!);
-        
+
         // Filtrar solo las membresías de la comunidad actual
         const communityMemberships = response.memberships.filter(
-          membership => membership.community.id === communityId
+          (membership) => membership.community.id === communityId,
         );
 
         setAllMemberships(communityMemberships);
-        
       } catch (error) {
         console.error('Error fetching memberships:', error);
         setErrorMemberships('Error al cargar las membresías.');
@@ -90,9 +89,14 @@ const CommunityMembershipsLayout = () => {
     // Filtro por término de búsqueda
     if (searchTerm) {
       currentMemberships = currentMemberships.filter((membership) => {
-        const planName = membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
-        return planName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               membership.community.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const planName =
+          membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
+        return (
+          planName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          membership.community.name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        );
       });
     }
 
@@ -107,18 +111,14 @@ const CommunityMembershipsLayout = () => {
     // Filtro por plan
     if (filterByPlan) {
       currentMemberships = currentMemberships.filter((membership) => {
-        const planName = membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
+        const planName =
+          membership.plan.type === 'MONTHLY' ? 'Básico' : 'Anual';
         return planName.toLowerCase().includes(filterByPlan.toLowerCase());
       });
     }
 
     return currentMemberships;
-  }, [
-    allMemberships,
-    searchTerm,
-    filterByStatus,
-    filterByPlan,
-  ]);
+  }, [allMemberships, searchTerm, filterByStatus, filterByPlan]);
 
   const handleViewMembership = (membership: Membership) => {
     setSelectedMembership(membership);
@@ -134,14 +134,16 @@ const CommunityMembershipsLayout = () => {
     try {
       console.log('Suspendiendo membresía:', membershipId);
       // await membershipApi.suspendMembership(membershipId);
-      
+
       // Actualizar el estado local
-      setAllMemberships(prev => prev.map(m => 
-        m.id === membershipId 
-          ? { ...m, status: MembershipState.SUSPENDED }
-          : m
-      ));
-      
+      setAllMemberships((prev) =>
+        prev.map((m) =>
+          m.id === membershipId
+            ? { ...m, status: MembershipState.SUSPENDED }
+            : m,
+        ),
+      );
+
       handleCloseDialog();
     } catch (error) {
       console.error('Error al suspender membresía:', error);
@@ -153,14 +155,16 @@ const CommunityMembershipsLayout = () => {
     try {
       console.log('Cancelando membresía:', membershipId);
       // await membershipApi.cancelMembership(membershipId);
-      
+
       // Actualizar el estado local
-      setAllMemberships(prev => prev.map(m => 
-        m.id === membershipId 
-          ? { ...m, status: MembershipState.CANCELLED }
-          : m
-      ));
-      
+      setAllMemberships((prev) =>
+        prev.map((m) =>
+          m.id === membershipId
+            ? { ...m, status: MembershipState.CANCELLED }
+            : m,
+        ),
+      );
+
       handleCloseDialog();
     } catch (error) {
       console.error('Error al cancelar membresía:', error);
@@ -298,4 +302,4 @@ const CommunityMembershipsLayout = () => {
   );
 };
 
-export default CommunityMembershipsLayout; 
+export default CommunityMembershipsLayout;

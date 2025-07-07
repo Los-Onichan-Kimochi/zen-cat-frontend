@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate,Link } from '@tanstack/react-router';
+import { useNavigate, Link } from '@tanstack/react-router';
 
 interface CommunityCardProps {
   communityId: string;
@@ -35,13 +35,13 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
         <h3 className="text-xl font-semibold mb-2 text-gray-800">{title}</h3>
         <p className="text-gray-600 text-sm mb-4 line-clamp-4">{description}</p>
       </div>
-<Link
-  to="/comunidades/$communityId"
-  params={{ communityId }}
-  className="mt-4 w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors block text-center"
->
-  Ver más
-</Link>
+      <Link
+        to="/comunidades/$communityId"
+        params={{ communityId }}
+        className="mt-4 w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors block text-center"
+      >
+        Ver más
+      </Link>
     </div>
   );
 };

@@ -5,7 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectItem } from '@/components/ui/select';
 import { useMembershipOnboarding } from '@/context/MembershipOnboardingContext';
-import { CreateOnboardingRequest, DocumentType, Gender } from '@/types/onboarding';
+import {
+  CreateOnboardingRequest,
+  DocumentType,
+  Gender,
+} from '@/types/onboarding';
 import { useAuth } from '@/context/AuthContext';
 import { useUserOnboarding } from '@/hooks/use-user-onboarding';
 import rawRegiones from '@/types/ubigeo_peru_2016_departamentos.json';
@@ -27,7 +31,7 @@ interface OnboardingFormData {
   district: string;
   province: string;
   region: string;
-  
+
   // Optional fields
   birth_date: string;
   gender: Gender | '';
@@ -46,9 +50,14 @@ interface FormErrors {
 }
 
 export function OnboardingStep() {
-  const { state, setOnboardingData, nextStep, prevStep } = useMembershipOnboarding();
+  const { state, setOnboardingData, nextStep, prevStep } =
+    useMembershipOnboarding();
   const { user } = useAuth();
-  const { onboardingData, isLoading: onboardingLoading, error: onboardingError } = useUserOnboarding();
+  const {
+    onboardingData,
+    isLoading: onboardingLoading,
+    error: onboardingError,
+  } = useUserOnboarding();
 
   // Estado inicial del formulario
   const initialFormData: OnboardingFormData = {
@@ -102,7 +111,9 @@ export function OnboardingStep() {
       let regionId = onboardingData.region || '';
       if (!regiones.find((r) => r.id === regionId)) {
         const regionByName = regiones.find(
-          (r) => r.name.toLowerCase() === (onboardingData.region || '').toLowerCase(),
+          (r) =>
+            r.name.toLowerCase() ===
+            (onboardingData.region || '').toLowerCase(),
         );
         regionId = regionByName?.id || '';
       }
@@ -112,7 +123,8 @@ export function OnboardingStep() {
       if (!provincias.find((p) => p.id === provinceId)) {
         const provinceByName = provincias.find(
           (p) =>
-            p.name.toLowerCase() === (onboardingData.province || '').toLowerCase() &&
+            p.name.toLowerCase() ===
+              (onboardingData.province || '').toLowerCase() &&
             p.department_id === regionId,
         );
         provinceId = provinceByName?.id || '';
@@ -123,7 +135,8 @@ export function OnboardingStep() {
       if (!distritos.find((d) => d.id === districtId)) {
         const districtByName = distritos.find(
           (d) =>
-            d.name.toLowerCase() === (onboardingData.district || '').toLowerCase() &&
+            d.name.toLowerCase() ===
+              (onboardingData.district || '').toLowerCase() &&
             d.department_id === regionId &&
             d.province_id === provinceId,
         );
@@ -135,7 +148,9 @@ export function OnboardingStep() {
         ? onboardingData.birth_date.split('T')[0]
         : '';
 
-      const normalizedDocumentType = (onboardingData.document_type || '').toUpperCase();
+      const normalizedDocumentType = (
+        onboardingData.document_type || ''
+      ).toUpperCase();
       const normalizedGender = (onboardingData.gender || '').toUpperCase();
 
       setFormData({
@@ -152,6 +167,71 @@ export function OnboardingStep() {
       });
     }
   }, [onboardingData, setOnboardingData, user?.id]);
+
+  // Mostrar resumen en modo solo-lectura si ya existe onboarding
+  if (!onboardingLoading && onboardingData) {
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              Datos ya registrados
+            </CardTitle>
+            <p className="text-center text-gray-600 text-sm">
+              Ya contamos con tu información de identificación, verifica que sea
+              correcta y continúa
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <p>
+                <strong>Tipo de Documento:</strong>{' '}
+                {onboardingData.document_type}
+              </p>
+              <p>
+                <strong>Número de Documento:</strong>{' '}
+                {onboardingData.document_number}
+              </p>
+              <p>
+                <strong>Teléfono:</strong> {onboardingData.phone_number}
+              </p>
+              <p>
+                <strong>Código Postal:</strong> {onboardingData.postal_code}
+              </p>
+              <p>
+                <strong>Fecha de Nacimiento:</strong>{' '}
+                {onboardingData.birth_date?.split('T')[0]}
+              </p>
+              <p>
+                <strong>Género:</strong> {onboardingData.gender}
+              </p>
+              <p>
+                <strong>Región:</strong> {onboardingData.region}
+              </p>
+              <p>
+                <strong>Provincia:</strong> {onboardingData.province}
+              </p>
+              <p>
+                <strong>Distrito:</strong> {onboardingData.district}
+              </p>
+              <p className="md:col-span-2">
+                <strong>Dirección:</strong> {onboardingData.address}
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-6">
+              <Button
+                onClick={nextStep}
+                className="px-8 bg-black text-white hover:bg-gray-800"
+              >
+                Continuar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Mostrar loading mientras se cargan los datos
   if (onboardingLoading) {
@@ -175,11 +255,16 @@ export function OnboardingStep() {
       <div className="w-full max-w-4xl mx-auto">
         <Card className="border-red-500 border-2">
           <CardHeader>
-            <CardTitle className="text-red-600">Error al cargar los datos</CardTitle>
+            <CardTitle className="text-red-600">
+              Error al cargar los datos
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-700 mb-4">{onboardingError}</p>
-            <Button onClick={() => window.location.reload()} className="bg-black text-white">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-black text-white"
+            >
               Reintentar
             </Button>
           </CardContent>
@@ -188,107 +273,7 @@ export function OnboardingStep() {
     );
   }
 
-  // Si no estamos editando y ya hay datos, mostramos el resumen
-  if (onboardingData) {
-    const getGenderInSpanish = (gender: Gender | null | undefined): string => {
-      if (!gender) {
-        return 'No especificado';
-      }
-      const genderMap: Record<Gender, string> = {
-        MALE: 'Masculino',
-        FEMALE: 'Femenino',
-        OTHER: 'Otro',
-      };
-      return genderMap[gender] || 'No especificado';
-    };
-    
-    return (
-      <div className="w-full max-w-xl mx-auto">
-        <Card className="shadow-lg border-gray-100">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">
-              Verifica tu Información
-            </CardTitle>
-            <p className="text-gray-500 text-sm mt-1">
-              Revisa que tus datos personales sean correctos antes de continuar.
-              <br />
-              En caso se necesite editar, puedes hacerlo en la sección "mi perfil".
-            </p>
-          </CardHeader>
-          <CardContent className="text-sm px-6 pb-8">
-            {/* Datos Personales */}
-            <div className="pt-6">
-                <p className="text-base font-semibold text-gray-800 mb-4">Datos Personales</p>
-                <div className="border rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Tipo de Documento</span>
-                      <span className="font-medium text-gray-800">{onboardingData.document_type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Número de Documento</span>
-                      <span className="font-medium text-gray-800">{onboardingData.document_number}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Teléfono</span>
-                      <span className="font-medium text-gray-800">{onboardingData.phone_number}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Fecha de Nacimiento</span>
-                      <span className="font-medium text-gray-800">{onboardingData.birth_date?.split('T')[0] || 'No especificado'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Género</span>
-                      <span className="font-medium text-gray-800">{getGenderInSpanish(onboardingData.gender)}</span>
-                    </div>
-                  </div>
-                </div>
-            </div>
-
-            {/* Dirección */}
-            <div className="pt-6">
-              <p className="text-base font-semibold text-gray-800 mb-4">Dirección</p>
-              <div className="border rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Región</span>
-                      <span className="font-medium text-gray-800">{onboardingData.region}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Provincia</span>
-                      <span className="font-medium text-gray-800">{onboardingData.province}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Distrito</span>
-                      <span className="font-medium text-gray-800">{onboardingData.district}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Código Postal</span>
-                      <span className="font-medium text-gray-800">{onboardingData.postal_code}</span>
-                    </div>
-                </div>
-                <div className="flex justify-between pt-4 mt-4 border-t">
-                  <span className="text-gray-600">Dirección Completa</span>
-                  <span className="font-medium text-gray-800 text-right max-w-xs truncate" title={onboardingData.address}>{onboardingData.address}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-8">
-              <Button
-                onClick={nextStep}
-                className="px-8 bg-black text-white hover:bg-gray-800"
-              >
-                Continuar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Si hay datos y estamos editando, o si no hay datos, mostramos el formulario
+  // Cálculos para los dropdowns de ubigeo
   const selectedRegion = regiones.find(
     (region) => region.id === formData.region,
   );
@@ -439,8 +424,7 @@ export function OnboardingStep() {
         newErrors.birth_date = 'Ingrese una fecha válida';
         valid = false;
       } else if (birthDate > currentDate) {
-        newErrors.birth_date =
-          'La fecha no puede ser mayor a la fecha actual';
+        newErrors.birth_date = 'La fecha no puede ser mayor a la fecha actual';
         valid = false;
       } else if (birthDate < minDate) {
         newErrors.birth_date = 'La fecha no puede ser anterior al año 1900';
@@ -457,7 +441,7 @@ export function OnboardingStep() {
     value: string,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
@@ -524,19 +508,17 @@ export function OnboardingStep() {
       district: selectedDistrictName,
       province: selectedProvinceName,
       region: selectedRegionName,
-      
+
       // Optional fields (only include if they have values)
       ...(formData.birth_date && {
         birth_date: new Date(formData.birth_date).toISOString(),
       }),
       ...(formData.gender &&
-        formData.gender.length > 0 && {
-          gender: formData.gender as Gender,
-        }),
+        formData.gender.length > 0 && { gender: formData.gender as Gender }),
     };
 
     setOnboardingData(onboardingRequest);
-    nextStep(); // Avanza al siguiente paso
+    nextStep();
   };
 
   return (
@@ -551,12 +533,13 @@ export function OnboardingStep() {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Seccion de Información de Identificación */}
-          <div className="space-y-4 rounded-lg border p-4">
-            <h3 className="text-lg font-semibold text-gray-800">
+          {/* Required Fields Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
               Información de Identificación
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="document_type">Tipo de Documento *</Label>
                 <Select
@@ -580,9 +563,7 @@ export function OnboardingStep() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="document_number">
-                  Número de Documento *
-                </Label>
+                <Label htmlFor="document_number">Número de Documento *</Label>
                 <Input
                   id="document_number"
                   value={formData.document_number}
@@ -616,6 +597,23 @@ export function OnboardingStep() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="postal_code">Código Postal *</Label>
+                <Input
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) =>
+                    handleInputChange('postal_code', e.target.value)
+                  }
+                  placeholder="Ingrese código postal"
+                />
+                {errors.postal_code && (
+                  <span className="text-red-500 text-sm">
+                    {errors.postal_code}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="birth_date">Fecha de Nacimiento</Label>
                 <Input
                   id="birth_date"
@@ -636,9 +634,7 @@ export function OnboardingStep() {
                 <Label htmlFor="gender">Género</Label>
                 <Select
                   value={formData.gender}
-                  onValueChange={(value) =>
-                    handleInputChange('gender', value)
-                  }
+                  onValueChange={(value) => handleInputChange('gender', value)}
                   placeholder="Seleccione género"
                 >
                   <SelectItem value="MALE">Masculino</SelectItem>
@@ -649,12 +645,13 @@ export function OnboardingStep() {
             </div>
           </div>
 
-          {/* Seccion de Ubicacion */}
-          <div className="space-y-4 rounded-lg border p-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Ubicación Geográfica
+          {/* Location Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+              Ubicación Geográfica *
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="region">Región *</Label>
                 <Select
@@ -669,9 +666,7 @@ export function OnboardingStep() {
                   ))}
                 </Select>
                 {errors.region && (
-                  <span className="text-red-500 text-sm">
-                    {errors.region}
-                  </span>
+                  <span className="text-red-500 text-sm">{errors.region}</span>
                 )}
               </div>
 
@@ -727,40 +722,18 @@ export function OnboardingStep() {
                 )}
               </div>
             </div>
-            {/* Dirección y Código Postal */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-4">
-              <div className="space-y-2 md:col-span-1">
-                <Label htmlFor="postal_code">Código Postal *</Label>
-                <Input
-                  id="postal_code"
-                  value={formData.postal_code}
-                  onChange={(e) =>
-                    handleInputChange('postal_code', e.target.value)
-                  }
-                  placeholder="Ingrese código postal"
-                />
-                {errors.postal_code && (
-                  <span className="text-red-500 text-sm">
-                    {errors.postal_code}
-                  </span>
-                )}
-              </div>
-              <div className="space-y-2 md:col-span-2">
+
+            <div className="space-y-2">
               <Label htmlFor="address">Dirección Completa *</Label>
               <Input
                 id="address"
                 value={formData.address}
-                  onChange={(e) =>
-                    handleInputChange('address', e.target.value)
-                  }
+                onChange={(e) => handleInputChange('address', e.target.value)}
                 placeholder="Ej: Av. El Sol 123, Dpto 4B"
               />
               {errors.address && (
-                  <span className="text-red-500 text-sm">
-                    {errors.address}
-                  </span>
+                <span className="text-red-500 text-sm">{errors.address}</span>
               )}
-              </div>
             </div>
           </div>
 

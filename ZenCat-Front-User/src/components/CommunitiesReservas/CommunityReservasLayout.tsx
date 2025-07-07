@@ -18,6 +18,7 @@ import { localsApi } from '@/api/locals/locals';
 import { useAuth } from '@/context/AuthContext';
 import { communityServicesApi } from '@/api/communities/community-services';
 import { servicesApi } from '@/api/services/services';
+import { membershipsApi } from '@/api/memberships/memberships';
 
 const CommunityReservasLayout = () => {
   const { communityId } = useParams({
@@ -66,11 +67,12 @@ const CommunityReservasLayout = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByDate, setFilterByDate] = useState('');
   const [filterByStatus, setFilterByStatus] = useState('');
-  const [filterByType, setFilterByType] = useState('');
-  
+  const [filterByPlace, setFilterByPlace] = useState('');
+
   // Estados para el dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!communityId) {
@@ -84,73 +86,85 @@ const CommunityReservasLayout = () => {
       setErrorReservations(null);
       try {
         const userId = user?.id;
-        
+
         if (!userId) {
           throw new Error('No se pudo obtener el ID del usuario');
         }
 
         // Llamada al nuevo endpoint para obtener reservas de una comunidad específica y un usuario
-        const response = await reservationsApi.getReservationsByCommunityAndUser(communityId as string, userId);
-        console.log("Response", response);
-        console.log("CommunityId", communityId);
-        console.log("UserId", userId);
-        
-        // Obtener los community services y los services de la comunidad
-        const communityServices = await communityServicesApi.getCommunityServices([communityId as string]);
-        const services = await communityServicesApi.getServicesByCommunityId(communityId as string);
-        console.log("Community Services", communityServices);
-        console.log("Services", services);
-        
+        const response =
+          await reservationsApi.getReservationsByCommunityAndUser(
+            communityId as string,
+            userId,
+          );
+        const communityServices =
+          await communityServicesApi.getCommunityServices([
+            communityId as string,
+          ]);
         // Enriquecer las reservas con información de profesor y lugar
         const reservationsWithDetails = await Promise.all(
           response.map(async (reservation: Reservation) => {
             const session = reservation.session;
-            
-            let professionalName = "";
-            let placeName = "";
-            
-            // Buscar el community service y luego el service correspondiente
-            const communityService = communityServices.find((cs) => cs.id === session.community_service_id);
-            const service = services.find((s) => s.id === communityService?.service_id);
-            
+
+            let professionalName = '';
+            let placeName = '';
+
+            const communityService = communityServices.find(
+              (service) =>
+                service.id === reservation.session.community_service_id,
+            );
+            const service = await servicesApi.getServiceById(
+              communityService?.service_id as string,
+            );
+
             // Obtener información del profesor si es necesario
-            if (session && session.professional_id && !reservation.professional) {
+            if (
+              session &&
+              session.professional_id &&
+              !reservation.professional
+            ) {
               try {
-                const professionalData = await professionalsApi.getProfessional(session.professional_id);
+                const professionalData = await professionalsApi.getProfessional(
+                  session.professional_id,
+                );
                 professionalName = professionalData.name;
               } catch (error) {
-                console.warn(`No se pudo obtener información del profesor: ${error}`);
-                professionalName = session.title || `Profesor ID: ${session.professional_id}`;
+                console.warn(
+                  `No se pudo obtener información del profesor: ${error}`,
+                );
+                professionalName =
+                  session.title || `Profesor ID: ${session.professional_id}`;
               }
             } else if (reservation.professional) {
               // Si ya tenemos el nombre del profesor en la reserva, usarlo directamente
               professionalName = reservation.professional;
             }
-            
+
             // Obtener información del local si es necesario
             if (session && session.local_id && !reservation.place) {
               try {
                 const localData = await localsApi.getLocal(session.local_id);
                 placeName = localData.local_name;
               } catch (error) {
-                console.warn(`No se pudo obtener información del local: ${error}`);
+                console.warn(
+                  `No se pudo obtener información del local: ${error}`,
+                );
                 placeName = `Local ID: ${session.local_id}`;
               }
             } else if (reservation.place) {
               placeName = reservation.place;
             }
-            
+
             // Devolver la reserva con la información adicional
             return {
               ...reservation,
               professional: professionalName || reservation.professional,
               place: placeName || reservation.place,
               service_name: service?.name || 'Servicio desconocido',
-              service_is_virtual: service?.is_virtual || false // Agregar la información de si es virtual
             };
-          })
+          }),
         );
-        
+
         setAllReservations(reservationsWithDetails);
       } catch (err) {
         console.error('Error al cargar reservas:', err);
@@ -172,42 +186,31 @@ const CommunityReservasLayout = () => {
     if (searchTerm) {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       currentReservations = currentReservations.filter(
-        (res) => {
-          const isVirtual = res.service_is_virtual || false;
-          const typeText = isVirtual ? 'virtual' : 'presencial';
-          return (
-            (res.service_name?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-            (res.session.title?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-            (res.professional?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
-            typeText.includes(lowerCaseSearchTerm) ||
-            translateReservationState(res.state).includes(lowerCaseSearchTerm)
-          );
-        }
+        (res) =>
+          (res.service_name?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
+          (res.session.title?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
+          (res.professional?.toLowerCase() || '').includes(
+            lowerCaseSearchTerm,
+          ) ||
+          (res.place?.toLowerCase() || '').includes(lowerCaseSearchTerm) ||
+          translateReservationState(res.state).includes(lowerCaseSearchTerm),
       );
     }
 
     if (filterByDate) {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
-      
       currentReservations = currentReservations.filter((res) => {
-        const sessionDate = new Date(res.session.date);
-        sessionDate.setHours(0, 0, 0, 0); // Normalizar a inicio del día
-        
+        const reservationDate = new Date(res.reservation_time);
         if (filterByDate === 'today') {
-          return sessionDate.getTime() === today.getTime();
+          return reservationDate.toDateString() === today.toDateString();
         } else if (filterByDate === 'week') {
           const sevenDaysAgo = new Date(today);
           sevenDaysAgo.setDate(today.getDate() - 7);
-          return sessionDate >= sevenDaysAgo && sessionDate <= today;
-        } else if (filterByDate === 'month') {
-          const thirtyDaysAgo = new Date(today);
-          thirtyDaysAgo.setDate(today.getDate() - 30);
-          return sessionDate >= thirtyDaysAgo && sessionDate <= today;
-        } else if (filterByDate === 'future') {
-          return sessionDate > today;
-        } else if (filterByDate === 'past') {
-          return sessionDate < today;
+          return reservationDate >= sevenDaysAgo && reservationDate <= today;
         }
         return true;
       });
@@ -248,16 +251,10 @@ const CommunityReservasLayout = () => {
       });
     }
 
-    if (filterByType) {
-      currentReservations = currentReservations.filter((res) => {
-        const isVirtual = res.service_is_virtual || false;
-        if (filterByType === 'virtual') {
-          return isVirtual;
-        } else if (filterByType === 'presencial') {
-          return !isVirtual;
-        }
-        return true;
-      });
+    if (filterByPlace) {
+      currentReservations = currentReservations.filter((res) =>
+        res.place?.toLowerCase().includes(filterByPlace.toLowerCase()),
+      );
     }
 
     return currentReservations;
@@ -266,7 +263,7 @@ const CommunityReservasLayout = () => {
     searchTerm,
     filterByDate,
     filterByStatus,
-    filterByType,
+    filterByPlace,
   ]);
 
   const handleViewReservation = (reservation: Reservation) => {
@@ -279,14 +276,18 @@ const CommunityReservasLayout = () => {
     setSelectedReservation(null);
   };
 
-  const handleCancelReservation = async (reservationOrId: Reservation | string) => {
+  const handleCancelReservation = async (
+    reservationOrId: Reservation | string,
+  ) => {
     try {
       // Determinar si recibimos una reserva completa o solo el ID
       let reservation: Reservation;
-      
+
       if (typeof reservationOrId === 'string') {
         // Si recibimos un ID, buscar la reserva en el estado local
-        const foundReservation = allReservations.find(r => r.id === reservationOrId);
+        const foundReservation = allReservations.find(
+          (r) => r.id === reservationOrId,
+        );
         if (!foundReservation) {
           console.error('Reserva no encontrada');
           return;
@@ -302,20 +303,45 @@ const CommunityReservasLayout = () => {
         return;
       }
 
-      // Cancelar la reserva - el backend maneja automáticamente:
-      // - Decrementar registered_count de la sesión
-      // - Decrementar reservations_used de la membresía (si aplica)
+      // 1. Cancelar la reserva
       await reservationsApi.updateReservation(reservation.id, {
         state: ReservationState.CANCELLED,
       });
-      
-      // Actualizar el estado local cambiando el estado de la reserva
-      setAllReservations(prev => prev.map(r => 
-        r.id === reservation.id 
-          ? { ...r, state: ReservationState.CANCELLED }
-          : r
-      ));
-      
+
+      // 2. Si hay membresía asociada, actualizar las reservas usadas
+      if (reservation.membership_id) {
+        console.log('Actualizando membresía:', reservation.membership_id);
+
+        const membership = await membershipsApi.getMembershipById(
+          reservation.membership_id,
+        );
+
+        // Solo actualizar si el plan tiene límite de reservas y hay reservas usadas
+        if (
+          membership.plan.reservation_limit !== null &&
+          typeof membership.reservations_used === 'number' &&
+          membership.reservations_used > 0
+        ) {
+          await membershipsApi.updateMembership(membership.id, {
+            reservations_used: membership.reservations_used - 1,
+          });
+
+          console.log('Reservas usadas actualizadas:', {
+            membresiaId: membership.id,
+            reservasAnteriores: membership.reservations_used,
+            reservasNuevas: membership.reservations_used - 1,
+          });
+        }
+      }
+
+      // 3. Actualizar el estado local cambiando el estado de la reserva
+      setAllReservations((prev) =>
+        prev.map((r) =>
+          r.id === reservation.id
+            ? { ...r, state: ReservationState.CANCELLED }
+            : r,
+        ),
+      );
     } catch (error) {
       console.error('Error al cancelar reserva:', error);
       alert('Error al cancelar la reserva. Por favor, inténtalo de nuevo.');
@@ -367,12 +393,13 @@ const CommunityReservasLayout = () => {
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                {filterByDate === '' ? 'Filtrar por fecha' : 
-                 filterByDate === 'today' ? 'Hoy' : 
-                 filterByDate === 'week' ? 'Última semana' : 
-                 filterByDate === 'month' ? 'Último mes' : 
-                 filterByDate === 'future' ? 'Próximas' : 
-                 filterByDate === 'past' ? 'Pasadas' : 'Filtrar por fecha'}
+                {filterByDate === ''
+                  ? 'Filtrar por fecha'
+                  : filterByDate === 'today'
+                    ? 'Hoy'
+                    : filterByDate === 'week'
+                      ? 'Última semana'
+                      : 'Filtrar por fecha'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -386,15 +413,7 @@ const CommunityReservasLayout = () => {
               <DropdownMenuItem onClick={() => setFilterByDate('week')}>
                 Última semana
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByDate('month')}>
-                Último mes
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByDate('future')}>
-                Próximas
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByDate('past')}>
-                Pasadas
-              </DropdownMenuItem>
+              {/* Aquí puedes añadir más opciones de fecha o un DatePicker */}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -402,11 +421,17 @@ const CommunityReservasLayout = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                {filterByStatus === '' ? 'Filtrar por estado' : 
-                 filterByStatus === 'DONE' ? 'Finalizada' : 
-                 filterByStatus === 'CANCELLED' ? 'Cancelada' : 
-                 filterByStatus === 'CONFIRMED' ? 'Confirmada' : 
-                 filterByStatus === 'ANULLED' ? 'Anulada' : 'Filtrar por estado'}
+                {filterByStatus === ''
+                  ? 'Filtrar por estado'
+                  : filterByStatus === 'DONE'
+                    ? 'Finalizada'
+                    : filterByStatus === 'CANCELLED'
+                      ? 'Cancelada'
+                      : filterByStatus === 'CONFIRMED'
+                        ? 'Confirmada'
+                        : filterByStatus === 'ANULLED'
+                          ? 'Anulada'
+                          : 'Filtrar por estado'}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -429,25 +454,48 @@ const CommunityReservasLayout = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Filtro por tipo */}
+          {/* Filtro por lugar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto text-gray-600 bg-white border border-gray-400 hover:bg-black hover:text-white flex items-center gap-2">
-                {filterByType === '' ? 'Filtrar por tipo' : 
-                 filterByType === 'virtual' ? 'Virtual' : 
-                 filterByType === 'presencial' ? 'Presencial' : 'Filtrar por tipo'}
+                {filterByPlace === '' ? 'Filtrar por lugar' : filterByPlace}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setFilterByType('')}>
+              <DropdownMenuItem onClick={() => setFilterByPlace('')}>
                 Todos
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByType('virtual')}>
-                Virtual
+              <DropdownMenuItem onClick={() => setFilterByPlace('pabellón a')}>
+                Pabellón A
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByType('presencial')}>
-                Presencial
+              <DropdownMenuItem
+                onClick={() => setFilterByPlace('gimnasio principal')}
+              >
+                Gimnasio Principal
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterByPlace('pabellón b')}>
+                Pabellón B
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setFilterByPlace('salón de usos múltiples')}
+              >
+                Salón de Usos Múltiples
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setFilterByPlace('área recreativa')}
+              >
+                Área Recreativa
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setFilterByPlace('edificio central')}
+              >
+                Edificio Central
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setFilterByPlace('zona deportiva')}
+              >
+                Zona Deportiva
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
